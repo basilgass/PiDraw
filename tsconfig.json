@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "outDir": "./esm/",
+    "noImplicitAny": true,
+    "module": "commonjs",
+    "target": "esnext",
+    "allowJs": true,
+    "sourceMap": true,
+    "moduleResolution": "node",
+    "declaration": true,
+    "removeComments": true
+  },
+  "include": [
+    "./src/**/*"
+  ]
+}
