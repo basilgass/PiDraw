@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>PiGraph - Dev page</title>
+    <title>PiGraph - Riemann example</title>
 
     <!-- Alpine -->
     <script src="//unpkg.com/alpinejs" defer></script>
@@ -26,45 +26,40 @@
     <script src="../dev/pidraw.js"></script>
 </head>
 <body>
-<div x-data="graphExample">
+<div x-data="riemann">
     <div id="root"></div>
-    <div @click="changePlot('g', '3*cos(x)')">CHANGE PLOT</div>
-    <div>
-        <template x-for="(fig, idx) of figures">
-            <div x-text="fig"></div>
-        </template>
+
+
+    <div class="my-5 text-center">
+        <input class="border-b border-b-blue  px-5 py-2" x-model="fx">
+    </div>
+    <div class="space-x-4 mt-5 text-center">
+        <button class="border w-14 py-2" @click="rectangle>2?rectangle--:rectangle;updateRiemann()">-</button>
+        <span x-text="rectangle"></span>
+        <button class="border w-14 py-2" @click="rectangle++;updateRiemann()">+</button>
     </div>
 </div>
 <script>
-	function graphExample () {
-		let graph = new PiDraw('root')
+	function riemann () {
+		let graph = new PiDraw('root'),
+			rectangle = 8
 		graph.axis()
 
-		const p = graph.point(5, 2, 'A').draggable()
-		const p3 = graph.point(8, 2, 'B').draggable(graph.getFigure('MAINGRID'))
-
-		const c1 = graph.circle(p, 2)
-		const c2 = graph.circle({ x: 8, y: 6 }, p3)
-		const k = graph.point(0, 0).middleOf(p, c2.center)
-
-		const PP = graph.line(p, c2.center).isSegment()
-		const f1 = graph.plot(((x) => x * x)).stroke({
-			color: 'blue',
-			width: 3,
-			opacity: 0.2
-		})
-
-		const f2 = graph.plot('2/3*sin(x^2)', {
-			domain: { min: -2, max: 14 },
-			samples: 50
-		}).ultrathick().color('red')
+		let p = graph.plot('1/2*x+3', {
+			samples: 20,
+          domain: {min: 0, max: 10}
+        })
+		p.riemann(2, 6, rectangle)
 
 		return {
+			fx: '(1/5)*((x-3)^3-(x-2)^2)+3',
 			graph,
-			figures: graph.figures.map(x => x.name),
-			changePlot(name, plot){
-				graph.getFigure(name).plot(plot, 200)
-            }
+			p,
+			rectangle,
+			updateRiemann () {
+				p.plot(this.fx)
+				p.riemann(2, 6, this.rectangle)
+			}
 		}
 	}
 </script>

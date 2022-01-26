@@ -128,7 +128,6 @@ export class Figure {
         return this.#svg;
     }
 
-
     set freeze(value: Boolean) {
         this.#freeze = value;
     }
@@ -140,4 +139,6 @@ export class Figure {
     set svg(value: Shape) {
         this.#svg = value;
     }
+
+
 }

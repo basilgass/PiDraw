@@ -5,12 +5,17 @@
     "module": "commonjs",
     "target": "esnext",
     "allowJs": true,
+    "jsx": "react",
     "sourceMap": true,
     "moduleResolution": "node",
     "declaration": true,
+    "declarationDir": "./typings/",
     "removeComments": true
   },
   "include": [
     "./src/**/*"
+  ],
+  "exclude": [
+    "node_modules"
   ]
 }

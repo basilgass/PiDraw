@@ -22,6 +22,7 @@ export class Line extends Figure {
     #B: Point
     #construction: ConstructionSettings
     #math: mathLine
+    #segment: boolean
 
     constructor(canvas: Canvas, name: string, A: Point, B: Point, construction?: ConstructionSettings) {
         super(canvas, name)
@@ -43,6 +44,27 @@ export class Line extends Figure {
         this.updateFigure()
     }
 
+    get segment(): boolean {
+        return this.#segment;
+    }
+
+    set segment(value: boolean) {
+        this.#segment = value;
+    }
+
+    get A(): Point {
+        return this.#A;
+    }
+
+    get B(): Point {
+        return this.#B;
+    }
+
+    isSegment(value: boolean) {
+        this.#segment = value === undefined || value
+        this.update()
+    }
+
     generateName(): string {
         if (this.name === undefined) {
             this.name = `d_${this.A.name + this.B.name}`
@@ -57,30 +79,25 @@ export class Line extends Figure {
             new mathPoint(this.#B.x, this.#B.y)
         )
 
-        if(this.#math.slope.isInfinity()){
-            if(this.svg instanceof svgLine) {
+        if (this.#math.slope.isInfinity()) {
+            if (this.svg instanceof svgLine) {
                 this.svg.plot(
                     this.#A.x, 0,
                     this.#A.x, this.canvas.height
                 )
             }
-        }else {
-            if(this.svg instanceof svgLine) {
+        } else {
+            let x1 = this.#segment ? this.#A.x : 0,
+                x2 = this.#segment ? this.#B.x : this.canvas.width
+            if (this.svg instanceof svgLine) {
                 this.svg.plot(
-                    0, this.#math.getValueAtX(0).value,
-                    this.canvas.width, this.#math.getValueAtX(this.canvas.width).value
+                    x1,
+                    this.#math.getValueAtX(x1).value,
+                    x2,
+                    this.#math.getValueAtX(x2).value
                 )
             }
         }
         return this
-    }
-
-
-    get A(): Point {
-        return this.#A;
-    }
-
-    get B(): Point {
-        return this.#B;
     }
 }

@@ -1,6 +1,6 @@
-import { Canvas } from "./Canvas";
-import { IPoint } from "./interfaces";
-import { Figure } from "./figures/Figure";
+import { Canvas } from "../Canvas";
+import { IPoint } from "../interfaces";
+import { Figure } from "./Figure";
 export interface gridConfig {
     axisX: number;
     axisY: number;

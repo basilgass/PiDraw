@@ -2,7 +2,8 @@ import {Figure} from "./Figure";
 import {Canvas} from "../Canvas";
 import {IPoint} from "../interfaces";
 import {NumExp} from "pimath/esm/maths/numexp";
-import {Path} from "@svgdotjs/svg.js";
+import {G, Path, Rect} from "@svgdotjs/svg.js";
+import {AXIS} from "./Axis";
 
 export interface plotConfig {
     domain: { min: number, max: number },
@@ -13,6 +14,7 @@ export class Plot extends Figure {
     #config: plotConfig
     #precision: number
     #fx: Function | NumExp
+    #riemann: { svg: G, rectangles: Rect[] }
 
     constructor(canvas: Canvas, name: string, fn: Function | string, config?: plotConfig) {
         super(canvas, name);
@@ -36,20 +38,19 @@ export class Plot extends Figure {
 
     generateName(): string {
         if (this.name === undefined) {
-            let n = this.canvas.figures.filter(fig=>fig instanceof Plot).length,
-                idx = Math.trunc(n/5)
-            this.name = 'fghij'[n%5] + (idx>=1 ? idx:'')
+            let n = this.canvas.figures.filter(fig => fig instanceof Plot).length,
+                idx = Math.trunc(n / 5)
+            this.name = 'fghij'[n % 5] + (idx >= 1 ? idx : '')
         }
 
         return this.name
     }
 
-    #parse(fn: Function | string): Function | NumExp {
-        // TODO : must calculate differently
-        if (typeof fn === 'string') {
-            return new NumExp(fn)
-        }
-        return fn
+    updateFigure(): Plot {
+        // Update the plot (using the plot function - so it's already done !)
+
+
+        return this
     }
 
     plot(fn: string | Function, speed?: number): Plot {
@@ -60,7 +61,7 @@ export class Plot extends Figure {
         const {d, points} = this.#getPath()
 
         // Draw the path.
-        if(this.svg instanceof Path) {
+        if (this.svg instanceof Path) {
             if (points.length !== this.svg.array().length) {
                 // Make a flat path.
                 this.svg.plot(this.#getFlatPath(points.length))
@@ -79,37 +80,114 @@ export class Plot extends Figure {
         return this
     }
 
+    riemann(from: number, to: number, n: number, below: boolean) {
+        let x = 0, y = 0,
+            height,
+            step = (to - from) / n,
+            pxX
+
+
+        // reset the rectangles if not the same number (for animation purpose)
+        if (this.#riemann !== undefined && n !== this.#riemann.rectangles.length) {
+            for (let r of this.#riemann.rectangles) {
+                r.remove()
+            }
+        }
+
+        // Generate the base version with "flatten rectangle"
+        if (this.#riemann === undefined || n !== this.#riemann.rectangles.length) {
+
+            // TODO: must reset the RIEMANN element !
+            this.#riemann = {
+                svg: this.canvas.svg.group(),
+                rectangles: []
+            }
+            // Create the zero height rectangles.
+            for (let i = 0; i < n; i++) {
+                // Unit value
+                x = +from + step * i
+                y = x + step
+                // pixels value
+                pxX = this.canvas.unitsToPixels({x: x, y: 0})
+                height = 0
+
+                this.#riemann.rectangles.push(
+                    this.canvas.svg.rect(
+                        this.canvas.distanceToPixels(step),
+                        height
+                    )
+                        .move(pxX.x, pxX.y)
+                        .addTo(this.#riemann.svg)
+                )
+            }
+
+            this.#riemann.svg.fill('yellow')
+                .stroke({
+                    color: 'black', width: 1
+                })
+
+            // Add to the correct layer
+            this.canvas.layers.main.add(this.#riemann.svg)
+
+        }
+
+        for (let i = 0; i < n; i++) {
+            // Unit value
+            x = +from + step * i
+            y = x + step
+            // pixels value
+            pxX = this.canvas.unitsToPixels({x: x, y: 0})
+
+            height = this.canvas.distanceToPixels(
+                (below === undefined || below) ? this.#evaluate(x).y : this.#evaluate(y).y, AXIS.VERTICAL
+            )
+            this.#riemann.rectangles[i]
+                .animate(500)
+                .height(height).move(pxX.x, pxX.y - height)
+        }
+    }
+
+    #parse(fn: Function | string): Function | NumExp {
+        // TODO : must calculate differently
+        if (typeof fn === 'string') {
+            return new NumExp(fn)
+        }
+        return fn
+    }
+
     #getFlatPath(numberOfPoints?: number): string {
-        if(numberOfPoints === undefined) {
+        if (numberOfPoints === undefined) {
             numberOfPoints = (this.#config.domain.max - this.#config.domain.min) * this.#config.samples
         }
 
         let h = this.canvas.origin.y,
             pt = this.canvas.unitsToPixels({x: this.#config.domain.min, y: 0}),
-            d:string = `M${pt.x},${pt.y}`
+            d: string = `M${pt.x},${pt.y}`
 
-        for(let x = 1; x<numberOfPoints; x++){
-            pt = this.canvas.unitsToPixels({x: this.#config.domain.min + x/this.#config.samples, y: 0})
+        for (let x = 1; x < numberOfPoints; x++) {
+            pt = this.canvas.unitsToPixels({x: this.#config.domain.min + x / this.#config.samples, y: 0})
             d += `L${pt.x},${pt.y}`
         }
 
         return d
     }
+
     #getPath(): { d: string, points: IPoint[] } {
         let d = '',
-            points:IPoint[]  = [],
+            points: IPoint[] = [],
             nextToken = 'M',
             prevToken = '',
             canvasHeight = this.canvas.height,
-            x = +this.#config.domain.min
+            x = +this.#config.domain.min,
+            y = 0
 
         while (x <= this.#config.domain.max) {
             // Evaluate the function at the point.
-            const pt = this.#evaluate(x)
+            const pt = this.canvas.unitsToPixels(this.#evaluate(x))
 
             // Do not add consecutive "move to"
-            if(prevToken==='M' && nextToken==='M'){
-            }else {
+            if (prevToken === 'M' && nextToken === 'M') {
+            } else {
                 // store the previous token.
                 prevToken = '' + nextToken
 
@@ -117,7 +195,16 @@ export class Plot extends Figure {
                 d += `${(prevToken === 'L' || nextToken === 'L') ? nextToken : prevToken}`;
 
                 // Create next coordinate, removing extra decimals
-                d += `${pt.x.toFixed(this.#precision)},${(Math.abs(pt.y) > canvasHeight * 5) ? 0 : pt.y.toFixed(this.#precision)} `
+                if (Math.abs(pt.y) > canvasHeight * 5) {
+                    if (pt.y > 0) {
+                        y = this.canvas.height + 50
+                    } else {
+                        y = -50
+                    }
+                } else {
+                    y = pt.y
+                }
+                d += `${pt.x.toFixed(this.#precision)},${y.toFixed(this.#precision)} `
 
                 points.push(pt)
             }
@@ -151,7 +238,7 @@ export class Plot extends Figure {
             console.log('Function type error: ', typeof this.#fx)
         }
 
-        return this.canvas.unitsToPixels({x, y})
+        return {x, y}
     }
 
 }

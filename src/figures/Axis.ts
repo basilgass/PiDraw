@@ -7,7 +7,6 @@ export enum AXIS {
 }
 export class Axis extends Figure {
     constructor(canvas: Canvas, name: string, orientation: AXIS) {
-        // TODO : build the axis class
         super(canvas, name);
 
         this.generateName()

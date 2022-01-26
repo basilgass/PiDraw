@@ -199,8 +199,12 @@ export class Canvas {
         this.#svg.viewbox(0, 0, this.#width, this.#height)
     }
 
-    distanceToPixels(distance: number): number {
-        return distance*this.#pixelsPerUnit.x
+    distanceToPixels(distance: number, direction?: AXIS): number {
+        if(direction===undefined || direction===AXIS.HORIZONTAL) {
+            return distance * this.#pixelsPerUnit.x
+        }else{
+            return distance * this.#pixelsPerUnit.y
+        }
     }
 
     unitsToPixels(point: IPoint): IPoint {
@@ -396,5 +400,10 @@ export class Canvas {
 
     get markers(): { start: Marker; end: Marker } {
         return this.#markers;
+    }
+
+
+    get layers(): ILayers {
+        return this.#layers;
     }
 }
