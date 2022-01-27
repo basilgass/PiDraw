@@ -25,7 +25,7 @@
   "homepage": "https://github.com/basilgass/PiDraw#readme",
   "dependencies": {
     "@svgdotjs/svg.draggable.js": "^3.0.2",
-    "@svgdotjs/svg.js": "^"
+    "@svgdotjs/svg.js": "^3.1.2"
   },
   "devDependencies": {
     "@types/node": "^16.11.7",
