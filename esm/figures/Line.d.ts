@@ -1,20 +1,10 @@
 import { Figure } from "./Figure";
-import { Canvas } from "../Canvas";
+import { Graph } from "../Graph";
 import { Point } from "./Point";
-export declare enum LINERULE {
-    DEFAULT = 0,
-    PARALLEL = 1,
-    PERPENDICULAR = 2,
-    TANGENT = 3
-}
-export interface ConstructionSettings {
-    rule: string;
-    point?: Point;
-    k?: number;
-}
+import { ConstructionSettings } from "../variables/interfaces";
 export declare class Line extends Figure {
     #private;
-    constructor(canvas: Canvas, name: string, A: Point, B: Point, construction?: ConstructionSettings);
+    constructor(canvas: Graph, name: string, A: Point, B: Point, construction?: ConstructionSettings);
     get segment(): boolean;
     set segment(value: boolean);
     get A(): Point;

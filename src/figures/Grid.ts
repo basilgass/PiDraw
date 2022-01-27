@@ -1,24 +1,15 @@
-import {Canvas} from "../Canvas";
+import {Graph} from "../Graph";
 import {G} from "@svgdotjs/svg.js";
-import {IPoint} from "../interfaces";
+import {gridConfig, IPoint} from "../variables/interfaces";
 import {Figure} from "./Figure";
+import {GRIDTYPE} from "../variables/enums";
 
-export interface gridConfig {
-    axisX: number,
-    axisY: number,
-    type: gridType
-}
 
-export enum gridType {
-    ORTHOGONAL = 4,
-    TRIANGLE = 3,
-    HEXAGONAL = 6
-}
 
 export class Grid extends Figure{
     #config: gridConfig
-    #origin: IPoint;
-    constructor(canvas: Canvas, name: string, config?:gridConfig) {
+    // #origin: IPoint;
+    constructor(canvas: Graph, name: string, config?:gridConfig) {
         super(canvas, name)
 
         this.svg = this.canvas.svg.group()
@@ -30,11 +21,11 @@ export class Grid extends Figure{
             this.#config = {
                 axisX: 50,
                 axisY: 50,
-                type: gridType.ORTHOGONAL
+                type: GRIDTYPE.ORTHOGONAL
             }
         }
 
-        this.#origin = {x: 0, y: this.canvas.height}
+        // this.#origin = {x: 0, y: this.canvas.height}
 
         this.load()
     }
@@ -43,14 +34,18 @@ export class Grid extends Figure{
         const w = this.canvas.width,
             h = this.canvas.height,
             x = this.#config.axisX,
-            y = this.#config.axisY
+            y = this.#config.axisY,
+            xOffset = this.canvas.origin.x % x,
+            yOffset = this.canvas.origin.y % y
 
-        for (let pos = 0; pos <= w; pos += x) {
-            this.svg.add(this.canvas.svg.line(pos, 0, pos, h));
+        // Vertical lines
+        for (let pos = -x; pos <= w; pos += x) {
+            this.svg.add(this.canvas.svg.line(pos+xOffset, 0-yOffset, pos+xOffset, h+yOffset));
         }
 
-        for (let pos = h; pos >= 0; pos -= y) {
-            this.svg.add(this.canvas.svg.line(0, pos, w, pos));
+        // Horizontal lines
+        for (let pos = h+y; pos >= 0; pos -= y) {
+            this.svg.add(this.canvas.svg.line(0-xOffset, pos-yOffset, w+xOffset, pos-yOffset));
         }
 
         this.svg.stroke({color: 'black', width: 0.5});
@@ -73,7 +68,7 @@ export class Grid extends Figure{
             nearestPoint = {x: +pt.x, y: +pt.y};
 
         // Version for orthographic.
-        if(this.#config.type===gridType.ORTHOGONAL){
+        if(this.#config.type===GRIDTYPE.ORTHOGONAL){
             let nX = Math.trunc(pt.x / this.#config.axisX)*this.#config.axisX,
                 nY = Math.trunc(pt.y / this.#config.axisY)*this.#config.axisY
 

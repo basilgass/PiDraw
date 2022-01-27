@@ -1,8 +1,8 @@
 import {Figure} from "./Figure";
-import {Canvas} from "../Canvas";
+import {Graph} from "../Graph";
 
 export class Polygon extends Figure{
-    constructor(canvas: Canvas, name: string) {
+    constructor(canvas: Graph, name: string) {
         // TODO : build the polygon class
         super(canvas, name);
 

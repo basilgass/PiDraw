@@ -1,14 +1,10 @@
 import {Figure} from "./Figure";
-import {Canvas} from "../Canvas";
-import {IPoint} from "../interfaces";
+import {Graph} from "../Graph";
+import {IPoint, plotConfig} from "../variables/interfaces";
 import {NumExp} from "pimath/esm/maths/numexp";
 import {G, Path, Rect} from "@svgdotjs/svg.js";
-import {AXIS} from "./Axis";
+import {AXIS} from "../variables/enums";
 
-export interface plotConfig {
-    domain: { min: number, max: number },
-    samples: number
-}
 
 export class Plot extends Figure {
     #config: plotConfig
@@ -16,7 +12,7 @@ export class Plot extends Figure {
     #fx: Function | NumExp
     #riemann: { svg: G, rectangles: Rect[] }
 
-    constructor(canvas: Canvas, name: string, fn: Function | string, config?: plotConfig) {
+    constructor(canvas: Graph, name: string, fn: Function | string, config?: plotConfig) {
         super(canvas, name);
 
         this.#config = {
@@ -96,12 +92,11 @@ export class Plot extends Figure {
 
         // Generate the base version with "flatten rectangle"
         if (this.#riemann === undefined || n !== this.#riemann.rectangles.length) {
-
-            // TODO: must reset the RIEMANN element !
             this.#riemann = {
                 svg: this.canvas.svg.group(),
                 rectangles: []
             }
+
             // Create the zero height rectangles.
             for (let i = 0; i < n; i++) {
                 // Unit value
@@ -138,12 +133,13 @@ export class Plot extends Figure {
             // pixels value
             pxX = this.canvas.unitsToPixels({x: x, y: 0})
 
+            // The value can be negatie
             height = this.canvas.distanceToPixels(
                 (below === undefined || below) ? this.#evaluate(x).y : this.#evaluate(y).y, AXIS.VERTICAL
             )
             this.#riemann.rectangles[i]
                 .animate(500)
-                .height(height).move(pxX.x, pxX.y - height)
+                .height(Math.abs(height)).move(pxX.x, pxX.y - (height>0?height:0))
         }
     }
 

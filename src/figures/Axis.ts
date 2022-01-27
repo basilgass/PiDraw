@@ -1,28 +1,26 @@
 import {Figure} from "./Figure";
-import {Canvas} from "../Canvas";
+import {Graph} from "../Graph";
+import {AXIS} from "../variables/enums";
 
-export enum AXIS {
-    HORIZONTAL,
-    VERTICAL
-}
 export class Axis extends Figure {
-    constructor(canvas: Canvas, name: string, orientation: AXIS) {
+    constructor(canvas: Graph, name: string, orientation: AXIS) {
         super(canvas, name);
 
         this.generateName()
 
         const offset = 0.2
+        const markers = this.canvas.createMarker(8)
         if(orientation===AXIS.HORIZONTAL) {
             this.svg = canvas.svg.line(
                 this.canvas.pixelsPerUnit.x * offset, this.canvas.origin.y,
                 this.canvas.width - this.canvas.pixelsPerUnit.x * offset, this.canvas.origin.y
-            ).stroke({width: 1, color: 'black'}).marker('end', this.canvas.markers.end)
+            ).stroke({width: 2, color: 'black'}).marker('end', markers.end)
         }
         if(orientation===AXIS.VERTICAL) {
             this.svg = canvas.svg.line(
                 this.canvas.origin.x, this.canvas.height - this.canvas.pixelsPerUnit.y * offset,
                 this.canvas.origin.x, this.canvas.pixelsPerUnit.y * offset
-            ).stroke({width: 1, color: 'black'}).marker('end', this.canvas.markers.end)
+            ).stroke({width: 2, color: 'black'}).marker('end', markers.end)
         }
     }
 

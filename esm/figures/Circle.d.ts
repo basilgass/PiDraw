@@ -1,9 +1,9 @@
-import { Canvas } from "../Canvas";
+import { Graph } from "../Graph";
 import { Figure } from "./Figure";
 import { Point } from "./Point";
 export declare class Circle extends Figure {
     #private;
-    constructor(canvas: Canvas, name: string, center: Point, radius: number | Point);
+    constructor(canvas: Graph, name: string, center: Point, radius: number | Point);
     get center(): Point;
     set center(value: Point);
     get radius(): number | Point;

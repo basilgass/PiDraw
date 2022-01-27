@@ -1,41 +1,25 @@
-import {G, Marker, SVG, Svg} from "@svgdotjs/svg.js";
+import {Marker, SVG, Svg} from "@svgdotjs/svg.js";
 import '@svgdotjs/svg.draggable.js'
 import {
-    DrawConfig,
+    ConstructionSettings,
+    ILayers,
     IPoint,
     isDrawConfigUnitMinMax,
     isDrawConfigUnitWidthHeight,
-    isDrawConfigWidthHeight
-} from "./interfaces";
+    isDrawConfigWidthHeight,
+    plotConfig
+} from "./variables/interfaces";
 import {Figure} from "./figures/Figure";
 import {Circle} from "./figures/Circle";
 import {Point} from "./figures/Point";
-import {Grid, gridType} from "./figures/Grid";
-import {ConstructionSettings, Line} from "./figures/Line";
-import {Plot, plotConfig} from "./figures/Plot";
-import {AXIS, Axis} from "./figures/Axis";
+import {Grid} from "./figures/Grid";
+import {Line} from "./figures/Line";
+import {Plot} from "./figures/Plot";
+import {Axis} from "./figures/Axis";
+import {AXIS, GRIDTYPE, LAYER} from "./variables/enums";
+import {GraphConfig} from "./variables/types";
 
-export enum LAYER {
-    BACKGROUND = 'background',
-    GRIDS = 'grids',
-    AXIS = 'axis',
-    MAIN = 'main',
-    PLOTS = 'plots',
-    FOREGROUND = 'foreground',
-    POINTS = 'points'
-}
-
-export interface ILayers {
-    background: G,
-    grids: G,
-    axis: G,
-    main: G,
-    plots: G,
-    foreground: G,
-    points: G
-}
-
-export class Canvas {
+export class Graph {
     /**
      * HTML container
      * @type {HTMLElement}
@@ -96,14 +80,8 @@ export class Canvas {
      * @private
      */
     #layers: ILayers
-    /**
-     * Generate the marker element (arrow)
-     * @type {{start: Marker, end: Marker}}
-     * @private
-     */
-    #markers: {start: Marker, end: Marker}
 
-    constructor(containerID: string | HTMLElement, config?: DrawConfig) {
+    constructor(containerID: string | HTMLElement, config?: GraphConfig) {
         // By default, the canvas is frozen on initialisation
         this.#freeze = false
 
@@ -119,11 +97,21 @@ export class Canvas {
         // Init variables
         this.#figures = []
         this.#points = {}
+
         this.#origin = {
-            x: 100, y: 400
+            x: 50, y: 550
         }
         this.#pixelsPerUnit = {
             x: 50, y: 50
+        }
+        if (config) {
+            if (config.origin !== undefined) {
+                this.#origin = config.origin
+            }
+
+            if (config.grid !== undefined) {
+                this.#pixelsPerUnit = config.grid
+            }
         }
 
         // Init layers.
@@ -141,16 +129,190 @@ export class Canvas {
         const g = new Grid(this, 'MAINGRID', {
             axisX: this.#pixelsPerUnit.x,
             axisY: this.#pixelsPerUnit.y,
-            type: gridType.ORTHOGONAL
+            type: GRIDTYPE.ORTHOGONAL
         })
         this.#figures.push(g)
         this.#layers.grids.add(g.svg)
 
         // Create the markers
-        this.#createMarker(15)
+        this.createMarker(15)
     }
 
-    private _initSetWidthAndHeight(config: DrawConfig) {
+    get container(): HTMLElement {
+        return this.#container;
+    }
+
+    get svg(): Svg {
+        return this.#svg;
+    }
+
+    get width(): number {
+        return this.#width;
+    }
+
+    get height(): number {
+        return this.#height;
+    }
+
+    get origin(): IPoint {
+        return this.#origin;
+    }
+
+    set origin(value: IPoint) {
+        this.#origin = value;
+    }
+
+    get figures(): Figure[] {
+        return this.#figures;
+    }
+
+    get freeze(): boolean {
+        return this.#freeze;
+    }
+
+    get unitXDomain(): { min: number, max: number } {
+        return {
+            min: Math.round(-this.#origin.x / this.#pixelsPerUnit.x),
+            max: Math.round((this.#width - this.#origin.x) / this.#pixelsPerUnit.x)
+        }
+    }
+
+    get unitYDomain(): { min: number, max: number } {
+        return {
+            max: Math.round(-(this.#height - this.#origin.y) / this.#pixelsPerUnit.y),
+            min: Math.round(this.#origin.y / this.#pixelsPerUnit.y)
+        }
+    }
+
+    get points(): { [p: string]: Point } {
+        return this.#points;
+    }
+
+    get pixelsPerUnit(): IPoint {
+        return this.#pixelsPerUnit;
+    }
+
+    get layers(): ILayers {
+        return this.#layers;
+    }
+
+    distanceToPixels(distance: number, direction?: AXIS): number {
+        if (direction === undefined || direction === AXIS.HORIZONTAL) {
+            return distance * this.#pixelsPerUnit.x
+        } else {
+            return distance * this.#pixelsPerUnit.y
+        }
+    }
+
+    unitsToPixels(point: IPoint): IPoint {
+        return {
+            x: this.origin.x + (point.x * this.#pixelsPerUnit.x),
+            y: this.origin.y - (point.y * this.#pixelsPerUnit.y)
+        }
+    }
+
+    pixelsToUnits(point: IPoint): IPoint {
+        // TODO: handle other grid types.
+        return {
+            x: (point.x - this.origin.x) / this.#pixelsPerUnit.x,
+            y: -(point.y - this.origin.y) / this.#pixelsPerUnit.y
+        }
+    }
+
+    getFigure(name: string): Figure {
+        for (let figure of this.#figures) {
+            if (figure.name === name) {
+                return figure
+            }
+        }
+
+        return
+    }
+
+    getPoint(name: string): Point {
+        return this.#points[name]
+    }
+
+    axis(): { x: Axis, y: Axis } {
+        const axisX = new Axis(this, 'x', AXIS.HORIZONTAL)
+        const axisY = new Axis(this, 'y', AXIS.VERTICAL)
+        this.#validateFigure(axisX, LAYER.AXIS)
+        this.#validateFigure(axisY, LAYER.AXIS)
+
+        return {
+            x: axisX,
+            y: axisY
+        }
+    }
+
+    point(x: number, y: number, name?: string): Point {
+        const pixels = this.unitsToPixels({x, y})
+        const figure = new Point(
+            this,
+            name,
+            pixels
+        );
+
+        this.#validateFigure(figure, LAYER.POINTS)
+        return figure
+    }
+
+    line(A: Point | string, B: Point | string, construction?: ConstructionSettings, name?: string): Line {
+        const figure = new Line(
+            this,
+            name,
+            (A instanceof Point) ? A : this.getPoint(A),
+            (B instanceof Point) ? B : this.getPoint(B),
+            construction
+        );
+
+        this.#validateFigure(figure)
+        return figure
+    }
+
+    circle(center: Point | IPoint, radius: number, name?: string): Circle {
+        // Case the point is given as xy coordinate instead of an existing point.
+        if (!(center instanceof Point)) {
+            return this.circle(
+                this.point(center.x, center.y),
+                radius,
+                name
+            )
+        }
+
+        let figure = new Circle(
+            this,
+            name,
+            center,
+            radius)
+
+        this.#validateFigure(figure)
+
+        return figure
+    }
+
+    plot(fn: Function | string, config?: plotConfig, name?: string): Plot {
+        //TODO: plot auto config ?
+        const figure = new Plot(
+            this,
+            name,
+            fn,
+            config
+        )
+
+        this.#validateFigure(figure, LAYER.PLOTS)
+
+        return figure
+    }
+
+    update(): Graph {
+        for (let figure of this.#figures) {
+            figure.update()
+        }
+        return this
+    }
+
+    private _initSetWidthAndHeight(config: GraphConfig) {
         if (isDrawConfigWidthHeight(config)) {
             this.#width = config.width
             this.#height = config.height
@@ -199,29 +361,6 @@ export class Canvas {
         this.#svg.viewbox(0, 0, this.#width, this.#height)
     }
 
-    distanceToPixels(distance: number, direction?: AXIS): number {
-        if(direction===undefined || direction===AXIS.HORIZONTAL) {
-            return distance * this.#pixelsPerUnit.x
-        }else{
-            return distance * this.#pixelsPerUnit.y
-        }
-    }
-
-    unitsToPixels(point: IPoint): IPoint {
-        return {
-            x: this.origin.x + (point.x * this.#pixelsPerUnit.x),
-            y: this.origin.y - (point.y * this.#pixelsPerUnit.y)
-        }
-    }
-
-    pixelsToUnits(point: IPoint): IPoint {
-        // TODO: handle other grid types.
-        return {
-            x: (point.x - this.origin.x) / this.#pixelsPerUnit.x,
-            y: -(point.y - this.origin.y) / this.#pixelsPerUnit.y
-        }
-    }
-
     #validateFigure(figure: Figure, layer?: LAYER): void {
         // Add to the list of drawings, for updating.
         this.#figures.push(figure)
@@ -237,173 +376,20 @@ export class Canvas {
         figure.draw()
     }
 
-    getFigure(name: string): Figure {
-        for(let figure of this.#figures){
-            if(figure.name===name){return figure}
-        }
-
-        return
-    }
-
-    getPoint(name: string): Point {
-        return this.#points[name]
-    }
-
-    axis(): {x: Axis, y: Axis} {
-        const axisX = new Axis(this, 'x', AXIS.HORIZONTAL)
-        const axisY = new Axis(this, 'y', AXIS.VERTICAL)
-        this.#validateFigure(axisX, LAYER.AXIS)
-        this.#validateFigure(axisY, LAYER.AXIS)
-
-        return {
-            x: axisX,
-            y: axisY
-        }
-    }
-    point(x: number, y: number, name?: string): Point {
-        const pixels = this.unitsToPixels({x, y})
-        const figure = new Point(
-            this,
-            name,
-            pixels
-        );
-
-        this.#validateFigure(figure, LAYER.POINTS)
-        return figure
-    }
-
-    line(A: Point|string, B: Point|string, construction?: ConstructionSettings ,name?: string): Line {
-        const figure = new Line(
-            this,
-            name,
-            (A instanceof Point)?A:this.getPoint(A),
-            (B instanceof Point)?B:this.getPoint(B),
-            construction
-        );
-
-        this.#validateFigure(figure)
-        return figure
-    }
-    circle(center: Point | IPoint, radius: number, name?: string): Circle {
-        // Case the point is given as xy coordinate instead of an existing point.
-        if (!(center instanceof Point)) {
-            return this.circle(
-                this.point(center.x, center.y),
-                radius,
-                name
-            )
-        }
-
-        let figure = new Circle(
-            this,
-            name,
-            center,
-            radius)
-
-        this.#validateFigure(figure)
-
-        return figure
-    }
-
-    plot(fn: Function | string, config?: plotConfig, name?: string): Plot {
-        //TODO: plot auto config ?
-        const figure = new Plot(
-            this,
-            name,
-            fn,
-            config
-        )
-
-        this.#validateFigure(figure, LAYER.PLOTS)
-
-        return figure
-    }
-
-
-    update(): Canvas {
-        for(let figure of this.#figures){
-            figure.update()
-        }
-        return this
-    }
-    get container(): HTMLElement {
-        return this.#container;
-    }
-
-    get svg(): Svg {
-        return this.#svg;
-    }
-
-    get width(): number {
-        return this.#width;
-    }
-
-    get height(): number {
-        return this.#height;
-    }
-
-    get origin(): IPoint {
-        return this.#origin;
-    }
-
-    get figures(): Figure[] {
-        return this.#figures;
-    }
-
-    get freeze(): boolean {
-        return this.#freeze;
-    }
-
-    get unitXDomain(): {min: number, max: number} {
-        return {
-            min: Math.round(-this.#origin.x/this.#pixelsPerUnit.x),
-            max: Math.round((this.#width-this.#origin.x)/this.#pixelsPerUnit.x)
-        }
-    }
-
-    get unitYDomain(): { min: number, max: number } {
-        return {
-            max: Math.round(-(this.#height-this.#origin.y)/this.#pixelsPerUnit.y),
-            min: Math.round(this.#origin.y/this.#pixelsPerUnit.y)
-        }
-    }
-
-
-    get points(): { [p: string]: Point } {
-        return this.#points;
-    }
-
-
-    get pixelsPerUnit(): IPoint {
-        return this.#pixelsPerUnit;
-    }
-
-    #createMarker(scale: number) {
-            this.#markers = {
-                start: null,
-                end: null
-            };
-
-            this.#markers.start = this.svg.marker(
-                scale*1.2,
-                scale*1.2,
+    createMarker(scale: number): { start: Marker, end: Marker }  {
+        return  {
+            start: this.svg.marker(
+                scale * 1.2,
+                scale * 1.2,
                 function (add) {
                     add.path(`M1,0 L1,${scale}, L${scale * 1.2},${scale / 2} L1,0z`).rotate(180)
-                }).ref(0, scale / 2);
-            this.#markers.end = this.svg.marker(
-                scale+5,
-                scale+5,
+                }).ref(0, scale / 2),
+            end: this.svg.marker(
+                scale + 5,
+                scale + 5,
                 function (add) {
                     add.path(`M1,0 L1,${scale}, L${scale * 1.2},${scale / 2} L1,0z`)
-                }).ref(scale, scale / 2);
-    }
-
-    get markers(): { start: Marker; end: Marker } {
-        return this.#markers;
-    }
-
-
-    get layers(): ILayers {
-        return this.#layers;
+                }).ref(scale, scale / 2)
+        };
     }
 }

@@ -1,16 +1,15 @@
-import {Canvas} from "../Canvas";
+import {Graph} from "../Graph";
 import {Label} from "./Label";
 import {Circle, G, Line, Path, Shape} from "@svgdotjs/svg.js";
-
-export type svgShape = Shape | G | Line | Path | Circle
+import {svgShape} from "../variables/types";
 
 export class Figure {
     /**
      * Canvas root object.
-     * @type {Canvas}
+     * @type {Graph}
      * @private
      */
-    #canvas: Canvas
+    #canvas: Graph
     /**
      * Define if the object should update or not.
      * @type {Boolean}
@@ -36,7 +35,7 @@ export class Figure {
      */
     #svg: svgShape
 
-    constructor(canvas: Canvas, name: string) {
+    constructor(canvas: Graph, name: string) {
         this.#freeze = true
 
         this.#canvas = canvas
@@ -120,7 +119,7 @@ export class Figure {
         return this.#label;
     }
 
-    get canvas(): Canvas {
+    get canvas(): Graph {
         return this.#canvas;
     }
 

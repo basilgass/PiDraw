@@ -1,4 +1,3 @@
-import {Canvas} from "./Canvas";
-export {Canvas as PiDraw} from "./Canvas"
+import {Graph} from "./Graph";
 
-(<any>window).PiDraw = Canvas
+(<any>window).PiDraw = Graph

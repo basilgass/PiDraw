@@ -4,7 +4,7 @@ exports.Plot = void 0;
 const Figure_1 = require("./Figure");
 const numexp_1 = require("pimath/esm/maths/numexp");
 const svg_js_1 = require("@svgdotjs/svg.js");
-const Axis_1 = require("./Axis");
+const enums_1 = require("../variables/enums");
 class Plot extends Figure_1.Figure {
     #config;
     #precision;
@@ -83,10 +83,10 @@ class Plot extends Figure_1.Figure {
             x = +from + step * i;
             y = x + step;
             pxX = this.canvas.unitsToPixels({ x: x, y: 0 });
-            height = this.canvas.distanceToPixels((below === undefined || below) ? this.#evaluate(x).y : this.#evaluate(y).y, Axis_1.AXIS.VERTICAL);
+            height = this.canvas.distanceToPixels((below === undefined || below) ? this.#evaluate(x).y : this.#evaluate(y).y, enums_1.AXIS.VERTICAL);
             this.#riemann.rectangles[i]
                 .animate(500)
-                .height(height).move(pxX.x, pxX.y - height);
+                .height(Math.abs(height)).move(pxX.x, pxX.y - (height > 0 ? height : 0));
         }
     }
     #parse(fn) {

@@ -1,21 +1,10 @@
 import {Figure} from "./Figure";
-import {Canvas} from "../Canvas";
+import {Graph} from "../Graph";
 import {Point} from "./Point";
 import {Line as mathLine, Point as mathPoint} from "pimath/esm/maths/geometry";
 import {Line as svgLine} from "@svgdotjs/svg.js";
+import {ConstructionSettings} from "../variables/interfaces";
 
-export enum LINERULE {
-    DEFAULT,
-    PARALLEL,
-    PERPENDICULAR,
-    TANGENT
-}
-
-export interface ConstructionSettings {
-    rule: string,
-    point?: Point,
-    k?: number
-}
 
 export class Line extends Figure {
     #A: Point
@@ -24,7 +13,7 @@ export class Line extends Figure {
     #math: mathLine
     #segment: boolean
 
-    constructor(canvas: Canvas, name: string, A: Point, B: Point, construction?: ConstructionSettings) {
+    constructor(canvas: Graph, name: string, A: Point, B: Point, construction?: ConstructionSettings) {
         super(canvas, name)
 
         this.#A = A

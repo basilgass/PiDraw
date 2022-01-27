@@ -3,18 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.Point = void 0;
 const Figure_1 = require("./Figure");
 const Grid_1 = require("./Grid");
-var POINTSHAPE;
-(function (POINTSHAPE) {
-    POINTSHAPE[POINTSHAPE["CIRCLE"] = 0] = "CIRCLE";
-    POINTSHAPE[POINTSHAPE["CROSS"] = 1] = "CROSS";
-    POINTSHAPE[POINTSHAPE["HANDLE"] = 2] = "HANDLE";
-})(POINTSHAPE || (POINTSHAPE = {}));
-var CONSTRAIN;
-(function (CONSTRAIN) {
-    CONSTRAIN[CONSTRAIN["FREE"] = 0] = "FREE";
-    CONSTRAIN[CONSTRAIN["MIDDLE"] = 1] = "MIDDLE";
-    CONSTRAIN[CONSTRAIN["FIXED"] = 2] = "FIXED";
-})(CONSTRAIN || (CONSTRAIN = {}));
+const enums_1 = require("../variables/enums");
 class Point extends Figure_1.Figure {
     #x;
     #y;
@@ -26,9 +15,9 @@ class Point extends Figure_1.Figure {
         this.#x = pixels.x;
         this.#y = pixels.y;
         this.generateName();
-        this.#shape = POINTSHAPE.CROSS;
+        this.#shape = enums_1.POINTSHAPE.CROSS;
         this.#scale = 6;
-        this.#constrain = { type: CONSTRAIN.FIXED };
+        this.#constrain = { type: enums_1.CONSTRAIN.FIXED };
         this.#updateShape();
     }
     generateName() {
@@ -44,14 +33,14 @@ class Point extends Figure_1.Figure {
         if (this.svg && this.#shape !== this.svg.data('shape')) {
             this.svg.remove();
         }
-        if (this.#shape === POINTSHAPE.CIRCLE) {
-            this.svg = this.canvas.svg.circle(5).stroke('black').fill('none').data('shape', POINTSHAPE.CIRCLE);
+        if (this.#shape === enums_1.POINTSHAPE.CIRCLE) {
+            this.svg = this.canvas.svg.circle(5).stroke('black').fill('none').data('shape', enums_1.POINTSHAPE.CIRCLE);
         }
-        else if (this.#shape === POINTSHAPE.CROSS) {
-            this.svg = this.canvas.svg.path(`M${-this.#scale},${-this.#scale} L${+this.#scale},${+this.#scale} M${+this.#scale},${-this.#scale} L${-this.#scale},${+this.#scale}`).stroke('black').center(0, 0).data('shape', POINTSHAPE.CROSS);
+        else if (this.#shape === enums_1.POINTSHAPE.CROSS) {
+            this.svg = this.canvas.svg.path(`M${-this.#scale},${-this.#scale} L${+this.#scale},${+this.#scale} M${+this.#scale},${-this.#scale} L${-this.#scale},${+this.#scale}`).stroke('black').center(0, 0).data('shape', enums_1.POINTSHAPE.CROSS);
         }
-        else if (this.#shape === POINTSHAPE.HANDLE) {
-            this.svg = this.canvas.svg.circle(20).stroke('black').fill('white').opacity(0.4).data('shape', POINTSHAPE.HANDLE);
+        else if (this.#shape === enums_1.POINTSHAPE.HANDLE) {
+            this.svg = this.canvas.svg.circle(20).stroke('black').fill('white').opacity(0.4).data('shape', enums_1.POINTSHAPE.HANDLE);
         }
     }
     updateFigure() {
@@ -64,7 +53,7 @@ class Point extends Figure_1.Figure {
         return this;
     }
     #updateCoordinate() {
-        if (this.#constrain.type === CONSTRAIN.MIDDLE) {
+        if (this.#constrain.type === enums_1.CONSTRAIN.MIDDLE) {
             const A = this.#constrain.data[0], B = this.#constrain.data[1];
             this.#x = (A.x + B.x) / 2;
             this.#y = (A.y + B.y) / 2;
@@ -72,14 +61,14 @@ class Point extends Figure_1.Figure {
     }
     middleOf(A, B) {
         this.#constrain = {
-            type: CONSTRAIN.MIDDLE,
+            type: enums_1.CONSTRAIN.MIDDLE,
             data: [A, B]
         };
         this.update();
         return this;
     }
     draggable(grid) {
-        this.#shape = POINTSHAPE.HANDLE;
+        this.#shape = enums_1.POINTSHAPE.HANDLE;
         this.updateFigure();
         let point = this;
         function dragmove(e) {

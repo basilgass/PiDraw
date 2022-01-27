@@ -1,19 +1,8 @@
-import {Canvas} from "../Canvas";
+import {Graph} from "../Graph";
 import {Figure} from "./Figure";
-import {IPoint} from "../interfaces";
+import {IPoint} from "../variables/interfaces";
 import {Grid} from "./Grid";
-
-enum POINTSHAPE {
-    CIRCLE,
-    CROSS,
-    HANDLE
-}
-
-enum CONSTRAIN {
-    FREE,
-    MIDDLE,
-    FIXED
-}
+import {CONSTRAIN, POINTSHAPE} from "../variables/enums";
 
 export class Point extends Figure {
     #x: number
@@ -25,7 +14,7 @@ export class Point extends Figure {
         data?: any
     }
 
-    constructor(canvas: Canvas, name: string, pixels: IPoint) {
+    constructor(canvas: Graph, name: string, pixels: IPoint) {
         super(canvas, name);
 
         this.#x = pixels.x

@@ -1,4 +1,4 @@
-import {Canvas} from "../Canvas";
+import {Graph} from "../Graph";
 import {Figure} from "./Figure";
 import {Point} from "./Point";
 import {Circle as svgCircle} from "@svgdotjs/svg.js";
@@ -7,7 +7,7 @@ export class Circle extends Figure {
     #center: Point;
     #radius: number | Point;
 
-    constructor(canvas: Canvas, name: string, center: Point, radius: number | Point) {
+    constructor(canvas: Graph, name: string, center: Point, radius: number | Point) {
         super(canvas, name);
 
         this.#center = center

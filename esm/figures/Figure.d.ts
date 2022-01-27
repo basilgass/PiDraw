@@ -1,10 +1,9 @@
-import { Canvas } from "../Canvas";
+import { Graph } from "../Graph";
 import { Label } from "./Label";
-import { Circle, G, Line, Path, Shape } from "@svgdotjs/svg.js";
-export declare type svgShape = Shape | G | Line | Path | Circle;
+import { Shape } from "@svgdotjs/svg.js";
 export declare class Figure {
     #private;
-    constructor(canvas: Canvas, name: string);
+    constructor(canvas: Graph, name: string);
     draw(): void;
     update(): void;
     updateFigure(): Figure;
@@ -24,7 +23,7 @@ export declare class Figure {
     get freeze(): Boolean;
     get name(): string;
     get label(): Label;
-    get canvas(): Canvas;
+    get canvas(): Graph;
     get svg(): Shape;
     set freeze(value: Boolean);
     set name(value: string);

@@ -1,10 +1,10 @@
-import { Canvas } from "../Canvas";
+import { Graph } from "../Graph";
 import { Figure } from "./Figure";
-import { IPoint } from "../interfaces";
+import { IPoint } from "../variables/interfaces";
 import { Grid } from "./Grid";
 export declare class Point extends Figure {
     #private;
-    constructor(canvas: Canvas, name: string, pixels: IPoint);
+    constructor(canvas: Graph, name: string, pixels: IPoint);
     generateName(): string;
     updateFigure(): Point;
     middleOf(A: Point, B: Point): Point;

@@ -1,10 +1,7 @@
 import { Figure } from "./Figure";
-import { Canvas } from "../Canvas";
-export declare enum AXIS {
-    HORIZONTAL = 0,
-    VERTICAL = 1
-}
+import { Graph } from "../Graph";
+import { AXIS } from "../variables/enums";
 export declare class Axis extends Figure {
-    constructor(canvas: Canvas, name: string, orientation: AXIS);
+    constructor(canvas: Graph, name: string, orientation: AXIS);
     generateName(): string;
 }

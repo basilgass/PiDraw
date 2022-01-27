@@ -1,12 +1,12 @@
 import {Figure} from "./Figure";
-import {Canvas} from "../Canvas";
+import {Graph} from "../Graph";
 import {Point} from "./Point";
 
 export class Arc extends Figure{
     #center: Point;
     #start: Point;
     #stop: Point;
-    constructor(canvas: Canvas, name: string, center: Point, start: Point, stop: Point) {
+    constructor(canvas: Graph, name: string, center: Point, start: Point, stop: Point) {
         // TODO : build the arc class
         super(canvas, name);
 

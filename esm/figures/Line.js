@@ -1,16 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Line = exports.LINERULE = void 0;
+exports.Line = void 0;
 const Figure_1 = require("./Figure");
 const geometry_1 = require("pimath/esm/maths/geometry");
 const svg_js_1 = require("@svgdotjs/svg.js");
-var LINERULE;
-(function (LINERULE) {
-    LINERULE[LINERULE["DEFAULT"] = 0] = "DEFAULT";
-    LINERULE[LINERULE["PARALLEL"] = 1] = "PARALLEL";
-    LINERULE[LINERULE["PERPENDICULAR"] = 2] = "PERPENDICULAR";
-    LINERULE[LINERULE["TANGENT"] = 3] = "TANGENT";
-})(LINERULE = exports.LINERULE || (exports.LINERULE = {}));
 class Line extends Figure_1.Figure {
     #A;
     #B;

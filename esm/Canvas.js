@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Canvas = exports.LAYER = void 0;
+exports.Canvas = void 0;
 const svg_js_1 = require("@svgdotjs/svg.js");
 require("@svgdotjs/svg.draggable.js");
 const interfaces_1 = require("./interfaces");
@@ -10,16 +10,6 @@ const Grid_1 = require("./figures/Grid");
 const Line_1 = require("./figures/Line");
 const Plot_1 = require("./figures/Plot");
 const Axis_1 = require("./figures/Axis");
-var LAYER;
-(function (LAYER) {
-    LAYER["BACKGROUND"] = "background";
-    LAYER["GRIDS"] = "grids";
-    LAYER["AXIS"] = "axis";
-    LAYER["MAIN"] = "main";
-    LAYER["PLOTS"] = "plots";
-    LAYER["FOREGROUND"] = "foreground";
-    LAYER["POINTS"] = "points";
-})(LAYER = exports.LAYER || (exports.LAYER = {}));
 class Canvas {
     #container;
     #svg;
@@ -131,7 +121,7 @@ class Canvas {
         if (figure instanceof Point_1.Point) {
             this.#points[figure.name] = figure;
         }
-        this.#layers[layer ? layer : LAYER.MAIN].add(figure.svg);
+        this.#layers[layer ? layer : interfaces_1.LAYER.MAIN].add(figure.svg);
         figure.draw();
     }
     getFigure(name) {
@@ -148,8 +138,8 @@ class Canvas {
     axis() {
         const axisX = new Axis_1.Axis(this, 'x', Axis_1.AXIS.HORIZONTAL);
         const axisY = new Axis_1.Axis(this, 'y', Axis_1.AXIS.VERTICAL);
-        this.#validateFigure(axisX, LAYER.AXIS);
-        this.#validateFigure(axisY, LAYER.AXIS);
+        this.#validateFigure(axisX, interfaces_1.LAYER.AXIS);
+        this.#validateFigure(axisY, interfaces_1.LAYER.AXIS);
         return {
             x: axisX,
             y: axisY
@@ -158,7 +148,7 @@ class Canvas {
     point(x, y, name) {
         const pixels = this.unitsToPixels({ x, y });
         const figure = new Point_1.Point(this, name, pixels);
-        this.#validateFigure(figure, LAYER.POINTS);
+        this.#validateFigure(figure, interfaces_1.LAYER.POINTS);
         return figure;
     }
     line(A, B, construction, name) {
@@ -176,7 +166,7 @@ class Canvas {
     }
     plot(fn, config, name) {
         const figure = new Plot_1.Plot(this, name, fn, config);
-        this.#validateFigure(figure, LAYER.PLOTS);
+        this.#validateFigure(figure, interfaces_1.LAYER.PLOTS);
         return figure;
     }
     update() {

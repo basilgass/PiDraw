@@ -1,6 +1,6 @@
 import { Figure } from "./Figure";
-import { Canvas } from "../Canvas";
+import { Graph } from "../Graph";
 export declare class Triangle extends Figure {
-    constructor(canvas: Canvas, name: string);
+    constructor(canvas: Graph, name: string);
     generateName(): string;
 }

@@ -41,18 +41,23 @@
 </div>
 <script>
 	function riemann () {
-		let graph = new PiDraw('root'),
+		let graph = new PiDraw('root',
+				{
+					origin: { x: 120, y: 450 },
+					grid: { x: 100, y: 100 }
+				}),
 			rectangle = 8
 		graph.axis()
 
-		let p = graph.plot('1/2*x+3', {
+		let p = graph.plot('((x-3)^3-(x-2)^2)/2+1', {
 			samples: 20,
-          domain: {min: 0, max: 10}
-        })
+			domain: { min: 0, max: 10 }
+		})
 		p.riemann(2, 6, rectangle)
 
+		// '(1/5)*((x-3)^3-(x-2)^2)+3'
 		return {
-			fx: '(1/5)*((x-3)^3-(x-2)^2)+3',
+			fx: '((x-3)^3-(x-2)^2)/2+1',
 			graph,
 			p,
 			rectangle,
