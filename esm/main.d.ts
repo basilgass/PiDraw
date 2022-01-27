@@ -1,1 +1,1 @@
-export {};
+export { Canvas as PiDraw } from "./Canvas";

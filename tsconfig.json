@@ -9,7 +9,6 @@
     "sourceMap": true,
     "moduleResolution": "node",
     "declaration": true,
-    "declarationDir": "./typings/",
     "removeComments": true
   },
   "include": [
