@@ -79,6 +79,15 @@ export class Graph {
      */
     #layers: ILayers
 
+    /**
+     * Create the main graph canvas element
+     * config: {origin: {x: number, y: number}, grid: {x: number, y: number, type: GRIDTYPE}}
+     * config (dim pixels): {... width: number, height: number}
+     * config (dim units): {... dx: number, dy: number, pixelsPerUnit: number}
+     * config (plot wise): {... xMin: number, xMax: number, yMin: number, yMax: number, pixelsPerUnit: number}
+     * @param {string | HTMLElement} containerID
+     * @param {GraphConfig} config
+     */
     constructor(containerID: string | HTMLElement, config?: GraphConfig) {
         // By default, the graph is frozen on initialisation
         this.#freeze = false
@@ -351,7 +360,7 @@ export class Graph {
         const wrapper = document.createElement('DIV')
         wrapper.style.position = 'relative'
         wrapper.style.width = '100%'
-        wrapper.style.height = '100%'
+        wrapper.style.height = 'auto'
         this.#container.appendChild(wrapper)
 
         // Create the SVG element.

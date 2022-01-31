@@ -215,7 +215,7 @@ class Graph {
         const wrapper = document.createElement('DIV');
         wrapper.style.position = 'relative';
         wrapper.style.width = '100%';
-        wrapper.style.height = '100%';
+        wrapper.style.height = 'auto';
         this.#container.appendChild(wrapper);
         this.#svg = (0, svg_js_1.SVG)().addTo(wrapper).size('100%', '100%');
         this.#svg.viewbox(0, 0, this.#width, this.#height);
