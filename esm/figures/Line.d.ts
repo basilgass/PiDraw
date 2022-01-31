@@ -1,10 +1,14 @@
 import { Figure } from "./Figure";
 import { Graph } from "../Graph";
 import { Point } from "./Point";
-import { ConstructionSettings } from "../variables/interfaces";
+export interface LineConfig {
+    rule: string;
+    point?: Point;
+    k?: number;
+}
 export declare class Line extends Figure {
     #private;
-    constructor(canvas: Graph, name: string, A: Point, B: Point, construction?: ConstructionSettings);
+    constructor(graph: Graph, name: string, A: Point, B: Point, construction?: LineConfig);
     get segment(): boolean;
     set segment(value: boolean);
     get A(): Point;

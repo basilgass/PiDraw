@@ -7,8 +7,8 @@ export class Circle extends Figure {
     #center: Point;
     #radius: number | Point;
 
-    constructor(canvas: Graph, name: string, center: Point, radius: number | Point) {
-        super(canvas, name);
+    constructor(graph: Graph, name: string, center: Point, radius: number | Point) {
+        super(graph, name);
 
         this.#center = center
 
@@ -18,7 +18,7 @@ export class Circle extends Figure {
 
         // Create the shape
 
-        this.svg = canvas.svg.circle(
+        this.svg = graph.svg.circle(
             this.getRadiusAsPixels() * 2
         ).stroke('black').fill('none');
 
@@ -51,7 +51,7 @@ export class Circle extends Figure {
                 (this.#radius.y - this.#center.y) ** 2
             )
         } else if (typeof this.#radius === 'number') {
-            radius = this.canvas.distanceToPixels(this.#radius)
+            radius = this.graph.distanceToPixels(this.#radius)
         }
 
         return radius
@@ -59,7 +59,7 @@ export class Circle extends Figure {
 
     generateName(): string {
         if (this.name === undefined) {
-            let n = this.canvas.figures.filter(fig => fig instanceof Circle).length + 1
+            let n = this.graph.figures.filter(fig => fig instanceof Circle).length + 1
 
             this.name = `C_${n}`
         }
@@ -69,7 +69,7 @@ export class Circle extends Figure {
 
     updateFigure(): Circle {
         // The update mechanism is frozen.
-        if (this.freeze || this.canvas.freeze) {
+        if (this.freeze || this.graph.freeze) {
             return this
         }
         // No center is given

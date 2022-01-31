@@ -2,20 +2,23 @@ import {Graph} from "../Graph";
 import {Figure} from "./Figure";
 import {IPoint} from "../variables/interfaces";
 import {Grid} from "./Grid";
-import {CONSTRAIN, POINTSHAPE} from "../variables/enums";
+import {POINTCONSTRAIN, POINTSHAPE} from "../variables/enums";
+import {Circle as svgCircle} from "@svgdotjs/svg.js";
+
+export interface PointConfig {
+    type: POINTCONSTRAIN,
+    data?: any
+}
 
 export class Point extends Figure {
     #x: number
     #y: number
     #scale: number
     #shape: POINTSHAPE
-    #constrain: {
-        type: CONSTRAIN,
-        data?: any
-    }
+    #constrain: PointConfig
 
-    constructor(canvas: Graph, name: string, pixels: IPoint) {
-        super(canvas, name);
+    constructor(graph: Graph, name: string, pixels: IPoint) {
+        super(graph, name);
 
         this.#x = pixels.x
         this.#y = pixels.y
@@ -25,14 +28,14 @@ export class Point extends Figure {
         this.#shape = POINTSHAPE.CROSS
         this.#scale = 6
 
-        this.#constrain = {type: CONSTRAIN.FIXED}
+        this.#constrain = {type: POINTCONSTRAIN.FIXED}
 
         this.#updateShape()
     }
 
     generateName(): string {
         if (this.name === undefined) {
-            this.name = `P${Object.keys(this.canvas.points).length}`
+            this.name = `P${Object.keys(this.graph.points).length}`
         }
 
         return this.name
@@ -51,23 +54,41 @@ export class Point extends Figure {
 
         // Create the new shape
         if (this.#shape === POINTSHAPE.CIRCLE) {
-            this.svg = this.canvas.svg.circle(
-                5
-            ).stroke('black').fill('none').data('shape', POINTSHAPE.CIRCLE);
+            this.svg = this.graph.svg.circle(
+                this.#scale
+            ).stroke('black').fill('white').data('shape', POINTSHAPE.CIRCLE);
         } else if (this.#shape === POINTSHAPE.CROSS) {
-            this.svg = this.canvas.svg.path(
+            this.svg = this.graph.svg.path(
                 `M${-this.#scale},${-this.#scale} L${+this.#scale},${+this.#scale} M${+this.#scale},${-this.#scale} L${-this.#scale},${+this.#scale}`
             ).stroke('black').center(0, 0).data('shape', POINTSHAPE.CROSS);
         } else if (this.#shape === POINTSHAPE.HANDLE) {
-            this.svg = this.canvas.svg.circle(
+            this.svg = this.graph.svg.circle(
                 20
             ).stroke('black').fill('white').opacity(0.4).data('shape', POINTSHAPE.HANDLE);
         }
     }
 
+    asCross(): Point {
+        this.#shape = POINTSHAPE.CROSS
+        this.#updateShape()
+        return this
+    }
+    asCircle(): Point {
+        this.#shape = POINTSHAPE.CIRCLE
+        this.update()
+        return this
+    }
+    setSize(value: number): Point {
+        this.#scale = value
+        // Force update
+        this.svg.data('shape', null)
+        this.update()
+        return this
+    }
+
     updateFigure(): Point {
         // The update mechanism is frozen.
-        if (this.freeze || this.canvas.freeze) {
+        if (this.freeze || this.graph.freeze) {
             return this
         }
 
@@ -80,7 +101,7 @@ export class Point extends Figure {
     }
 
     #updateCoordinate(): void {
-        if (this.#constrain.type === CONSTRAIN.MIDDLE) {
+        if (this.#constrain.type === POINTCONSTRAIN.MIDDLE) {
             const A: Point = this.#constrain.data[0],
                 B: Point = this.#constrain.data[1]
 
@@ -97,7 +118,7 @@ export class Point extends Figure {
      */
     middleOf(A: Point, B: Point): Point {
         this.#constrain = {
-            type: CONSTRAIN.MIDDLE,
+            type: POINTCONSTRAIN.MIDDLE,
             data: [A, B]
         }
         this.update()
@@ -109,7 +130,7 @@ export class Point extends Figure {
         this.updateFigure()
 
         let point = this
-        // let grid = this.canvas.getFigure('MAINGRID')
+        // let grid = this.graph.getFigure('MAINGRID')
 
         function dragmove(e: any): void {
             // Get the event details
@@ -120,11 +141,11 @@ export class Point extends Figure {
             // Prevent default behavior
             e.preventDefault()
 
-            // Do not allow to go outside the canvas.
-            if (x < 0 || x > point.canvas.width - box.width / 2) {
+            // Do not allow to go outside the graph.
+            if (x < 0 || x > point.graph.width - box.width / 2) {
                 return
             }
-            if (y < 0 || y > point.canvas.height - box.height / 2) {
+            if (y < 0 || y > point.graph.height - box.height / 2) {
                 return
             }
 
@@ -148,7 +169,7 @@ export class Point extends Figure {
 
             // console.log(handler.el.cy())
             // Update the figures and labels.
-            point.canvas.update()
+            point.graph.update()
 
             // TODO: add after drag event ?
         }
@@ -177,6 +198,6 @@ export class Point extends Figure {
     }
 
     get coord(): IPoint {
-        return this.canvas.pixelsToUnits(this)
+        return this.graph.pixelsToUnits(this)
     }
 }

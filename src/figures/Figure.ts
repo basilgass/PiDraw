@@ -9,7 +9,7 @@ export class Figure {
      * @type {Graph}
      * @private
      */
-    #canvas: Graph
+    #graph: Graph
     /**
      * Define if the object should update or not.
      * @type {Boolean}
@@ -35,14 +35,14 @@ export class Figure {
      */
     #svg: svgShape
 
-    constructor(canvas: Graph, name: string) {
-        this.#freeze = true
+    constructor(graph: Graph, name: string) {
+        this.#freeze = false
 
-        this.#canvas = canvas
+        this.#graph = graph
         this.#name = name
 
         // TODO: handle labels - automatically add it ?
-        // this.#label = new Label(canvas, name)
+        // this.#label = new Label(graph, name)
 
     }
 
@@ -52,7 +52,7 @@ export class Figure {
     }
     update() {
         // We don't want to update.
-        if (this.#freeze || this.#canvas.freeze) {
+        if (this.#freeze || this.#graph.freeze) {
             return
         }
         this.updateFigure()
@@ -119,8 +119,8 @@ export class Figure {
         return this.#label;
     }
 
-    get canvas(): Graph {
-        return this.#canvas;
+    get graph(): Graph {
+        return this.#graph;
     }
 
     get svg(): Shape {

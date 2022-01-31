@@ -1,9 +1,15 @@
 import { Graph } from "../Graph";
-import { gridConfig, IPoint } from "../variables/interfaces";
+import { IPoint } from "../variables/interfaces";
 import { Figure } from "./Figure";
+import { GRIDTYPE } from "../variables/enums";
+export interface GridConfig {
+    axisX: number;
+    axisY: number;
+    type: GRIDTYPE;
+}
 export declare class Grid extends Figure {
     #private;
-    constructor(canvas: Graph, name: string, config?: gridConfig);
+    constructor(graph: Graph, name: string, config?: GridConfig);
     load(): Grid;
     show(): Grid;
     hide(): Grid;

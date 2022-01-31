@@ -2,9 +2,9 @@ import {Graph} from "../Graph";
 import {Figure} from "./Figure";
 
 export class Label extends Figure{
-    constructor(canvas: Graph, name: string) {
+    constructor(graph: Graph, name: string) {
         // TODO : build the label class
-        super(canvas, name);
+        super(graph, name);
 
         this.generateName()
     }

@@ -5,9 +5,9 @@ const Figure_1 = require("./Figure");
 const enums_1 = require("../variables/enums");
 class Grid extends Figure_1.Figure {
     #config;
-    constructor(canvas, name, config) {
-        super(canvas, name);
-        this.svg = this.canvas.svg.group();
+    constructor(graph, name, config) {
+        super(graph, name);
+        this.svg = this.graph.svg.group();
         if (config) {
             this.#config = config;
         }
@@ -21,12 +21,12 @@ class Grid extends Figure_1.Figure {
         this.load();
     }
     load() {
-        const w = this.canvas.width, h = this.canvas.height, x = this.#config.axisX, y = this.#config.axisY, xOffset = this.canvas.origin.x % x, yOffset = this.canvas.origin.y % y;
+        const w = this.graph.width, h = this.graph.height, x = this.#config.axisX, y = this.#config.axisY, xOffset = this.graph.origin.x % x, yOffset = this.graph.origin.y % y;
         for (let pos = -x; pos <= w; pos += x) {
-            this.svg.add(this.canvas.svg.line(pos + xOffset, 0 - yOffset, pos + xOffset, h + yOffset));
+            this.svg.add(this.graph.svg.line(pos + xOffset, 0 - yOffset, pos + xOffset, h + yOffset));
         }
         for (let pos = h + y; pos >= 0; pos -= y) {
-            this.svg.add(this.canvas.svg.line(0 - xOffset, pos - yOffset, w + xOffset, pos - yOffset));
+            this.svg.add(this.graph.svg.line(0 - xOffset, pos - yOffset, w + xOffset, pos - yOffset));
         }
         this.svg.stroke({ color: 'black', width: 0.5 });
         return this;

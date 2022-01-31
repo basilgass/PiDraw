@@ -10,19 +10,19 @@ class Point extends Figure_1.Figure {
     #scale;
     #shape;
     #constrain;
-    constructor(canvas, name, pixels) {
-        super(canvas, name);
+    constructor(graph, name, pixels) {
+        super(graph, name);
         this.#x = pixels.x;
         this.#y = pixels.y;
         this.generateName();
         this.#shape = enums_1.POINTSHAPE.CROSS;
         this.#scale = 6;
-        this.#constrain = { type: enums_1.CONSTRAIN.FIXED };
+        this.#constrain = { type: enums_1.POINTCONSTRAIN.FIXED };
         this.#updateShape();
     }
     generateName() {
         if (this.name === undefined) {
-            this.name = `P${Object.keys(this.canvas.points).length}`;
+            this.name = `P${Object.keys(this.graph.points).length}`;
         }
         return this.name;
     }
@@ -34,17 +34,33 @@ class Point extends Figure_1.Figure {
             this.svg.remove();
         }
         if (this.#shape === enums_1.POINTSHAPE.CIRCLE) {
-            this.svg = this.canvas.svg.circle(5).stroke('black').fill('none').data('shape', enums_1.POINTSHAPE.CIRCLE);
+            this.svg = this.graph.svg.circle(this.#scale).stroke('black').fill('white').data('shape', enums_1.POINTSHAPE.CIRCLE);
         }
         else if (this.#shape === enums_1.POINTSHAPE.CROSS) {
-            this.svg = this.canvas.svg.path(`M${-this.#scale},${-this.#scale} L${+this.#scale},${+this.#scale} M${+this.#scale},${-this.#scale} L${-this.#scale},${+this.#scale}`).stroke('black').center(0, 0).data('shape', enums_1.POINTSHAPE.CROSS);
+            this.svg = this.graph.svg.path(`M${-this.#scale},${-this.#scale} L${+this.#scale},${+this.#scale} M${+this.#scale},${-this.#scale} L${-this.#scale},${+this.#scale}`).stroke('black').center(0, 0).data('shape', enums_1.POINTSHAPE.CROSS);
         }
         else if (this.#shape === enums_1.POINTSHAPE.HANDLE) {
-            this.svg = this.canvas.svg.circle(20).stroke('black').fill('white').opacity(0.4).data('shape', enums_1.POINTSHAPE.HANDLE);
+            this.svg = this.graph.svg.circle(20).stroke('black').fill('white').opacity(0.4).data('shape', enums_1.POINTSHAPE.HANDLE);
         }
     }
+    asCross() {
+        this.#shape = enums_1.POINTSHAPE.CROSS;
+        this.#updateShape();
+        return this;
+    }
+    asCircle() {
+        this.#shape = enums_1.POINTSHAPE.CIRCLE;
+        this.update();
+        return this;
+    }
+    setSize(value) {
+        this.#scale = value;
+        this.svg.data('shape', null);
+        this.update();
+        return this;
+    }
     updateFigure() {
-        if (this.freeze || this.canvas.freeze) {
+        if (this.freeze || this.graph.freeze) {
             return this;
         }
         this.#updateShape();
@@ -53,7 +69,7 @@ class Point extends Figure_1.Figure {
         return this;
     }
     #updateCoordinate() {
-        if (this.#constrain.type === enums_1.CONSTRAIN.MIDDLE) {
+        if (this.#constrain.type === enums_1.POINTCONSTRAIN.MIDDLE) {
             const A = this.#constrain.data[0], B = this.#constrain.data[1];
             this.#x = (A.x + B.x) / 2;
             this.#y = (A.y + B.y) / 2;
@@ -61,7 +77,7 @@ class Point extends Figure_1.Figure {
     }
     middleOf(A, B) {
         this.#constrain = {
-            type: enums_1.CONSTRAIN.MIDDLE,
+            type: enums_1.POINTCONSTRAIN.MIDDLE,
             data: [A, B]
         };
         this.update();
@@ -75,10 +91,10 @@ class Point extends Figure_1.Figure {
             const { handler, box } = e.detail;
             let { x, y } = box;
             e.preventDefault();
-            if (x < 0 || x > point.canvas.width - box.width / 2) {
+            if (x < 0 || x > point.graph.width - box.width / 2) {
                 return;
             }
-            if (y < 0 || y > point.canvas.height - box.height / 2) {
+            if (y < 0 || y > point.graph.height - box.height / 2) {
                 return;
             }
             if (grid !== null) {
@@ -91,7 +107,7 @@ class Point extends Figure_1.Figure {
             handler.move(x, y);
             point.x = x;
             point.y = y;
-            point.canvas.update();
+            point.graph.update();
         }
         this.svg.draggable()
             .on('dragmove', dragmove);
@@ -112,7 +128,7 @@ class Point extends Figure_1.Figure {
         this.update();
     }
     get coord() {
-        return this.canvas.pixelsToUnits(this);
+        return this.graph.pixelsToUnits(this);
     }
 }
 exports.Point = Point;

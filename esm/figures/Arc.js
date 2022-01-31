@@ -6,8 +6,8 @@ class Arc extends Figure_1.Figure {
     #center;
     #start;
     #stop;
-    constructor(canvas, name, center, start, stop) {
-        super(canvas, name);
+    constructor(graph, name, center, start, stop) {
+        super(graph, name);
         this.#center = center;
         this.#start = start;
         this.#stop = stop;

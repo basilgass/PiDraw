@@ -1,5 +1,4 @@
 import { G } from "@svgdotjs/svg.js";
-import { Point } from "../figures/Point";
 import { GRIDTYPE } from "./enums";
 export interface IDrawConfig {
     origin?: {
@@ -37,13 +36,6 @@ export interface ILayers {
     foreground: G;
     points: G;
 }
-export interface plotConfig {
-    domain: {
-        min: number;
-        max: number;
-    };
-    samples: number;
-}
 export declare function isDrawConfigWidthHeight(config: any): config is IDrawConfigWidthHeight;
 export declare function isDrawConfigUnitWidthHeight(config: any): config is IDrawConfigUnitWidthHeight;
 export declare function isDrawConfigUnitMinMax(config: any): config is IDrawConfigUnitMinMax;
@@ -51,14 +43,4 @@ export declare function isXY(config: any): config is IPoint;
 export interface IPoint {
     x: number;
     y: number;
-}
-export interface ConstructionSettings {
-    rule: string;
-    point?: Point;
-    k?: number;
-}
-export interface gridConfig {
-    axisX: number;
-    axisY: number;
-    type: GRIDTYPE;
 }

@@ -1,11 +1,23 @@
 import { Figure } from "./Figure";
 import { Graph } from "../Graph";
-import { plotConfig } from "../variables/interfaces";
+import { IPoint } from "../variables/interfaces";
+import { Riemann } from "./PlotPlugins/Riemann";
+import { Follow } from "./PlotPlugins/Follow";
+export interface PlotConfig {
+    domain: {
+        min: number;
+        max: number;
+    };
+    samples: number;
+}
 export declare class Plot extends Figure {
     #private;
-    constructor(canvas: Graph, name: string, fn: Function | string, config?: plotConfig);
+    constructor(graph: Graph, name: string, fn: Function | string, config?: PlotConfig);
     generateName(): string;
     updateFigure(): Plot;
+    updatePlugins(): Plot;
     plot(fn: string | Function, speed?: number): Plot;
-    riemann(from: number, to: number, n: number, below: boolean): void;
+    riemann(from: number, to: number, rectangles: number, below?: boolean): Riemann;
+    follow(showTangent?: boolean): Follow;
+    evaluate(x: number): IPoint;
 }

@@ -6,9 +6,9 @@ export class Arc extends Figure{
     #center: Point;
     #start: Point;
     #stop: Point;
-    constructor(canvas: Graph, name: string, center: Point, start: Point, stop: Point) {
+    constructor(graph: Graph, name: string, center: Point, start: Point, stop: Point) {
         // TODO : build the arc class
-        super(canvas, name);
+        super(graph, name);
 
         this.#center = center
         this.#start = start

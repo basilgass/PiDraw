@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.LINERULE = exports.CONSTRAIN = exports.POINTSHAPE = exports.GRIDTYPE = exports.AXIS = exports.LAYER = void 0;
+exports.LINERULE = exports.POINTCONSTRAIN = exports.POINTSHAPE = exports.GRIDTYPE = exports.AXIS = exports.LAYER = void 0;
 var LAYER;
 (function (LAYER) {
     LAYER["BACKGROUND"] = "background";
@@ -28,12 +28,12 @@ var POINTSHAPE;
     POINTSHAPE[POINTSHAPE["CROSS"] = 1] = "CROSS";
     POINTSHAPE[POINTSHAPE["HANDLE"] = 2] = "HANDLE";
 })(POINTSHAPE = exports.POINTSHAPE || (exports.POINTSHAPE = {}));
-var CONSTRAIN;
-(function (CONSTRAIN) {
-    CONSTRAIN[CONSTRAIN["FREE"] = 0] = "FREE";
-    CONSTRAIN[CONSTRAIN["MIDDLE"] = 1] = "MIDDLE";
-    CONSTRAIN[CONSTRAIN["FIXED"] = 2] = "FIXED";
-})(CONSTRAIN = exports.CONSTRAIN || (exports.CONSTRAIN = {}));
+var POINTCONSTRAIN;
+(function (POINTCONSTRAIN) {
+    POINTCONSTRAIN[POINTCONSTRAIN["FREE"] = 0] = "FREE";
+    POINTCONSTRAIN[POINTCONSTRAIN["MIDDLE"] = 1] = "MIDDLE";
+    POINTCONSTRAIN[POINTCONSTRAIN["FIXED"] = 2] = "FIXED";
+})(POINTCONSTRAIN = exports.POINTCONSTRAIN || (exports.POINTCONSTRAIN = {}));
 var LINERULE;
 (function (LINERULE) {
     LINERULE[LINERULE["DEFAULT"] = 0] = "DEFAULT";

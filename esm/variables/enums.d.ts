@@ -21,7 +21,7 @@ export declare enum POINTSHAPE {
     CROSS = 1,
     HANDLE = 2
 }
-export declare enum CONSTRAIN {
+export declare enum POINTCONSTRAIN {
     FREE = 0,
     MIDDLE = 1,
     FIXED = 2

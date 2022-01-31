@@ -1,11 +1,11 @@
 import { Marker, Svg } from "@svgdotjs/svg.js";
 import '@svgdotjs/svg.draggable.js';
-import { ConstructionSettings, ILayers, IPoint, plotConfig } from "./variables/interfaces";
+import { ILayers, IPoint } from "./variables/interfaces";
 import { Figure } from "./figures/Figure";
 import { Circle } from "./figures/Circle";
 import { Point } from "./figures/Point";
-import { Line } from "./figures/Line";
-import { Plot } from "./figures/Plot";
+import { Line, LineConfig } from "./figures/Line";
+import { Plot, PlotConfig } from "./figures/Plot";
 import { Axis } from "./figures/Axis";
 import { AXIS } from "./variables/enums";
 import { GraphConfig } from "./variables/types";
@@ -43,9 +43,9 @@ export declare class Graph {
         y: Axis;
     };
     point(x: number, y: number, name?: string): Point;
-    line(A: Point | string, B: Point | string, construction?: ConstructionSettings, name?: string): Line;
+    line(A: Point | string, B: Point | string, construction?: LineConfig, name?: string): Line;
     circle(center: Point | IPoint, radius: number, name?: string): Circle;
-    plot(fn: Function | string, config?: plotConfig, name?: string): Plot;
+    plot(fn: Function | string, config?: PlotConfig, name?: string): Plot;
     update(): Graph;
     private _initSetWidthAndHeight;
     private _initGetContainerId;

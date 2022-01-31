@@ -2,14 +2,14 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Figure = void 0;
 class Figure {
-    #canvas;
+    #graph;
     #freeze;
     #name;
     #label;
     #svg;
-    constructor(canvas, name) {
-        this.#freeze = true;
-        this.#canvas = canvas;
+    constructor(graph, name) {
+        this.#freeze = false;
+        this.#graph = graph;
         this.#name = name;
     }
     draw() {
@@ -17,7 +17,7 @@ class Figure {
         this.update();
     }
     update() {
-        if (this.#freeze || this.#canvas.freeze) {
+        if (this.#freeze || this.#graph.freeze) {
             return;
         }
         this.updateFigure();
@@ -70,8 +70,8 @@ class Figure {
     get label() {
         return this.#label;
     }
-    get canvas() {
-        return this.#canvas;
+    get graph() {
+        return this.#graph;
     }
     get svg() {
         return this.#svg;

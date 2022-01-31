@@ -3,7 +3,7 @@ import { Label } from "./Label";
 import { Shape } from "@svgdotjs/svg.js";
 export declare class Figure {
     #private;
-    constructor(canvas: Graph, name: string);
+    constructor(graph: Graph, name: string);
     draw(): void;
     update(): void;
     updateFigure(): Figure;
@@ -23,7 +23,7 @@ export declare class Figure {
     get freeze(): Boolean;
     get name(): string;
     get label(): Label;
-    get canvas(): Graph;
+    get graph(): Graph;
     get svg(): Shape;
     set freeze(value: Boolean);
     set name(value: string);

@@ -4,34 +4,45 @@ exports.Plot = void 0;
 const Figure_1 = require("./Figure");
 const numexp_1 = require("pimath/esm/maths/numexp");
 const svg_js_1 = require("@svgdotjs/svg.js");
-const enums_1 = require("../variables/enums");
+const Riemann_1 = require("./PlotPlugins/Riemann");
+const Follow_1 = require("./PlotPlugins/Follow");
 class Plot extends Figure_1.Figure {
     #config;
     #precision;
     #fx;
+    #plugins;
     #riemann;
-    constructor(canvas, name, fn, config) {
-        super(canvas, name);
+    constructor(graph, name, fn, config) {
+        super(graph, name);
         this.#config = {
             samples: 20,
-            domain: this.canvas.unitXDomain
+            domain: this.graph.unitXDomain
         };
         if (config !== undefined) {
-            this.#config = config;
+            this.#config = Object.assign({}, this.#config, config);
         }
         this.generateName();
         this.#precision = 2;
-        this.svg = this.canvas.svg.path(this.#getFlatPath()).fill('none').stroke({ color: 'black', width: 2 });
+        this.svg = this.graph.svg.path(this.#getFlatPath()).fill('none').stroke({ color: 'black', width: 2 });
         this.plot(fn);
+        this.#plugins = [];
     }
     generateName() {
         if (this.name === undefined) {
-            let n = this.canvas.figures.filter(fig => fig instanceof Plot).length, idx = Math.trunc(n / 5);
+            let n = this.graph.figures.filter(fig => fig instanceof Plot).length, idx = Math.trunc(n / 5);
             this.name = 'fghij'[n % 5] + (idx >= 1 ? idx : '');
         }
         return this.name;
     }
     updateFigure() {
+        return this;
+    }
+    updatePlugins() {
+        if (this.#plugins !== undefined) {
+            for (let P of this.#plugins) {
+                P.update();
+            }
+        }
         return this;
     }
     plot(fn, speed) {
@@ -50,44 +61,18 @@ class Plot extends Figure_1.Figure {
                 this.svg.plot(d);
             }
         }
+        this.updatePlugins();
         return this;
     }
-    riemann(from, to, n, below) {
-        let x = 0, y = 0, height, step = (to - from) / n, pxX;
-        if (this.#riemann !== undefined && n !== this.#riemann.rectangles.length) {
-            for (let r of this.#riemann.rectangles) {
-                r.remove();
-            }
-        }
-        if (this.#riemann === undefined || n !== this.#riemann.rectangles.length) {
-            this.#riemann = {
-                svg: this.canvas.svg.group(),
-                rectangles: []
-            };
-            for (let i = 0; i < n; i++) {
-                x = +from + step * i;
-                y = x + step;
-                pxX = this.canvas.unitsToPixels({ x: x, y: 0 });
-                height = 0;
-                this.#riemann.rectangles.push(this.canvas.svg.rect(this.canvas.distanceToPixels(step), height)
-                    .move(pxX.x, pxX.y)
-                    .addTo(this.#riemann.svg));
-            }
-            this.#riemann.svg.fill('yellow')
-                .stroke({
-                color: 'black', width: 1
-            });
-            this.canvas.layers.main.add(this.#riemann.svg);
-        }
-        for (let i = 0; i < n; i++) {
-            x = +from + step * i;
-            y = x + step;
-            pxX = this.canvas.unitsToPixels({ x: x, y: 0 });
-            height = this.canvas.distanceToPixels((below === undefined || below) ? this.#evaluate(x).y : this.#evaluate(y).y, enums_1.AXIS.VERTICAL);
-            this.#riemann.rectangles[i]
-                .animate(500)
-                .height(Math.abs(height)).move(pxX.x, pxX.y - (height > 0 ? height : 0));
-        }
+    riemann(from, to, rectangles, below) {
+        let R = new Riemann_1.Riemann(this, from, to, rectangles, below);
+        this.#plugins.push(R);
+        return R;
+    }
+    follow(showTangent) {
+        let P = new Follow_1.Follow(this, showTangent);
+        this.#plugins.push(P);
+        return P;
     }
     #parse(fn) {
         if (typeof fn === 'string') {
@@ -99,25 +84,25 @@ class Plot extends Figure_1.Figure {
         if (numberOfPoints === undefined) {
             numberOfPoints = (this.#config.domain.max - this.#config.domain.min) * this.#config.samples;
         }
-        let h = this.canvas.origin.y, pt = this.canvas.unitsToPixels({ x: this.#config.domain.min, y: 0 }), d = `M${pt.x},${pt.y}`;
+        let h = this.graph.origin.y, pt = this.graph.unitsToPixels({ x: this.#config.domain.min, y: 0 }), d = `M${pt.x},${pt.y}`;
         for (let x = 1; x < numberOfPoints; x++) {
-            pt = this.canvas.unitsToPixels({ x: this.#config.domain.min + x / this.#config.samples, y: 0 });
+            pt = this.graph.unitsToPixels({ x: this.#config.domain.min + x / this.#config.samples, y: 0 });
             d += `L${pt.x},${pt.y}`;
         }
         return d;
     }
     #getPath() {
-        let d = '', points = [], nextToken = 'M', prevToken = '', canvasHeight = this.canvas.height, x = +this.#config.domain.min, y = 0;
+        let d = '', points = [], nextToken = 'M', prevToken = '', graphHeight = this.graph.height, x = +this.#config.domain.min, y = 0;
         while (x <= this.#config.domain.max) {
-            const pt = this.canvas.unitsToPixels(this.#evaluate(x));
+            const pt = this.graph.unitsToPixels(this.evaluate(x));
             if (prevToken === 'M' && nextToken === 'M') {
             }
             else {
                 prevToken = '' + nextToken;
                 d += `${(prevToken === 'L' || nextToken === 'L') ? nextToken : prevToken}`;
-                if (Math.abs(pt.y) > canvasHeight * 5) {
+                if (Math.abs(pt.y) > graphHeight * 5) {
                     if (pt.y > 0) {
-                        y = this.canvas.height + 50;
+                        y = this.graph.height + 50;
                     }
                     else {
                         y = -50;
@@ -129,7 +114,7 @@ class Plot extends Figure_1.Figure {
                 d += `${pt.x.toFixed(this.#precision)},${y.toFixed(this.#precision)} `;
                 points.push(pt);
             }
-            if ((pt.y > -100 && pt.y < canvasHeight + 100)) {
+            if ((pt.y > -100 && pt.y < graphHeight + 100)) {
                 nextToken = 'L';
             }
             else {
@@ -139,13 +124,12 @@ class Plot extends Figure_1.Figure {
         }
         return { d, points };
     }
-    #evaluate(x) {
+    evaluate(x) {
         let y;
         if (this.#fx instanceof numexp_1.NumExp) {
             y = this.#fx.evaluate({ x: +x });
             if (isNaN(y)) {
-                console.log('error calculating', this.#fx.expression, x);
-                y = 0;
+                console.log('error calculating', this.#fx.expression, ' at ', x);
             }
         }
         else if (typeof this.#fx === 'function') {

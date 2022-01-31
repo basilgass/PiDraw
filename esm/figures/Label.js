@@ -3,8 +3,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.Label = void 0;
 const Figure_1 = require("./Figure");
 class Label extends Figure_1.Figure {
-    constructor(canvas, name) {
-        super(canvas, name);
+    constructor(graph, name) {
+        super(graph, name);
         this.generateName();
     }
     generateName() {

@@ -3,18 +3,22 @@ import {Graph} from "../Graph";
 import {Point} from "./Point";
 import {Line as mathLine, Point as mathPoint} from "pimath/esm/maths/geometry";
 import {Line as svgLine} from "@svgdotjs/svg.js";
-import {ConstructionSettings} from "../variables/interfaces";
 
+export interface LineConfig {
+    rule: string,
+    point?: Point,
+    k?: number
+}
 
 export class Line extends Figure {
     #A: Point
     #B: Point
-    #construction: ConstructionSettings
+    #construction: LineConfig
     #math: mathLine
     #segment: boolean
 
-    constructor(canvas: Graph, name: string, A: Point, B: Point, construction?: ConstructionSettings) {
-        super(canvas, name)
+    constructor(graph: Graph, name: string, A: Point, B: Point, construction?: LineConfig) {
+        super(graph, name)
 
         this.#A = A
         this.#B = B
@@ -26,7 +30,7 @@ export class Line extends Figure {
             this.#construction = construction
         }
 
-        this.svg = this.canvas.svg.line(
+        this.svg = this.graph.svg.line(
             0, 0, 0, 0
         ).stroke('black');
 
@@ -72,12 +76,12 @@ export class Line extends Figure {
             if (this.svg instanceof svgLine) {
                 this.svg.plot(
                     this.#A.x, 0,
-                    this.#A.x, this.canvas.height
+                    this.#A.x, this.graph.height
                 )
             }
         } else {
             let x1 = this.#segment ? this.#A.x : 0,
-                x2 = this.#segment ? this.#B.x : this.canvas.width
+                x2 = this.#segment ? this.#B.x : this.graph.width
             if (this.svg instanceof svgLine) {
                 this.svg.plot(
                     x1,

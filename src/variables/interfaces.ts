@@ -43,13 +43,6 @@ export interface ILayers {
     points: G
 }
 
-export interface plotConfig {
-    domain: { min: number, max: number },
-    samples: number
-}
-
-
-
 
 export function isDrawConfigWidthHeight(config: any): config is IDrawConfigWidthHeight {
     return config && 'width' in config
@@ -70,18 +63,5 @@ export function isXY(config: any): config is IPoint {
 export interface IPoint {
     x: number,
     y: number
-}
-
-
-export interface ConstructionSettings {
-    rule: string,
-    point?: Point,
-    k?: number
-}
-
-export interface gridConfig {
-    axisX: number,
-    axisY: number,
-    type: GRIDTYPE
 }
 

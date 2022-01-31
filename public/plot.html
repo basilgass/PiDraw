@@ -34,32 +34,12 @@
 <script>
 	let graph = new PiDraw('root')
 	graph.axis()
-	let fx = graph.plot('sqrt(x)', {
+	let fx = graph.plot('sqrt(x)*sin(x)+2/5*x', {
 		samples: 20,
 		domain: { min: 0, max: 20 }
 	})
 
-	graph.point(3, 5).asCircle().setSize(10)
-
-	let riemanns = fx.riemann(2, 6, 8)
-	riemanns.number = 16
-
-	fx.riemann(9,11, 4)
-
-
-	function update () {
-		riemanns.to = 12
-	}
-
-	function updatePlot () {
-		fx.plot('sqrt(2*x+3)')
-	}
-
-	function RRClick (evt) {
-		console.log(evt.detail)
-	}
-
-	document.addEventListener('RiemannRectangleClick', RRClick)
+    let F = fx.follow(true)
 </script>
 </body>
 </html>

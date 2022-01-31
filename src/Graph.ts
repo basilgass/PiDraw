@@ -1,20 +1,18 @@
 import {Marker, SVG, Svg} from "@svgdotjs/svg.js";
 import '@svgdotjs/svg.draggable.js'
 import {
-    ConstructionSettings,
     ILayers,
     IPoint,
     isDrawConfigUnitMinMax,
     isDrawConfigUnitWidthHeight,
-    isDrawConfigWidthHeight,
-    plotConfig
+    isDrawConfigWidthHeight
 } from "./variables/interfaces";
 import {Figure} from "./figures/Figure";
 import {Circle} from "./figures/Circle";
 import {Point} from "./figures/Point";
 import {Grid} from "./figures/Grid";
-import {Line} from "./figures/Line";
-import {Plot} from "./figures/Plot";
+import {Line, LineConfig} from "./figures/Line";
+import {Plot, PlotConfig} from "./figures/Plot";
 import {Axis} from "./figures/Axis";
 import {AXIS, GRIDTYPE, LAYER} from "./variables/enums";
 import {GraphConfig} from "./variables/types";
@@ -33,13 +31,13 @@ export class Graph {
      */
     #svg: Svg;
     /**
-     * Number of pixels on the canvas
+     * Number of pixels on the graph
      * @type {number}
      * @private
      */
     #width: number;
     /**
-     * Number of pixels in the canvas
+     * Number of pixels in the graph
      * @type {number}
      * @private
      */
@@ -57,7 +55,7 @@ export class Graph {
      */
     #pixelsPerUnit: IPoint
     /**
-     * List of all figures drawn in the canvas.
+     * List of all figures drawn in the graph.
      * @type {Figure[]}
      * @private
      */
@@ -69,23 +67,23 @@ export class Graph {
      */
     #points: { [key: string]: Point }
     /**
-     * Determine if all the canvas must be drawn or not.
+     * Determine if all the graph must be drawn or not.
      * @type {boolean}
      * @private
      */
     #freeze: boolean
     /**
-     * Layers of the canvas
+     * Layers of the graph
      * @type {ILayers}
      * @private
      */
     #layers: ILayers
 
     constructor(containerID: string | HTMLElement, config?: GraphConfig) {
-        // By default, the canvas is frozen on initialisation
+        // By default, the graph is frozen on initialisation
         this.#freeze = false
 
-        // Determine the width and height of the canvas.
+        // Determine the width and height of the graph.
         this._initSetWidthAndHeight(config)
 
         // Create the container
@@ -257,7 +255,7 @@ export class Graph {
         return figure
     }
 
-    line(A: Point | string, B: Point | string, construction?: ConstructionSettings, name?: string): Line {
+    line(A: Point | string, B: Point | string, construction?: LineConfig, name?: string): Line {
         const figure = new Line(
             this,
             name,
@@ -291,7 +289,7 @@ export class Graph {
         return figure
     }
 
-    plot(fn: Function | string, config?: plotConfig, name?: string): Plot {
+    plot(fn: Function | string, config?: PlotConfig, name?: string): Plot {
         //TODO: plot auto config ?
         const figure = new Plot(
             this,

@@ -40,7 +40,7 @@ export enum POINTSHAPE {
 /**
  * Point constrain
  */
-export enum CONSTRAIN {
+export enum POINTCONSTRAIN {
     FREE,
     MIDDLE,
     FIXED

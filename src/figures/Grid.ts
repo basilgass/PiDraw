@@ -1,18 +1,22 @@
 import {Graph} from "../Graph";
 import {G} from "@svgdotjs/svg.js";
-import {gridConfig, IPoint} from "../variables/interfaces";
+import {IPoint} from "../variables/interfaces";
 import {Figure} from "./Figure";
 import {GRIDTYPE} from "../variables/enums";
 
-
+export interface GridConfig {
+    axisX: number,
+    axisY: number,
+    type: GRIDTYPE
+}
 
 export class Grid extends Figure{
-    #config: gridConfig
+    #config: GridConfig
     // #origin: IPoint;
-    constructor(canvas: Graph, name: string, config?:gridConfig) {
-        super(canvas, name)
+    constructor(graph: Graph, name: string, config?:GridConfig) {
+        super(graph, name)
 
-        this.svg = this.canvas.svg.group()
+        this.svg = this.graph.svg.group()
 
         // Default configuration of the grid.
         if(config){
@@ -25,27 +29,27 @@ export class Grid extends Figure{
             }
         }
 
-        // this.#origin = {x: 0, y: this.canvas.height}
+        // this.#origin = {x: 0, y: this.graph.height}
 
         this.load()
     }
 
     load(): Grid {
-        const w = this.canvas.width,
-            h = this.canvas.height,
+        const w = this.graph.width,
+            h = this.graph.height,
             x = this.#config.axisX,
             y = this.#config.axisY,
-            xOffset = this.canvas.origin.x % x,
-            yOffset = this.canvas.origin.y % y
+            xOffset = this.graph.origin.x % x,
+            yOffset = this.graph.origin.y % y
 
         // Vertical lines
         for (let pos = -x; pos <= w; pos += x) {
-            this.svg.add(this.canvas.svg.line(pos+xOffset, 0-yOffset, pos+xOffset, h+yOffset));
+            this.svg.add(this.graph.svg.line(pos+xOffset, 0-yOffset, pos+xOffset, h+yOffset));
         }
 
         // Horizontal lines
         for (let pos = h+y; pos >= 0; pos -= y) {
-            this.svg.add(this.canvas.svg.line(0-xOffset, pos-yOffset, w+xOffset, pos-yOffset));
+            this.svg.add(this.graph.svg.line(0-xOffset, pos-yOffset, w+xOffset, pos-yOffset));
         }
 
         this.svg.stroke({color: 'black', width: 0.5});

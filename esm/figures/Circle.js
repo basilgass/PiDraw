@@ -7,12 +7,12 @@ const svg_js_1 = require("@svgdotjs/svg.js");
 class Circle extends Figure_1.Figure {
     #center;
     #radius;
-    constructor(canvas, name, center, radius) {
-        super(canvas, name);
+    constructor(graph, name, center, radius) {
+        super(graph, name);
         this.#center = center;
         this.#radius = radius;
         this.generateName();
-        this.svg = canvas.svg.circle(this.getRadiusAsPixels() * 2).stroke('black').fill('none');
+        this.svg = graph.svg.circle(this.getRadiusAsPixels() * 2).stroke('black').fill('none');
         return this;
     }
     get center() {
@@ -35,19 +35,19 @@ class Circle extends Figure_1.Figure {
                 (this.#radius.y - this.#center.y) ** 2);
         }
         else if (typeof this.#radius === 'number') {
-            radius = this.canvas.distanceToPixels(this.#radius);
+            radius = this.graph.distanceToPixels(this.#radius);
         }
         return radius;
     }
     generateName() {
         if (this.name === undefined) {
-            let n = this.canvas.figures.filter(fig => fig instanceof Circle).length + 1;
+            let n = this.graph.figures.filter(fig => fig instanceof Circle).length + 1;
             this.name = `C_${n}`;
         }
         return this.name;
     }
     updateFigure() {
-        if (this.freeze || this.canvas.freeze) {
+        if (this.freeze || this.graph.freeze) {
             return this;
         }
         if (!this.#center) {
