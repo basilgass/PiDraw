@@ -6,6 +6,7 @@ const numexp_1 = require("pimath/esm/maths/numexp");
 const svg_js_1 = require("@svgdotjs/svg.js");
 const Riemann_1 = require("./PlotPlugins/Riemann");
 const Follow_1 = require("./PlotPlugins/Follow");
+const FillBetween_1 = require("./PlotPlugins/FillBetween");
 class Plot extends Figure_1.Figure {
     #config;
     #precision;
@@ -23,7 +24,7 @@ class Plot extends Figure_1.Figure {
         }
         this.generateName();
         this.#precision = 2;
-        this.svg = this.graph.svg.path(this.#getFlatPath()).fill('none').stroke({ color: 'black', width: 2 });
+        this.svg = this.graph.svg.path().fill('none').stroke({ color: 'black', width: 2 });
         this.plot(fn);
         this.#plugins = [];
     }
@@ -47,10 +48,10 @@ class Plot extends Figure_1.Figure {
     }
     plot(fn, speed) {
         this.#fx = this.#parse(fn);
-        const { d, points } = this.#getPath();
+        const { d, points } = this.#getPath(this.#config.domain.min, this.#config.domain.max, this.#config.samples);
         if (this.svg instanceof svg_js_1.Path) {
             if (points.length !== this.svg.array().length) {
-                this.svg.plot(this.#getFlatPath(points.length));
+                this.svg.plot();
             }
             if (points.length === this.svg.array().length) {
                 if (this.svg instanceof svg_js_1.Path) {
@@ -58,7 +59,14 @@ class Plot extends Figure_1.Figure {
                 }
             }
             else {
-                this.svg.plot(d);
+                this.svg.hide().plot(d);
+                let L = this.svg.node.getTotalLength() * 2;
+                this.svg.attr({
+                    'stroke-dasharray': L + ' ' + L,
+                    'stroke-dashoffset': L
+                }).show().animate(1000).attr({
+                    'stroke-dashoffset': 0
+                });
             }
         }
         this.updatePlugins();
@@ -71,6 +79,11 @@ class Plot extends Figure_1.Figure {
     }
     follow(showTangent) {
         let P = new Follow_1.Follow(this, showTangent);
+        this.#plugins.push(P);
+        return P;
+    }
+    fillBetween(plot, from, to, samples) {
+        let P = new FillBetween_1.FillBetween(this, plot, from, to, samples === undefined ? this.#config.samples : samples);
         this.#plugins.push(P);
         return P;
     }
@@ -91,9 +104,9 @@ class Plot extends Figure_1.Figure {
         }
         return d;
     }
-    #getPath() {
-        let d = '', points = [], nextToken = 'M', prevToken = '', graphHeight = this.graph.height, x = +this.#config.domain.min, y = 0;
-        while (x <= this.#config.domain.max) {
+    #getPath(from, to, samples, firstToken) {
+        let d = '', points = [], nextToken = firstToken === undefined ? 'M' : firstToken, prevToken = '', graphHeight = this.graph.height, x = +from, y = 0;
+        while (x <= to) {
             const pt = this.graph.unitsToPixels(this.evaluate(x));
             if (prevToken === 'M' && nextToken === 'M') {
             }
@@ -120,9 +133,17 @@ class Plot extends Figure_1.Figure {
             else {
                 nextToken = 'M';
             }
-            x += 1 / this.#config.samples;
+            x += 1 / samples;
         }
         return { d, points };
+    }
+    getPartialPath(from, to, samples, reversed, firstToken) {
+        let { d, points } = this.#getPath(from, to, samples === undefined ? this.#config.samples : samples, firstToken);
+        if (reversed) {
+            let reversed = ((firstToken === undefined ? 'L' : firstToken) + d.substring(1, d.length)).split(' ').reverse();
+            d = reversed.join(' ');
+        }
+        return d;
     }
     evaluate(x) {
         let y;

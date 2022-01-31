@@ -24,17 +24,17 @@ class Graph {
     #layers;
     constructor(containerID, config) {
         this.#freeze = false;
-        this._initSetWidthAndHeight(config);
-        this._initGetContainerId(containerID);
-        this._initCreateSVG();
-        this.#figures = [];
-        this.#points = {};
         this.#origin = {
             x: 50, y: 550
         };
         this.#pixelsPerUnit = {
             x: 50, y: 50
         };
+        this._initSetWidthAndHeight(config);
+        this._initGetContainerId(containerID);
+        this._initCreateSVG();
+        this.#figures = [];
+        this.#points = {};
         if (config) {
             if (config.origin !== undefined) {
                 this.#origin = config.origin;
@@ -189,6 +189,8 @@ class Graph {
         else if ((0, interfaces_1.isDrawConfigUnitMinMax)(config)) {
             this.#width = (config.xMax - config.xMin) * config.pixelsPerUnit;
             this.#height = (config.yMax - config.yMin) * config.pixelsPerUnit;
+            this.#origin.x = -config.xMin * config.pixelsPerUnit;
+            this.#origin.y = this.#height + config.yMin * config.pixelsPerUnit;
         }
         else {
             this.#width = 800;

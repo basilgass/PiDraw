@@ -92,6 +92,14 @@ export class Graph {
         // By default, the graph is frozen on initialisation
         this.#freeze = false
 
+        // Default values.
+        this.#origin = {
+            x: 50, y: 550
+        }
+        this.#pixelsPerUnit = {
+            x: 50, y: 50
+        }
+
         // Determine the width and height of the graph.
         this._initSetWidthAndHeight(config)
 
@@ -105,12 +113,6 @@ export class Graph {
         this.#figures = []
         this.#points = {}
 
-        this.#origin = {
-            x: 50, y: 550
-        }
-        this.#pixelsPerUnit = {
-            x: 50, y: 50
-        }
         if (config) {
             if (config.origin !== undefined) {
                 this.#origin = config.origin
@@ -329,6 +331,8 @@ export class Graph {
         } else if (isDrawConfigUnitMinMax(config)) {
             this.#width = (config.xMax - config.xMin) * config.pixelsPerUnit
             this.#height = (config.yMax - config.yMin) * config.pixelsPerUnit
+            this.#origin.x = -config.xMin*config.pixelsPerUnit
+            this.#origin.y = this.#height + config.yMin*config.pixelsPerUnit
         } else {
             // Default width and height.
             this.#width = 800

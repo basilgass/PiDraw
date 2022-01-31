@@ -32,14 +32,28 @@
     <button onclick="updatePlot()">PLOT</button>
 </div>
 <script>
-	let graph = new PiDraw('root')
+	let graph = new PiDraw('root',
+		{
+			xMin: -10,
+			xMax: 10,
+			yMin: -2,
+			yMax: 10,
+			pixelsPerUnit: 50
+		})
+
 	graph.axis()
 	let fx = graph.plot('sqrt(x)*sin(x)+2/5*x', {
-		samples: 20,
-		domain: { min: 0, max: 20 }
-	})
-
+			samples: 20,
+			domain: { min: 0, max: 20 }
+		}),
+		fx2 = graph.plot('1/10*(x^2-5*x)'),
+		fx3 = graph.plot('-1/10*(x^2-4*x)+5')
     let F = fx.follow(true)
+
+    let FB = fx2.fillBetween(fx3, 1, 5)
+
+    let FB2 = fx3.fillBetween(false, -7, 5)
+    FB2.svg.fill({color: 'red'})
 </script>
 </body>
 </html>

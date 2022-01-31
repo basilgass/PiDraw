@@ -6,6 +6,7 @@ import {G, Path, Rect} from "@svgdotjs/svg.js";
 import {AXIS} from "../variables/enums";
 import {Riemann} from "./PlotPlugins/Riemann";
 import {Follow} from "./PlotPlugins/Follow";
+import {FillBetween} from "./PlotPlugins/FillBetween";
 
 export interface PlotConfig {
     domain: { min: number, max: number },
@@ -34,7 +35,7 @@ export class Plot extends Figure {
         this.generateName()
         this.#precision = 2
 
-        this.svg = this.graph.svg.path(this.#getFlatPath()).fill('none').stroke({color: 'black', width: 2});
+        this.svg = this.graph.svg.path().fill('none').stroke({color: 'black', width: 2});
         this.plot(fn);
 
         this.#plugins = []
@@ -69,13 +70,13 @@ export class Plot extends Figure {
         this.#fx = this.#parse(fn)
 
         // Create the path
-        const {d, points} = this.#getPath()
+        const {d, points} = this.#getPath(this.#config.domain.min, this.#config.domain.max, this.#config.samples)
 
         // Draw the path.
         if (this.svg instanceof Path) {
             if (points.length !== this.svg.array().length) {
                 // Make a flat path.
-                this.svg.plot(this.#getFlatPath(points.length))
+                this.svg.plot()
             }
 
             if (points.length === this.svg.array().length) {
@@ -84,7 +85,16 @@ export class Plot extends Figure {
                     this.svg.animate(speed === undefined ? 500 : speed).plot(d)
                 }
             } else {
-                this.svg.plot(d)
+                this.svg.hide().plot(d)
+
+                let L = this.svg.node.getTotalLength()*2
+
+                this.svg.attr({
+                    'stroke-dasharray': L + ' ' + L,
+                    'stroke-dashoffset': L
+                }).show().animate(1000).attr({
+                    'stroke-dashoffset': 0
+                })
             }
         }
 
@@ -104,6 +114,13 @@ export class Plot extends Figure {
 
     follow(showTangent?: boolean): Follow {
         let P = new Follow(this, showTangent)
+
+        this.#plugins.push(P)
+        return P
+    }
+
+    fillBetween(plot: Plot, from: number, to: number, samples?:number): FillBetween {
+        let P  = new FillBetween(this, plot, from, to, samples===undefined?this.#config.samples:samples)
 
         this.#plugins.push(P)
         return P
@@ -134,16 +151,16 @@ export class Plot extends Figure {
         return d
     }
 
-    #getPath(): { d: string, points: IPoint[] } {
+    #getPath(from: number, to: number, samples: number, firstToken?: string): { d: string, points: IPoint[] } {
         let d = '',
             points: IPoint[] = [],
-            nextToken = 'M',
+            nextToken = firstToken===undefined?'M':firstToken,
             prevToken = '',
             graphHeight = this.graph.height,
-            x = +this.#config.domain.min,
+            x = +from,
             y = 0
 
-        while (x <= this.#config.domain.max) {
+        while (x <= to) {
             // Evaluate the function at the point.
             const pt = this.graph.unitsToPixels(this.evaluate(x))
 
@@ -180,12 +197,22 @@ export class Plot extends Figure {
             }
 
             // Next point
-            x += 1 / this.#config.samples;
+            x += 1 / samples;
         }
 
         return {d, points}
     }
 
+    getPartialPath(from: number, to: number, samples?: number, reversed?: boolean, firstToken?: string):string{
+        let {d, points} = this.#getPath(from, to, samples===undefined?this.#config.samples:samples, firstToken)
+
+        if(reversed){
+            let reversed = ((firstToken===undefined?'L':firstToken) + d.substring(1, d.length)).split(' ').reverse()
+            d = reversed.join(' ')
+        }
+
+        return d
+    }
     evaluate(x: number): IPoint {
         let y
         if (this.#fx instanceof NumExp) {
