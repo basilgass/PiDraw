@@ -8,25 +8,25 @@ const Riemann_1 = require("./PlotPlugins/Riemann");
 const Follow_1 = require("./PlotPlugins/Follow");
 const FillBetween_1 = require("./PlotPlugins/FillBetween");
 class Plot extends Figure_1.Figure {
-    #config;
-    #precision;
-    #fx;
-    #plugins;
-    #riemann;
+    _config;
+    _precision;
+    _fx;
+    _plugins;
+    _riemann;
     constructor(graph, name, fn, config) {
         super(graph, name);
-        this.#config = {
+        this._config = {
             samples: 20,
             domain: this.graph.unitXDomain
         };
         if (config !== undefined) {
-            this.#config = Object.assign({}, this.#config, config);
+            this._config = Object.assign({}, this._config, config);
         }
         this.generateName();
-        this.#precision = 2;
+        this._precision = 2;
         this.svg = this.graph.svg.path().fill('none').stroke({ color: 'black', width: 2 });
         this.plot(fn);
-        this.#plugins = [];
+        this._plugins = [];
     }
     generateName() {
         if (this.name === undefined) {
@@ -39,16 +39,16 @@ class Plot extends Figure_1.Figure {
         return this;
     }
     updatePlugins() {
-        if (this.#plugins !== undefined) {
-            for (let P of this.#plugins) {
+        if (this._plugins !== undefined) {
+            for (let P of this._plugins) {
                 P.update();
             }
         }
         return this;
     }
     plot(fn, speed) {
-        this.#fx = this.#parse(fn);
-        const { d, points } = this.#getPath(this.#config.domain.min, this.#config.domain.max, this.#config.samples);
+        this._fx = this._parse(fn);
+        const { d, points } = this._getPath(this._config.domain.min, this._config.domain.max, this._config.samples);
         if (this.svg instanceof svg_js_1.Path) {
             if (points.length !== this.svg.array().length) {
                 this.svg.plot();
@@ -72,41 +72,68 @@ class Plot extends Figure_1.Figure {
         this.updatePlugins();
         return this;
     }
-    riemann(from, to, rectangles, below) {
-        let R = new Riemann_1.Riemann(this, from, to, rectangles, below);
-        this.#plugins.push(R);
+    riemann(from, to, rectangles, pos) {
+        let R = new Riemann_1.Riemann(this, from, to, rectangles, pos);
+        this._plugins.push(R);
         return R;
     }
     follow(showTangent) {
         let P = new Follow_1.Follow(this, showTangent);
-        this.#plugins.push(P);
+        this._plugins.push(P);
         return P;
     }
     fillBetween(plot, from, to, samples) {
-        let P = new FillBetween_1.FillBetween(this, plot, from, to, samples === undefined ? this.#config.samples : samples);
-        this.#plugins.push(P);
+        let P = new FillBetween_1.FillBetween(this, plot, from, to, samples === undefined ? this._config.samples : samples);
+        this._plugins.push(P);
         return P;
     }
-    #parse(fn) {
+    getPartialPath(from, to, samples, reversed, firstToken) {
+        let { d, points } = this._getPath(from, to, samples === undefined ? this._config.samples : samples, firstToken);
+        if (reversed) {
+            let reversed = ((firstToken === undefined ? 'L' : firstToken) + d.substring(1, d.length)).split(' ').reverse();
+            d = reversed.join(' ');
+        }
+        return d;
+    }
+    evaluate(x) {
+        let y;
+        if (this._fx instanceof numexp_1.NumExp) {
+            y = this._fx.evaluate({ x: +x });
+            if (isNaN(y)) {
+                console.log('error calculating', this._fx.expression, ' at ', x);
+            }
+        }
+        else if (typeof this._fx === 'function') {
+            y = this._fx(x);
+        }
+        else {
+            console.log('Function type error: ', typeof this._fx);
+        }
+        return { x, y };
+    }
+    _parse(fn) {
         if (typeof fn === 'string') {
             return new numexp_1.NumExp(fn);
         }
         return fn;
     }
-    #getFlatPath(numberOfPoints) {
+    _getFlatPath(numberOfPoints) {
         if (numberOfPoints === undefined) {
-            numberOfPoints = (this.#config.domain.max - this.#config.domain.min) * this.#config.samples;
+            numberOfPoints = (this._config.domain.max - this._config.domain.min) * this._config.samples;
         }
-        let h = this.graph.origin.y, pt = this.graph.unitsToPixels({ x: this.#config.domain.min, y: 0 }), d = `M${pt.x},${pt.y}`;
+        let h = this.graph.origin.y, pt = this.graph.unitsToPixels({ x: this._config.domain.min, y: 0 }), d = `M${pt.x},${pt.y}`;
         for (let x = 1; x < numberOfPoints; x++) {
-            pt = this.graph.unitsToPixels({ x: this.#config.domain.min + x / this.#config.samples, y: 0 });
+            pt = this.graph.unitsToPixels({ x: this._config.domain.min + x / this._config.samples, y: 0 });
             d += `L${pt.x},${pt.y}`;
         }
         return d;
     }
-    #getPath(from, to, samples, firstToken) {
+    _getPath(from, to, samples, firstToken) {
         let d = '', points = [], nextToken = firstToken === undefined ? 'M' : firstToken, prevToken = '', graphHeight = this.graph.height, x = +from, y = 0;
-        while (x <= to) {
+        if (samples <= 0) {
+            samples = 20;
+        }
+        while (x <= to + 1 / samples) {
             const pt = this.graph.unitsToPixels(this.evaluate(x));
             if (prevToken === 'M' && nextToken === 'M') {
             }
@@ -124,7 +151,7 @@ class Plot extends Figure_1.Figure {
                 else {
                     y = pt.y;
                 }
-                d += `${pt.x.toFixed(this.#precision)},${y.toFixed(this.#precision)} `;
+                d += `${pt.x.toFixed(this._precision)},${y.toFixed(this._precision)} `;
                 points.push(pt);
             }
             if ((pt.y > -100 && pt.y < graphHeight + 100)) {
@@ -136,30 +163,6 @@ class Plot extends Figure_1.Figure {
             x += 1 / samples;
         }
         return { d, points };
-    }
-    getPartialPath(from, to, samples, reversed, firstToken) {
-        let { d, points } = this.#getPath(from, to, samples === undefined ? this.#config.samples : samples, firstToken);
-        if (reversed) {
-            let reversed = ((firstToken === undefined ? 'L' : firstToken) + d.substring(1, d.length)).split(' ').reverse();
-            d = reversed.join(' ');
-        }
-        return d;
-    }
-    evaluate(x) {
-        let y;
-        if (this.#fx instanceof numexp_1.NumExp) {
-            y = this.#fx.evaluate({ x: +x });
-            if (isNaN(y)) {
-                console.log('error calculating', this.#fx.expression, ' at ', x);
-            }
-        }
-        else if (typeof this.#fx === 'function') {
-            y = this.#fx(x);
-        }
-        else {
-            console.log('Function type error: ', typeof this.#fx);
-        }
-        return { x, y };
     }
 }
 exports.Plot = Plot;

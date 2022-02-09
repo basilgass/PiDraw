@@ -8,7 +8,7 @@ export interface GridConfig {
     type: GRIDTYPE;
 }
 export declare class Grid extends Figure {
-    #private;
+    _config: GridConfig;
     constructor(graph: Graph, name: string, config?: GridConfig);
     load(): Grid;
     show(): Grid;

@@ -11,137 +11,148 @@ const Line_1 = require("./figures/Line");
 const Plot_1 = require("./figures/Plot");
 const Axis_1 = require("./figures/Axis");
 const enums_1 = require("./variables/enums");
+const Arc_1 = require("./figures/Arc");
+const Parser_1 = require("./Parser");
 class Graph {
-    #container;
-    #svg;
-    #width;
-    #height;
-    #origin;
-    #pixelsPerUnit;
-    #figures;
-    #points;
-    #freeze;
-    #layers;
     constructor(containerID, config) {
-        this.#freeze = false;
-        this.#origin = {
+        this._freeze = false;
+        this._origin = {
             x: 50, y: 550
         };
-        this.#pixelsPerUnit = {
+        this._pixelsPerUnit = {
             x: 50, y: 50
         };
         this._initSetWidthAndHeight(config);
         this._initGetContainerId(containerID);
         this._initCreateSVG();
-        this.#figures = [];
-        this.#points = {};
+        this._figures = [];
+        this._points = {};
         if (config) {
             if (config.origin !== undefined) {
-                this.#origin = config.origin;
+                this._origin = config.origin;
             }
             if (config.grid !== undefined) {
-                this.#pixelsPerUnit = config.grid;
+                this._pixelsPerUnit = config.grid;
             }
         }
-        this.#layers = {
+        this._layers = {
             background: this.svg.group(),
             grids: this.svg.group(),
             axis: this.svg.group(),
             main: this.svg.group(),
+            plotsBG: this.svg.group(),
             plots: this.svg.group(),
+            plotsFG: this.svg.group(),
             foreground: this.svg.group(),
             points: this.svg.group()
         };
         const g = new Grid_1.Grid(this, 'MAINGRID', {
-            axisX: this.#pixelsPerUnit.x,
-            axisY: this.#pixelsPerUnit.y,
+            axisX: this._pixelsPerUnit.x,
+            axisY: this._pixelsPerUnit.y,
             type: enums_1.GRIDTYPE.ORTHOGONAL
-        });
-        this.#figures.push(g);
-        this.#layers.grids.add(g.svg);
-        this.createMarker(15);
+        }).color('lightgray');
+        this._figures.push(g);
+        this._layers.grids.add(g.svg);
+        this._markers = this.createMarker(10);
     }
+    _container;
     get container() {
-        return this.#container;
+        return this._container;
     }
+    _svg;
     get svg() {
-        return this.#svg;
+        return this._svg;
     }
+    _width;
     get width() {
-        return this.#width;
+        return this._width;
     }
+    _height;
     get height() {
-        return this.#height;
+        return this._height;
     }
+    _origin;
     get origin() {
-        return this.#origin;
+        return this._origin;
     }
     set origin(value) {
-        this.#origin = value;
+        this._origin = value;
     }
+    _pixelsPerUnit;
+    get pixelsPerUnit() {
+        return this._pixelsPerUnit;
+    }
+    _figures;
     get figures() {
-        return this.#figures;
+        return this._figures;
     }
+    _points;
+    get points() {
+        return this._points;
+    }
+    _freeze;
     get freeze() {
-        return this.#freeze;
+        return this._freeze;
+    }
+    _layers;
+    get layers() {
+        return this._layers;
+    }
+    _markers;
+    get markers() {
+        return this._markers;
     }
     get unitXDomain() {
         return {
-            min: Math.round(-this.#origin.x / this.#pixelsPerUnit.x),
-            max: Math.round((this.#width - this.#origin.x) / this.#pixelsPerUnit.x)
+            min: Math.round(-this._origin.x / this._pixelsPerUnit.x),
+            max: Math.round((this._width - this._origin.x) / this._pixelsPerUnit.x)
         };
     }
     get unitYDomain() {
         return {
-            max: Math.round(-(this.#height - this.#origin.y) / this.#pixelsPerUnit.y),
-            min: Math.round(this.#origin.y / this.#pixelsPerUnit.y)
+            max: Math.round(-(this._height - this._origin.y) / this._pixelsPerUnit.y),
+            min: Math.round(this._origin.y / this._pixelsPerUnit.y)
         };
-    }
-    get points() {
-        return this.#points;
-    }
-    get pixelsPerUnit() {
-        return this.#pixelsPerUnit;
-    }
-    get layers() {
-        return this.#layers;
     }
     distanceToPixels(distance, direction) {
         if (direction === undefined || direction === enums_1.AXIS.HORIZONTAL) {
-            return distance * this.#pixelsPerUnit.x;
+            return distance * this._pixelsPerUnit.x;
         }
         else {
-            return distance * this.#pixelsPerUnit.y;
+            return distance * this._pixelsPerUnit.y;
         }
     }
     unitsToPixels(point) {
         return {
-            x: this.origin.x + (point.x * this.#pixelsPerUnit.x),
-            y: this.origin.y - (point.y * this.#pixelsPerUnit.y)
+            x: this.origin.x + (point.x * this._pixelsPerUnit.x),
+            y: this.origin.y - (point.y * this._pixelsPerUnit.y)
         };
     }
     pixelsToUnits(point) {
         return {
-            x: (point.x - this.origin.x) / this.#pixelsPerUnit.x,
-            y: -(point.y - this.origin.y) / this.#pixelsPerUnit.y
+            x: (point.x - this.origin.x) / this._pixelsPerUnit.x,
+            y: -(point.y - this.origin.y) / this._pixelsPerUnit.y
         };
     }
     getFigure(name) {
-        for (let figure of this.#figures) {
+        for (let figure of this._figures) {
             if (figure.name === name) {
                 return figure;
             }
         }
-        return;
+        return null;
     }
     getPoint(name) {
-        return this.#points[name];
+        if (name instanceof Point_1.Point) {
+            return name;
+        }
+        return this._points[name] || null;
     }
     axis() {
-        const axisX = new Axis_1.Axis(this, 'x', enums_1.AXIS.HORIZONTAL);
-        const axisY = new Axis_1.Axis(this, 'y', enums_1.AXIS.VERTICAL);
-        this.#validateFigure(axisX, enums_1.LAYER.AXIS);
-        this.#validateFigure(axisY, enums_1.LAYER.AXIS);
+        const axisX = new Axis_1.Axis(this, 'Ox', enums_1.AXIS.HORIZONTAL);
+        const axisY = new Axis_1.Axis(this, 'Oy', enums_1.AXIS.VERTICAL);
+        this._validateFigure(axisX, enums_1.LAYER.AXIS);
+        this._validateFigure(axisY, enums_1.LAYER.AXIS);
         return {
             x: axisX,
             y: axisY
@@ -150,85 +161,68 @@ class Graph {
     point(x, y, name) {
         const pixels = this.unitsToPixels({ x, y });
         const figure = new Point_1.Point(this, name, pixels);
-        this.#validateFigure(figure, enums_1.LAYER.POINTS);
+        this._validateFigure(figure, enums_1.LAYER.POINTS);
+        return figure;
+    }
+    segment(A, B, name) {
+        const figure = new Line_1.Line(this, name, (A instanceof Point_1.Point) ? A : this.getPoint(A), (B instanceof Point_1.Point) ? B : this.getPoint(B));
+        figure.asSegment();
+        this._validateFigure(figure);
+        return figure;
+    }
+    vector(A, B, name) {
+        const figure = new Line_1.Line(this, name, (A instanceof Point_1.Point) ? A : this.getPoint(A), (B instanceof Point_1.Point) ? B : this.getPoint(B));
+        figure.asVector();
+        this._validateFigure(figure);
         return figure;
     }
     line(A, B, construction, name) {
         const figure = new Line_1.Line(this, name, (A instanceof Point_1.Point) ? A : this.getPoint(A), (B instanceof Point_1.Point) ? B : this.getPoint(B), construction);
-        this.#validateFigure(figure);
+        this._validateFigure(figure);
+        return figure;
+    }
+    parallel(line, P, name) {
+        const figure = new Line_1.Line(this, name, this.getPoint(P), null, {
+            rule: Line_1.LINECONSTRUCTION.PARALLEL,
+            value: line
+        });
+        this._validateFigure(figure);
+        return figure;
+    }
+    perpendicular(line, P, name) {
+        const figure = new Line_1.Line(this, name, this.getPoint(P), null, {
+            rule: Line_1.LINECONSTRUCTION.PERPENDICULAR,
+            value: line
+        });
+        this._validateFigure(figure);
         return figure;
     }
     circle(center, radius, name) {
-        if (!(center instanceof Point_1.Point)) {
+        if (typeof center === 'string') {
+            return this.circle(this.getPoint(center), radius, name);
+        }
+        else if (!(center instanceof Point_1.Point)) {
             return this.circle(this.point(center.x, center.y), radius, name);
         }
         let figure = new Circle_1.Circle(this, name, center, radius);
-        this.#validateFigure(figure);
+        this._validateFigure(figure);
         return figure;
     }
     plot(fn, config, name) {
         const figure = new Plot_1.Plot(this, name, fn, config);
-        this.#validateFigure(figure, enums_1.LAYER.PLOTS);
+        this._validateFigure(figure, enums_1.LAYER.PLOTS);
+        return figure;
+    }
+    arc(A, O, B, radius, name) {
+        const figure = new Arc_1.Arc(this, name, this.getPoint(O), this.getPoint(A), this.getPoint(B), radius);
+        this._validateFigure(figure);
         return figure;
     }
     update() {
-        for (let figure of this.#figures) {
+        for (let figure of this._figures) {
             figure.update();
         }
         return this;
-    }
-    _initSetWidthAndHeight(config) {
-        if ((0, interfaces_1.isDrawConfigWidthHeight)(config)) {
-            this.#width = config.width;
-            this.#height = config.height;
-        }
-        else if ((0, interfaces_1.isDrawConfigUnitWidthHeight)(config)) {
-            this.#width = config.dx * config.pixelsPerUnit;
-            this.#height = config.dy * config.pixelsPerUnit;
-        }
-        else if ((0, interfaces_1.isDrawConfigUnitMinMax)(config)) {
-            this.#width = (config.xMax - config.xMin) * config.pixelsPerUnit;
-            this.#height = (config.yMax - config.yMin) * config.pixelsPerUnit;
-            this.#origin.x = -config.xMin * config.pixelsPerUnit;
-            this.#origin.y = this.#height + config.yMin * config.pixelsPerUnit;
-        }
-        else {
-            this.#width = 800;
-            this.#height = 600;
-        }
-    }
-    _initGetContainerId(id) {
-        let el;
-        if (typeof id === 'string') {
-            el = document.getElementById(id);
-            if (!el) {
-                el = document.getElementById('#' + id);
-            }
-            if (!el) {
-                console.error('PiDraw: no HTML element found for ', id);
-            }
-        }
-        else if (id instanceof HTMLElement) {
-            el = id;
-        }
-        this.#container = el;
-    }
-    _initCreateSVG() {
-        const wrapper = document.createElement('DIV');
-        wrapper.style.position = 'relative';
-        wrapper.style.width = '100%';
-        wrapper.style.height = 'auto';
-        this.#container.appendChild(wrapper);
-        this.#svg = (0, svg_js_1.SVG)().addTo(wrapper).size('100%', '100%');
-        this.#svg.viewbox(0, 0, this.#width, this.#height);
-    }
-    #validateFigure(figure, layer) {
-        this.#figures.push(figure);
-        if (figure instanceof Point_1.Point) {
-            this.#points[figure.name] = figure;
-        }
-        this.#layers[layer ? layer : enums_1.LAYER.MAIN].add(figure.svg);
-        figure.draw();
     }
     createMarker(scale) {
         return {
@@ -239,6 +233,63 @@ class Graph {
                 add.path(`M1,0 L1,${scale}, L${scale * 1.2},${scale / 2} L1,0z`);
             }).ref(scale, scale / 2)
         };
+    }
+    parse(construction) {
+        let parser = new Parser_1.Parser(this, construction);
+        return parser;
+    }
+    _initSetWidthAndHeight(config) {
+        if ((0, interfaces_1.isDrawConfigWidthHeight)(config)) {
+            this._width = config.width;
+            this._height = config.height;
+        }
+        else if ((0, interfaces_1.isDrawConfigUnitWidthHeight)(config)) {
+            this._width = config.dx * config.pixelsPerUnit;
+            this._height = config.dy * config.pixelsPerUnit;
+        }
+        else if ((0, interfaces_1.isDrawConfigUnitMinMax)(config)) {
+            this._width = (config.xMax - config.xMin) * config.pixelsPerUnit;
+            this._height = (config.yMax - config.yMin) * config.pixelsPerUnit;
+            this._origin.x = -config.xMin * config.pixelsPerUnit;
+            this._origin.y = this._height + config.yMin * config.pixelsPerUnit;
+        }
+        else {
+            this._width = 800;
+            this._height = 600;
+        }
+    }
+    _initGetContainerId(id) {
+        let el;
+        if (typeof id === 'string') {
+            el = document.getElementById(id);
+            if (!el) {
+                el = document.getElementById('_' + id);
+            }
+            if (!el) {
+                console.error('PiDraw: no HTML element found for ', id);
+            }
+        }
+        else if (id instanceof HTMLElement) {
+            el = id;
+        }
+        this._container = el;
+    }
+    _initCreateSVG() {
+        const wrapper = document.createElement('DIV');
+        wrapper.style.position = 'relative';
+        wrapper.style.width = '100%';
+        wrapper.style.height = 'auto';
+        this._container.appendChild(wrapper);
+        this._svg = (0, svg_js_1.SVG)().addTo(wrapper).size('100%', '100%');
+        this._svg.viewbox(0, 0, this._width, this._height);
+    }
+    _validateFigure(figure, layer) {
+        this._figures.push(figure);
+        if (figure instanceof Point_1.Point) {
+            this._points[figure.name] = figure;
+        }
+        this._layers[layer ? layer : enums_1.LAYER.MAIN].add(figure.svg);
+        figure.draw();
     }
 }
 exports.Graph = Graph;

@@ -2,7 +2,8 @@ import { Graph } from "../Graph";
 import { Figure } from "./Figure";
 import { Point } from "./Point";
 export declare class Circle extends Figure {
-    #private;
+    _center: Point;
+    _radius: number | Point;
     constructor(graph: Graph, name: string, center: Point, radius: number | Point);
     get center(): Point;
     set center(value: Point);

@@ -5,37 +5,37 @@ const Figure_1 = require("./Figure");
 const Point_1 = require("./Point");
 const svg_js_1 = require("@svgdotjs/svg.js");
 class Circle extends Figure_1.Figure {
-    #center;
-    #radius;
+    _center;
+    _radius;
     constructor(graph, name, center, radius) {
         super(graph, name);
-        this.#center = center;
-        this.#radius = radius;
+        this._center = center;
+        this._radius = radius;
         this.generateName();
         this.svg = graph.svg.circle(this.getRadiusAsPixels() * 2).stroke('black').fill('none');
         return this;
     }
     get center() {
-        return this.#center;
+        return this._center;
     }
     set center(value) {
-        this.#center.x = value.x;
-        this.#center.y = value.y;
+        this._center.x = value.x;
+        this._center.y = value.y;
     }
     get radius() {
-        return this.#radius;
+        return this._radius;
     }
     set radius(value) {
-        this.#radius = value;
+        this._radius = value;
     }
     getRadiusAsPixels() {
         let radius = 100;
-        if (this.#radius instanceof Point_1.Point) {
-            radius = Math.sqrt((this.#radius.x - this.#center.x) ** 2 +
-                (this.#radius.y - this.#center.y) ** 2);
+        if (this._radius instanceof Point_1.Point) {
+            radius = Math.sqrt((this._radius.x - this._center.x) ** 2 +
+                (this._radius.y - this._center.y) ** 2);
         }
-        else if (typeof this.#radius === 'number') {
-            radius = this.graph.distanceToPixels(this.#radius);
+        else if (typeof this._radius === 'number') {
+            radius = this.graph.distanceToPixels(this._radius);
         }
         return radius;
     }
@@ -50,13 +50,13 @@ class Circle extends Figure_1.Figure {
         if (this.freeze || this.graph.freeze) {
             return this;
         }
-        if (!this.#center) {
+        if (!this._center) {
             return this;
         }
-        if (this.#radius <= 0) {
+        if (this._radius <= 0) {
             return this;
         }
-        this.svg.center(this.#center.x, this.#center.y);
+        this.svg.center(this._center.x, this._center.y);
         if (this.svg instanceof svg_js_1.Circle) {
             this.svg.radius(this.getRadiusAsPixels());
         }

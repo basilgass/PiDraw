@@ -4,15 +4,15 @@ exports.Grid = void 0;
 const Figure_1 = require("./Figure");
 const enums_1 = require("../variables/enums");
 class Grid extends Figure_1.Figure {
-    #config;
+    _config;
     constructor(graph, name, config) {
         super(graph, name);
         this.svg = this.graph.svg.group();
         if (config) {
-            this.#config = config;
+            this._config = config;
         }
         else {
-            this.#config = {
+            this._config = {
                 axisX: 50,
                 axisY: 50,
                 type: enums_1.GRIDTYPE.ORTHOGONAL
@@ -21,7 +21,7 @@ class Grid extends Figure_1.Figure {
         this.load();
     }
     load() {
-        const w = this.graph.width, h = this.graph.height, x = this.#config.axisX, y = this.#config.axisY, xOffset = this.graph.origin.x % x, yOffset = this.graph.origin.y % y;
+        const w = this.graph.width, h = this.graph.height, x = this._config.axisX, y = this._config.axisY, xOffset = this.graph.origin.x % x, yOffset = this.graph.origin.y % y;
         for (let pos = -x; pos <= w; pos += x) {
             this.svg.add(this.graph.svg.line(pos + xOffset, 0 - yOffset, pos + xOffset, h + yOffset));
         }
@@ -41,10 +41,10 @@ class Grid extends Figure_1.Figure {
     }
     nearestPoint = (pt) => {
         let minDistance = false, distance = 0, nearestPoint = { x: +pt.x, y: +pt.y };
-        if (this.#config.type === enums_1.GRIDTYPE.ORTHOGONAL) {
-            let nX = Math.trunc(pt.x / this.#config.axisX) * this.#config.axisX, nY = Math.trunc(pt.y / this.#config.axisY) * this.#config.axisY;
-            nearestPoint.x = pt.x < nX + this.#config.axisX / 2 ? nX : nX + this.#config.axisX;
-            nearestPoint.y = pt.y < nY + this.#config.axisY / 2 ? nY : nY + this.#config.axisY;
+        if (this._config.type === enums_1.GRIDTYPE.ORTHOGONAL) {
+            let nX = Math.trunc(pt.x / this._config.axisX) * this._config.axisX, nY = Math.trunc(pt.y / this._config.axisY) * this._config.axisY;
+            nearestPoint.x = pt.x < nX + this._config.axisX / 2 ? nX : nX + this._config.axisX;
+            nearestPoint.y = pt.y < nY + this._config.axisY / 2 ? nY : nY + this._config.axisY;
         }
         return nearestPoint;
     };

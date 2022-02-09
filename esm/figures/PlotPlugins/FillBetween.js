@@ -5,39 +5,39 @@ const Figure_1 = require("../Figure");
 const Plot_1 = require("../Plot");
 const svg_js_1 = require("@svgdotjs/svg.js");
 class FillBetween extends Figure_1.Figure {
-    #plot;
-    #plot2;
-    #from;
-    #to;
-    #samples;
-    #d;
+    _plot;
+    _plot2;
+    _from;
+    _to;
+    _samples;
+    _d;
     constructor(plot, plot2, from, to, samples) {
         super(plot.graph, '');
-        this.#plot = plot;
-        this.#plot2 = plot2;
-        this.#from = from;
-        this.#to = to;
-        this.#samples = samples;
-        this.#d = '';
-        this.svg = this.graph.svg.path(this.#d)
+        this._plot = plot;
+        this._plot2 = plot2;
+        this._from = from;
+        this._to = to;
+        this._samples = samples;
+        this._d = '';
+        this.svg = this.graph.svg.path(this._d)
             .fill({ color: 'yellow', opacity: 0.2 })
             .stroke({ width: 1, color: 'black' });
-        this.graph.layers.plots.add(this.svg);
+        this.graph.layers.plotsBG.add(this.svg);
         this.updateFigure();
     }
     get plot() {
-        return this.#plot;
+        return this._plot;
     }
     clean() {
         this.svg.remove();
     }
     updateFigure() {
-        let d1 = this.#plot.getPartialPath(this.#from, this.#to, this.#samples), d2;
-        if (this.#plot2 instanceof Plot_1.Plot) {
-            d2 = this.#plot2.getPartialPath(this.#from, this.#to, this.#samples, true);
+        let d1 = this._plot.getPartialPath(this._from, this._to, this._samples), d2;
+        if (this._plot2 instanceof Plot_1.Plot) {
+            d2 = this._plot2.getPartialPath(this._from, this._to, this._samples, true);
         }
         else {
-            let pt1 = this.graph.unitsToPixels({ x: this.#to, y: 0 }), pt2 = this.graph.unitsToPixels({ x: this.#from, y: 0 });
+            let pt1 = this.graph.unitsToPixels({ x: this._to, y: 0 }), pt2 = this.graph.unitsToPixels({ x: this._from, y: 0 });
             d2 = `L${pt1.x},${pt1.y} L${pt2.x},${pt2.y}`;
         }
         if (this.svg instanceof svg_js_1.Path) {
