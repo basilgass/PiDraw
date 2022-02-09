@@ -40,20 +40,31 @@
 		let graph = new PiDraw('root')
 		graph.axis()
 
-		const p = graph.point(5, 2, 'A').draggable()
-		const p3 = graph.point(8, 2, 'B').draggable(graph.getFigure('MAINGRID'))
+		graph.getFigure('MAINGRID')
+
+		const p = graph.point(5, 2, 'A').draggable(graph.getFigure('MAINGRID'))
+		const p3 = graph.point(10, 2, 'B').draggable(graph.getFigure('MAINGRID'))
 
 		const c1 = graph.circle(p, 2)
 		const c2 = graph.circle({ x: 8, y: 6 }, p3)
-		const k = graph.point(0, 0).middleOf(p, c2.center)
+		const k = graph.point(0, 0).middleOf(p, c2.center).asCircle()
 
-		const PP = graph.line(p, c2.center).isSegment()
+		const PP = graph.segment(p, c2.center)
+		const v = graph.vector(p, 'B')
+
+		const l = graph.parallel(v, c2.center)
+		const l2 = graph.perpendicular(v, c2.center)
+
 		const f1 = graph.plot(((x) => x * x)).stroke({
 			color: 'blue',
 			width: 3,
 			opacity: 0.2
 		})
 
+		const a = graph.arc('B', 'A', c2.center, k)
+		a.mark = true
+		a.sector = true
+		a.svg.fill('blue')
 		const f2 = graph.plot('2/3*sin(x^2)', {
 			domain: { min: -2, max: 14 },
 			samples: 50
@@ -62,9 +73,9 @@
 		return {
 			graph,
 			figures: graph.figures.map(x => x.name),
-			changePlot(name, plot){
+			changePlot (name, plot) {
 				graph.getFigure(name).plot(plot, 200)
-            }
+			}
 		}
 	}
 </script>

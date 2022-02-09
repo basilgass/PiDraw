@@ -8,18 +8,26 @@ export interface PointConfig {
     data?: any;
 }
 export declare class Point extends Figure {
-    #private;
+    private _scale;
+    private _shape;
+    private _constrain;
     constructor(graph: Graph, name: string, pixels: IPoint);
-    generateName(): string;
-    asCross(): Point;
-    asCircle(): Point;
-    setSize(value: number): Point;
-    updateFigure(): Point;
-    middleOf(A: Point, B: Point): Point;
-    draggable(grid?: Grid): Point;
+    private _x;
     get x(): number;
-    get y(): number;
     set x(value: number);
+    private _y;
+    get y(): number;
     set y(value: number);
     get coord(): IPoint;
+    generateName(): string;
+    asCross(): Point;
+    asCircle(size?: number): Point;
+    setSize(value: number): Point;
+    getDistanceTo(value: Figure): number;
+    updateFigure(): Point;
+    updateLabel(): Point;
+    middleOf(A: Point, B: Point): Point;
+    draggable(grid?: Grid): Point;
+    private _updateShape;
+    private _updateCoordinate;
 }

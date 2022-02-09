@@ -3,7 +3,6 @@ import {Graph} from "../Graph";
 import {IPoint} from "../variables/interfaces";
 import {NumExp} from "pimath/esm/maths/numexp";
 import {G, Path, Rect} from "@svgdotjs/svg.js";
-import {AXIS} from "../variables/enums";
 import {Riemann} from "./PlotPlugins/Riemann";
 import {Follow} from "./PlotPlugins/Follow";
 import {FillBetween} from "./PlotPlugins/FillBetween";
@@ -14,31 +13,33 @@ export interface PlotConfig {
 }
 
 export class Plot extends Figure {
-    #config: PlotConfig
-    #precision: number
-    #fx: Function | NumExp
-    #plugins: any[]
-    #riemann: { svg: G, rectangles: Rect[] }
+    private _config: PlotConfig
+    private _precision: number
+    private _fx: Function | NumExp
+    private _plugins: any[]
+    private _riemann: { svg: G, rectangles: Rect[] }
 
     constructor(graph: Graph, name: string, fn: Function | string, config?: PlotConfig) {
         super(graph, name);
 
-        this.#config = {
+        this._config = {
             samples: 20,
             domain: this.graph.unitXDomain
         }
 
         if (config !== undefined) {
-            this.#config = Object.assign({}, this.#config, config)
+            this._config = Object.assign({}, this._config, config)
         }
 
         this.generateName()
-        this.#precision = 2
+        this._precision = 2
 
         this.svg = this.graph.svg.path().fill('none').stroke({color: 'black', width: 2});
         this.plot(fn);
 
-        this.#plugins = []
+        this._plugins = []
+
+
     }
 
     generateName(): string {
@@ -57,8 +58,8 @@ export class Plot extends Figure {
     }
 
     updatePlugins(): Plot {
-        if(this.#plugins!==undefined) {
-            for (let P of this.#plugins) {
+        if (this._plugins !== undefined) {
+            for (let P of this._plugins) {
                 P.update()
             }
         }
@@ -67,10 +68,10 @@ export class Plot extends Figure {
 
     plot(fn: string | Function, speed?: number): Plot {
         // Parse the function
-        this.#fx = this.#parse(fn)
+        this._fx = this._parse(fn)
 
         // Create the path
-        const {d, points} = this.#getPath(this.#config.domain.min, this.#config.domain.max, this.#config.samples)
+        const {d, points} = this._getPath(this._config.domain.min, this._config.domain.max, this._config.samples)
 
         // Draw the path.
         if (this.svg instanceof Path) {
@@ -87,7 +88,7 @@ export class Plot extends Figure {
             } else {
                 this.svg.hide().plot(d)
 
-                let L = this.svg.node.getTotalLength()*2
+                let L = this.svg.node.getTotalLength() * 2
 
                 this.svg.attr({
                     'stroke-dasharray': L + ' ' + L,
@@ -104,29 +105,55 @@ export class Plot extends Figure {
     }
 
 
+    riemann(from: number, to: number, rectangles: number, pos?: number): Riemann {
+        let R = new Riemann(this, from, to, rectangles, pos)
 
-    riemann(from: number, to: number, rectangles: number, below?:boolean): Riemann{
-        let R = new Riemann(this, from, to, rectangles, below)
-
-        this.#plugins.push(R)
+        this._plugins.push(R)
         return R
     }
 
     follow(showTangent?: boolean): Follow {
         let P = new Follow(this, showTangent)
 
-        this.#plugins.push(P)
+        this._plugins.push(P)
         return P
     }
 
-    fillBetween(plot: Plot, from: number, to: number, samples?:number): FillBetween {
-        let P  = new FillBetween(this, plot, from, to, samples===undefined?this.#config.samples:samples)
+    fillBetween(plot: Plot, from: number, to: number, samples?: number): FillBetween {
+        let P = new FillBetween(this, plot, from, to, samples === undefined ? this._config.samples : samples)
 
-        this.#plugins.push(P)
+        this._plugins.push(P)
         return P
     }
 
-    #parse(fn: Function | string): Function | NumExp {
+    getPartialPath(from: number, to: number, samples?: number, reversed?: boolean, firstToken?: string): string {
+        let {d, points} = this._getPath(from, to, samples === undefined ? this._config.samples : samples, firstToken)
+
+        if (reversed) {
+            let reversed = ((firstToken === undefined ? 'L' : firstToken) + d.substring(1, d.length)).split(' ').reverse()
+            d = reversed.join(' ')
+        }
+
+        return d
+    }
+
+    evaluate(x: number): IPoint {
+        let y
+        if (this._fx instanceof NumExp) {
+            y = this._fx.evaluate({x: +x})
+            if (isNaN(y)) {
+                console.log('error calculating', this._fx.expression, ' at ', x)
+            }
+        } else if (typeof this._fx === 'function') {
+            y = this._fx(x)
+        } else {
+            console.log('Function type error: ', typeof this._fx)
+        }
+
+        return {x, y}
+    }
+
+    private _parse(fn: Function | string): Function | NumExp {
         // TODO : must calculate differently
         if (typeof fn === 'string') {
             return new NumExp(fn)
@@ -134,33 +161,38 @@ export class Plot extends Figure {
         return fn
     }
 
-    #getFlatPath(numberOfPoints?: number): string {
+    private _getFlatPath(numberOfPoints?: number): string {
         if (numberOfPoints === undefined) {
-            numberOfPoints = (this.#config.domain.max - this.#config.domain.min) * this.#config.samples
+            numberOfPoints = (this._config.domain.max - this._config.domain.min) * this._config.samples
         }
 
         let h = this.graph.origin.y,
-            pt = this.graph.unitsToPixels({x: this.#config.domain.min, y: 0}),
+            pt = this.graph.unitsToPixels({x: this._config.domain.min, y: 0}),
             d: string = `M${pt.x},${pt.y}`
 
         for (let x = 1; x < numberOfPoints; x++) {
-            pt = this.graph.unitsToPixels({x: this.#config.domain.min + x / this.#config.samples, y: 0})
+            pt = this.graph.unitsToPixels({x: this._config.domain.min + x / this._config.samples, y: 0})
             d += `L${pt.x},${pt.y}`
         }
 
         return d
     }
 
-    #getPath(from: number, to: number, samples: number, firstToken?: string): { d: string, points: IPoint[] } {
+    private _getPath(from: number, to: number, samples: number, firstToken?: string): { d: string, points: IPoint[] } {
         let d = '',
             points: IPoint[] = [],
-            nextToken = firstToken===undefined?'M':firstToken,
+            nextToken = firstToken === undefined ? 'M' : firstToken,
             prevToken = '',
             graphHeight = this.graph.height,
             x = +from,
             y = 0
 
-        while (x <= to) {
+        // Make sure the samples is a positive number.
+        if (samples <= 0) {
+            samples = 20
+        }
+
+        while (x <= to + 1 / samples) {
             // Evaluate the function at the point.
             const pt = this.graph.unitsToPixels(this.evaluate(x))
 
@@ -183,7 +215,7 @@ export class Plot extends Figure {
                 } else {
                     y = pt.y
                 }
-                d += `${pt.x.toFixed(this.#precision)},${y.toFixed(this.#precision)} `
+                d += `${pt.x.toFixed(this._precision)},${y.toFixed(this._precision)} `
 
                 points.push(pt)
             }
@@ -201,31 +233,5 @@ export class Plot extends Figure {
         }
 
         return {d, points}
-    }
-
-    getPartialPath(from: number, to: number, samples?: number, reversed?: boolean, firstToken?: string):string{
-        let {d, points} = this.#getPath(from, to, samples===undefined?this.#config.samples:samples, firstToken)
-
-        if(reversed){
-            let reversed = ((firstToken===undefined?'L':firstToken) + d.substring(1, d.length)).split(' ').reverse()
-            d = reversed.join(' ')
-        }
-
-        return d
-    }
-    evaluate(x: number): IPoint {
-        let y
-        if (this.#fx instanceof NumExp) {
-            y = this.#fx.evaluate({x: +x})
-            if (isNaN(y)) {
-                console.log('error calculating', this.#fx.expression, ' at ',  x)
-            }
-        } else if (typeof this.#fx === 'function') {
-            y = this.#fx(x)
-        } else {
-            console.log('Function type error: ', typeof this.#fx)
-        }
-
-        return {x, y}
     }
 }

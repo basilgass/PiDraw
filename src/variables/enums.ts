@@ -6,7 +6,9 @@ export enum LAYER {
     GRIDS = 'grids',
     AXIS = 'axis',
     MAIN = 'main',
+    PLOTSBG = 'plotsBG',
     PLOTS = 'plots',
+    PLOTSFG = 'plotsFG',
     FOREGROUND = 'foreground',
     POINTS = 'points'
 }

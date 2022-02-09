@@ -4,15 +4,15 @@ import {Point} from "./Point";
 import {Circle as svgCircle} from "@svgdotjs/svg.js";
 
 export class Circle extends Figure {
-    #center: Point;
-    #radius: number | Point;
+    _center: Point;
+    _radius: number | Point;
 
     constructor(graph: Graph, name: string, center: Point, radius: number | Point) {
         super(graph, name);
 
-        this.#center = center
+        this._center = center
 
-        this.#radius = radius
+        this._radius = radius
 
         this.generateName()
 
@@ -27,31 +27,31 @@ export class Circle extends Figure {
     }
 
     get center(): Point {
-        return this.#center;
+        return this._center;
     }
 
     set center(value: Point) {
-        this.#center.x = value.x
-        this.#center.y = value.y
+        this._center.x = value.x
+        this._center.y = value.y
     }
 
     get radius(): number | Point {
-        return this.#radius;
+        return this._radius;
     }
 
     set radius(value: number | Point) {
-        this.#radius = value;
+        this._radius = value;
     }
 
     getRadiusAsPixels(): number {
         let radius = 100
-        if (this.#radius instanceof Point) {
+        if (this._radius instanceof Point) {
             radius = Math.sqrt(
-                (this.#radius.x - this.#center.x) ** 2 +
-                (this.#radius.y - this.#center.y) ** 2
+                (this._radius.x - this._center.x) ** 2 +
+                (this._radius.y - this._center.y) ** 2
             )
-        } else if (typeof this.#radius === 'number') {
-            radius = this.graph.distanceToPixels(this.#radius)
+        } else if (typeof this._radius === 'number') {
+            radius = this.graph.distanceToPixels(this._radius)
         }
 
         return radius
@@ -73,15 +73,15 @@ export class Circle extends Figure {
             return this
         }
         // No center is given
-        if (!this.#center) {
+        if (!this._center) {
             return this
         }
         // No radius is given
-        if (this.#radius <= 0) {
+        if (this._radius <= 0) {
             return this
         }
 
-        this.svg.center(this.#center.x, this.#center.y)
+        this.svg.center(this._center.x, this._center.y)
 
         if (this.svg instanceof svgCircle) {
             this.svg.radius(this.getRadiusAsPixels())

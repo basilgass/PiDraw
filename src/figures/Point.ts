@@ -3,7 +3,7 @@ import {Figure} from "./Figure";
 import {IPoint} from "../variables/interfaces";
 import {Grid} from "./Grid";
 import {POINTCONSTRAIN, POINTSHAPE} from "../variables/enums";
-import {Circle as svgCircle} from "@svgdotjs/svg.js";
+import {Label} from "./Label";
 
 export interface PointConfig {
     type: POINTCONSTRAIN,
@@ -11,26 +11,53 @@ export interface PointConfig {
 }
 
 export class Point extends Figure {
-    #x: number
-    #y: number
-    #scale: number
-    #shape: POINTSHAPE
-    #constrain: PointConfig
+    private _scale: number
+    private _shape: POINTSHAPE
+    private _constrain: PointConfig
 
     constructor(graph: Graph, name: string, pixels: IPoint) {
         super(graph, name);
 
-        this.#x = pixels.x
-        this.#y = pixels.y
+        this._x = pixels.x
+        this._y = pixels.y
 
         this.generateName()
 
-        this.#shape = POINTSHAPE.CROSS
-        this.#scale = 6
+        this._shape = POINTSHAPE.CROSS
+        this._scale = 6
 
-        this.#constrain = {type: POINTCONSTRAIN.FIXED}
+        this._constrain = {type: POINTCONSTRAIN.FIXED}
 
-        this.#updateShape()
+        this._updateShape()
+
+        // Add the label
+        this.label = new Label(this.graph, 'LABEL', {el: this})
+    }
+
+    private _x: number
+
+    get x(): number {
+        return this._x;
+    }
+
+    set x(value: number) {
+        this._x = value;
+        this.update()
+    }
+
+    private _y: number
+
+    get y(): number {
+        return this._y;
+    }
+
+    set y(value: number) {
+        this._y = value;
+        this.update()
+    }
+
+    get coord(): IPoint {
+        return this.graph.pixelsToUnits(this)
     }
 
     generateName(): string {
@@ -41,49 +68,36 @@ export class Point extends Figure {
         return this.name
     }
 
-    #updateShape(): void {
-        // If the shape exist and is the same, no need to continue.
-        if (this.svg && this.#shape === this.svg.data('shape')) {
-            return
-        }
-
-        // Remove the current shape if it already exist and is not the same
-        if (this.svg && this.#shape !== this.svg.data('shape')) {
-            this.svg.remove()
-        }
-
-        // Create the new shape
-        if (this.#shape === POINTSHAPE.CIRCLE) {
-            this.svg = this.graph.svg.circle(
-                this.#scale
-            ).stroke('black').fill('white').data('shape', POINTSHAPE.CIRCLE);
-        } else if (this.#shape === POINTSHAPE.CROSS) {
-            this.svg = this.graph.svg.path(
-                `M${-this.#scale},${-this.#scale} L${+this.#scale},${+this.#scale} M${+this.#scale},${-this.#scale} L${-this.#scale},${+this.#scale}`
-            ).stroke('black').center(0, 0).data('shape', POINTSHAPE.CROSS);
-        } else if (this.#shape === POINTSHAPE.HANDLE) {
-            this.svg = this.graph.svg.circle(
-                20
-            ).stroke('black').fill('white').opacity(0.4).data('shape', POINTSHAPE.HANDLE);
-        }
-    }
-
     asCross(): Point {
-        this.#shape = POINTSHAPE.CROSS
-        this.#updateShape()
+        this._shape = POINTSHAPE.CROSS
+        this._updateShape()
         return this
     }
-    asCircle(): Point {
-        this.#shape = POINTSHAPE.CIRCLE
+
+    asCircle(size?: number): Point {
+        if (size !== undefined && size > 0) {
+            this._scale = size
+        }
+
+        this._shape = POINTSHAPE.CIRCLE
         this.update()
         return this
     }
+
     setSize(value: number): Point {
-        this.#scale = value
+        this._scale = value
         // Force update
         this.svg.data('shape', null)
         this.update()
         return this
+    }
+
+    getDistanceTo(value: Figure): number {
+        if (value instanceof Point) {
+            return Math.sqrt((this.x - value.x) ** 2 + (this.y - value.y) ** 2)
+        }
+
+        return 40
     }
 
     updateFigure(): Point {
@@ -92,22 +106,17 @@ export class Point extends Figure {
             return this
         }
 
-        this.#updateShape()
-        this.#updateCoordinate()
+        this._updateShape()
+        this._updateCoordinate()
 
-        this.svg.center(this.#x, this.#y)
+        this.svg.center(this._x, this._y)
 
         return this
     }
 
-    #updateCoordinate(): void {
-        if (this.#constrain.type === POINTCONSTRAIN.MIDDLE) {
-            const A: Point = this.#constrain.data[0],
-                B: Point = this.#constrain.data[1]
+    updateLabel(): Point {
 
-            this.#x = (A.x + B.x) / 2
-            this.#y = (A.y + B.y) / 2
-        }
+        return this
     }
 
     /**
@@ -117,7 +126,7 @@ export class Point extends Figure {
      * @returns {Point}
      */
     middleOf(A: Point, B: Point): Point {
-        this.#constrain = {
+        this._constrain = {
             type: POINTCONSTRAIN.MIDDLE,
             data: [A, B]
         }
@@ -126,10 +135,11 @@ export class Point extends Figure {
     }
 
     draggable(grid?: Grid): Point {
-        this.#shape = POINTSHAPE.HANDLE
+        this._shape = POINTSHAPE.HANDLE
         this.updateFigure()
 
         let point = this
+
         // let grid = this.graph.getFigure('MAINGRID')
 
         function dragmove(e: any): void {
@@ -150,8 +160,8 @@ export class Point extends Figure {
             }
 
             // Update the value to match the grid
-            if(grid!==null){
-                if(grid instanceof Grid) {
+            if (grid !== null) {
+                if (grid instanceof Grid) {
                     const intersection = grid.nearestPoint({x, y})
                     x = intersection.x
                     y = intersection.y
@@ -179,25 +189,40 @@ export class Point extends Figure {
         return this
     }
 
-    get x(): number {
-        return this.#x;
+    private _updateShape(): void {
+        // If the shape exist and is the same, no need to continue.
+        if (this.svg && this._shape === this.svg.data('shape')) {
+            return
+        }
+
+        // Remove the current shape if it already exist and is not the same
+        if (this.svg && this._shape !== this.svg.data('shape')) {
+            this.svg.remove()
+        }
+
+        // Create the new shape
+        if (this._shape === POINTSHAPE.CIRCLE) {
+            this.svg = this.graph.svg.circle(
+                this._scale
+            ).stroke('black').fill('white').data('shape', POINTSHAPE.CIRCLE);
+        } else if (this._shape === POINTSHAPE.CROSS) {
+            this.svg = this.graph.svg.path(
+                `M${-this._scale},${-this._scale} L${+this._scale},${+this._scale} M${+this._scale},${-this._scale} L${-this._scale},${+this._scale}`
+            ).stroke('black').center(0, 0).data('shape', POINTSHAPE.CROSS);
+        } else if (this._shape === POINTSHAPE.HANDLE) {
+            this.svg = this.graph.svg.circle(
+                20
+            ).stroke('black').fill('white').opacity(0.4).data('shape', POINTSHAPE.HANDLE);
+        }
     }
 
-    get y(): number {
-        return this.#y;
-    }
+    private _updateCoordinate(): void {
+        if (this._constrain.type === POINTCONSTRAIN.MIDDLE) {
+            const A: Point = this._constrain.data[0],
+                B: Point = this._constrain.data[1]
 
-    set x(value: number) {
-        this.#x = value;
-        this.update()
-    }
-
-    set y(value: number) {
-        this.#y = value;
-        this.update()
-    }
-
-    get coord(): IPoint {
-        return this.graph.pixelsToUnits(this)
+            this._x = (A.x + B.x) / 2
+            this._y = (A.y + B.y) / 2
+        }
     }
 }

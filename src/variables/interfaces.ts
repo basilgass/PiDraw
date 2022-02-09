@@ -38,7 +38,9 @@ export interface ILayers {
     grids: G,
     axis: G,
     main: G,
+    plotsBG: G,
     plots: G,
+    plotsFG: G,
     foreground: G,
     points: G
 }

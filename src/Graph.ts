@@ -11,74 +11,15 @@ import {Figure} from "./figures/Figure";
 import {Circle} from "./figures/Circle";
 import {Point} from "./figures/Point";
 import {Grid} from "./figures/Grid";
-import {Line, LineConfig} from "./figures/Line";
+import {Line, LineConfig, LINECONSTRUCTION} from "./figures/Line";
 import {Plot, PlotConfig} from "./figures/Plot";
 import {Axis} from "./figures/Axis";
 import {AXIS, GRIDTYPE, LAYER} from "./variables/enums";
 import {GraphConfig} from "./variables/types";
+import {Arc} from "./figures/Arc";
+import {Parser} from "./Parser";
 
 export class Graph {
-    /**
-     * HTML container
-     * @type {HTMLElement}
-     * @private
-     */
-    #container: HTMLElement;
-    /**
-     * SVG.js main element
-     * @type {Svg}
-     * @private
-     */
-    #svg: Svg;
-    /**
-     * Number of pixels on the graph
-     * @type {number}
-     * @private
-     */
-    #width: number;
-    /**
-     * Number of pixels in the graph
-     * @type {number}
-     * @private
-     */
-    #height: number;
-    /**
-     * Origin position in unit coordinate
-     * @type {IPoint}
-     * @private
-     */
-    #origin: IPoint
-    /**
-     * Number of pixels per unit.
-     * @type {IPoint}
-     * @private
-     */
-    #pixelsPerUnit: IPoint
-    /**
-     * List of all figures drawn in the graph.
-     * @type {Figure[]}
-     * @private
-     */
-    #figures: Figure[]
-    /**
-     * List of all points by name. Used to quickly get a point.
-     * @type {{[p: string]: Point}}
-     * @private
-     */
-    #points: { [key: string]: Point }
-    /**
-     * Determine if all the graph must be drawn or not.
-     * @type {boolean}
-     * @private
-     */
-    #freeze: boolean
-    /**
-     * Layers of the graph
-     * @type {ILayers}
-     * @private
-     */
-    #layers: ILayers
-
     /**
      * Create the main graph canvas element
      * config: {origin: {x: number, y: number}, grid: {x: number, y: number, type: GRIDTYPE}}
@@ -90,13 +31,13 @@ export class Graph {
      */
     constructor(containerID: string | HTMLElement, config?: GraphConfig) {
         // By default, the graph is frozen on initialisation
-        this.#freeze = false
+        this._freeze = false
 
         // Default values.
-        this.#origin = {
+        this._origin = {
             x: 50, y: 550
         }
-        this.#pixelsPerUnit = {
+        this._pixelsPerUnit = {
             x: 50, y: 50
         }
 
@@ -110,143 +51,230 @@ export class Graph {
         this._initCreateSVG()
 
         // Init variables
-        this.#figures = []
-        this.#points = {}
+        this._figures = []
+        this._points = {}
 
         if (config) {
             if (config.origin !== undefined) {
-                this.#origin = config.origin
+                this._origin = config.origin
             }
 
             if (config.grid !== undefined) {
-                this.#pixelsPerUnit = config.grid
+                this._pixelsPerUnit = config.grid
             }
         }
 
         // Init layers.
-        this.#layers = {
+        this._layers = {
             background: this.svg.group(),
             grids: this.svg.group(),
             axis: this.svg.group(),
             main: this.svg.group(),
+            plotsBG: this.svg.group(),
             plots: this.svg.group(),
+            plotsFG: this.svg.group(),
             foreground: this.svg.group(),
             points: this.svg.group()
         }
 
         // Create grid
         const g = new Grid(this, 'MAINGRID', {
-            axisX: this.#pixelsPerUnit.x,
-            axisY: this.#pixelsPerUnit.y,
+            axisX: this._pixelsPerUnit.x,
+            axisY: this._pixelsPerUnit.y,
             type: GRIDTYPE.ORTHOGONAL
-        })
-        this.#figures.push(g)
-        this.#layers.grids.add(g.svg)
+        }).color('lightgray')
+        this._figures.push(g)
+        this._layers.grids.add(g.svg)
 
         // Create the markers
-        this.createMarker(15)
+        this._markers = this.createMarker(10)
     }
+
+    /**
+     * HTML container
+     * @type {HTMLElement}
+     * @private
+     */
+    private _container: HTMLElement;
 
     get container(): HTMLElement {
-        return this.#container;
+        return this._container;
     }
+
+    /**
+     * SVG.js main element
+     * @type {Svg}
+     * @private
+     */
+    private _svg: Svg;
 
     get svg(): Svg {
-        return this.#svg;
+        return this._svg;
     }
+
+    /**
+     * Number of pixels on the graph
+     * @type {number}
+     * @private
+     */
+    private _width: number;
 
     get width(): number {
-        return this.#width;
+        return this._width;
     }
+
+    /**
+     * Number of pixels in the graph
+     * @type {number}
+     * @private
+     */
+    private _height: number;
 
     get height(): number {
-        return this.#height;
+        return this._height;
     }
 
+    /**
+     * Origin position in unit coordinate
+     * @type {IPoint}
+     * @private
+     */
+    private _origin: IPoint
+
     get origin(): IPoint {
-        return this.#origin;
+        return this._origin;
     }
 
     set origin(value: IPoint) {
-        this.#origin = value;
+        this._origin = value;
     }
+
+    /**
+     * Number of pixels per unit.
+     * @type {IPoint}
+     * @private
+     */
+    private _pixelsPerUnit: IPoint
+
+    get pixelsPerUnit(): IPoint {
+        return this._pixelsPerUnit;
+    }
+
+    /**
+     * List of all figures drawn in the graph.
+     * @type {Figure[]}
+     * @private
+     */
+    private _figures: Figure[]
 
     get figures(): Figure[] {
-        return this.#figures;
+        return this._figures;
     }
 
+    /**
+     * List of all points by name. Used to quickly get a point.
+     * @type {{[p: string]: Point}}
+     * @private
+     */
+    private _points: { [key: string]: Point }
+
+    get points(): { [p: string]: Point } {
+        return this._points;
+    }
+
+    /**
+     * Determine if all the graph must be drawn or not.
+     * @type {boolean}
+     * @private
+     */
+    private _freeze: boolean
+
     get freeze(): boolean {
-        return this.#freeze;
+        return this._freeze;
+    }
+
+    /**
+     * Layers of the graph
+     * @type {ILayers}
+     * @private
+     */
+    private _layers: ILayers
+
+    get layers(): ILayers {
+        return this._layers;
+    }
+
+    /**
+     * Default markers for start and end
+     * @type {{start: Marker, end: Marker}}
+     * @private
+     */
+    private _markers: { start: Marker, end: Marker }
+
+    get markers(): { start: Marker; end: Marker } {
+        return this._markers;
     }
 
     get unitXDomain(): { min: number, max: number } {
         return {
-            min: Math.round(-this.#origin.x / this.#pixelsPerUnit.x),
-            max: Math.round((this.#width - this.#origin.x) / this.#pixelsPerUnit.x)
+            min: Math.round(-this._origin.x / this._pixelsPerUnit.x),
+            max: Math.round((this._width - this._origin.x) / this._pixelsPerUnit.x)
         }
     }
 
     get unitYDomain(): { min: number, max: number } {
         return {
-            max: Math.round(-(this.#height - this.#origin.y) / this.#pixelsPerUnit.y),
-            min: Math.round(this.#origin.y / this.#pixelsPerUnit.y)
+            max: Math.round(-(this._height - this._origin.y) / this._pixelsPerUnit.y),
+            min: Math.round(this._origin.y / this._pixelsPerUnit.y)
         }
-    }
-
-    get points(): { [p: string]: Point } {
-        return this.#points;
-    }
-
-    get pixelsPerUnit(): IPoint {
-        return this.#pixelsPerUnit;
-    }
-
-    get layers(): ILayers {
-        return this.#layers;
     }
 
     distanceToPixels(distance: number, direction?: AXIS): number {
         if (direction === undefined || direction === AXIS.HORIZONTAL) {
-            return distance * this.#pixelsPerUnit.x
+            return distance * this._pixelsPerUnit.x
         } else {
-            return distance * this.#pixelsPerUnit.y
+            return distance * this._pixelsPerUnit.y
         }
     }
 
     unitsToPixels(point: IPoint): IPoint {
         return {
-            x: this.origin.x + (point.x * this.#pixelsPerUnit.x),
-            y: this.origin.y - (point.y * this.#pixelsPerUnit.y)
+            x: this.origin.x + (point.x * this._pixelsPerUnit.x),
+            y: this.origin.y - (point.y * this._pixelsPerUnit.y)
         }
     }
 
     pixelsToUnits(point: IPoint): IPoint {
         // TODO: handle other grid types.
         return {
-            x: (point.x - this.origin.x) / this.#pixelsPerUnit.x,
-            y: -(point.y - this.origin.y) / this.#pixelsPerUnit.y
+            x: (point.x - this.origin.x) / this._pixelsPerUnit.x,
+            y: -(point.y - this.origin.y) / this._pixelsPerUnit.y
         }
     }
 
     getFigure(name: string): Figure {
-        for (let figure of this.#figures) {
+        for (let figure of this._figures) {
             if (figure.name === name) {
                 return figure
             }
         }
 
-        return
+        return null
     }
 
-    getPoint(name: string): Point {
-        return this.#points[name]
+    getPoint(name: Point | string): Point {
+        if (name instanceof Point) {
+            return name
+        }
+
+        return this._points[name] || null
     }
 
     axis(): { x: Axis, y: Axis } {
-        const axisX = new Axis(this, 'x', AXIS.HORIZONTAL)
-        const axisY = new Axis(this, 'y', AXIS.VERTICAL)
-        this.#validateFigure(axisX, LAYER.AXIS)
-        this.#validateFigure(axisY, LAYER.AXIS)
+        const axisX = new Axis(this, 'Ox', AXIS.HORIZONTAL)
+        const axisY = new Axis(this, 'Oy', AXIS.VERTICAL)
+        this._validateFigure(axisX, LAYER.AXIS)
+        this._validateFigure(axisY, LAYER.AXIS)
 
         return {
             x: axisX,
@@ -262,7 +290,33 @@ export class Graph {
             pixels
         );
 
-        this.#validateFigure(figure, LAYER.POINTS)
+        this._validateFigure(figure, LAYER.POINTS)
+        return figure
+    }
+
+    segment(A: Point | string, B: Point | string, name?: string): Line {
+        const figure = new Line(
+            this,
+            name,
+            (A instanceof Point) ? A : this.getPoint(A),
+            (B instanceof Point) ? B : this.getPoint(B)
+        )
+        figure.asSegment()
+
+        this._validateFigure(figure)
+        return figure
+    }
+
+    vector(A: Point | string, B: Point | string, name?: string): Line {
+        const figure = new Line(
+            this,
+            name,
+            (A instanceof Point) ? A : this.getPoint(A),
+            (B instanceof Point) ? B : this.getPoint(B)
+        )
+        figure.asVector()
+
+        this._validateFigure(figure)
         return figure
     }
 
@@ -275,18 +329,36 @@ export class Graph {
             construction
         );
 
-        this.#validateFigure(figure)
+        this._validateFigure(figure)
         return figure
     }
 
-    circle(center: Point | IPoint, radius: number, name?: string): Circle {
+    parallel(line: Line, P: Point | string, name?: string): Line {
+        const figure = new Line(this, name, this.getPoint(P), null, {
+            rule: LINECONSTRUCTION.PARALLEL,
+            value: line
+        })
+
+        this._validateFigure(figure)
+        return figure
+    }
+
+    perpendicular(line: Line, P: Point | string, name?: string): Line {
+        const figure = new Line(this, name, this.getPoint(P), null, {
+            rule: LINECONSTRUCTION.PERPENDICULAR,
+            value: line
+        })
+
+        this._validateFigure(figure)
+        return figure
+    }
+
+    circle(center: Point | IPoint | string, radius: number, name?: string): Circle {
         // Case the point is given as xy coordinate instead of an existing point.
-        if (!(center instanceof Point)) {
-            return this.circle(
-                this.point(center.x, center.y),
-                radius,
-                name
-            )
+        if (typeof center === 'string') {
+            return this.circle(this.getPoint(center), radius, name)
+        } else if (!(center instanceof Point)) {
+            return this.circle(this.point(center.x, center.y), radius, name)
         }
 
         let figure = new Circle(
@@ -295,8 +367,7 @@ export class Graph {
             center,
             radius)
 
-        this.#validateFigure(figure)
-
+        this._validateFigure(figure)
         return figure
     }
 
@@ -309,86 +380,26 @@ export class Graph {
             config
         )
 
-        this.#validateFigure(figure, LAYER.PLOTS)
+        this._validateFigure(figure, LAYER.PLOTS)
+        return figure
+    }
 
+    arc(A: Point | string, O: Point | string, B: Point | string, radius?: number | Point, name?: string): Arc {
+        const figure = new Arc(this, name, this.getPoint(O), this.getPoint(A), this.getPoint(B), radius)
+
+        this._validateFigure(figure)
         return figure
     }
 
     update(): Graph {
-        for (let figure of this.#figures) {
+        for (let figure of this._figures) {
             figure.update()
         }
         return this
     }
 
-    private _initSetWidthAndHeight(config: GraphConfig) {
-        if (isDrawConfigWidthHeight(config)) {
-            this.#width = config.width
-            this.#height = config.height
-        } else if (isDrawConfigUnitWidthHeight(config)) {
-            this.#width = config.dx * config.pixelsPerUnit
-            this.#height = config.dy * config.pixelsPerUnit
-        } else if (isDrawConfigUnitMinMax(config)) {
-            this.#width = (config.xMax - config.xMin) * config.pixelsPerUnit
-            this.#height = (config.yMax - config.yMin) * config.pixelsPerUnit
-            this.#origin.x = -config.xMin*config.pixelsPerUnit
-            this.#origin.y = this.#height + config.yMin*config.pixelsPerUnit
-        } else {
-            // Default width and height.
-            this.#width = 800
-            this.#height = 600
-        }
-    }
-
-    private _initGetContainerId(id: string | HTMLElement) {
-        let el: HTMLElement
-        if (typeof id === 'string') {
-            el = document.getElementById(id)
-
-            if (!el) {
-                el = document.getElementById('#' + id)
-            }
-
-            if (!el) {
-                console.error('PiDraw: no HTML element found for ', id)
-            }
-        } else if (id instanceof HTMLElement) {
-            el = id
-        }
-
-        this.#container = el
-    }
-
-    private _initCreateSVG() {
-        // Create the SVG wrapper.
-        const wrapper = document.createElement('DIV')
-        wrapper.style.position = 'relative'
-        wrapper.style.width = '100%'
-        wrapper.style.height = 'auto'
-        this.#container.appendChild(wrapper)
-
-        // Create the SVG element.
-        this.#svg = SVG().addTo(wrapper).size('100%', '100%')
-        this.#svg.viewbox(0, 0, this.#width, this.#height)
-    }
-
-    #validateFigure(figure: Figure, layer?: LAYER): void {
-        // Add to the list of drawings, for updating.
-        this.#figures.push(figure)
-
-        if (figure instanceof Point) {
-            this.#points[figure.name] = figure
-        }
-
-        // Add to the layer.
-        this.#layers[layer ? layer : LAYER.MAIN].add(figure.svg)
-
-        // Release the figure
-        figure.draw()
-    }
-
-    createMarker(scale: number): { start: Marker, end: Marker }  {
-        return  {
+    createMarker(scale: number): { start: Marker, end: Marker } {
+        return {
             start: this.svg.marker(
                 scale * 1.2,
                 scale * 1.2,
@@ -402,5 +413,76 @@ export class Graph {
                     add.path(`M1,0 L1,${scale}, L${scale * 1.2},${scale / 2} L1,0z`)
                 }).ref(scale, scale / 2)
         };
+    }
+
+    parse(construction: string): Parser {
+        let parser = new Parser(this, construction)
+        return parser
+    }
+
+    private _initSetWidthAndHeight(config: GraphConfig) {
+        if (isDrawConfigWidthHeight(config)) {
+            this._width = config.width
+            this._height = config.height
+        } else if (isDrawConfigUnitWidthHeight(config)) {
+            this._width = config.dx * config.pixelsPerUnit
+            this._height = config.dy * config.pixelsPerUnit
+        } else if (isDrawConfigUnitMinMax(config)) {
+            this._width = (config.xMax - config.xMin) * config.pixelsPerUnit
+            this._height = (config.yMax - config.yMin) * config.pixelsPerUnit
+            this._origin.x = -config.xMin * config.pixelsPerUnit
+            this._origin.y = this._height + config.yMin * config.pixelsPerUnit
+        } else {
+            // Default width and height.
+            this._width = 800
+            this._height = 600
+        }
+    }
+
+    private _initGetContainerId(id: string | HTMLElement) {
+        let el: HTMLElement
+        if (typeof id === 'string') {
+            el = document.getElementById(id)
+
+            if (!el) {
+                el = document.getElementById('_' + id)
+            }
+
+            if (!el) {
+                console.error('PiDraw: no HTML element found for ', id)
+            }
+        } else if (id instanceof HTMLElement) {
+            el = id
+        }
+
+        this._container = el
+    }
+
+    private _initCreateSVG() {
+        // Create the SVG wrapper.
+        const wrapper = document.createElement('DIV')
+        wrapper.style.position = 'relative'
+        wrapper.style.width = '100%'
+        wrapper.style.height = 'auto'
+        this._container.appendChild(wrapper)
+
+        // Create the SVG element.
+        this._svg = SVG().addTo(wrapper).size('100%', '100%')
+        this._svg.viewbox(0, 0, this._width, this._height)
+    }
+
+    private _validateFigure(figure: Figure, layer?: LAYER): void {
+        // Add to the list of drawings, for updating.
+        this._figures.push(figure)
+
+        if (figure instanceof Point) {
+            this._points[figure.name] = figure
+        }
+
+        // Add to the layer.
+        this._layers[layer ? layer : LAYER.MAIN].add(figure.svg)
+
+        // Release the figure
+        figure.draw()
     }
 }

@@ -3,29 +3,29 @@ import {Plot} from "../Plot";
 import {Circle, Line} from "@svgdotjs/svg.js";
 
 export class Follow extends Figure {
-    #plot: Plot
-    #size: number
-    #tangent: Line
-    #tangentVisible: boolean
-    #tangentDX: number
+    private _plot: Plot
+    private _size: number
+    private _tangent: Line
+    private _tangentVisible: boolean
+    private _tangentDX: number
 
     constructor(plot: Plot, showTangent?: boolean) {
         super(plot.graph, '');
 
-        this.#plot = plot
-        this.#size = 10
+        this._plot = plot
+        this._size = 10
 
 
-        this.svg = this.graph.svg.circle(this.#size)
+        this.svg = this.graph.svg.circle(this._size)
             .fill('white')
             .stroke({width: 1, color: 'black'})
         this.graph.layers.points.add(this.svg)
 
-        this.#tangent = this.graph.svg.line()
+        this._tangent = this.graph.svg.line()
             .stroke({color: 'black', width: 1})
-        this.#tangentVisible = showTangent===undefined?false:showTangent
-        this.#tangentDX = 0.001
-        this.graph.layers.plots.add(this.#tangent)
+        this._tangentVisible = showTangent===undefined?false:showTangent
+        this._tangentDX = 0.001
+        this.graph.layers.plotsFG.add(this._tangent)
 
         this.updateFigure()
 
@@ -41,7 +41,7 @@ export class Follow extends Figure {
 
             let ptInUnits1 = this.graph.pixelsToUnits(clientXY)
             // Get the bounding box
-            let pt = this.graph.unitsToPixels(this.#plot.evaluate(ptInUnits1.x))
+            let pt = this.graph.unitsToPixels(this._plot.evaluate(ptInUnits1.x))
 
             // Update the point
             if (isNaN(pt.y)) {
@@ -55,23 +55,23 @@ export class Follow extends Figure {
 
             // Update the tangent
 
-            let pt2 = this.graph.unitsToPixels(this.#plot.evaluate(+ptInUnits1.x + this.#tangentDX)),
+            let pt2 = this.graph.unitsToPixels(this._plot.evaluate(+ptInUnits1.x + this._tangentDX)),
                 slope = (pt2.y - pt.y) / (pt2.x - pt.x),
                 h = pt.y - slope * pt.x
 
-            if (isNaN(pt.y) || isNaN(pt2.y) || this.#tangentVisible===false) {
-                this.#tangent.hide()
+            if (isNaN(pt.y) || isNaN(pt2.y) || this._tangentVisible===false) {
+                this._tangent.hide()
             } else {
-                if (!this.#tangent.visible()) {
-                    this.#tangent.show()
+                if (!this._tangent.visible()) {
+                    this._tangent.show()
                 }
                 if (pt.y * pt.y < 0) {
                     // Vertical asymptote
-                    this.#tangent.plot(
+                    this._tangent.plot(
                         pt.x, 0, pt.x, this.graph.height
                     )
                 } else {
-                    this.#tangent.plot(
+                    this._tangent.plot(
                         0, h, this.graph.width, slope * this.graph.width + h
                     )
                 }
@@ -80,12 +80,12 @@ export class Follow extends Figure {
     }
 
     get plot(): Plot {
-        return this.#plot;
+        return this._plot;
     }
 
     clean() {
-        if (this.#tangent) {
-            this.#tangent.remove()
+        if (this._tangent) {
+            this._tangent.remove()
         }
         this.svg.remove()
     }
@@ -102,7 +102,7 @@ export class Follow extends Figure {
     }
 
     showTangent(value: boolean): Follow {
-        this.#tangentVisible = value === undefined || value
+        this._tangentVisible = value === undefined || value
 
         return this
     }

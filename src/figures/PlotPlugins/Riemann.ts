@@ -4,74 +4,77 @@ import {Rect} from "@svgdotjs/svg.js";
 import {Plot} from "../Plot";
 
 export class Riemann extends Figure {
-    #plot: Plot
-    #from: number
-    #to: number
-    #number: number
-    #below: boolean
-    #rectangles: Rect[]
+    private _plot: Plot
+    private _from: number
+    private _to: number
+    private _number: number
+    private _pos: number
+    private _rectangles: Rect[]
 
-    constructor(plot: Plot, from: number, to: number, rectangles: number, below?: boolean) {
+    constructor(plot: Plot, from: number, to: number, rectangles: number, pos?: number) {
         super(plot.graph, '');
 
-        this.#plot = plot
-        this.#from = from
-        this.#to = to
-        this.#number = rectangles
-        this.#below = below === undefined || below
+        this._plot = plot
+        this._from = from
+        this._to = to
+        this._number = rectangles
+        this._pos = pos === undefined?0:pos
+
+        if(pos<0){pos =0}
+        if(pos>1){pos =1}
 
         this.svg = this.graph.svg.group()
-        this.#rectangles = []
+        this._rectangles = []
 
         this.updateFigure()
     }
 
     get plot(): Plot {
-        return this.#plot;
+        return this._plot;
     }
 
     get from(): number {
-        return this.#from;
+        return this._from;
     }
 
     set from(value: number) {
-        this.#from = value;
+        this._from = value;
         this.update()
     }
 
     get to(): number {
-        return this.#to;
+        return this._to;
     }
 
     set to(value: number) {
-        this.#to = value;
+        this._to = value;
         this.update()
     }
 
     get number(): number {
-        return this.#number;
+        return this._number;
     }
 
     set number(value: number) {
-        this.#number = value;
+        this._number = value;
         this.update()
     }
 
-    get below(): boolean {
-        return this.#below;
+    get pos(): number {
+        return this._pos;
     }
 
-    set below(value: boolean) {
-        this.#below = value;
+    set below(value: number) {
+        this._pos = value;
         this.update()
     }
 
     get rectangles(): Rect[] {
-        return this.#rectangles;
+        return this._rectangles;
     }
 
     clean() {
-        for (let r of this.#rectangles) {
+        for (let r of this._rectangles) {
             r.remove()
         }
         this.svg.remove()
@@ -80,29 +83,29 @@ export class Riemann extends Figure {
     updateFigure(): Riemann {
         let x = 0, y = 0,
             height,
-            step = (this.#to - this.#from) / this.#number,
+            step = (this._to - this._from) / this._number,
             width = this.graph.distanceToPixels(step),
             pxX
 
         // reset the rectangles if not the same number (for animation purpose)
-        if (this.#rectangles !== undefined && this.#number !== this.#rectangles.length) {
+        if (this._rectangles !== undefined && this._number !== this._rectangles.length) {
             this.clean()
         }
 
         // Generate the base version with "flatten rectangle"
-        if (this.#rectangles === undefined || this.#number !== this.#rectangles.length) {
-            this.#rectangles = []
+        if (this._rectangles === undefined || this._number !== this._rectangles.length) {
+            this._rectangles = []
 
             // Create the zero height rectangles.
-            for (let i = 0; i < this.#number; i++) {
+            for (let i = 0; i < this._number; i++) {
                 // Unit value
-                x = +this.#from + step * i
+                x = +this._from + step * i
                 y = x + step
                 // pixels value
                 pxX = this.graph.unitsToPixels({x: x, y: 0})
                 height = 0
 
-                this.#rectangles.push(
+                this._rectangles.push(
                     this.graph.svg.rect(
                         width,
                         height
@@ -135,19 +138,18 @@ export class Riemann extends Figure {
 
         }
 
-        for (let i = 0; i < this.#number; i++) {
+        for (let i = 0; i < this._number; i++) {
             // Unit value
-            x = +this.#from + step * i
+            x = +this._from + step * i
             y = x + step
             // pixels value
             pxX = this.graph.unitsToPixels({x: x, y: 0})
 
             // The value can be negative
-            height = this.graph.distanceToPixels(
-                (this.#below === undefined || this.#below) ? this.#plot.evaluate(x).y : this.#plot.evaluate(y).y, AXIS.VERTICAL
-            )
+            // (this._pos === undefined || this._pos) ? this._plot.evaluate(x).y : this._plot.evaluate(y).y, AXIS.VERTICAL
+            height = this.graph.distanceToPixels(this._plot.evaluate(x + step*this._pos).y, AXIS.VERTICAL)
 
-            this.#rectangles[i]
+            this._rectangles[i]
                 .data('values', {x, y, height, width})
                 .animate(500)
                 .height(Math.abs(height))

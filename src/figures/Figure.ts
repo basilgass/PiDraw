@@ -1,71 +1,135 @@
 import {Graph} from "../Graph";
 import {Label} from "./Label";
-import {Circle, G, Line, Path, Shape} from "@svgdotjs/svg.js";
+import {Shape} from "@svgdotjs/svg.js";
 import {svgShape} from "../variables/types";
 
 export class Figure {
+    constructor(graph: Graph, name: string) {
+        this._freeze = false
+
+        this._graph = graph
+        this._name = name
+    }
+
     /**
      * Canvas root object.
      * @type {Graph}
      * @private
      */
-    #graph: Graph
+    private _graph: Graph
+
+    get graph(): Graph {
+        return this._graph;
+    }
+
     /**
      * Define if the object should update or not.
      * @type {Boolean}
      * @private
      */
-    #freeze: Boolean
+    private _freeze: Boolean
+
+    get freeze(): Boolean {
+        return this._freeze;
+    }
+
+    set freeze(value: Boolean) {
+        this._freeze = value;
+    }
+
     /**
      * Name of the figure
      * @type {string}
      * @private
      */
-    #name: string
-    /**
-     * THe Label object assign to this Figure.
-     * @type {Label}
-     * @private
-     */
-    #label: Label
+    private _name: string
+
+    get name(): string {
+        return this._name;
+    }
+
+    set name(value: string) {
+        this._name = value;
+    }
+
     /**
      * The SVG object
      * @type {unknown}
      * @private
      */
-    #svg: svgShape
+    private _svg: svgShape
 
-    constructor(graph: Graph, name: string) {
-        this.#freeze = false
+    get svg(): Shape {
+        return this._svg;
+    }
 
-        this.#graph = graph
-        this.#name = name
+    set svg(value: Shape) {
+        this._svg = value;
+    }
 
-        // TODO: handle labels - automatically add it ?
-        // this.#label = new Label(graph, name)
+    /**
+     * Label figure
+     * @type {Label}
+     * @private
+     */
+    private _label: Label
 
+    get label(): Label {
+        return this._label;
+    }
+
+    set label(value: Label) {
+        this._label = value;
     }
 
     draw() {
-        this.#freeze = false
+        this._freeze = false
         this.update()
     }
+
     update() {
         // We don't want to update.
-        if (this.#freeze || this.#graph.freeze) {
+        if (this._freeze || this._graph.freeze) {
             return
         }
         this.updateFigure()
+        if (this._label) {
+            this._label.update()
+        }
     }
 
-    updateFigure():Figure {
+    updateFigure(): Figure {
         return this
     }
 
-    generateName(): string {
-        return this.#name
+    updateLabel(): Figure {
+        return this
     }
 
+    remove(): void {
+        // Remove the label
+        if (this.label) {
+            this.label.svg.remove()
+        }
+        // Remove the svg
+        this.svg.remove()
+
+
+        // Remove the item from the graph build list.
+        if (this.graph.points[this.name] !== undefined) {
+            delete this.graph.points[this.name]
+        }
+
+        for (let i = 0; i < this.graph.figures.length; i++) {
+            if (this.graph.figures[i].name === this.name) {
+                this.graph.figures.splice(i, 1)
+            }
+        }
+    }
+
+    generateName(): string {
+        return this._name
+    }
 
     dash(value: number | string): Figure {
         if (typeof value === "number") {
@@ -85,12 +149,15 @@ export class Figure {
     thin(): Figure {
         return this.width(1)
     }
+
     ultrathin(): Figure {
         return this.width(0.5)
     }
-    thick(): Figure{
+
+    thick(): Figure {
         return this.width(2)
     }
+
     ultrathick(): Figure {
         return this.width(3)
     }
@@ -101,42 +168,10 @@ export class Figure {
         return this
     }
 
-    stroke(value: {width?: number, color?: string, opacity?: number}): Figure {
+    stroke(value: { width?: number, color?: string, opacity?: number }): Figure {
         this.svg.stroke(value)
 
         return this
-    }
-
-    get freeze(): Boolean {
-        return this.#freeze;
-    }
-
-    get name(): string {
-        return this.#name;
-    }
-
-    get label(): Label {
-        return this.#label;
-    }
-
-    get graph(): Graph {
-        return this.#graph;
-    }
-
-    get svg(): Shape {
-        return this.#svg;
-    }
-
-    set freeze(value: Boolean) {
-        this.#freeze = value;
-    }
-
-    set name(value: string) {
-        this.#name = value;
-    }
-
-    set svg(value: Shape) {
-        this.#svg = value;
     }
 
 

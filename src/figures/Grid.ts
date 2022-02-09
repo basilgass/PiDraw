@@ -11,8 +11,8 @@ export interface GridConfig {
 }
 
 export class Grid extends Figure{
-    #config: GridConfig
-    // #origin: IPoint;
+    _config: GridConfig
+    // _origin: IPoint;
     constructor(graph: Graph, name: string, config?:GridConfig) {
         super(graph, name)
 
@@ -20,25 +20,24 @@ export class Grid extends Figure{
 
         // Default configuration of the grid.
         if(config){
-            this.#config = config
+            this._config = config
         }else{
-            this.#config = {
+            this._config = {
                 axisX: 50,
                 axisY: 50,
                 type: GRIDTYPE.ORTHOGONAL
             }
         }
 
-        // this.#origin = {x: 0, y: this.graph.height}
-
+        // this._origin = {x: 0, y: this.graph.height}
         this.load()
     }
 
     load(): Grid {
         const w = this.graph.width,
             h = this.graph.height,
-            x = this.#config.axisX,
-            y = this.#config.axisY,
+            x = this._config.axisX,
+            y = this._config.axisY,
             xOffset = this.graph.origin.x % x,
             yOffset = this.graph.origin.y % y
 
@@ -72,12 +71,12 @@ export class Grid extends Figure{
             nearestPoint = {x: +pt.x, y: +pt.y};
 
         // Version for orthographic.
-        if(this.#config.type===GRIDTYPE.ORTHOGONAL){
-            let nX = Math.trunc(pt.x / this.#config.axisX)*this.#config.axisX,
-                nY = Math.trunc(pt.y / this.#config.axisY)*this.#config.axisY
+        if(this._config.type===GRIDTYPE.ORTHOGONAL){
+            let nX = Math.trunc(pt.x / this._config.axisX)*this._config.axisX,
+                nY = Math.trunc(pt.y / this._config.axisY)*this._config.axisY
 
-            nearestPoint.x = pt.x < nX+this.#config.axisX/2 ? nX: nX + this.#config.axisX
-            nearestPoint.y = pt.y < nY+this.#config.axisY/2 ? nY: nY + this.#config.axisY
+            nearestPoint.x = pt.x < nX+this._config.axisX/2 ? nX: nX + this._config.axisX
+            nearestPoint.y = pt.y < nY+this._config.axisY/2 ? nY: nY + this._config.axisY
         }
 
         return nearestPoint;
