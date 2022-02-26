@@ -15,8 +15,8 @@ export class FillBetween extends Figure {
 
         this._plot = plot
         this._plot2 = plot2
-        this._from = from
-        this._to = to
+        this._from = from<to?+from:+to
+        this._to = from<to?+to:+from
         this._samples = samples
         this._d = ''
 

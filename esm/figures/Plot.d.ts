@@ -30,4 +30,5 @@ export declare class Plot extends Figure {
     private _parse;
     private _getFlatPath;
     private _getPath;
+    remove(): void;
 }

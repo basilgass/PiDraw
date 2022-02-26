@@ -33,12 +33,16 @@
 
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 my-5 max-w-3xl mx-auto">
-        <textarea
+        <div class="flex flex-col">
+            <div class="font-thin">Paramètres (xMin,xMax,yMin,yMax)</div>
+            <input x-model="parameters" @input="modify" class=" px-2 py-3 mb-5 border rounded">
+
+            <textarea
                 x-model="construct"
                 rows="10"
-                class="border mx-3 md:mx-0 py-2 px-3"
+                class="border mx-3 md:mx-0 py-2 px-3 rounded"
                 @input="build"
-        ></textarea>
+        ></textarea></div>
         <div class="px-3 md:px-0">
             <table class="w-full">
                 <tr>
@@ -54,6 +58,18 @@
                     <td class="font-thin">droite passant par A et B</td>
                 </tr>
                 <tr>
+                    <td class="font-mono">a=[AB]</td>
+                    <td class="font-thin">segment AB</td>
+                </tr>
+                <tr>
+                    <td class="font-mono">a=[AB[</td>
+                    <td class="font-thin">demi droite AB, ouverte en B</td>
+                </tr>
+                <tr>
+                    <td class="font-mono">a=vAB</td>
+                    <td class="font-thin">vecteur AB</td>
+                </tr>
+                <tr>
                     <td class="font-mono">p=perp d,A</td>
                     <td class="font-thin">perpendiculaire à d par A</td>
                 </tr>
@@ -65,6 +81,14 @@
                     <td class="font-mono">p=circ A,2</td>
                     <td class="font-thin">cercle de centre A et de rayon 2</td>
                 </tr>
+                <tr>
+                    <td class="font-mono">f(x)=3*x-5</td>
+                    <td class="font-thin">Tracer une fonction y=f(x)</td>
+                </tr>
+                <tr>
+                    <td class="font-mono">zone=fill f,g? a,b</td>
+                    <td class="font-thin">Remplir l'espace entre deux fonctions, borné par a et b</td>
+                </tr>
             </table>
         </div>
     </div>
@@ -73,17 +97,41 @@
 </div>
 <script>
 	function autoParse () {
-		let graph = new PiDraw('root')
-		graph.axis()
+		let graph = new PiDraw('root'),
+            axis = graph.axis()
 
         let parser = graph.parse(``)
 
 		return {
 			figures: graph.figures.map(x => x.name),
 			construct: '',
+            parameters: '',
 			build () {
 				parser.update(this.construct)
-			}
+			},
+            modify() {
+                // Get the parameters.
+                let values = this.parameters.split(',')
+                if(values.length===4){
+                    let xMin = +values[0],
+                        xMax = +values[1],
+                        yMin = +values[2],
+                        yMax = +values[3]
+
+
+                    let pixelsPerUnitX = 800 / (Math.max(xMin, xMax)-Math.min(xMin, xMax))
+
+                    console.log(pixelsPerUnitX)
+                    graph.updateLayout({
+                        xMin,
+                        xMax,
+                        yMin,
+                        yMax,
+                        pixelsPerUnit: pixelsPerUnitX
+                    })
+                    parser.update(this.construct, true)
+                }
+            }
 		}
 	}
 

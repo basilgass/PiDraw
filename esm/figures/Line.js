@@ -48,6 +48,7 @@ class Line extends Figure_1.Figure {
     asSegment(value) {
         this._segment = value === undefined || value;
         this.update();
+        return this;
     }
     asVector(value) {
         this._segment = value === undefined || value;
@@ -55,6 +56,7 @@ class Line extends Figure_1.Figure {
             this.svg.marker('end', this.graph.markers.end);
         }
         this.update();
+        return this;
     }
     generateName() {
         if (this.name === undefined) {

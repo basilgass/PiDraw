@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Parser = void 0;
 const Line_1 = require("./figures/Line");
+const Plot_1 = require("./figures/Plot");
 class Parser {
     figures;
     step;
@@ -11,7 +12,10 @@ class Parser {
         this._graph = graph;
         this.update(construction);
     }
-    update(construction) {
+    update(construction, refresh) {
+        if (refresh === true) {
+            this.update('');
+        }
         if (!this._buildedSteps) {
             this._buildedSteps = [];
         }
@@ -19,7 +23,10 @@ class Parser {
         let i;
         for (i = 0; i < this._buildedSteps.length; i++) {
             if (this._buildedSteps[i].step !== steps[i]) {
-                for (let j = i; j < this._buildedSteps.length; j++) {
+                for (let j = +i; j < this._buildedSteps.length; j++) {
+                    if (this._buildedSteps[j].figures === undefined) {
+                        continue;
+                    }
                     for (let fig of this._buildedSteps[j].figures) {
                         fig.remove();
                     }
@@ -42,32 +49,57 @@ class Parser {
             }
             name = match[0].trim();
             assign = construct.split('=');
-            if (assign.length === 1) {
-                builded = this._generatePoint(construct);
+            try {
+                if (assign.length === 1) {
+                    builded = this._generatePoint(construct);
+                }
+                else if (assign.length === 2) {
+                    if (this._graph.getFigure(name)) {
+                        continue;
+                    }
+                    let constr = assign[1].trim(), key = constr.match(/^[a-z]+\s/g);
+                    if (constr === '') {
+                        break;
+                    }
+                    if (key === null) {
+                        let checkFx = assign[0].match(/^[a-zA-z_0-9]+\(x\)/g);
+                        if (checkFx) {
+                            builded = this._generatePlot(name, constr);
+                        }
+                        else {
+                            if (constr[0] === 'v') {
+                                builded = this._generateVector(name, constr);
+                            }
+                            else {
+                                builded = this._generateLine(name, constr);
+                            }
+                        }
+                    }
+                    else {
+                        let constructKey = key[0].trim();
+                        if (constructKey === 'mid') {
+                            builded = this._generateMidPoint(name, constr);
+                        }
+                        else if (constructKey === 'perp') {
+                            builded = this._generatePerpendicular(name, constr);
+                        }
+                        else if (constructKey === 'para') {
+                            builded = this._generateParallel(name, constr);
+                        }
+                        else if (constructKey === 'circ') {
+                            builded = this._generateCircle(name, constr);
+                        }
+                        else if (constructKey === 'fill') {
+                            builded = this._generateFillBetween(name, constr);
+                        }
+                    }
+                }
             }
-            else if (assign.length === 2) {
-                if (this._graph.getFigure(name)) {
-                    continue;
-                }
-                let constr = assign[1].trim(), key = constr.match(/^[a-z]+\s/g);
-                if (key === null) {
-                    builded = this._generateLine(name, constr);
-                }
-                else {
-                    let constructKey = key[0].trim();
-                    if (constructKey === 'mid') {
-                        builded = this._generateMidPoint(name, constr);
-                    }
-                    else if (constructKey === 'perp') {
-                        builded = this._generatePerpendicular(name, constr);
-                    }
-                    else if (constructKey === 'para') {
-                        builded = this._generateParallel(name, constr);
-                    }
-                    else if (constructKey === 'circ') {
-                        builded = this._generateCircle(name, constr);
-                    }
-                }
+            catch {
+                console.error('There was an error building', {
+                    name: name,
+                    step: construct
+                });
             }
             builded.step = construct;
             this._buildedSteps.push(builded);
@@ -89,6 +121,14 @@ class Parser {
             figures = [this._graph.point(x, y, name)];
         }
         return { step, figures };
+    }
+    _generateVector(name, step) {
+        let match = [...step.matchAll(/^v([A-Z]_?[0-9]?)([A-Z]_?[0-9]?)/g)], figures;
+        if (match.length > 0) {
+            let A = this._graph.getPoint(match[0][1]), B = this._graph.getPoint(match[0][2]);
+            figures = [this._graph.line(A, B, null, name).asVector()];
+        }
+        return { figures, step };
     }
     _generateLine(name, step) {
         let match = [...step.matchAll(/^([A-Z]_?[0-9]?)([A-Z]_?[0-9]?)/g)], figures;
@@ -132,7 +172,32 @@ class Parser {
         let match = [...step.matchAll(/^circ ([A-Z]_?[0-9]?),([0-9.]+)/g)], figures;
         if (match.length > 0) {
             let A = this._graph.getPoint(match[0][1]), radius = +match[0][2];
-            figures = [this._graph.circle(A, radius)];
+            figures = [this._graph.circle(A, radius, name)];
+        }
+        return { figures, step };
+    }
+    _generatePlot(name, step) {
+        let figures;
+        figures = [this._graph.plot(step, {
+                samples: 100,
+                domain: this._graph.unitXDomain
+            }, name)];
+        return { figures, step };
+    }
+    _generateFillBetween(name, step) {
+        let figures = [], match, f = null, g = null, min, max;
+        match = [...step.matchAll(/fill ([a-z]),?([a-z])?.?(([\d.]+),([\d.]+))?/g)];
+        if (match.length > 0) {
+            f = match[0][1] || null;
+            g = match[0][2] || null;
+            min = +match[0][4] || this._graph.unitXDomain.min;
+            max = +match[0][5] || this._graph.unitXDomain.max;
+        }
+        if (f !== null) {
+            let FX = this._graph.getFigure(f), GX = g !== null ? this._graph.getFigure(g) : null;
+            if (FX instanceof Plot_1.Plot) {
+                figures = [FX.fillBetween((GX instanceof Plot_1.Plot) ? GX : null, min, max)];
+            }
         }
         return { figures, step };
     }

@@ -1,11 +1,11 @@
 import {Figure} from "./Figure";
 import {Graph} from "../Graph";
 import {IPoint} from "../variables/interfaces";
-import {NumExp} from "pimath/esm/maths/numexp";
 import {G, Path, Rect} from "@svgdotjs/svg.js";
 import {Riemann} from "./PlotPlugins/Riemann";
 import {Follow} from "./PlotPlugins/Follow";
 import {FillBetween} from "./PlotPlugins/FillBetween";
+import {NumExp} from "pimath/esm/maths/expressions/numexp";
 
 export interface PlotConfig {
     domain: { min: number, max: number },
@@ -38,8 +38,6 @@ export class Plot extends Figure {
         this.plot(fn);
 
         this._plugins = []
-
-
     }
 
     generateName(): string {
@@ -139,15 +137,13 @@ export class Plot extends Figure {
 
     evaluate(x: number): IPoint {
         let y
-        if (this._fx instanceof NumExp) {
+        if (this._fx instanceof NumExp && this._fx.isValid) {
             y = this._fx.evaluate({x: +x})
-            if (isNaN(y)) {
-                console.log('error calculating', this._fx.expression, ' at ', x)
-            }
         } else if (typeof this._fx === 'function') {
             y = this._fx(x)
         } else {
-            console.log('Function type error: ', typeof this._fx)
+            y = NaN
+            // console.log('Function type error: ', typeof this._fx)
         }
 
         return {x, y}
@@ -185,7 +181,8 @@ export class Plot extends Figure {
             prevToken = '',
             graphHeight = this.graph.height,
             x = +from,
-            y = 0
+            y = 0,
+            errorCounter = 0
 
         // Make sure the samples is a positive number.
         if (samples <= 0) {
@@ -194,34 +191,36 @@ export class Plot extends Figure {
 
         while (x <= to + 1 / samples) {
             // Evaluate the function at the point.
-            const pt = this.graph.unitsToPixels(this.evaluate(x))
-
-            // Do not add consecutive "move to"
-            if (prevToken === 'M' && nextToken === 'M') {
-            } else {
-                // store the previous token.
-                prevToken = '' + nextToken
-
-                // If it was already a line before (or will be after), add a L (lineto)
-                d += `${(prevToken === 'L' || nextToken === 'L') ? nextToken : prevToken}`;
-
-                // Create next coordinate, removing extra decimals
-                if (Math.abs(pt.y) > graphHeight * 5) {
-                    if (pt.y > 0) {
-                        y = this.graph.height + 50
-                    } else {
-                        y = -50
-                    }
-                } else {
-                    y = pt.y
-                }
-                d += `${pt.x.toFixed(this._precision)},${y.toFixed(this._precision)} `
-
-                points.push(pt)
+           const pt = this.graph.unitsToPixels(this.evaluate(x))
+            if(isNaN(pt.y)){
+                errorCounter++
+                pt.y = 0
+                nextToken = 'M'
             }
+            if(errorCounter>samples*2){return {d, points}}
+
+            // store the previous token.
+            prevToken = '' + nextToken
+
+            // If it was already a line before (or will be after), add a L (lineto)
+            d += `${(prevToken === 'L' || nextToken === 'L') ? nextToken : prevToken}`;
+
+            // Create next coordinate, removing extra decimals
+            if (Math.abs(pt.y) > graphHeight * 5) {
+                if (pt.y > 0) {
+                    y = this.graph.height + 100
+                } else {
+                    y = -100
+                }
+            } else {
+                y = pt.y
+            }
+            d += `${pt.x.toFixed(this._precision)},${y.toFixed(this._precision)} `
+
+            points.push(pt)
 
             // Prepare the next point (break or continuous line)
-            if ((pt.y > -100 && pt.y < graphHeight + 100)) { // The point is not too far - draw a line.
+            if ((pt.y > -5000 && pt.y < graphHeight + 5000)) { // The point is not too far - draw a line.
                 nextToken = 'L';
             } else {
                 // The line is out of scope - no need to draw it !
@@ -233,5 +232,14 @@ export class Plot extends Figure {
         }
 
         return {d, points}
+    }
+
+    public remove(){
+        // Remove all plugins.
+        for(let P of this._plugins){
+            P.remove()
+        }
+
+        super.remove()
     }
 }

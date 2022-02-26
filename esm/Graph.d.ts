@@ -68,6 +68,7 @@ export declare class Graph {
     plot(fn: Function | string, config?: PlotConfig, name?: string): Plot;
     arc(A: Point | string, O: Point | string, B: Point | string, radius?: number | Point, name?: string): Arc;
     update(): Graph;
+    updateLayout(config: GraphConfig): Graph;
     createMarker(scale: number): {
         start: Marker;
         end: Marker;

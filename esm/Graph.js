@@ -50,7 +50,7 @@ class Graph {
             axisX: this._pixelsPerUnit.x,
             axisY: this._pixelsPerUnit.y,
             type: enums_1.GRIDTYPE.ORTHOGONAL
-        }).color('lightgray');
+        });
         this._figures.push(g);
         this._layers.grids.add(g.svg);
         this._markers = this.createMarker(10);
@@ -222,6 +222,24 @@ class Graph {
         for (let figure of this._figures) {
             figure.update();
         }
+        return this;
+    }
+    updateLayout(config) {
+        let grid = this.getFigure('MAINGRID'), axisX = this.getFigure('Ox'), axisY = this.getFigure('Oy');
+        this._initSetWidthAndHeight(config);
+        this._svg.viewbox(0, 0, this._width, this._height);
+        if (grid instanceof Grid_1.Grid) {
+            if ((0, interfaces_1.isDrawConfigUnitMinMax)(config)) {
+                this._pixelsPerUnit.x = config.pixelsPerUnit;
+                this._pixelsPerUnit.y = config.pixelsPerUnit;
+            }
+            grid.config = {
+                axisX: this._pixelsPerUnit.x,
+                axisY: this._pixelsPerUnit.y,
+                type: enums_1.GRIDTYPE.ORTHOGONAL
+            };
+        }
+        this.update();
         return this;
     }
     createMarker(scale) {

@@ -71,18 +71,20 @@ export class Line extends Figure {
         this._segment = value;
     }
 
-    asSegment(value?: boolean) {
+    asSegment(value?: boolean): Line {
         this._segment = value === undefined || value
         this.update()
+        return this
     }
 
-    asVector(value?: boolean) {
+    asVector(value?: boolean): Line {
         this._segment = value === undefined || value
 
         if (this.svg instanceof svgLine) {
             this.svg.marker('end', this.graph.markers.end)
         }
         this.update()
+        return this
     }
 
     generateName(): string {

@@ -82,7 +82,8 @@ export class Graph {
             axisX: this._pixelsPerUnit.x,
             axisY: this._pixelsPerUnit.y,
             type: GRIDTYPE.ORTHOGONAL
-        }).color('lightgray')
+        })
+
         this._figures.push(g)
         this._layers.grids.add(g.svg)
 
@@ -395,6 +396,38 @@ export class Graph {
         for (let figure of this._figures) {
             figure.update()
         }
+        return this
+    }
+
+    updateLayout(config: GraphConfig): Graph {
+        let grid = this.getFigure('MAINGRID'),
+            axisX = this.getFigure('Ox'),
+            axisY = this.getFigure('Oy')
+
+        // This sets the origin and width
+        this._initSetWidthAndHeight(config)
+        this._svg.viewbox(0, 0, this._width, this._height)
+        if (grid instanceof Grid) {
+            if(isDrawConfigUnitMinMax(config)){
+                this._pixelsPerUnit.x = config.pixelsPerUnit
+                this._pixelsPerUnit.y = config.pixelsPerUnit
+            }
+            grid.config = {
+                axisX: this._pixelsPerUnit.x,
+                axisY: this._pixelsPerUnit.y,
+                type: GRIDTYPE.ORTHOGONAL
+            }
+            // grid.update()
+        }
+        // if(axisX instanceof Axis){
+        //     axisX.update()
+        // }
+        // if(axisY instanceof Axis){
+        //     axisY.update()
+        // }
+
+        this.update()
+
         return this
     }
 

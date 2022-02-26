@@ -2,11 +2,11 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Plot = void 0;
 const Figure_1 = require("./Figure");
-const numexp_1 = require("pimath/esm/maths/numexp");
 const svg_js_1 = require("@svgdotjs/svg.js");
 const Riemann_1 = require("./PlotPlugins/Riemann");
 const Follow_1 = require("./PlotPlugins/Follow");
 const FillBetween_1 = require("./PlotPlugins/FillBetween");
+const numexp_1 = require("pimath/esm/maths/expressions/numexp");
 class Plot extends Figure_1.Figure {
     _config;
     _precision;
@@ -97,17 +97,14 @@ class Plot extends Figure_1.Figure {
     }
     evaluate(x) {
         let y;
-        if (this._fx instanceof numexp_1.NumExp) {
+        if (this._fx instanceof numexp_1.NumExp && this._fx.isValid) {
             y = this._fx.evaluate({ x: +x });
-            if (isNaN(y)) {
-                console.log('error calculating', this._fx.expression, ' at ', x);
-            }
         }
         else if (typeof this._fx === 'function') {
             y = this._fx(x);
         }
         else {
-            console.log('Function type error: ', typeof this._fx);
+            y = NaN;
         }
         return { x, y };
     }
@@ -129,32 +126,36 @@ class Plot extends Figure_1.Figure {
         return d;
     }
     _getPath(from, to, samples, firstToken) {
-        let d = '', points = [], nextToken = firstToken === undefined ? 'M' : firstToken, prevToken = '', graphHeight = this.graph.height, x = +from, y = 0;
+        let d = '', points = [], nextToken = firstToken === undefined ? 'M' : firstToken, prevToken = '', graphHeight = this.graph.height, x = +from, y = 0, errorCounter = 0;
         if (samples <= 0) {
             samples = 20;
         }
         while (x <= to + 1 / samples) {
             const pt = this.graph.unitsToPixels(this.evaluate(x));
-            if (prevToken === 'M' && nextToken === 'M') {
+            if (isNaN(pt.y)) {
+                errorCounter++;
+                pt.y = 0;
+                nextToken = 'M';
             }
-            else {
-                prevToken = '' + nextToken;
-                d += `${(prevToken === 'L' || nextToken === 'L') ? nextToken : prevToken}`;
-                if (Math.abs(pt.y) > graphHeight * 5) {
-                    if (pt.y > 0) {
-                        y = this.graph.height + 50;
-                    }
-                    else {
-                        y = -50;
-                    }
+            if (errorCounter > samples * 2) {
+                return { d, points };
+            }
+            prevToken = '' + nextToken;
+            d += `${(prevToken === 'L' || nextToken === 'L') ? nextToken : prevToken}`;
+            if (Math.abs(pt.y) > graphHeight * 5) {
+                if (pt.y > 0) {
+                    y = this.graph.height + 100;
                 }
                 else {
-                    y = pt.y;
+                    y = -100;
                 }
-                d += `${pt.x.toFixed(this._precision)},${y.toFixed(this._precision)} `;
-                points.push(pt);
             }
-            if ((pt.y > -100 && pt.y < graphHeight + 100)) {
+            else {
+                y = pt.y;
+            }
+            d += `${pt.x.toFixed(this._precision)},${y.toFixed(this._precision)} `;
+            points.push(pt);
+            if ((pt.y > -5000 && pt.y < graphHeight + 5000)) {
                 nextToken = 'L';
             }
             else {
@@ -163,6 +164,12 @@ class Plot extends Figure_1.Figure {
             x += 1 / samples;
         }
         return { d, points };
+    }
+    remove() {
+        for (let P of this._plugins) {
+            P.remove();
+        }
+        super.remove();
     }
 }
 exports.Plot = Plot;

@@ -25,8 +25,8 @@ export declare class Line extends Figure {
     private _segment;
     get segment(): boolean;
     set segment(value: boolean);
-    asSegment(value?: boolean): void;
-    asVector(value?: boolean): void;
+    asSegment(value?: boolean): Line;
+    asVector(value?: boolean): Line;
     generateName(): string;
     updateFigure(): Line;
     private _updateLineThroughAandB;

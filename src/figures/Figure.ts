@@ -114,7 +114,6 @@ export class Figure {
         // Remove the svg
         this.svg.remove()
 
-
         // Remove the item from the graph build list.
         if (this.graph.points[this.name] !== undefined) {
             delete this.graph.points[this.name]

@@ -1,5 +1,4 @@
 import {Graph} from "../Graph";
-import {G} from "@svgdotjs/svg.js";
 import {IPoint} from "../variables/interfaces";
 import {Figure} from "./Figure";
 import {GRIDTYPE} from "../variables/enums";
@@ -10,18 +9,15 @@ export interface GridConfig {
     type: GRIDTYPE
 }
 
-export class Grid extends Figure{
-    _config: GridConfig
+export class Grid extends Figure {
     // _origin: IPoint;
-    constructor(graph: Graph, name: string, config?:GridConfig) {
+    constructor(graph: Graph, name: string, config?: GridConfig) {
         super(graph, name)
 
-        this.svg = this.graph.svg.group()
-
         // Default configuration of the grid.
-        if(config){
+        if (config) {
             this._config = config
-        }else{
+        } else {
             this._config = {
                 axisX: 50,
                 axisY: 50,
@@ -33,7 +29,18 @@ export class Grid extends Figure{
         this.load()
     }
 
+    private _config: GridConfig
+
+    get config(): GridConfig {
+        return this._config;
+    }
+
+    set config(value: GridConfig) {
+        this._config = value;
+    }
+
     load(): Grid {
+        this.svg = this.graph.svg.group()
         const w = this.graph.width,
             h = this.graph.height,
             x = this._config.axisX,
@@ -43,26 +50,27 @@ export class Grid extends Figure{
 
         // Vertical lines
         for (let pos = -x; pos <= w; pos += x) {
-            this.svg.add(this.graph.svg.line(pos+xOffset, 0-yOffset, pos+xOffset, h+yOffset));
+            this.svg.add(this.graph.svg.line(pos + xOffset, 0 - yOffset, pos + xOffset, h + yOffset));
         }
 
         // Horizontal lines
-        for (let pos = h+y; pos >= 0; pos -= y) {
-            this.svg.add(this.graph.svg.line(0-xOffset, pos-yOffset, w+xOffset, pos-yOffset));
+        for (let pos = h + y; pos >= 0; pos -= y) {
+            this.svg.add(this.graph.svg.line(0 - xOffset, pos - yOffset, w + xOffset, pos - yOffset));
         }
 
-        this.svg.stroke({color: 'black', width: 0.5});
+        this.svg.stroke({color: 'lightgray', width: 0.5});
         return this
 
     }
+
     show(): Grid {
         this.svg.show()
-    return  this
+        return this
     }
 
     hide(): Grid {
         this.svg.hide()
-        return  this
+        return this
     }
 
     nearestPoint = (pt: IPoint): IPoint => {
@@ -71,16 +79,21 @@ export class Grid extends Figure{
             nearestPoint = {x: +pt.x, y: +pt.y};
 
         // Version for orthographic.
-        if(this._config.type===GRIDTYPE.ORTHOGONAL){
-            let nX = Math.trunc(pt.x / this._config.axisX)*this._config.axisX,
-                nY = Math.trunc(pt.y / this._config.axisY)*this._config.axisY
+        if (this._config.type === GRIDTYPE.ORTHOGONAL) {
+            let nX = Math.trunc(pt.x / this._config.axisX) * this._config.axisX,
+                nY = Math.trunc(pt.y / this._config.axisY) * this._config.axisY
 
-            nearestPoint.x = pt.x < nX+this._config.axisX/2 ? nX: nX + this._config.axisX
-            nearestPoint.y = pt.y < nY+this._config.axisY/2 ? nY: nY + this._config.axisY
+            nearestPoint.x = pt.x < nX + this._config.axisX / 2 ? nX : nX + this._config.axisX
+            nearestPoint.y = pt.y < nY + this._config.axisY / 2 ? nY : nY + this._config.axisY
         }
 
         return nearestPoint;
     };
 
+    update(): Grid {
+        this.svg.remove()
+        this.load()
 
+        return this
+    }
 }

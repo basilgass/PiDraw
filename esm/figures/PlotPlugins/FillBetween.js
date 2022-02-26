@@ -15,8 +15,8 @@ class FillBetween extends Figure_1.Figure {
         super(plot.graph, '');
         this._plot = plot;
         this._plot2 = plot2;
-        this._from = from;
-        this._to = to;
+        this._from = from < to ? +from : +to;
+        this._to = from < to ? +to : +from;
         this._samples = samples;
         this._d = '';
         this.svg = this.graph.svg.path(this._d)

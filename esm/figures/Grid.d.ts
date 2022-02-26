@@ -8,10 +8,13 @@ export interface GridConfig {
     type: GRIDTYPE;
 }
 export declare class Grid extends Figure {
-    _config: GridConfig;
     constructor(graph: Graph, name: string, config?: GridConfig);
+    private _config;
+    get config(): GridConfig;
+    set config(value: GridConfig);
     load(): Grid;
     show(): Grid;
     hide(): Grid;
     nearestPoint: (pt: IPoint) => IPoint;
+    update(): Grid;
 }
