@@ -2,7 +2,7 @@
   "name": "pidraw",
   "version": "0.0.9",
   "description": "A drawing library using PiMath",
-  "main": "main.ts",
+  "main": "index.ts",
   "scripts": {
     "dev": "webpack --watch --config webpack.config.js",
     "production": "webpack --config webpack-production.config.js && webpack --config webpack-production-min.config.js && tsc --build"
