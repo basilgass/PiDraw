@@ -5,6 +5,8 @@ const Figure_1 = require("./Figure");
 const Point_1 = require("./Point");
 const svg_js_1 = require("@svgdotjs/svg.js");
 class Circle extends Figure_1.Figure {
+    _center;
+    _radius;
     constructor(graph, name, center, radius) {
         super(graph, name);
         this._center = center;

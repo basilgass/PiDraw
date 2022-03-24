@@ -1,9 +1,10 @@
 import {Figure} from "./Figure";
 import {Graph} from "../Graph";
 import {Point} from "./Point";
-import {Line as mathLine, Point as mathPoint, Vector as mathVector} from "pimath/esm/maths/geometry";
 import {Line as svgLine} from "@svgdotjs/svg.js";
-import {Fraction} from "pimath/esm/maths/coefficients";
+import {Line as mathLine} from "pimath/esm/maths/geometry/line"
+import {Point as mathPoint} from "pimath/esm/maths/geometry/point"
+import {PiMath} from "pimath/esm";
 
 export interface LineConfig {
     rule: string,
@@ -169,7 +170,7 @@ export class Line extends Figure {
 
             if((this._construction.rule === LINECONSTRUCTION.SLOPE)) {
                 if (! (this._construction.value instanceof Figure)) {
-                    let value = new Fraction(this._construction.value).value
+                    let value = new PiMath.Fraction(this._construction.value).value
                     this._math = new mathLine(
                         new mathPoint(this._A.x, this._A.y),
                         new mathPoint(this._A.x + 1, this._A.y - value)

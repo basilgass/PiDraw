@@ -5,6 +5,11 @@ const Figure_1 = require("./Figure");
 const Point_1 = require("./Point");
 const svg_js_1 = require("@svgdotjs/svg.js");
 class Arc extends Figure_1.Figure {
+    _center;
+    _start;
+    _end;
+    _radius;
+    _radiusReference;
     constructor(graph, name, center, start, stop, radius) {
         // TODO : build the arc class
         super(graph, name);
@@ -32,11 +37,13 @@ class Arc extends Figure_1.Figure {
         this.generateName();
         this.svg = this.graph.svg.path(this.getPath()).stroke('black').fill('none');
     }
+    _angle;
     get angle() {
         let { start, end } = this.getAngles();
         this._angle = end - start;
         return this._angle;
     }
+    _mark;
     get mark() {
         return this._mark;
     }
@@ -44,6 +51,7 @@ class Arc extends Figure_1.Figure {
         this._mark = value;
         this.update();
     }
+    _square;
     get square() {
         return this._square;
     }
@@ -51,6 +59,7 @@ class Arc extends Figure_1.Figure {
         this._square = value;
         this.update();
     }
+    _sector;
     get sector() {
         return this._sector;
     }

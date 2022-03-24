@@ -1,7 +1,7 @@
 import { Figure } from "./Figure";
 import { Graph } from "../Graph";
 import { Point } from "./Point";
-import { Line as mathLine } from "pimath/esm/maths/geometry";
+import { Line as mathLine } from "pimath/esm/maths/geometry/line";
 export interface LineConfig {
     rule: string;
     value?: Figure | number | string;

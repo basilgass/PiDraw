@@ -73,39 +73,105 @@ class Graph {
         // Create the markers
         this._markers = this.createMarker(10);
     }
+    /**
+     * HTML container
+     * @type {HTMLElement}
+     * @private
+     */
+    _container;
     get container() {
         return this._container;
     }
+    /**
+     * SVG.js main element
+     * @type {Svg}
+     * @private
+     */
+    _svg;
     get svg() {
         return this._svg;
     }
+    /**
+     * Number of pixels on the graph
+     * @type {number}
+     * @private
+     */
+    _width;
     get width() {
         return this._width;
     }
+    /**
+     * Number of pixels in the graph
+     * @type {number}
+     * @private
+     */
+    _height;
     get height() {
         return this._height;
     }
+    /**
+     * Origin position in unit coordinate
+     * @type {IPoint}
+     * @private
+     */
+    _origin;
     get origin() {
         return this._origin;
     }
     set origin(value) {
         this._origin = value;
     }
+    /**
+     * Number of pixels per unit.
+     * @type {IPoint}
+     * @private
+     */
+    _pixelsPerUnit;
     get pixelsPerUnit() {
         return this._pixelsPerUnit;
     }
+    /**
+     * List of all figures drawn in the graph.
+     * @type {Figure[]}
+     * @private
+     */
+    _figures;
     get figures() {
         return this._figures;
     }
+    /**
+     * List of all points by name. Used to quickly get a point.
+     * @type {{[p: string]: Point}}
+     * @private
+     */
+    _points;
     get points() {
         return this._points;
     }
+    /**
+     * Determine if all the graph must be drawn or not.
+     * @type {boolean}
+     * @private
+     */
+    _freeze;
     get freeze() {
         return this._freeze;
     }
+    /**
+     * Layers of the graph
+     * @type {ILayers}
+     * @private
+     */
+    _layers;
     get layers() {
         return this._layers;
     }
+    /**
+     * Default markers for start and end
+     * @type {{start: Marker, end: Marker}}
+     * @private
+     */
+    _markers;
     get markers() {
         return this._markers;
     }

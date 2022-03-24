@@ -8,6 +8,11 @@ const Follow_1 = require("./PlotPlugins/Follow");
 const FillBetween_1 = require("./PlotPlugins/FillBetween");
 const numexp_1 = require("pimath/esm/maths/expressions/numexp");
 class Plot extends Figure_1.Figure {
+    _config;
+    _precision;
+    _fx;
+    _plugins;
+    _riemann;
     constructor(graph, name, fn, config) {
         super(graph, name);
         this._config = {

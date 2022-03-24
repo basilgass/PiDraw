@@ -3,8 +3,13 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.Parser = void 0;
 const Line_1 = require("./figures/Line");
 const Plot_1 = require("./figures/Plot");
-const geometry_1 = require("pimath/esm/maths/geometry");
+const line_1 = require("pimath/esm/maths/geometry/line");
 class Parser {
+    figures;
+    step;
+    _buildedSteps; // {'A(4,6)': ['A']} {step: [list of object names]}
+    _construction;
+    _graph;
     constructor(graph, construction) {
         this._graph = graph;
         this.update(construction);
@@ -230,7 +235,7 @@ class Parser {
         }
         else if (match.includes('=')) {
             // type is      d = line 3x-2y=0    From equation
-            let equ = new geometry_1.Line(match);
+            let equ = new line_1.Line(match);
             // Get the point
             let A = this._graph.point(0, equ.getValueAtX(0).value);
             A.hide().label.hide();

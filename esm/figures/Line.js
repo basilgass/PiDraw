@@ -2,9 +2,10 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Line = exports.LINECONSTRUCTION = void 0;
 const Figure_1 = require("./Figure");
-const geometry_1 = require("pimath/esm/maths/geometry");
 const svg_js_1 = require("@svgdotjs/svg.js");
-const coefficients_1 = require("pimath/esm/maths/coefficients");
+const line_1 = require("pimath/esm/maths/geometry/line");
+const point_1 = require("pimath/esm/maths/geometry/point");
+const esm_1 = require("pimath/esm");
 var LINECONSTRUCTION;
 (function (LINECONSTRUCTION) {
     LINECONSTRUCTION["PARALLEL"] = "parallel";
@@ -25,18 +26,23 @@ class Line extends Figure_1.Figure {
         this.svg = this.graph.svg.line(0, 0, 0, 0).stroke('black');
         this.updateFigure();
     }
+    _A;
     get A() {
         return this._A;
     }
+    _B;
     get B() {
         return this._B;
     }
+    _construction;
     get construction() {
         return this._construction;
     }
+    _math;
     get math() {
         return this._math;
     }
+    _segment;
     get segment() {
         return this._segment;
     }
@@ -77,7 +83,7 @@ class Line extends Figure_1.Figure {
         return this;
     }
     _updateLineThroughAandB() {
-        this._math = new geometry_1.Line(new geometry_1.Point(this._A.x, this._A.y), new geometry_1.Point(this._B.x, this._B.y));
+        this._math = new line_1.Line(new point_1.Point(this._A.x, this._A.y), new point_1.Point(this._B.x, this._B.y));
         if (this._math.slope.isInfinity()) {
             if (this.svg instanceof svg_js_1.Line) {
                 this.svg.plot(this._A.x, 0, this._A.x, this.graph.height);
@@ -96,21 +102,21 @@ class Line extends Figure_1.Figure {
             if ((this._construction.rule === LINECONSTRUCTION.PARALLEL)) {
                 if (this._construction.value instanceof Line) {
                     let director = this._construction.value.math.director;
-                    this._math = new geometry_1.Line(new geometry_1.Point(this._A.x, this._A.y), director, 1 //TODO: LINECONSTRUCTION.PARALLEL
+                    this._math = new line_1.Line(new point_1.Point(this._A.x, this._A.y), director, 1 //TODO: LINECONSTRUCTION.PARALLEL
                     );
                 }
             }
             if ((this._construction.rule === LINECONSTRUCTION.PERPENDICULAR)) {
                 if (this._construction.value instanceof Line) {
                     let normal = this._construction.value.math.normal;
-                    this._math = new geometry_1.Line(new geometry_1.Point(this._A.x, this._A.y), normal, 1 //TODO: LINECONSTRUCTION.PERPENDICULAR
+                    this._math = new line_1.Line(new point_1.Point(this._A.x, this._A.y), normal, 1 //TODO: LINECONSTRUCTION.PERPENDICULAR
                     );
                 }
             }
             if ((this._construction.rule === LINECONSTRUCTION.SLOPE)) {
                 if (!(this._construction.value instanceof Figure_1.Figure)) {
-                    let value = new coefficients_1.Fraction(this._construction.value).value;
-                    this._math = new geometry_1.Line(new geometry_1.Point(this._A.x, this._A.y), new geometry_1.Point(this._A.x + 1, this._A.y - value));
+                    let value = new esm_1.PiMath.Fraction(this._construction.value).value;
+                    this._math = new line_1.Line(new point_1.Point(this._A.x, this._A.y), new point_1.Point(this._A.x + 1, this._A.y - value));
                 }
             }
             if (this._math.slope.isInfinity()) {

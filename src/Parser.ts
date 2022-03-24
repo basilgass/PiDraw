@@ -2,7 +2,7 @@ import {Graph} from "./Graph";
 import {LINECONSTRUCTION} from "./figures/Line";
 import {Figure} from "./figures/Figure";
 import {Plot} from "./figures/Plot";
-import {Line as mathLine} from "pimath/esm/maths/geometry";
+import {Line as mathLine} from "pimath/esm/maths/geometry/line"
 
 type BuildStep = { step: string, figures: Figure[] }
 

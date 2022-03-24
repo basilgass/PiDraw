@@ -15,6 +15,14 @@ var LABELPOS;
     LABELPOS["MIDDLE"] = "middle";
 })(LABELPOS = exports.LABELPOS || (exports.LABELPOS = {}));
 class Label extends Figure_1.Figure {
+    _config;
+    get displayName() {
+        return this._config.name === undefined ? this.name : this._config.name;
+    }
+    set displayName(value) {
+        this._config.name = value;
+        this.updateFigure();
+    }
     constructor(graph, name, config) {
         super(graph, name);
         this.generateName();
@@ -31,13 +39,6 @@ class Label extends Figure_1.Figure {
         this.svg = this.graph.svg.text(this._config.el.name).font({ 'anchor': 'middle' });
         this.graph.layers.foreground.add(this.svg);
         // Update the label text and position
-        this.updateFigure();
-    }
-    get displayName() {
-        return this._config.name === undefined ? this.name : this._config.name;
-    }
-    set displayName(value) {
-        this._config.name = value;
         this.updateFigure();
     }
     generateName() {

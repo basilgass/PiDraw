@@ -4,6 +4,12 @@ exports.Riemann = void 0;
 const Figure_1 = require("../Figure");
 const enums_1 = require("../../variables/enums");
 class Riemann extends Figure_1.Figure {
+    _plot;
+    _from;
+    _to;
+    _number;
+    _pos;
+    _rectangles;
     constructor(plot, from, to, rectangles, pos) {
         super(plot.graph, '');
         this._plot = plot;

@@ -4,6 +4,11 @@ exports.Follow = void 0;
 const Figure_1 = require("../Figure");
 const svg_js_1 = require("@svgdotjs/svg.js");
 class Follow extends Figure_1.Figure {
+    _plot;
+    _size;
+    _tangent;
+    _tangentVisible;
+    _tangentDX;
     constructor(plot, showTangent) {
         super(plot.graph, '');
         this._plot = plot;

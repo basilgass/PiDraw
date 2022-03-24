@@ -5,6 +5,12 @@ const Figure_1 = require("../Figure");
 const Plot_1 = require("../Plot");
 const svg_js_1 = require("@svgdotjs/svg.js");
 class FillBetween extends Figure_1.Figure {
+    _plot;
+    _plot2;
+    _from;
+    _to;
+    _samples;
+    _d;
     constructor(plot, plot2, from, to, samples) {
         super(plot.graph, '');
         this._plot = plot;

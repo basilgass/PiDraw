@@ -5,6 +5,8 @@ const Figure_1 = require("./Figure");
 const enums_1 = require("../variables/enums");
 const svg_js_1 = require("@svgdotjs/svg.js");
 class Axis extends Figure_1.Figure {
+    _orientation;
+    _offset;
     constructor(graph, name, orientation) {
         super(graph, name);
         this.generateName();

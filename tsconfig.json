@@ -3,7 +3,7 @@
     "outDir": "./esm/",
     "noImplicitAny": true,
     "module": "commonjs",
-    "target": "es2021",
+    "target": "esnext",
     "allowJs": true,
     "sourceMap": true,
     "moduleResolution": "node",

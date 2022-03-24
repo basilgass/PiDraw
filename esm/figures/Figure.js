@@ -7,27 +7,57 @@ class Figure {
         this._graph = graph;
         this._name = name;
     }
+    /**
+     * Canvas root object.
+     * @type {Graph}
+     * @private
+     */
+    _graph;
     get graph() {
         return this._graph;
     }
+    /**
+     * Define if the object should update or not.
+     * @type {Boolean}
+     * @private
+     */
+    _freeze;
     get freeze() {
         return this._freeze;
     }
     set freeze(value) {
         this._freeze = value;
     }
+    /**
+     * Name of the figure
+     * @type {string}
+     * @private
+     */
+    _name;
     get name() {
         return this._name;
     }
     set name(value) {
         this._name = value;
     }
+    /**
+     * The SVG object
+     * @type {unknown}
+     * @private
+     */
+    _svg;
     get svg() {
         return this._svg;
     }
     set svg(value) {
         this._svg = value;
     }
+    /**
+     * Label figure
+     * @type {Label}
+     * @private
+     */
+    _label;
     get label() {
         return this._label;
     }
