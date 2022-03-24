@@ -15,7 +15,6 @@ var LABELPOS;
     LABELPOS["MIDDLE"] = "middle";
 })(LABELPOS = exports.LABELPOS || (exports.LABELPOS = {}));
 class Label extends Figure_1.Figure {
-    _config;
     constructor(graph, name, config) {
         super(graph, name);
         this.generateName();
@@ -31,12 +30,22 @@ class Label extends Figure_1.Figure {
         this.graph.layers.foreground.add(this.svg);
         this.updateFigure();
     }
+    get displayName() {
+        return this._config.name === undefined ? this.name : this._config.name;
+    }
+    set displayName(value) {
+        this._config.name = value;
+        this.updateFigure();
+    }
     generateName() {
         this.name = `LABEL_${this.name}`;
         return this.name;
     }
     updateFigure() {
         let x = 0, y = 0, w = 0, h = 0;
+        if (this.svg instanceof svg_js_1.Text) {
+            this.svg.text(this.displayName);
+        }
         if (this._config.el instanceof Point_1.Point) {
             x = this._config.el.x;
             y = this._config.el.y;

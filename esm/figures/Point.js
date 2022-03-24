@@ -6,9 +6,6 @@ const Grid_1 = require("./Grid");
 const enums_1 = require("../variables/enums");
 const Label_1 = require("./Label");
 class Point extends Figure_1.Figure {
-    _scale;
-    _shape;
-    _constrain;
     constructor(graph, name, pixels) {
         super(graph, name);
         this._x = pixels.x;
@@ -20,7 +17,6 @@ class Point extends Figure_1.Figure {
         this._updateShape();
         this.label = new Label_1.Label(this.graph, 'LABEL', { el: this });
     }
-    _x;
     get x() {
         return this._x;
     }
@@ -28,7 +24,6 @@ class Point extends Figure_1.Figure {
         this._x = value;
         this.update();
     }
-    _y;
     get y() {
         return this._y;
     }

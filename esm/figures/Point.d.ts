@@ -26,6 +26,12 @@ export declare class Point extends Figure {
     getDistanceTo(value: Figure): number;
     updateFigure(): Point;
     updateLabel(): Point;
+    /**
+     * Constrain the point to be the middle of two other points.
+     * @param {Point} A
+     * @param {Point} B
+     * @returns {Point}
+     */
     middleOf(A: Point, B: Point): Point;
     draggable(grid?: Grid): Point;
     private _updateShape;

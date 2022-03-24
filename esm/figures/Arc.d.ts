@@ -24,8 +24,26 @@ export declare class Arc extends Figure {
     get isSquare(): boolean;
     generateName(): string;
     updateFigure(): Arc;
+    /**
+     * Get coordinate by radius / angle
+     * Reference: https://stackoverflow.com/questions/5736398/how-to-calculate-the-svg-path-for-an-arc-of-a-circle
+     * @param centerX
+     * @param centerY
+     * @param radius
+     * @param angleInDegrees
+     */
     polarToCartesian(centerX: number, centerY: number, radius: number, angleInDegrees: number): IPoint;
+    /**
+     * get the angle from Ox to OP, where O is origin and P is the handle
+     * @param {Point} origin
+     * @param {Point} handle
+     * @returns {number}
+     */
     cartesianToAngle(origin: Point, handle: Point): number;
+    /**
+     * Calculate the start and end angle of an arc
+     * @returns {{startAngle: number, endAngle: number}}
+     */
     getAngles(): {
         start: number;
         end: number;

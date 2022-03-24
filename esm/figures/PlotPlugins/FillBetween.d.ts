@@ -11,4 +11,5 @@ export declare class FillBetween extends Figure {
     get plot(): Plot;
     clean(): void;
     updateFigure(): FillBetween;
+    color(color: string): FillBetween;
 }

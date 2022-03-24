@@ -10,6 +10,7 @@ export declare enum LABELPOS {
 }
 export interface LabelConfig {
     el: Figure;
+    name?: string;
     position?: {
         horizontal: string;
         vertical: string;
@@ -21,6 +22,8 @@ export interface LabelConfig {
 }
 export declare class Label extends Figure {
     private _config;
+    get displayName(): string;
+    set displayName(value: string);
     constructor(graph: Graph, name: string, config?: LabelConfig);
     generateName(): string;
     updateFigure(): Label;

@@ -163,15 +163,21 @@ export class Figure {
 
     color(value: string): Figure {
         this.svg.stroke({color: value})
-
         return this
     }
 
     stroke(value: { width?: number, color?: string, opacity?: number }): Figure {
         this.svg.stroke(value)
-
         return this
     }
 
+    hide(): Figure {
+        this._svg.hide()
+        return this
+    }
+    show(): Figure {
+        this._svg.show()
+        return this
+    }
 
 }

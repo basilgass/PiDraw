@@ -7,32 +7,27 @@ class Figure {
         this._graph = graph;
         this._name = name;
     }
-    _graph;
     get graph() {
         return this._graph;
     }
-    _freeze;
     get freeze() {
         return this._freeze;
     }
     set freeze(value) {
         this._freeze = value;
     }
-    _name;
     get name() {
         return this._name;
     }
     set name(value) {
         this._name = value;
     }
-    _svg;
     get svg() {
         return this._svg;
     }
     set svg(value) {
         this._svg = value;
     }
-    _label;
     get label() {
         return this._label;
     }
@@ -106,6 +101,14 @@ class Figure {
     }
     stroke(value) {
         this.svg.stroke(value);
+        return this;
+    }
+    hide() {
+        this._svg.hide();
+        return this;
+    }
+    show() {
+        this._svg.show();
         return this;
     }
 }

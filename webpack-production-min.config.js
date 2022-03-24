@@ -17,11 +17,11 @@ module.exports = {
         extensions: ['.tsx','.ts', '.js'],
     },
     output: {
-        filename: 'pidraw.js',
+        filename: 'pidraw.min.js',
         path: path.resolve(__dirname, 'dist'),
     },
     optimization: {
-        minimize: false
+        minimize: true
     },
     externals: {
         // '@svgdotjs/svg.js': '@svgdotjs/svg.js',

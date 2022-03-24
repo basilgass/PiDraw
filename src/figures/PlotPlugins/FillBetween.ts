@@ -57,4 +57,9 @@ export class FillBetween extends Figure {
 
         return this
     }
+
+    color(color: string): FillBetween{
+        this.svg.fill(color)
+        return this
+    }
 }

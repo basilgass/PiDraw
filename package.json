@@ -5,7 +5,7 @@
   "main": "main.ts",
   "scripts": {
     "dev": "webpack --watch --config webpack.config.js",
-    "production": "webpack --config webpack-production.config.js && tsc --build"
+    "production": "webpack --config webpack-production.config.js && webpack --config webpack-production-min.config.js && tsc --build"
   },
   "repository": {
     "type": "git",

@@ -16,6 +16,7 @@ export enum LABELPOS {
 
 export interface LabelConfig {
     el: Figure,
+    name?: string,
     position?: {
         horizontal: string,
         vertical: string
@@ -29,6 +30,13 @@ export interface LabelConfig {
 export class Label extends Figure {
     private _config: LabelConfig
 
+    get displayName(): string {
+        return this._config.name===undefined?this.name:this._config.name
+    }
+    set displayName(value: string) {
+        this._config.name = value
+        this.updateFigure()
+    }
     constructor(graph: Graph, name: string, config?: LabelConfig) {
         super(graph, name);
 
@@ -61,14 +69,18 @@ export class Label extends Figure {
     updateFigure(): Label {
         let x = 0, y = 0, w = 0, h = 0
 
-        if (this._config.el instanceof Point) {
-            x = this._config.el.x
-            y = this._config.el.y
-
-        } else if (this._config.el instanceof Line) {
+        // Update the name
+        if(this.svg instanceof Text) {
+            this.svg.text(this.displayName)
 
         }
 
+        if (this._config.el instanceof Point) {
+            x = this._config.el.x
+            y = this._config.el.y
+        } else if (this._config.el instanceof Line) {
+                //TODO: set the label for a line
+        }
 
         // Label position relative to the current (x,y) coordinate
         if (this.svg instanceof Text) {

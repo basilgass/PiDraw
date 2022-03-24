@@ -55,50 +55,39 @@ class Graph {
         this._layers.grids.add(g.svg);
         this._markers = this.createMarker(10);
     }
-    _container;
     get container() {
         return this._container;
     }
-    _svg;
     get svg() {
         return this._svg;
     }
-    _width;
     get width() {
         return this._width;
     }
-    _height;
     get height() {
         return this._height;
     }
-    _origin;
     get origin() {
         return this._origin;
     }
     set origin(value) {
         this._origin = value;
     }
-    _pixelsPerUnit;
     get pixelsPerUnit() {
         return this._pixelsPerUnit;
     }
-    _figures;
     get figures() {
         return this._figures;
     }
-    _points;
     get points() {
         return this._points;
     }
-    _freeze;
     get freeze() {
         return this._freeze;
     }
-    _layers;
     get layers() {
         return this._layers;
     }
-    _markers;
     get markers() {
         return this._markers;
     }

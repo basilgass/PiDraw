@@ -1,19 +1,21 @@
 import {Figure} from "./Figure";
 import {Graph} from "../Graph";
 import {Point} from "./Point";
-import {Line as mathLine, Point as mathPoint} from "pimath/esm/maths/geometry";
+import {Line as mathLine, Point as mathPoint, Vector as mathVector} from "pimath/esm/maths/geometry";
 import {Line as svgLine} from "@svgdotjs/svg.js";
+import {Fraction} from "pimath/esm/maths/coefficients";
 
 export interface LineConfig {
     rule: string,
-    value?: Figure,
+    value?: Figure|number|string,
     k?: number
 }
 
 export enum LINECONSTRUCTION {
     PARALLEL = 'parallel',
     PERPENDICULAR = 'perpendicular',
-    TANGENT = 'tangent'
+    TANGENT = 'tangent',
+    SLOPE = 'slope'
 }
 
 export class Line extends Figure {
@@ -92,7 +94,7 @@ export class Line extends Figure {
 
             if (this._B) {
                 this.name = `d_${this.A.name + this.B.name}`
-            } else if (this._construction) {
+            } else if (this._construction && this._construction.value instanceof Figure) {
                 this.name = `p_${this._construction.value.name},${this.A.name}`
             }
         }
@@ -164,6 +166,17 @@ export class Line extends Figure {
                     )
                 }
             }
+
+            if((this._construction.rule === LINECONSTRUCTION.SLOPE)) {
+                if (! (this._construction.value instanceof Figure)) {
+                    let value = new Fraction(this._construction.value).value
+                    this._math = new mathLine(
+                        new mathPoint(this._A.x, this._A.y),
+                        new mathPoint(this._A.x + 1, this._A.y - value)
+                    )
+                }
+            }
+
 
             if (this._math.slope.isInfinity()) {
                 x1 = this._A.x

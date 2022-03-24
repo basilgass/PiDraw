@@ -4,13 +4,14 @@ import { Point } from "./Point";
 import { Line as mathLine } from "pimath/esm/maths/geometry";
 export interface LineConfig {
     rule: string;
-    value?: Figure;
+    value?: Figure | number | string;
     k?: number;
 }
 export declare enum LINECONSTRUCTION {
     PARALLEL = "parallel",
     PERPENDICULAR = "perpendicular",
-    TANGENT = "tangent"
+    TANGENT = "tangent",
+    SLOPE = "slope"
 }
 export declare class Line extends Figure {
     constructor(graph: Graph, name: string, A: Point, B: Point, construction?: LineConfig);
