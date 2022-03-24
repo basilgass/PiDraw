@@ -10,6 +10,7 @@ class Circle extends Figure_1.Figure {
         this._center = center;
         this._radius = radius;
         this.generateName();
+        // Create the shape
         this.svg = graph.svg.circle(this.getRadiusAsPixels() * 2).stroke('black').fill('none');
         return this;
     }
@@ -45,12 +46,15 @@ class Circle extends Figure_1.Figure {
         return this.name;
     }
     updateFigure() {
+        // The update mechanism is frozen.
         if (this.freeze || this.graph.freeze) {
             return this;
         }
+        // No center is given
         if (!this._center) {
             return this;
         }
+        // No radius is given
         if (this._radius <= 0) {
             return this;
         }

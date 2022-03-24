@@ -39,6 +39,7 @@ class Figure {
         this.update();
     }
     update() {
+        // We don't want to update.
         if (this._freeze || this._graph.freeze) {
             return;
         }
@@ -54,10 +55,13 @@ class Figure {
         return this;
     }
     remove() {
+        // Remove the label
         if (this.label) {
             this.label.svg.remove();
         }
+        // Remove the svg
         this.svg.remove();
+        // Remove the item from the graph build list.
         if (this.graph.points[this.name] !== undefined) {
             delete this.graph.points[this.name];
         }

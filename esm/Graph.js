@@ -14,17 +14,32 @@ const enums_1 = require("./variables/enums");
 const Arc_1 = require("./figures/Arc");
 const Parser_1 = require("./Parser");
 class Graph {
+    /**
+     * Create the main graph canvas element
+     * config: {origin: {x: number, y: number}, grid: {x: number, y: number, type: GRIDTYPE}}
+     * config (dim pixels): {... width: number, height: number}
+     * config (dim units): {... dx: number, dy: number, pixelsPerUnit: number}
+     * config (plot wise): {... xMin: number, xMax: number, yMin: number, yMax: number, pixelsPerUnit: number}
+     * @param {string | HTMLElement} containerID
+     * @param {GraphConfig} config
+     */
     constructor(containerID, config) {
+        // By default, the graph is frozen on initialisation
         this._freeze = false;
+        // Default values.
         this._origin = {
             x: 50, y: 550
         };
         this._pixelsPerUnit = {
             x: 50, y: 50
         };
+        // Determine the width and height of the graph.
         this._initSetWidthAndHeight(config);
+        // Create the container
         this._initGetContainerId(containerID);
+        // Create the SVG
         this._initCreateSVG();
+        // Init variables
         this._figures = [];
         this._points = {};
         if (config) {
@@ -35,6 +50,7 @@ class Graph {
                 this._pixelsPerUnit = config.grid;
             }
         }
+        // Init layers.
         this._layers = {
             background: this.svg.group(),
             grids: this.svg.group(),
@@ -46,6 +62,7 @@ class Graph {
             foreground: this.svg.group(),
             points: this.svg.group()
         };
+        // Create grid
         const g = new Grid_1.Grid(this, 'MAINGRID', {
             axisX: this._pixelsPerUnit.x,
             axisY: this._pixelsPerUnit.y,
@@ -53,6 +70,7 @@ class Graph {
         });
         this._figures.push(g);
         this._layers.grids.add(g.svg);
+        // Create the markers
         this._markers = this.createMarker(10);
     }
     get container() {
@@ -118,6 +136,7 @@ class Graph {
         };
     }
     pixelsToUnits(point) {
+        // TODO: handle other grid types.
         return {
             x: (point.x - this.origin.x) / this._pixelsPerUnit.x,
             y: -(point.y - this.origin.y) / this._pixelsPerUnit.y
@@ -187,6 +206,7 @@ class Graph {
         return figure;
     }
     circle(center, radius, name) {
+        // Case the point is given as xy coordinate instead of an existing point.
         if (typeof center === 'string') {
             return this.circle(this.getPoint(center), radius, name);
         }
@@ -198,6 +218,7 @@ class Graph {
         return figure;
     }
     plot(fn, config, name) {
+        //TODO: plot auto config ?
         const figure = new Plot_1.Plot(this, name, fn, config);
         this._validateFigure(figure, enums_1.LAYER.PLOTS);
         return figure;
@@ -215,6 +236,7 @@ class Graph {
     }
     updateLayout(config) {
         let grid = this.getFigure('MAINGRID'), axisX = this.getFigure('Ox'), axisY = this.getFigure('Oy');
+        // This sets the origin and width
         this._initSetWidthAndHeight(config);
         this._svg.viewbox(0, 0, this._width, this._height);
         if (grid instanceof Grid_1.Grid) {
@@ -227,7 +249,14 @@ class Graph {
                 axisY: this._pixelsPerUnit.y,
                 type: enums_1.GRIDTYPE.ORTHOGONAL
             };
+            // grid.update()
         }
+        // if(axisX instanceof Axis){
+        //     axisX.update()
+        // }
+        // if(axisY instanceof Axis){
+        //     axisY.update()
+        // }
         this.update();
         return this;
     }
@@ -261,6 +290,7 @@ class Graph {
             this._origin.y = this._height + config.yMin * config.pixelsPerUnit;
         }
         else {
+            // Default width and height.
             this._width = 800;
             this._height = 600;
         }
@@ -282,20 +312,25 @@ class Graph {
         this._container = el;
     }
     _initCreateSVG() {
+        // Create the SVG wrapper.
         const wrapper = document.createElement('DIV');
         wrapper.style.position = 'relative';
         wrapper.style.width = '100%';
         wrapper.style.height = 'auto';
         this._container.appendChild(wrapper);
+        // Create the SVG element.
         this._svg = (0, svg_js_1.SVG)().addTo(wrapper).size('100%', '100%');
         this._svg.viewbox(0, 0, this._width, this._height);
     }
     _validateFigure(figure, layer) {
+        // Add to the list of drawings, for updating.
         this._figures.push(figure);
         if (figure instanceof Point_1.Point) {
             this._points[figure.name] = figure;
         }
+        // Add to the layer.
         this._layers[layer ? layer : enums_1.LAYER.MAIN].add(figure.svg);
+        // Release the figure
         figure.draw();
     }
 }

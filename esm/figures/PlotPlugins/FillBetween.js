@@ -31,6 +31,7 @@ class FillBetween extends Figure_1.Figure {
             d2 = this._plot2.getPartialPath(this._from, this._to, this._samples, true);
         }
         else {
+            // Assume the "second plot" is the Ox axes.
             let pt1 = this.graph.unitsToPixels({ x: this._to, y: 0 }), pt2 = this.graph.unitsToPixels({ x: this._from, y: 0 });
             d2 = `L${pt1.x},${pt1.y} L${pt2.x},${pt2.y}`;
         }

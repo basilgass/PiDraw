@@ -4,6 +4,7 @@ exports.Path = void 0;
 const Figure_1 = require("./Figure");
 class Path extends Figure_1.Figure {
     constructor(graph, name) {
+        // TODO : build the path class
         super(graph, name);
         this.generateName();
     }

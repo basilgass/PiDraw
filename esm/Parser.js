@@ -9,18 +9,30 @@ class Parser {
         this._graph = graph;
         this.update(construction);
     }
+    /**
+     * Update the graph using a new construction string.
+     * @param {string} construction
+     */
     update(construction, refresh) {
         if (refresh === true) {
+            // Reset the construction
             this.update('');
         }
+        // Keep the construction value
         this._construction = construction;
+        // Initialize the built steps
         if (!this._buildedSteps) {
             this._buildedSteps = [];
         }
+        // Build sanitize the build array.
         let steps = this._processConstruction(construction);
+        // Remove all figures and builded steps.
         let i;
         for (i = 0; i < this._buildedSteps.length; i++) {
+            // Go through each already built steps.
+            // It must be the same than the current one, in this order !
             if (this._buildedSteps[i].step !== steps[i]) {
+                // Not the same step ! Everything after this must be removed from the graph!
                 for (let j = +i; j < this._buildedSteps.length; j++) {
                     if (this._buildedSteps[j].figures === undefined) {
                         continue;
@@ -33,6 +45,7 @@ class Parser {
                 break;
             }
         }
+        // Build the new steps from the current point
         this.generate(steps.slice(i));
     }
     updateLayout(parameters) {
@@ -52,15 +65,20 @@ class Parser {
         return this;
     }
     generate(steps) {
+        // get all current figures.
         let name, match, color, assign, builded;
         for (let construct of steps) {
+            // The step command is empty or too small - do not continue to parse it.
             if (construct.length < 3) {
                 continue;
             }
+            // Get the object name of the command
             match = construct.match(/^[A-Za-z0-9_]+/g);
+            // This step is not a correct step (no name found)
             if (!match) {
                 return;
             }
+            // Get the name
             name = match[0].trim();
             color = null;
             if (construct.includes('->')) {
@@ -69,13 +87,16 @@ class Parser {
             }
             assign = construct.split('=').map(x => x.trim());
             try {
+                // Check for a point
                 if (assign.length === 1) {
                     builded = this._generatePoint(construct);
                 }
                 else if (assign.length === 2 || assign.length === 3) {
+                    // The name of the figure already exist.
                     if (this._graph.getFigure(name)) {
                         continue;
                     }
+                    // The construction data to parse
                     let constr = assign[1], key = constr.match(/^[a-z]+\s/g);
                     if (assign.length === 3) {
                         constr = constr + '=' + assign[2];
@@ -84,21 +105,26 @@ class Parser {
                         break;
                     }
                     if (key === null) {
+                        // une droite ou une fonction.
                         let checkFx = assign[0].match(/^[a-zA-z_0-9]+\(x\)/g);
                         if (checkFx) {
+                            // une fonction.
                             builded = this._generatePlot(name, constr);
                         }
                         else {
                             if (constr[0] === 'v') {
+                                // un vecteur
                                 builded = this._generateVector(name, constr);
                             }
                             else {
+                                // Une droite
                                 builded = this._generateLineThroughTwoPoints(name, constr);
                             }
                         }
                     }
                     else {
                         let constructKey = key[0].trim();
+                        // n'importe quel autre commande
                         if (constructKey === 'mid') {
                             builded = this._generateMidPoint(name, constr);
                         }
@@ -126,25 +152,38 @@ class Parser {
                     step: construct
                 });
             }
-            builded.step = construct;
+            // Add the builded step.
+            builded.step = construct; // reset to the original construct key.
+            // change the color
             if (color !== null) {
                 for (let fig of builded.figures) {
                     fig.color(color);
                 }
             }
+            // Do whatever check
             this._buildedSteps.push(builded);
         }
     }
+    /**
+     * Parse the main input string and sanitize it.
+     * @param {string} construction
+     * @returns {string[]}
+     * @private
+     */
     _processConstruction(construction) {
         return construction.split('\n').map(x => x.trim()).filter(x => x !== '');
     }
     _generatePoint(step) {
+        // Regexp to get the data.
         let match = [...step.matchAll(/^([A-Z]_?[0-9_]*@?)\((-?[0-9.]+)[,;](-?[0-9.]+)\)(\*?)/g)], figures;
         if (match.length > 0) {
+            // The name of the figure
             let name = match[0][1].includes('@') ? match[0][1].slice(0, -1) : match[0][1], x = +match[0][2], y = +match[0][3], label = match[0][1].includes('@') ? `${name}(${x},${y})` : name;
+            // The point already exists
             if (this._graph.getPoint(name)) {
                 return { step, figures };
             }
+            // The coordinates aren't a number
             if (isNaN(x) || isNaN(y)) {
                 return { step, figures };
             }
@@ -155,6 +194,7 @@ class Parser {
                     pt.asCircle();
                 }
             }
+            // Generate and return the figures.
             figures = [pt];
         }
         return { step, figures };
@@ -178,15 +218,20 @@ class Parser {
     _generateLine(name, step) {
         let match = step.split('line ')[1], figures;
         if (match.includes(',')) {
+            // type is      d = line A,3/4      Point through and slope
             let pointSlope = match.split(',');
+            // Get another point
             let A = this._graph.getPoint(pointSlope[0]);
+            // Get the figures.
             figures = [this._graph.line(A, null, {
                     rule: Line_1.LINECONSTRUCTION.SLOPE,
                     value: pointSlope[1]
                 }, name)];
         }
         else if (match.includes('=')) {
+            // type is      d = line 3x-2y=0    From equation
             let equ = new geometry_1.Line(match);
+            // Get the point
             let A = this._graph.point(0, equ.getValueAtX(0).value);
             A.hide().label.hide();
             figures = [
@@ -197,6 +242,14 @@ class Parser {
                 })
             ];
         }
+        // let match = [...step.matchAll(/^line ([A-Z]_?[0-9]?)([A-Z]_?[0-9]?)/g)],
+        //     figures: Figure[]
+        // if (match.length > 0) {
+        //     let A = this._graph.getPoint(match[0][1]),
+        //         B = this._graph.getPoint(match[0][2])
+        //
+        //     figures = [this._graph.line(A, B, null, name)]
+        // }
         return { figures, step };
     }
     _generateMidPoint(name, step) {
@@ -251,12 +304,22 @@ class Parser {
             }
             fx = values[0];
         }
+        // PLot the function
         figures = [this._graph.plot(fx, {
                 samples: 100,
                 domain
             }, name)];
         return { figures, step };
     }
+    /**
+     * FillBetween two plots
+     * <NAME> = fill(f,g)   fill between f and g
+     * <NAME> = fill(f)     fill between f and Ox axis
+     * @param {string} name
+     * @param {string} step
+     * @returns {BuildStep}
+     * @private
+     */
     _generateFillBetween(name, step) {
         let figures = [], match, f = null, g = null, min, max;
         match = [...step.matchAll(/fill ([a-z]),?([a-z])?.?(([\-\d.]+),([\-\d.]+))?/g)];
@@ -267,11 +330,17 @@ class Parser {
             max = +match[0][5] || this._graph.unitXDomain.max;
         }
         if (f !== null) {
+            // Get the main figure
             let FX = this._graph.getFigure(f), GX = g !== null ? this._graph.getFigure(g) : null;
             if (FX instanceof Plot_1.Plot) {
                 figures = [FX.fillBetween((GX instanceof Plot_1.Plot) ? GX : null, min, max)];
             }
         }
+        /**
+         f(x)=3/2*x+1
+         g(x)=1/2*x+3
+         zone=fill f,g 3,6
+         */
         return { figures, step };
     }
 }

@@ -4,10 +4,12 @@ exports.Grid = void 0;
 const Figure_1 = require("./Figure");
 const enums_1 = require("../variables/enums");
 class Grid extends Figure_1.Figure {
+    // _origin: IPoint;
     constructor(graph, name, config) {
         super(graph, name);
         this.nearestPoint = (pt) => {
             let minDistance = false, distance = 0, nearestPoint = { x: +pt.x, y: +pt.y };
+            // Version for orthographic.
             if (this._config.type === enums_1.GRIDTYPE.ORTHOGONAL) {
                 let nX = Math.trunc(pt.x / this._config.axisX) * this._config.axisX, nY = Math.trunc(pt.y / this._config.axisY) * this._config.axisY;
                 nearestPoint.x = pt.x < nX + this._config.axisX / 2 ? nX : nX + this._config.axisX;
@@ -15,6 +17,7 @@ class Grid extends Figure_1.Figure {
             }
             return nearestPoint;
         };
+        // Default configuration of the grid.
         if (config) {
             this._config = config;
         }
@@ -25,6 +28,7 @@ class Grid extends Figure_1.Figure {
                 type: enums_1.GRIDTYPE.ORTHOGONAL
             };
         }
+        // this._origin = {x: 0, y: this.graph.height}
         this.load();
     }
     get config() {
@@ -36,9 +40,11 @@ class Grid extends Figure_1.Figure {
     load() {
         this.svg = this.graph.svg.group();
         const w = this.graph.width, h = this.graph.height, x = this._config.axisX, y = this._config.axisY, xOffset = this.graph.origin.x % x, yOffset = this.graph.origin.y % y;
+        // Vertical lines
         for (let pos = -x; pos <= w; pos += x) {
             this.svg.add(this.graph.svg.line(pos + xOffset, 0 - yOffset, pos + xOffset, h + yOffset));
         }
+        // Horizontal lines
         for (let pos = h + y; pos >= 0; pos -= y) {
             this.svg.add(this.graph.svg.line(0 - xOffset, pos - yOffset, w + xOffset, pos - yOffset));
         }

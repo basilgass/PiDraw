@@ -18,6 +18,7 @@ class Label extends Figure_1.Figure {
     constructor(graph, name, config) {
         super(graph, name);
         this.generateName();
+        // default configuration
         this._config = {
             el: null,
             position: {
@@ -26,8 +27,10 @@ class Label extends Figure_1.Figure {
             }
         };
         this._config = Object.assign({}, this._config, config);
+        // Create the text object.
         this.svg = this.graph.svg.text(this._config.el.name).font({ 'anchor': 'middle' });
         this.graph.layers.foreground.add(this.svg);
+        // Update the label text and position
         this.updateFigure();
     }
     get displayName() {
@@ -43,6 +46,7 @@ class Label extends Figure_1.Figure {
     }
     updateFigure() {
         let x = 0, y = 0, w = 0, h = 0;
+        // Update the name
         if (this.svg instanceof svg_js_1.Text) {
             this.svg.text(this.displayName);
         }
@@ -51,7 +55,9 @@ class Label extends Figure_1.Figure {
             y = this._config.el.y;
         }
         else if (this._config.el instanceof Line_1.Line) {
+            //TODO: set the label for a line
         }
+        // Label position relative to the current (x,y) coordinate
         if (this.svg instanceof svg_js_1.Text) {
             w = this.svg.length();
         }

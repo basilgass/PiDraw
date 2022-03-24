@@ -15,6 +15,7 @@ class Point extends Figure_1.Figure {
         this._scale = 6;
         this._constrain = { type: enums_1.POINTCONSTRAIN.FIXED };
         this._updateShape();
+        // Add the label
         this.label = new Label_1.Label(this.graph, 'LABEL', { el: this });
     }
     get x() {
@@ -55,6 +56,7 @@ class Point extends Figure_1.Figure {
     }
     setSize(value) {
         this._scale = value;
+        // Force update
         this.svg.data('shape', null);
         this.update();
         return this;
@@ -66,6 +68,7 @@ class Point extends Figure_1.Figure {
         return 40;
     }
     updateFigure() {
+        // The update mechanism is frozen.
         if (this.freeze || this.graph.freeze) {
             return this;
         }
@@ -77,6 +80,12 @@ class Point extends Figure_1.Figure {
     updateLabel() {
         return this;
     }
+    /**
+     * Constrain the point to be the middle of two other points.
+     * @param {Point} A
+     * @param {Point} B
+     * @returns {Point}
+     */
     middleOf(A, B) {
         this._constrain = {
             type: enums_1.POINTCONSTRAIN.MIDDLE,
@@ -89,16 +98,22 @@ class Point extends Figure_1.Figure {
         this._shape = enums_1.POINTSHAPE.HANDLE;
         this.updateFigure();
         let point = this;
+        // let grid = this.graph.getFigure('MAINGRID')
         function dragmove(e) {
+            // Get the event details
             const { handler, box } = e.detail;
+            // Get the bounding box
             let { x, y } = box;
+            // Prevent default behavior
             e.preventDefault();
+            // Do not allow to go outside the graph.
             if (x < 0 || x > point.graph.width - box.width / 2) {
                 return;
             }
             if (y < 0 || y > point.graph.height - box.height / 2) {
                 return;
             }
+            // Update the value to match the grid
             if (grid !== null) {
                 if (grid instanceof Grid_1.Grid) {
                     const intersection = grid.nearestPoint({ x, y });
@@ -106,22 +121,31 @@ class Point extends Figure_1.Figure {
                     y = intersection.y;
                 }
             }
+            // Move the circle to the current positiovn
             handler.move(x, y);
-            point.x = x;
-            point.y = y;
+            // TODO: Work with constrains.
+            // Set the point shape coordinate
+            point.x = x; //handler.el.cx()
+            point.y = y; //handler.el.cy()
+            // console.log(handler.el.cy())
+            // Update the figures and labels.
             point.graph.update();
+            // TODO: add after drag event ?
         }
         this.svg.draggable()
             .on('dragmove', dragmove);
         return this;
     }
     _updateShape() {
+        // If the shape exist and is the same, no need to continue.
         if (this.svg && this._shape === this.svg.data('shape')) {
             return;
         }
+        // Remove the current shape if it already exist and is not the same
         if (this.svg && this._shape !== this.svg.data('shape')) {
             this.svg.remove();
         }
+        // Create the new shape
         if (this._shape === enums_1.POINTSHAPE.CIRCLE) {
             this.svg = this.graph.svg.circle(this._scale).stroke('black').fill('white').data('shape', enums_1.POINTSHAPE.CIRCLE);
         }

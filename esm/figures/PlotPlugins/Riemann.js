@@ -63,14 +63,19 @@ class Riemann extends Figure_1.Figure {
     }
     updateFigure() {
         let x = 0, y = 0, height, step = (this._to - this._from) / this._number, width = this.graph.distanceToPixels(step), pxX;
+        // reset the rectangles if not the same number (for animation purpose)
         if (this._rectangles !== undefined && this._number !== this._rectangles.length) {
             this.clean();
         }
+        // Generate the base version with "flatten rectangle"
         if (this._rectangles === undefined || this._number !== this._rectangles.length) {
             this._rectangles = [];
+            // Create the zero height rectangles.
             for (let i = 0; i < this._number; i++) {
+                // Unit value
                 x = +this._from + step * i;
                 y = x + step;
+                // pixels value
                 pxX = this.graph.unitsToPixels({ x: x, y: 0 });
                 height = 0;
                 this._rectangles.push(this.graph.svg.rect(width, height)
@@ -93,12 +98,17 @@ class Riemann extends Figure_1.Figure {
                 .stroke({
                 color: 'black', width: 1
             });
+            // Add to the correct layer
             this.graph.layers.main.add(this.svg);
         }
         for (let i = 0; i < this._number; i++) {
+            // Unit value
             x = +this._from + step * i;
             y = x + step;
+            // pixels value
             pxX = this.graph.unitsToPixels({ x: x, y: 0 });
+            // The value can be negative
+            // (this._pos === undefined || this._pos) ? this._plot.evaluate(x).y : this._plot.evaluate(y).y, AXIS.VERTICAL
             height = this.graph.distanceToPixels(this._plot.evaluate(x + step * this._pos).y, enums_1.AXIS.VERTICAL);
             this._rectangles[i]
                 .data('values', { x, y, height, width })

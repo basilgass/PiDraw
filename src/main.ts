@@ -1,3 +1,4 @@
 import {Graph} from "./Graph";
 
-(<any>window).PiDraw = Graph
+export const PiDraw = Graph;
+(<any>window).PiDraw = PiDraw

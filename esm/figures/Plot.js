@@ -31,6 +31,7 @@ class Plot extends Figure_1.Figure {
         return this.name;
     }
     updateFigure() {
+        // Update the plot (using the plot function - so it's already done !)
         return this;
     }
     updatePlugins() {
@@ -42,14 +43,19 @@ class Plot extends Figure_1.Figure {
         return this;
     }
     plot(fn, speed) {
+        // Parse the function
         this._fx = this._parse(fn);
+        // Create the path
         const { d, points } = this._getPath(this._config.domain.min, this._config.domain.max, this._config.samples);
+        // Draw the path.
         if (this.svg instanceof svg_js_1.Path) {
             if (points.length !== this.svg.array().length) {
+                // Make a flat path.
                 this.svg.plot();
             }
             if (points.length === this.svg.array().length) {
                 if (this.svg instanceof svg_js_1.Path) {
+                    // @ts-ignore
                     this.svg.animate(speed === undefined ? 500 : speed).plot(d);
                 }
             }
@@ -64,6 +70,7 @@ class Plot extends Figure_1.Figure {
                 });
             }
         }
+        // Update the plugins.
         this.updatePlugins();
         return this;
     }
@@ -100,10 +107,12 @@ class Plot extends Figure_1.Figure {
         }
         else {
             y = NaN;
+            // console.log('Function type error: ', typeof this._fx)
         }
         return { x, y };
     }
     _parse(fn) {
+        // TODO : must calculate differently
         if (typeof fn === 'string') {
             return new numexp_1.NumExp(fn);
         }
@@ -122,10 +131,12 @@ class Plot extends Figure_1.Figure {
     }
     _getPath(from, to, samples, firstToken) {
         let d = '', points = [], nextToken = firstToken === undefined ? 'M' : firstToken, prevToken = '', graphHeight = this.graph.height, x = +from, y = 0, errorCounter = 0;
+        // Make sure the samples is a positive number.
         if (samples <= 0) {
             samples = 20;
         }
         while (x <= to + 1 / samples) {
+            // Evaluate the function at the point.
             const pt = this.graph.unitsToPixels(this.evaluate(x));
             if (isNaN(pt.y)) {
                 errorCounter++;
@@ -135,8 +146,11 @@ class Plot extends Figure_1.Figure {
             if (errorCounter > samples * 2) {
                 return { d, points };
             }
+            // store the previous token.
             prevToken = '' + nextToken;
+            // If it was already a line before (or will be after), add a L (lineto)
             d += `${(prevToken === 'L' || nextToken === 'L') ? nextToken : prevToken}`;
+            // Create next coordinate, removing extra decimals
             if (Math.abs(pt.y) > graphHeight * 5) {
                 if (pt.y > 0) {
                     y = this.graph.height + 100;
@@ -150,17 +164,21 @@ class Plot extends Figure_1.Figure {
             }
             d += `${pt.x.toFixed(this._precision)},${y.toFixed(this._precision)} `;
             points.push(pt);
-            if ((pt.y > -5000 && pt.y < graphHeight + 5000)) {
+            // Prepare the next point (break or continuous line)
+            if ((pt.y > -5000 && pt.y < graphHeight + 5000)) { // The point is not too far - draw a line.
                 nextToken = 'L';
             }
             else {
+                // The line is out of scope - no need to draw it !
                 nextToken = 'M';
             }
+            // Next point
             x += 1 / samples;
         }
         return { d, points };
     }
     remove() {
+        // Remove all plugins.
         for (let P of this._plugins) {
             P.remove();
         }

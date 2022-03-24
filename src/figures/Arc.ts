@@ -120,7 +120,7 @@ export class Arc extends Figure {
      * @param angleInDegrees
      */
     polarToCartesian(centerX: number, centerY: number, radius: number, angleInDegrees: number): IPoint {
-        var angleInRadians = -(angleInDegrees) * Math.PI / 180.0;
+        const angleInRadians = -(angleInDegrees) * Math.PI / 180.0;
 
         return {
             x: centerX + (radius * Math.cos(angleInRadians)),

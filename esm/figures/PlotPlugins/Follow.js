@@ -18,13 +18,17 @@ class Follow extends Figure_1.Figure {
         this._tangentDX = 0.001;
         this.graph.layers.plotsFG.add(this._tangent);
         this.updateFigure();
+        // Add the event on the root
         this.graph.svg.on('mousemove', (handler) => {
+            // Real Client coordinates
             let clientXY = this.graph.svg.node.createSVGPoint();
             clientXY.x = handler.clientX;
             clientXY.y = handler.clientY;
             clientXY = clientXY.matrixTransform(this.graph.svg.node.getScreenCTM().inverse());
             let ptInUnits1 = this.graph.pixelsToUnits(clientXY);
+            // Get the bounding box
             let pt = this.graph.unitsToPixels(this._plot.evaluate(ptInUnits1.x));
+            // Update the point
             if (isNaN(pt.y)) {
                 this.svg.hide();
             }
@@ -34,6 +38,7 @@ class Follow extends Figure_1.Figure {
                 }
                 this.svg.center(pt.x, pt.y);
             }
+            // Update the tangent
             let pt2 = this.graph.unitsToPixels(this._plot.evaluate(+ptInUnits1.x + this._tangentDX)), slope = (pt2.y - pt.y) / (pt2.x - pt.x), h = pt.y - slope * pt.x;
             if (isNaN(pt.y) || isNaN(pt2.y) || this._tangentVisible === false) {
                 this._tangent.hide();
@@ -43,6 +48,7 @@ class Follow extends Figure_1.Figure {
                     this._tangent.show();
                 }
                 if (pt.y * pt.y < 0) {
+                    // Vertical asymptote
                     this._tangent.plot(pt.x, 0, pt.x, this.graph.height);
                 }
                 else {
