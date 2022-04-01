@@ -65,26 +65,35 @@ export class Parser {
     }
 
     updateLayout(parameters: string): Parser {
+        // TODO: parse the values using regex
+        // x=3:-5,y=-5:2                            min/max
+        // dx=20,dy=12                              number of units
+        // ppu=50                                   pixels per unit
+        // grid/nogrid                              show / hide grid
+        // axes/miniaxes/noaxes                     show full axes, min axes (one unit long), hide axis
+        // origin=bl/bc/br/ml/mc/mr/tl/tc/tr/mc     place the origin to top, bottom, middle, left, center or right
+
         let values = parameters.split(',')
 
-        if (values.length === 4) {
-            let xMin = +values[0],
-                xMax = +values[1],
-                yMin = +values[2],
-                yMax = +values[3]
+        let xMin = -1, xMax = 10, yMin = -1, yMax = 10
 
-
-            let pixelsPerUnitX = 800 / (Math.max(xMin, xMax) - Math.min(xMin, xMax))
-            this._graph.updateLayout({
-                xMin,
-                xMax,
-                yMin,
-                yMax,
-                pixelsPerUnit: pixelsPerUnitX
-            })
-
-            this.update(this._construction, true)
+        if (values.length >= 4) {
+            xMin = +values[0]
+            xMax = +values[1]
+            yMin = +values[2]
+            yMax = +values[3]
         }
+
+        let pixelsPerUnitX = 800 / (Math.max(xMin, xMax) - Math.min(xMin, xMax))
+        this._graph.updateLayout({
+            xMin,
+            xMax,
+            yMin,
+            yMax,
+            pixelsPerUnit: pixelsPerUnitX
+        })
+
+        this.update(this._construction, true)
         return this
     }
 
@@ -92,7 +101,7 @@ export class Parser {
         // get all current figures.
         let name,
             match,
-            color,
+            figureConfig,
             assign: string[],
             builded: { step: string, figures: Figure[] }
 
@@ -112,13 +121,13 @@ export class Parser {
 
             // Get the name
             name = match[0].trim()
-            color = null
+            figureConfig = null
 
             if (construct.includes('->')) {
-                color = construct.split('->')[1]
+                figureConfig = construct.split('->')[1]
                 construct = construct.split('->')[0]
             }
-            assign = construct.split('=').map(x=>x.trim())
+            assign = construct.split('=').map(x => x.trim())
 
 
             try {
@@ -126,7 +135,7 @@ export class Parser {
                 if (assign.length === 1) {
                     builded = this._generatePoint(construct)
 
-                } else if (assign.length === 2 || assign.length===3) {
+                } else if (assign.length === 2 || assign.length === 3) {
                     // The name of the figure already exist.
                     if (this._graph.getFigure(name)) {
                         continue
@@ -136,7 +145,7 @@ export class Parser {
                     let constr = assign[1],
                         key = constr.match(/^[a-z]+\s/g)
 
-                    if(assign.length===3){
+                    if (assign.length === 3) {
                         constr = constr + '=' + assign[2]
                     }
 
@@ -188,11 +197,26 @@ export class Parser {
             // Add the builded step.
             builded.step = construct // reset to the original construct key.
 
-            // change the color
-            if (color !== null) {
-                for (let fig of builded.figures) {
-                    fig.color(color)
-                }
+            // change the color or settings
+            if (figureConfig !== null) {
+                figureConfig.split(',').forEach(el=>{
+                    builded.figures.forEach(fig=>{
+                        if(el==='dash'){
+                            fig.dash(this._graph.pixelsPerUnit.x/4)
+                        }else if(el==='thick'){
+                            fig.thick()
+                        }else if(el==='thin'){
+                            fig.thin()
+                        }else if(el==='ultrathick'){
+                            fig.ultrathick()
+                        }else if(el==='ultrathin'){
+                            fig.ultrathin()
+                        }else {
+                            fig.color(el)
+                        }
+                    })
+                })
+
             }
 
             // Do whatever check
@@ -217,10 +241,10 @@ export class Parser {
 
         if (match.length > 0) {
             // The name of the figure
-            let name = match[0][1].includes('@')?match[0][1].slice(0,-1):match[0][1],
+            let name = match[0][1].includes('@') ? match[0][1].slice(0, -1) : match[0][1],
                 x = +match[0][2],
                 y = +match[0][3],
-                label = match[0][1].includes('@')?`${name}(${x},${y})`:name
+                label = match[0][1].includes('@') ? `${name}(${x},${y})` : name
 
             // The point already exists
             if (this._graph.getPoint(name)) {
@@ -233,10 +257,10 @@ export class Parser {
             }
 
             const pt = this._graph.point(x, y, name)
-            pt.label.displayName=label
+            pt.label.displayName = label
 
-            if(match[0].length>=3){
-                if(match[0][4]==='*'){
+            if (match[0].length >= 3) {
+                if (match[0][4] === '*') {
                     pt.asCircle()
                 }
             }
@@ -290,7 +314,7 @@ export class Parser {
                 rule: LINECONSTRUCTION.SLOPE,
                 value: pointSlope[1]
             }, name)]
-        } else if (match.includes('=')){
+        } else if (match.includes('=')) {
             // type is      d = line 3x-2y=0    From equation
             let equ = new mathLine(match)
 
