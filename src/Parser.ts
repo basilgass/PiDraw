@@ -318,17 +318,32 @@ export class Parser {
             // type is      d = line 3x-2y=0    From equation
             let equ = new mathLine(match)
 
-            // Get the point
-            let A = this._graph.point(0, equ.getValueAtX(0).value)
-            A.hide().label.hide()
+            if(equ.equation.variables.includes('y')){
+                // Get the point
+                let A = this._graph.point(0, equ.getValueAtX(0).value)
+                A.hide().label.hide()
 
-            figures = [
-                A,
-                this._graph.line(A, null, {
-                    rule: LINECONSTRUCTION.SLOPE,
-                    value: equ.slope.value
-                })
-            ]
+                figures = [
+                    A,
+                    this._graph.line(A, null, {
+                        rule: LINECONSTRUCTION.SLOPE,
+                        value: equ.slope.value
+                    })
+                ]
+            }else{
+                // It's a vertical line.
+                let x = equ.getValueAtY(0).value
+
+                let A = this._graph.point(x, 0),
+                    B = this._graph.point(x, 1)
+                A.hide().label.hide()
+                B.hide().label.hide()
+                figures = [
+                    A, B,
+                    this._graph.line(A, B)
+                ]
+            }
+
         }
         // let match = [...step.matchAll(/^line ([A-Z]_?[0-9]?)([A-Z]_?[0-9]?)/g)],
         //     figures: Figure[]

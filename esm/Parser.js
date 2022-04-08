@@ -54,24 +54,35 @@ class Parser {
         this.generate(steps.slice(i));
     }
     updateLayout(parameters) {
+        // TODO: parse the values using regex
+        // x=3:-5,y=-5:2                            min/max
+        // dx=20,dy=12                              number of units
+        // ppu=50                                   pixels per unit
+        // grid/nogrid                              show / hide grid
+        // axes/miniaxes/noaxes                     show full axes, min axes (one unit long), hide axis
+        // origin=bl/bc/br/ml/mc/mr/tl/tc/tr/mc     place the origin to top, bottom, middle, left, center or right
         let values = parameters.split(',');
-        if (values.length === 4) {
-            let xMin = +values[0], xMax = +values[1], yMin = +values[2], yMax = +values[3];
-            let pixelsPerUnitX = 800 / (Math.max(xMin, xMax) - Math.min(xMin, xMax));
-            this._graph.updateLayout({
-                xMin,
-                xMax,
-                yMin,
-                yMax,
-                pixelsPerUnit: pixelsPerUnitX
-            });
-            this.update(this._construction, true);
+        let xMin = -1, xMax = 10, yMin = -1, yMax = 10;
+        if (values.length >= 4) {
+            xMin = +values[0];
+            xMax = +values[1];
+            yMin = +values[2];
+            yMax = +values[3];
         }
+        let pixelsPerUnitX = 800 / (Math.max(xMin, xMax) - Math.min(xMin, xMax));
+        this._graph.updateLayout({
+            xMin,
+            xMax,
+            yMin,
+            yMax,
+            pixelsPerUnit: pixelsPerUnitX
+        });
+        this.update(this._construction, true);
         return this;
     }
     generate(steps) {
         // get all current figures.
-        let name, match, color, assign, builded;
+        let name, match, figureConfig, assign, builded;
         for (let construct of steps) {
             // The step command is empty or too small - do not continue to parse it.
             if (construct.length < 3) {
@@ -85,9 +96,9 @@ class Parser {
             }
             // Get the name
             name = match[0].trim();
-            color = null;
+            figureConfig = null;
             if (construct.includes('->')) {
-                color = construct.split('->')[1];
+                figureConfig = construct.split('->')[1];
                 construct = construct.split('->')[0];
             }
             assign = construct.split('=').map(x => x.trim());
@@ -159,11 +170,30 @@ class Parser {
             }
             // Add the builded step.
             builded.step = construct; // reset to the original construct key.
-            // change the color
-            if (color !== null) {
-                for (let fig of builded.figures) {
-                    fig.color(color);
-                }
+            // change the color or settings
+            if (figureConfig !== null) {
+                figureConfig.split(',').forEach(el => {
+                    builded.figures.forEach(fig => {
+                        if (el === 'dash') {
+                            fig.dash(this._graph.pixelsPerUnit.x / 4);
+                        }
+                        else if (el === 'thick') {
+                            fig.thick();
+                        }
+                        else if (el === 'thin') {
+                            fig.thin();
+                        }
+                        else if (el === 'ultrathick') {
+                            fig.ultrathick();
+                        }
+                        else if (el === 'ultrathin') {
+                            fig.ultrathin();
+                        }
+                        else {
+                            fig.color(el);
+                        }
+                    });
+                });
             }
             // Do whatever check
             this._buildedSteps.push(builded);
@@ -236,16 +266,29 @@ class Parser {
         else if (match.includes('=')) {
             // type is      d = line 3x-2y=0    From equation
             let equ = new line_1.Line(match);
-            // Get the point
-            let A = this._graph.point(0, equ.getValueAtX(0).value);
-            A.hide().label.hide();
-            figures = [
-                A,
-                this._graph.line(A, null, {
-                    rule: Line_1.LINECONSTRUCTION.SLOPE,
-                    value: equ.slope.value
-                })
-            ];
+            if (equ.equation.variables.includes('y')) {
+                // Get the point
+                let A = this._graph.point(0, equ.getValueAtX(0).value);
+                A.hide().label.hide();
+                figures = [
+                    A,
+                    this._graph.line(A, null, {
+                        rule: Line_1.LINECONSTRUCTION.SLOPE,
+                        value: equ.slope.value
+                    })
+                ];
+            }
+            else {
+                // It's a vertical line.
+                let x = equ.getValueAtY(0).value;
+                let A = this._graph.point(x, 0), B = this._graph.point(x, 1);
+                A.hide().label.hide();
+                B.hide().label.hide();
+                figures = [
+                    A, B,
+                    this._graph.line(A, B)
+                ];
+            }
         }
         // let match = [...step.matchAll(/^line ([A-Z]_?[0-9]?)([A-Z]_?[0-9]?)/g)],
         //     figures: Figure[]
