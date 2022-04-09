@@ -4,6 +4,7 @@ import { ILayers, IPoint } from "./variables/interfaces";
 import { Figure } from "./figures/Figure";
 import { Circle } from "./figures/Circle";
 import { Point } from "./figures/Point";
+import { Grid } from "./figures/Grid";
 import { Line, LineConfig } from "./figures/Line";
 import { Plot, PlotConfig } from "./figures/Plot";
 import { Axis } from "./figures/Axis";
@@ -117,6 +118,7 @@ export declare class Graph {
     unitsToPixels(point: IPoint): IPoint;
     pixelsToUnits(point: IPoint): IPoint;
     getFigure(name: string): Figure;
+    getGrid(name?: string): Grid;
     getPoint(name: Point | string): Point;
     axis(): {
         x: Axis;

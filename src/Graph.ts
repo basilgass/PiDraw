@@ -263,6 +263,16 @@ export class Graph {
         return null
     }
 
+    getGrid(name?:string): Grid{
+        let grid = this.getFigure(typeof name===undefined?'MAINGRID':name)
+
+        if(grid instanceof Grid){
+            return grid
+        }else{
+            return this.getGrid('MAINGRID')
+        }
+    }
+
     getPoint(name: Point | string): Point {
         if (name instanceof Point) {
             return name

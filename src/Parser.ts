@@ -3,6 +3,7 @@ import {LINECONSTRUCTION} from "./figures/Line";
 import {Figure} from "./figures/Figure";
 import {Plot} from "./figures/Plot";
 import {Line as mathLine} from "pimath/esm/maths/geometry/line"
+import {Point} from "./figures/Point";
 
 type BuildStep = { step: string, figures: Figure[] }
 
@@ -201,7 +202,9 @@ export class Parser {
             if (figureConfig !== null) {
                 figureConfig.split(',').forEach(el=>{
                     builded.figures.forEach(fig=>{
-                        if(el==='dash'){
+                        if(el==='drag' && fig instanceof Point){
+                            fig.draggable(this._graph.getGrid())
+                        }else if(el==='dash'){
                             fig.dash(this._graph.pixelsPerUnit.x/4)
                         }else if(el==='thick'){
                             fig.thick()
