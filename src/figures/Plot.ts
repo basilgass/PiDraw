@@ -154,6 +154,7 @@ export class Plot extends Figure {
         if (typeof fn === 'string') {
             return new NumExp(fn)
         }
+
         return fn
     }
 

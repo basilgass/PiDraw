@@ -430,6 +430,7 @@ export class Parser {
         let domain = this._graph.unitXDomain,
             fx = step
 
+        // Domain of the function
         if (step.includes(',')) {
             let values = step.split(',')
 
@@ -445,6 +446,7 @@ export class Parser {
             fx = values[0]
         }
 
+        // Plottings
         // PLot the function
         figures = [this._graph.plot(fx, {
             samples: 100,
