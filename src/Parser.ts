@@ -66,6 +66,7 @@ export class Parser {
     }
 
     updateLayout(parameters: string): Parser {
+        // TODO: add segment and half-rule
         // TODO: parse the values using regex
         // x=3:-5,y=-5:2                            min/max
         // dx=20,dy=12                              number of units
