@@ -131,7 +131,7 @@ export class Parser {
             assign = construct.split('=').map(x => x.trim())
 
 
-            try {
+            // try {
                 // Check for a point
                 if (assign.length === 1) {
                     builded = this._generatePoint(construct)
@@ -188,12 +188,12 @@ export class Parser {
 
                 }
 
-            } catch {
-                console.error('There was an error building', {
-                    name: name,
-                    step: construct
-                })
-            }
+            // } catch {
+            //     console.error('There was an error building', {
+            //         name: name,
+            //         step: construct
+            //     })
+            // }
 
             // Add the builded step.
             builded.step = construct // reset to the original construct key.
@@ -374,6 +374,7 @@ export class Parser {
     }
 
     private _generatePerpendicular(name: string, step: string): BuildStep {
+        console.log('PERPENDICULAR')
         let match = [...step.matchAll(/^perp ([a-z]_?[0-9]?),([A-Z]_?[0-9]?)/g)],
             figures: Figure[]
 

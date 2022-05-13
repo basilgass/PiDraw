@@ -150,7 +150,7 @@ export class Line extends Figure {
                     this._math = new mathLine(
                         new mathPoint(this._A.x, this._A.y),
                         director,
-                        1 //TODO: LINECONSTRUCTION.PARALLEL
+                        LINECONSTRUCTION.PARALLEL
                     )
 
 
@@ -163,7 +163,7 @@ export class Line extends Figure {
                     this._math = new mathLine(
                         new mathPoint(this._A.x, this._A.y),
                         normal,
-                        1 //TODO: LINECONSTRUCTION.PERPENDICULAR
+                        LINECONSTRUCTION.PERPENDICULAR
                     )
                 }
             }
@@ -177,7 +177,6 @@ export class Line extends Figure {
                     )
                 }
             }
-
 
             if (this._math.slope.isInfinity()) {
                 x1 = this._A.x

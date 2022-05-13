@@ -4,6 +4,7 @@ exports.Parser = void 0;
 const Line_1 = require("./figures/Line");
 const Plot_1 = require("./figures/Plot");
 const line_1 = require("pimath/esm/maths/geometry/line");
+const Point_1 = require("./figures/Point");
 class Parser {
     figures;
     step;
@@ -102,79 +103,81 @@ class Parser {
                 construct = construct.split('->')[0];
             }
             assign = construct.split('=').map(x => x.trim());
-            try {
-                // Check for a point
-                if (assign.length === 1) {
-                    builded = this._generatePoint(construct);
+            // try {
+            // Check for a point
+            if (assign.length === 1) {
+                builded = this._generatePoint(construct);
+            }
+            else if (assign.length === 2 || assign.length === 3) {
+                // The name of the figure already exist.
+                if (this._graph.getFigure(name)) {
+                    continue;
                 }
-                else if (assign.length === 2 || assign.length === 3) {
-                    // The name of the figure already exist.
-                    if (this._graph.getFigure(name)) {
-                        continue;
-                    }
-                    // The construction data to parse
-                    let constr = assign[1], key = constr.match(/^[a-z]+\s/g);
-                    if (assign.length === 3) {
-                        constr = constr + '=' + assign[2];
-                    }
-                    if (constr === '') {
-                        break;
-                    }
-                    if (key === null) {
-                        // une droite ou une fonction.
-                        let checkFx = assign[0].match(/^[a-zA-z_0-9]+\(x\)/g);
-                        if (checkFx) {
-                            // une fonction.
-                            builded = this._generatePlot(name, constr);
-                        }
-                        else {
-                            if (constr[0] === 'v') {
-                                // un vecteur
-                                builded = this._generateVector(name, constr);
-                            }
-                            else {
-                                // Une droite
-                                builded = this._generateLineThroughTwoPoints(name, constr);
-                            }
-                        }
+                // The construction data to parse
+                let constr = assign[1], key = constr.match(/^[a-z]+\s/g);
+                if (assign.length === 3) {
+                    constr = constr + '=' + assign[2];
+                }
+                if (constr === '') {
+                    break;
+                }
+                if (key === null) {
+                    // une droite ou une fonction.
+                    let checkFx = assign[0].match(/^[a-zA-z_0-9]+\(x\)/g);
+                    if (checkFx) {
+                        // une fonction.
+                        builded = this._generatePlot(name, constr);
                     }
                     else {
-                        let constructKey = key[0].trim();
-                        // n'importe quel autre commande
-                        if (constructKey === 'mid') {
-                            builded = this._generateMidPoint(name, constr);
+                        if (constr[0] === 'v') {
+                            // un vecteur
+                            builded = this._generateVector(name, constr);
                         }
-                        else if (constructKey === 'perp') {
-                            builded = this._generatePerpendicular(name, constr);
-                        }
-                        else if (constructKey === 'para') {
-                            builded = this._generateParallel(name, constr);
-                        }
-                        else if (constructKey === 'circ') {
-                            builded = this._generateCircle(name, constr);
-                        }
-                        else if (constructKey === 'fill') {
-                            builded = this._generateFillBetween(name, constr);
-                        }
-                        else if (constructKey === 'line') {
-                            builded = this._generateLine(name, constr);
+                        else {
+                            // Une droite
+                            builded = this._generateLineThroughTwoPoints(name, constr);
                         }
                     }
                 }
+                else {
+                    let constructKey = key[0].trim();
+                    // n'importe quel autre commande
+                    if (constructKey === 'mid') {
+                        builded = this._generateMidPoint(name, constr);
+                    }
+                    else if (constructKey === 'perp') {
+                        builded = this._generatePerpendicular(name, constr);
+                    }
+                    else if (constructKey === 'para') {
+                        builded = this._generateParallel(name, constr);
+                    }
+                    else if (constructKey === 'circ') {
+                        builded = this._generateCircle(name, constr);
+                    }
+                    else if (constructKey === 'fill') {
+                        builded = this._generateFillBetween(name, constr);
+                    }
+                    else if (constructKey === 'line') {
+                        builded = this._generateLine(name, constr);
+                    }
+                }
             }
-            catch {
-                console.error('There was an error building', {
-                    name: name,
-                    step: construct
-                });
-            }
+            // } catch {
+            //     console.error('There was an error building', {
+            //         name: name,
+            //         step: construct
+            //     })
+            // }
             // Add the builded step.
             builded.step = construct; // reset to the original construct key.
             // change the color or settings
             if (figureConfig !== null) {
                 figureConfig.split(',').forEach(el => {
                     builded.figures.forEach(fig => {
-                        if (el === 'dash') {
+                        if (el === 'drag' && fig instanceof Point_1.Point) {
+                            fig.draggable(this._graph.getGrid());
+                        }
+                        else if (el === 'dash') {
                             fig.dash(this._graph.pixelsPerUnit.x / 4);
                         }
                         else if (el === 'thick') {
@@ -309,6 +312,7 @@ class Parser {
         return { figures, step };
     }
     _generatePerpendicular(name, step) {
+        console.log('PERPENDICULAR');
         let match = [...step.matchAll(/^perp ([a-z]_?[0-9]?),([A-Z]_?[0-9]?)/g)], figures;
         if (match.length > 0) {
             let d = this._graph.getFigure(match[0][1]), P = this._graph.getPoint(match[0][2]);
@@ -341,6 +345,7 @@ class Parser {
     _generatePlot(name, step) {
         let figures;
         let domain = this._graph.unitXDomain, fx = step;
+        // Domain of the function
         if (step.includes(',')) {
             let values = step.split(',');
             if (values.length >= 3) {
@@ -352,6 +357,7 @@ class Parser {
             }
             fx = values[0];
         }
+        // Plottings
         // PLot the function
         figures = [this._graph.plot(fx, {
                 samples: 100,

@@ -216,6 +216,15 @@ class Graph {
         }
         return null;
     }
+    getGrid(name) {
+        let grid = this.getFigure(typeof name === undefined ? 'MAINGRID' : name);
+        if (grid instanceof Grid_1.Grid) {
+            return grid;
+        }
+        else {
+            return this.getGrid('MAINGRID');
+        }
+    }
     getPoint(name) {
         if (name instanceof Point_1.Point) {
             return name;

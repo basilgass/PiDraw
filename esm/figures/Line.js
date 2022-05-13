@@ -102,15 +102,13 @@ class Line extends Figure_1.Figure {
             if ((this._construction.rule === LINECONSTRUCTION.PARALLEL)) {
                 if (this._construction.value instanceof Line) {
                     let director = this._construction.value.math.director;
-                    this._math = new line_1.Line(new point_1.Point(this._A.x, this._A.y), director, 1 //TODO: LINECONSTRUCTION.PARALLEL
-                    );
+                    this._math = new line_1.Line(new point_1.Point(this._A.x, this._A.y), director, LINECONSTRUCTION.PARALLEL);
                 }
             }
             if ((this._construction.rule === LINECONSTRUCTION.PERPENDICULAR)) {
                 if (this._construction.value instanceof Line) {
                     let normal = this._construction.value.math.normal;
-                    this._math = new line_1.Line(new point_1.Point(this._A.x, this._A.y), normal, 1 //TODO: LINECONSTRUCTION.PERPENDICULAR
-                    );
+                    this._math = new line_1.Line(new point_1.Point(this._A.x, this._A.y), normal, LINECONSTRUCTION.PERPENDICULAR);
                 }
             }
             if ((this._construction.rule === LINECONSTRUCTION.SLOPE)) {
