@@ -12,7 +12,14 @@ export declare class Parser {
      */
     update(construction: string, refresh?: boolean): void;
     updateLayout(parameters: string): Parser;
+    preprocess(step: string): {
+        label: string;
+        key: string;
+        code: string;
+        options: string[];
+    };
     generate(steps: string[]): void;
+    private _postprocess;
     /**
      * Parse the main input string and sanitize it.
      * @param {string} construction
@@ -29,14 +36,5 @@ export declare class Parser {
     private _generateParallel;
     private _generateCircle;
     private _generatePlot;
-    /**
-     * FillBetween two plots
-     * <NAME> = fill(f,g)   fill between f and g
-     * <NAME> = fill(f)     fill between f and Ox axis
-     * @param {string} name
-     * @param {string} step
-     * @returns {BuildStep}
-     * @private
-     */
     private _generateFillBetween;
 }

@@ -43,15 +43,33 @@ class Line extends Figure_1.Figure {
         return this._math;
     }
     _segment;
+    _segmentStart;
+    _segmentEnd;
     get segment() {
         return this._segment;
     }
     set segment(value) {
+        this._segmentStart = value;
+        this._segmentEnd = value;
         this._segment = value;
+        this.update();
+    }
+    get segmentStart() {
+        return this._segmentStart;
+    }
+    set segmentStart(value) {
+        this._segmentStart = value;
+        this.update();
+    }
+    get segmentEnd() {
+        return this._segmentEnd;
+    }
+    set segmentEnd(value) {
+        this._segmentEnd = value;
+        this.update();
     }
     asSegment(value) {
-        this._segment = value === undefined || value;
-        this.update();
+        this.segment = value === undefined || value;
         return this;
     }
     asVector(value) {
@@ -90,7 +108,7 @@ class Line extends Figure_1.Figure {
             }
         }
         else {
-            let x1 = this._segment ? this._A.x : 0, x2 = this._segment ? this._B.x : this.graph.width;
+            let x1 = this._segmentStart ? this._A.x : 0, x2 = this._segmentEnd ? this._B.x : this.graph.width;
             if (this.svg instanceof svg_js_1.Line) {
                 this.svg.plot(x1, this._math.getValueAtX(x1).value, x2, this._math.getValueAtX(x2).value);
             }
@@ -101,14 +119,12 @@ class Line extends Figure_1.Figure {
         if (this._construction) {
             if ((this._construction.rule === LINECONSTRUCTION.PARALLEL)) {
                 if (this._construction.value instanceof Line) {
-                    let director = this._construction.value.math.director;
-                    this._math = new line_1.Line(new point_1.Point(this._A.x, this._A.y), director, LINECONSTRUCTION.PARALLEL);
+                    this._math = new line_1.Line(new point_1.Point(this._A.x, this._A.y), this._construction.value.math.director, LINECONSTRUCTION.PARALLEL);
                 }
             }
             if ((this._construction.rule === LINECONSTRUCTION.PERPENDICULAR)) {
                 if (this._construction.value instanceof Line) {
-                    let normal = this._construction.value.math.normal;
-                    this._math = new line_1.Line(new point_1.Point(this._A.x, this._A.y), normal, LINECONSTRUCTION.PERPENDICULAR);
+                    this._math = new line_1.Line(new point_1.Point(this._A.x, this._A.y), this._construction.value.math.director, LINECONSTRUCTION.PERPENDICULAR);
                 }
             }
             if ((this._construction.rule === LINECONSTRUCTION.SLOPE)) {

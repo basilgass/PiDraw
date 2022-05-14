@@ -24,8 +24,14 @@ export declare class Line extends Figure {
     private _math;
     get math(): mathLine;
     private _segment;
+    private _segmentStart;
+    private _segmentEnd;
     get segment(): boolean;
     set segment(value: boolean);
+    get segmentStart(): boolean;
+    set segmentStart(value: boolean);
+    get segmentEnd(): boolean;
+    set segmentEnd(value: boolean);
     asSegment(value?: boolean): Line;
     asVector(value?: boolean): Line;
     generateName(): string;

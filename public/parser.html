@@ -106,13 +106,25 @@
 <script>
 	function autoParse () {
 		let graph = new PiDraw('root'),
-            axis = graph.axis()
-
-        let parser = graph.parse(``)
+            axis = graph.axis(),
+            construct = `A(4,6)->drag
+B(10,8)->drag
+C(8,1)->drag
+v=vAC
+bc=[BC]
+M=mid AB
+d=AB->red,dash
+d1=line A,2->blue,dot
+d2=line 3x+4y-9=0
+p1=perp d,B
+p2=para d,C
+c=circ B,2
+f(x)=sin(x)`
+        let parser = graph.parse(construct)
 
 		return {
 			figures: graph.figures.map(x => x.name),
-			construct: '',
+			construct,
             parameters: '',
 			build () {
 				parser.update(this.construct)
