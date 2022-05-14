@@ -62,7 +62,14 @@ export class Label extends Figure {
     }
 
     generateName(): string {
-        this.name = `LABEL_${this.name}`
+        if(this.name===undefined){
+            this.name = '?'
+            return this.name
+        }
+
+        if(this.name.includes('_')){
+            // it has subscript part.
+        }
         return this.name
     }
 

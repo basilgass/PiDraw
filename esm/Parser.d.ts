@@ -9,6 +9,7 @@ export declare class Parser {
     /**
      * Update the graph using a new construction string.
      * @param {string} construction
+     * @param refresh
      */
     update(construction: string, refresh?: boolean): void;
     updateLayout(parameters: string): Parser;

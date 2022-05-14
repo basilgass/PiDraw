@@ -42,7 +42,13 @@ class Label extends Figure_1.Figure {
         this.updateFigure();
     }
     generateName() {
-        this.name = `LABEL_${this.name}`;
+        if (this.name === undefined) {
+            this.name = '?';
+            return this.name;
+        }
+        if (this.name.includes('_')) {
+            // it has subscript part.
+        }
         return this.name;
     }
     updateFigure() {

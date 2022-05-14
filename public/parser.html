@@ -104,10 +104,9 @@
     <div class="text-center font-xs text-gray-300 mt-20 mb-5">Made with love (and some coffee) by B. Gass</div>
 </div>
 <script>
-	function autoParse () {
-		let graph = new PiDraw('root'),
-            axis = graph.axis(),
-            construct = `A(4,6)->drag
+    /*
+
+    A(4,6)->drag
 B(10,8)->drag
 C(8,1)->drag
 v=vAC
@@ -119,7 +118,14 @@ d2=line 3x+4y-9=0
 p1=perp d,B
 p2=para d,C
 c=circ B,2
-f(x)=sin(x)`
+f(x)=sin(x)
+     */
+	function autoParse () {
+		let graph = new PiDraw('root'),
+            axis = graph.axis(),
+            construct = `A(10,8)->drag
+B(10,6)->drag
+bc=[AB[`
         let parser = graph.parse(construct)
 
 		return {

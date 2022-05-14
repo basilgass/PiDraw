@@ -141,16 +141,48 @@ export class Line extends Figure {
             new mathPoint(this._B.x, this._B.y)
         )
 
+        console.log('A', this._A.x, this._A.y)
+        console.log('B', this._B.x, this._B.y)
         if (this._math.slope.isInfinity()) {
             if (this.svg instanceof svgLine) {
-                this.svg.plot(
-                    this._A.x, 0,
-                    this._A.x, this.graph.height
-                )
+                if(this._segmentStart===this._segmentEnd) {
+                    this.svg.plot(
+                        this._A.x, this._segmentStart?this._A.y:0,
+                        this._A.x, this.segmentEnd?this._B.y: this.graph.height
+                    )
+                }else{
+                    if(this._segmentStart){
+                        this.svg.plot(
+                            this._A.x, this._A.y>this._B.y?0:this._A.y,
+                            this._A.x, this._A.y>this._B.y?this._A.y:this.graph.height
+                        )
+                    }else{
+                        this.svg.plot(
+                            this._A.x, this._A.y>this._B.y?this._B.y:0,
+                            this._A.x, this._A.y>this._B.y?this.graph.height:this._B.y
+                        )
+                    }
+                }
             }
         } else {
-            let x1 = this._segmentStart ? this._A.x : 0,
+            let x1, x2
+            if(this._segmentStart===this._segmentEnd) {
+                x1 = this._segmentStart ? this._A.x : 0
                 x2 = this._segmentEnd ? this._B.x : this.graph.width
+            }else{
+                if(this._segmentStart){
+                    x1 = this.A.x>this.B.x?0:this.A.x
+                    x2 = this.A.x>this.B.x?this.A.x:this.graph.width
+                }else{
+                    x1 = this.A.x>this.B.x?this._B.x:0
+                    x2 = this.A.x>this.B.x?this.graph.width:this.B.x
+                }
+            }
+            // [AB]=[BA] OK
+            // ]AB[=]BA[ OK
+            // the problem comes for half rules - the order is then important depending of the relative position of each reference point
+
+
             if (this.svg instanceof svgLine) {
                 this.svg.plot(
                     x1,

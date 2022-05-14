@@ -22,6 +22,7 @@ export class Parser {
     /**
      * Update the graph using a new construction string.
      * @param {string} construction
+     * @param refresh
      */
     update(construction: string, refresh?: boolean) {
         if (refresh === true) {
@@ -171,45 +172,48 @@ export class Parser {
                 continue
             }
 
+            // Current building steps.
+            builded = {
+                step: construct,
+                figures: []
+            }
+
             // Preprocess the step
             let {label, key, code, options} = this.preprocess(construct)
 
             // console.log(construct, label, key, code, options)
             switch (key) {
                 case 'pt':
-                    builded = this._generatePoint(label, code)
+                    builded.figures = this._generatePoint(label, code)
                     break
                 case 'mid':
-                    builded = this._generateMidPoint(label, code)
+                    builded.figures = this._generateMidPoint(label, code)
                     break
                 case 'v':
-                    builded = this._generateVector(label, code)
+                    builded.figures = this._generateVector(label, code)
                     break
                 case 'line':
-                    builded = this._generateLine(label, code)
+                    builded.figures = this._generateLine(label, code)
                     break
                 case 'perp':
-                    builded = this._generatePerpendicular(label, code)
+                    builded.figures = this._generatePerpendicular(label, code)
                     break
                 case 'para':
-                    builded = this._generateParallel(label, code)
+                    builded.figures = this._generateParallel(label, code)
                     break
                 case 'circ':
-                    builded = this._generateCircle(label, code)
+                    builded.figures = this._generateCircle(label, code)
                     break
                 case 'plot':
-                    builded = this._generatePlot(label, code)
+                    builded.figures = this._generatePlot(label, code)
                     break
                 case 'zone':
-                    builded = this._generateFillBetween(label, code)
+                    builded.figures = this._generateFillBetween(label, code)
                     break
                 default:
                     console.log('No key found for ' + construct)
                     continue
             }
-
-            // Add the builded step.
-            builded.step = construct // reset to the original construct key.
 
             // change the color or settings
             this._postprocess(builded, options)
@@ -256,7 +260,7 @@ export class Parser {
         return construction.split('\n').map(x => x.trim()).filter(x => x !== '')
     }
 
-    private _generatePoint(name: string, step: string): BuildStep {
+    private _generatePoint(name: string, step: string): Figure[] {
         // The label for the point can be:
         // letters with or without @
         let showCoords = name.includes('@'),
@@ -267,13 +271,13 @@ export class Parser {
 
         // If the figure exist, no need to continue
         if (this._graph.getPoint(name)) {
-            return {step, figures}
+            return figures
         }
 
         // analyse the step/code value and extract the data
         let match = [...step.matchAll(/^\((-?[0-9.]+)[,;](-?[0-9.]+)\)(\*?)/g)].shift()
 
-        if (match === undefined || match.length < 2) return {step, figures}
+        if (match === undefined || match.length < 2) return figures
 
         // Everything should be fine now
         let x = +match[1],
@@ -281,17 +285,17 @@ export class Parser {
             label = showCoords ? `${name}(${x},${y})` : name
 
         // The point already exists
-        if (this._graph.getPoint(name)) return {step, figures}
+        if (this._graph.getPoint(name)) return figures
 
         // The coordinates aren't a number
-        if (isNaN(x) || isNaN(y)) return {step, figures}
+        if (isNaN(x) || isNaN(y)) return figures
 
         // Create the point
         const pt = this._graph.point(x, y, name)
         pt.label.displayName = label
 
-        if (match[3].length >= 3) {
-            if (match[0][4] === '*') {
+        if (match.length >= 3) {
+            if (match[3] === '*') {
                 pt.asCircle()
             }
         }
@@ -299,10 +303,10 @@ export class Parser {
         // Generate and return the figures.
         figures = [pt]
 
-        return {step, figures}
+        return figures
     }
 
-    private _generateVector(name: string, step: string): BuildStep {
+    private _generateVector(name: string, step: string): Figure[] {
         let match = [...step.matchAll(/^([A-Z]_?[0-9]?)([A-Z]_?[0-9]?)/g)],
             figures: Figure[]
 
@@ -313,10 +317,10 @@ export class Parser {
             figures = [this._graph.line(A, B, null, name).asVector()]
         }
 
-        return {figures, step};
+        return figures
     }
 
-    private _generateLineThroughTwoPoints(name: string, step: string, segmentStart: boolean, segmentEnd: boolean): BuildStep {
+    private _generateLineThroughTwoPoints(name: string, step: string, segmentStart: boolean, segmentEnd: boolean): Figure[] {
         let match = [...step.matchAll(/^[\[\]]?([A-Z]_?[0-9]?)([A-Z]_?[0-9]?)[\[\]]?/g)],
             figures: Figure[]
 
@@ -331,10 +335,10 @@ export class Parser {
             figures = [line]
         }
 
-        return {figures, step};
+        return figures
     }
 
-    private _generateLine(name: string, step: string): BuildStep {
+    private _generateLine(name: string, step: string): Figure[] {
         let figures: Figure[]
 
         if (step.includes(',')) {
@@ -386,32 +390,27 @@ export class Parser {
 
             return this._generateLineThroughTwoPoints(name, step, segmentStart, segmentEnd)
         }
-        // let step = [...step.matchAll(/^line ([A-Z]_?[0-9]?)([A-Z]_?[0-9]?)/g)],
-        //     figures: Figure[]
-        // if (match.length > 0) {
-        //     let A = this._graph.getPoint(match[0][1]),
-        //         B = this._graph.getPoint(match[0][2])
-        //
-        //     figures = [this._graph.line(A, B, null, name)]
-        // }
-
-        return {figures, step};
+        return figures
     }
 
-    private _generateMidPoint(name: string, step: string): BuildStep {
+    private _generateMidPoint(name: string, step: string): Figure[] {
         let match = [...step.matchAll(/^([A-Z]_?[0-9]?)([A-Z]_?[0-9]?)/g)],
             figures: Figure[]
 
         if (match.length > 0) {
             let A = this._graph.getPoint(match[0][1]),
-                B = this._graph.getPoint(match[0][2])
-            figures = [this._graph.point(0, 0, name).middleOf(A, B)]
+                B = this._graph.getPoint(match[0][2]),
+                pt = this._graph.point(0, 0, name).middleOf(A, B)
+
+            pt.asCircle().svg.fill('black')
+            // pt.label.displayName = name
+            figures = [pt]
         }
 
-        return {figures, step};
+        return figures
     }
 
-    private _generatePerpendicular(name: string, step: string): BuildStep {
+    private _generatePerpendicular(name: string, step: string): Figure[] {
         let match = [...step.matchAll(/^([a-z]_?[0-9]?),([A-Z]_?[0-9]?)/g)],
             figures: Figure[]
 
@@ -428,10 +427,10 @@ export class Parser {
 
         }
 
-        return {figures, step}
+        return figures
     }
 
-    private _generateParallel(name: string, step: string): BuildStep {
+    private _generateParallel(name: string, step: string): Figure[] {
         let match = [...step.matchAll(/^([a-z]_?[0-9]?),([A-Z]_?[0-9]?)/g)],
             figures: Figure[]
 
@@ -447,10 +446,10 @@ export class Parser {
                 }, name)]
         }
 
-        return {figures, step}
+        return figures
     }
 
-    private _generateCircle(name: string, step: string): BuildStep {
+    private _generateCircle(name: string, step: string): Figure[] {
         let match = [...step.matchAll(/^([A-Z]_?[0-9]?),([0-9.]+)/g)],
             figures: Figure[]
 
@@ -460,10 +459,10 @@ export class Parser {
 
             figures = [this._graph.circle(A, radius, name)]
         }
-        return {figures, step}
+        return figures
     }
 
-    private _generatePlot(name: string, step: string): BuildStep {
+    private _generatePlot(name: string, step: string): Figure[] {
         let figures: Figure[]
 
         let domain = this._graph.unitXDomain,
@@ -492,10 +491,10 @@ export class Parser {
             domain
         }, name)]
 
-        return {figures, step}
+        return figures
     }
 
-    private _generateFillBetween(name: string, step: string): BuildStep {
+    private _generateFillBetween(name: string, step: string): Figure[] {
         let figures: Figure[] = [],
             match, f: string = null, g: string = null, min: number, max: number
 
@@ -523,6 +522,6 @@ export class Parser {
          g(x)=1/2*x+3
          zone=fill f,g 3,6
          */
-        return {figures, step}
+        return figures
     }
 }

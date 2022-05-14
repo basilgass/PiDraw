@@ -31,7 +31,7 @@ export class Point extends Figure {
         this._updateShape()
 
         // Add the label
-        this.label = new Label(this.graph, 'LABEL', {el: this})
+        this.label = new Label(this.graph, name, {el: this})
     }
 
     private _x: number
