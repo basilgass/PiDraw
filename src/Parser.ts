@@ -87,7 +87,7 @@ export class Parser {
             yMax = +values[3]
         }
 
-        let pixelsPerUnitX = 800 / (Math.max(xMin, xMax) - Math.min(xMin, xMax))
+        let pixelsPerUnitX = this._graph.width / (Math.max(xMin, xMax) - Math.min(xMin, xMax))
         this._graph.updateLayout({
             xMin,
             xMax,
