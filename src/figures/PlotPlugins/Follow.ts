@@ -1,11 +1,11 @@
 import {Figure} from "../Figure";
 import {Plot} from "../Plot";
-import {Circle, Line} from "@svgdotjs/svg.js";
+import {Circle, Line as svgLine} from "@svgdotjs/svg.js";
 
 export class Follow extends Figure {
     private _plot: Plot
     private _size: number
-    private _tangent: Line
+    private _tangent: svgLine
     private _tangentVisible: boolean
     private _tangentDX: number
 

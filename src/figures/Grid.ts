@@ -10,7 +10,9 @@ export interface GridConfig {
 }
 
 export class Grid extends Figure {
+    private _config: GridConfig
     // _origin: IPoint;
+
     constructor(graph: Graph, name: string, config?: GridConfig) {
         super(graph, name)
 
@@ -25,11 +27,11 @@ export class Grid extends Figure {
             }
         }
 
+        // Storing the previous value.
+
         // this._origin = {x: 0, y: this.graph.height}
         this.load()
     }
-
-    private _config: GridConfig
 
     get config(): GridConfig {
         return this._config;
@@ -37,6 +39,7 @@ export class Grid extends Figure {
 
     set config(value: GridConfig) {
         this._config = value;
+        // Update the grid on config changes !!!!
     }
 
     load(): Grid {
@@ -59,6 +62,7 @@ export class Grid extends Figure {
         }
 
         this.svg.stroke({color: 'lightgray', width: 0.5});
+
         return this
 
     }
@@ -93,7 +97,6 @@ export class Grid extends Figure {
     update(): Grid {
         this.svg.remove()
         this.load()
-
         return this
     }
 }

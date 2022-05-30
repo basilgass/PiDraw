@@ -2,6 +2,7 @@ import {Graph} from "../Graph";
 import {Label} from "./Label";
 import {Shape} from "@svgdotjs/svg.js";
 import {svgShape} from "../variables/types";
+import {Grid} from "./Grid";
 
 export class Figure {
     constructor(graph: Graph, name: string) {
@@ -24,16 +25,16 @@ export class Figure {
 
     /**
      * Define if the object should update or not.
-     * @type {Boolean}
+     * @type {boolean}
      * @private
      */
-    private _freeze: Boolean
+    private _freeze: boolean
 
-    get freeze(): Boolean {
+    get freeze(): boolean {
         return this._freeze;
     }
 
-    set freeze(value: Boolean) {
+    set freeze(value: boolean) {
         this._freeze = value;
     }
 
@@ -87,7 +88,7 @@ export class Figure {
         this.update()
     }
 
-    update() {
+    update(): Figure {
         // We don't want to update.
         if (this._freeze || this._graph.freeze) {
             return
@@ -96,6 +97,8 @@ export class Figure {
         if (this._label) {
             this._label.update()
         }
+
+        return this
     }
 
     updateFigure(): Figure {

@@ -4,6 +4,7 @@ exports.Grid = void 0;
 const Figure_1 = require("./Figure");
 const enums_1 = require("../variables/enums");
 class Grid extends Figure_1.Figure {
+    _config;
     // _origin: IPoint;
     constructor(graph, name, config) {
         super(graph, name);
@@ -18,15 +19,16 @@ class Grid extends Figure_1.Figure {
                 type: enums_1.GRIDTYPE.ORTHOGONAL
             };
         }
+        // Storing the previous value.
         // this._origin = {x: 0, y: this.graph.height}
         this.load();
     }
-    _config;
     get config() {
         return this._config;
     }
     set config(value) {
         this._config = value;
+        // Update the grid on config changes !!!!
     }
     load() {
         this.svg = this.graph.svg.group();

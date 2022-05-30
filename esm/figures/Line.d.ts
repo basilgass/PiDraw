@@ -3,9 +3,9 @@ import { Graph } from "../Graph";
 import { Point } from "./Point";
 import { Line as mathLine } from "pimath/esm/maths/geometry/line";
 export interface LineConfig {
+    k?: number;
     rule: string;
     value?: Figure | number | string;
-    k?: number;
 }
 export declare enum LINECONSTRUCTION {
     PARALLEL = "parallel",
@@ -14,18 +14,18 @@ export declare enum LINECONSTRUCTION {
     SLOPE = "slope"
 }
 export declare class Line extends Figure {
-    constructor(graph: Graph, name: string, A: Point, B: Point, construction?: LineConfig);
     private _A;
-    get A(): Point;
     private _B;
-    get B(): Point;
     private _construction;
-    get construction(): LineConfig;
     private _math;
-    get math(): mathLine;
     private _segment;
-    private _segmentStart;
     private _segmentEnd;
+    private _segmentStart;
+    constructor(graph: Graph, name: string, A: Point, B: Point, construction?: LineConfig);
+    get A(): Point;
+    get B(): Point;
+    get construction(): LineConfig;
+    get math(): mathLine;
     get segment(): boolean;
     set segment(value: boolean);
     get segmentStart(): boolean;

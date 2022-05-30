@@ -18,7 +18,7 @@ class Figure {
     }
     /**
      * Define if the object should update or not.
-     * @type {Boolean}
+     * @type {boolean}
      * @private
      */
     _freeze;
@@ -77,6 +77,7 @@ class Figure {
         if (this._label) {
             this._label.update();
         }
+        return this;
     }
     updateFigure() {
         return this;

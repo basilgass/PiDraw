@@ -37,5 +37,6 @@ export declare class Parser {
     private _generateParallel;
     private _generateCircle;
     private _generatePlot;
+    private _generateParametricPlot;
     private _generateFillBetween;
 }

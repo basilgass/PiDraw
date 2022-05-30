@@ -18,8 +18,76 @@ import {AXIS, GRIDTYPE, LAYER} from "./variables/enums";
 import {GraphConfig} from "./variables/types";
 import {Arc} from "./figures/Arc";
 import {Parser} from "./Parser";
+import {Parametric} from "./figures/Parametric";
 
 export class Graph {
+    /**
+     * HTML container
+     * @type {HTMLElement}
+     * @private
+     */
+    private _container: HTMLElement;
+    /**
+     * List of all figures drawn in the graph.
+     * @type {Figure[]}
+     * @private
+     */
+    private _figures: Figure[]
+    /**
+     * Determine if all the graph must be drawn or not.
+     * @type {boolean}
+     * @private
+     */
+    private _freeze: boolean
+    /**
+     * Number of pixels in the graph
+     * @type {number}
+     * @private
+     */
+    private _height: number;
+    /**
+     * Layers of the graph
+     * @type {ILayers}
+     * @private
+     */
+    private _layers: ILayers
+    /**
+     * Default markers for start and end
+     * @type {{start: Marker, end: Marker}}
+     * @private
+     */
+    private _markers: { start: Marker, end: Marker }
+    /**
+     * Origin position in unit coordinate
+     * @type {IPoint}
+     * @private
+     */
+    private _origin: IPoint
+    /**
+     * Number of pixels per unit.
+     * @type {IPoint}
+     * @private
+     */
+    private _pixelsPerUnit: IPoint
+    /**
+     * List of all points by name. Used to quickly get a point.
+     * @type {{[p: string]: Point}}
+     * @private
+     */
+    private _points: { [key: string]: Point }
+    /**
+     * SVG.js main element
+     * @type {Svg}
+     * @private
+     */
+    private _svg: Svg;
+    /**
+     * Number of pixels on the graph
+     * @type {number}
+     * @private
+     */
+    private _width: number;
+
     /**
      * Create the main graph canvas element
      * config: {origin: {x: number, y: number}, grid: {x: number, y: number, type: GRIDTYPE}}
@@ -91,56 +159,21 @@ export class Graph {
         this._markers = this.createMarker(10)
     }
 
-    /**
-     * HTML container
-     * @type {HTMLElement}
-     * @private
-     */
-    private _container: HTMLElement;
-
     get container(): HTMLElement {
         return this._container;
     }
-
-    /**
-     * SVG.js main element
-     * @type {Svg}
-     * @private
-     */
-    private _svg: Svg;
 
     get svg(): Svg {
         return this._svg;
     }
 
-    /**
-     * Number of pixels on the graph
-     * @type {number}
-     * @private
-     */
-    private _width: number;
-
     get width(): number {
         return this._width;
     }
 
-    /**
-     * Number of pixels in the graph
-     * @type {number}
-     * @private
-     */
-    private _height: number;
-
     get height(): number {
         return this._height;
     }
-
-    /**
-     * Origin position in unit coordinate
-     * @type {IPoint}
-     * @private
-     */
-    private _origin: IPoint
 
     get origin(): IPoint {
         return this._origin;
@@ -150,67 +183,25 @@ export class Graph {
         this._origin = value;
     }
 
-    /**
-     * Number of pixels per unit.
-     * @type {IPoint}
-     * @private
-     */
-    private _pixelsPerUnit: IPoint
-
     get pixelsPerUnit(): IPoint {
         return this._pixelsPerUnit;
     }
-
-    /**
-     * List of all figures drawn in the graph.
-     * @type {Figure[]}
-     * @private
-     */
-    private _figures: Figure[]
 
     get figures(): Figure[] {
         return this._figures;
     }
 
-    /**
-     * List of all points by name. Used to quickly get a point.
-     * @type {{[p: string]: Point}}
-     * @private
-     */
-    private _points: { [key: string]: Point }
-
     get points(): { [p: string]: Point } {
         return this._points;
     }
-
-    /**
-     * Determine if all the graph must be drawn or not.
-     * @type {boolean}
-     * @private
-     */
-    private _freeze: boolean
 
     get freeze(): boolean {
         return this._freeze;
     }
 
-    /**
-     * Layers of the graph
-     * @type {ILayers}
-     * @private
-     */
-    private _layers: ILayers
-
     get layers(): ILayers {
         return this._layers;
     }
-
-    /**
-     * Default markers for start and end
-     * @type {{start: Marker, end: Marker}}
-     * @private
-     */
-    private _markers: { start: Marker, end: Marker }
 
     get markers(): { start: Marker; end: Marker } {
         return this._markers;
@@ -263,12 +254,12 @@ export class Graph {
         return null
     }
 
-    getGrid(name?:string): Grid{
-        let grid = this.getFigure(typeof name===undefined?'MAINGRID':name)
+    getGrid(name?: string): Grid {
+        let grid = this.getFigure(typeof name === undefined ? 'MAINGRID' : name)
 
-        if(grid instanceof Grid){
+        if (grid instanceof Grid) {
             return grid
-        }else{
+        } else {
             return this.getGrid('MAINGRID')
         }
     }
@@ -395,6 +386,21 @@ export class Graph {
         return figure
     }
 
+    parametric(fx: Function | string, fy: Function | string, config?: PlotConfig, name?: string): Parametric {
+        const figure = new Parametric(
+            this,
+            name,
+            {
+                x: fx,
+                y: fy
+            },
+            config
+        )
+
+        this._validateFigure(figure, LAYER.PLOTS)
+        return figure
+    }
+
     arc(A: Point | string, O: Point | string, B: Point | string, radius?: number | Point, name?: string): Arc {
         const figure = new Arc(this, name, this.getPoint(O), this.getPoint(A), this.getPoint(B), radius)
 
@@ -409,7 +415,7 @@ export class Graph {
         return this
     }
 
-    updateLayout(config: GraphConfig): Graph {
+    updateLayout(config: GraphConfig, updateConstructions?: boolean): Graph {
         let grid = this.getFigure('MAINGRID'),
             axisX = this.getFigure('Ox'),
             axisY = this.getFigure('Oy')
@@ -418,7 +424,7 @@ export class Graph {
         this._initSetWidthAndHeight(config)
         this._svg.viewbox(0, 0, this._width, this._height)
         if (grid instanceof Grid) {
-            if(isDrawConfigUnitMinMax(config)){
+            if (isDrawConfigUnitMinMax(config)) {
                 this._pixelsPerUnit.x = config.pixelsPerUnit
                 this._pixelsPerUnit.y = config.pixelsPerUnit
             }
@@ -436,7 +442,9 @@ export class Graph {
         //     axisY.update()
         // }
 
-        this.update()
+        if (updateConstructions === true) {
+            this.update()
+        }
 
         return this
     }

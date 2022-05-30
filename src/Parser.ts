@@ -4,6 +4,7 @@ import {Figure} from "./figures/Figure";
 import {Plot} from "./figures/Plot";
 import {Line as mathLine} from "pimath/esm/maths/geometry/line"
 import {Point} from "./figures/Point";
+import {Axis} from "./figures/Axis";
 
 type BuildStep = { step: string, figures: Figure[] }
 
@@ -67,24 +68,31 @@ export class Parser {
     }
 
     updateLayout(parameters: string): Parser {
-        // TODO: add segment and half-rule
-        // TODO: parse the values using regex
         // x=3:-5,y=-5:2                            min/max
         // dx=20,dy=12                              number of units
         // ppu=50                                   pixels per unit
         // grid/nogrid                              show / hide grid
-        // axes/miniaxes/noaxes                     show full axes, min axes (one unit long), hide axis
+        // axis/miniaxis/noaxes                     show full axes, min axes (one unit long), hide axis
         // origin=bl/bc/br/ml/mc/mr/tl/tc/tr/mc     place the origin to top, bottom, middle, left, center or right
-
         let values = parameters.split(',')
 
         let xMin = -1, xMax = 10, yMin = -1, yMax = 10
 
-        if (values.length >= 4) {
-            xMin = +values[0]
-            xMax = +values[1]
-            yMin = +values[2]
-            yMax = +values[3]
+        for(let param of values){
+            if(param.includes('=')){
+                let keyValue = param.split('=')
+                if(keyValue[0]==='x'){
+                    if(keyValue[1].includes(':')){
+                        xMin = +keyValue[1].split(':')[0]
+                        xMax = +keyValue[1].split(':')[1]
+                    }
+                }else if(keyValue[0]==='y'){
+                    if(keyValue[1].includes(':')){
+                        yMin = +keyValue[1].split(':')[0]
+                        yMax = +keyValue[1].split(':')[1]
+                    }
+                }
+            }
         }
 
         let pixelsPerUnitX = this._graph.width / (Math.max(xMin, xMax) - Math.min(xMin, xMax))
@@ -94,11 +102,74 @@ export class Parser {
             yMin,
             yMax,
             pixelsPerUnit: pixelsPerUnitX
-        })
+        }, false)
+
+        // Update the visibility.
+        if(values.includes('grid')){
+            this._graph.getFigure('MAINGRID').update().show()
+        }else{
+            this._graph.getFigure('MAINGRID').hide()
+        }
+
+        if(values.includes('axis')) {
+            let axis = this._graph.getFigure('Ox')
+            if(axis instanceof Axis) {
+                axis.setMinAxis(false).update().show()
+            }
+            axis = this._graph.getFigure('Oy')
+
+            if(axis instanceof Axis) {
+                axis.setMinAxis(false).update().show()
+            }
+        }else if(values.includes('minaxis')){
+            let axis = this._graph.getFigure('Ox')
+            if(axis instanceof Axis) {
+                axis.setMinAxis(true).update().show()
+            }
+            axis = this._graph.getFigure('Oy')
+
+            if(axis instanceof Axis) {
+                axis.setMinAxis(true).update().show()
+            }
+        }else{
+            this._graph.getFigure('Ox').hide()
+            this._graph.getFigure('Oy').hide()
+        }
 
         this.update(this._construction, true)
         return this
     }
+
+    // updateLayout(parameters: string): Parser {
+    //     // x=3:-5,y=-5:2                            min/max
+    //     // dx=20,dy=12                              number of units
+    //     // ppu=50                                   pixels per unit
+    //     // grid/nogrid                              show / hide grid
+    //     // axes/miniaxes/noaxes                     show full axes, min axes (one unit long), hide axis
+    //     // origin=bl/bc/br/ml/mc/mr/tl/tc/tr/mc     place the origin to top, bottom, middle, left, center or right
+    //     let values = parameters.split(',')
+    //
+    //     let xMin = -1, xMax = 10, yMin = -1, yMax = 10
+    //
+    //     if (values.length >= 4) {
+    //         xMin = +values[0]
+    //         xMax = +values[1]
+    //         yMin = +values[2]
+    //         yMax = +values[3]
+    //     }
+    //
+    //     let pixelsPerUnitX = this._graph.width / (Math.max(xMin, xMax) - Math.min(xMin, xMax))
+    //     this._graph.updateLayout({
+    //         xMin,
+    //         xMax,
+    //         yMin,
+    //         yMax,
+    //         pixelsPerUnit: pixelsPerUnitX
+    //     })
+    //
+    //     this.update(this._construction, true)
+    //     return this
+    // }
 
     preprocess(step: string): { label: string, key: string, code: string, options: string[] } {
         let label = "", key = "", code = "", options: string[] = [],
@@ -118,6 +189,7 @@ export class Parser {
             let arr = value.split('=')
             // First item of the array concern the label
             label = arr.shift()
+
             // Rebuit the rest of the value string
             value = arr.length > 1 ? arr.join('=') : arr[0];
 
@@ -132,7 +204,12 @@ export class Parser {
                     key = 'line'
                     code = arr[0]
                 } else if (label.match(/^[a-zA-z_0-9]+\(x\)/g)) {
+                    label = label.split('(')[0]
                     key = 'plot'
+                    code = arr[0]
+                } else if (label.match(/^[a-zA-z_0-9]+\(t\)/g)) {
+                    label = label.split('(')[0]
+                    key = 'parametric'
                     code = arr[0]
                 } else {
                     key = 'line'
@@ -148,7 +225,6 @@ export class Parser {
             key = 'pt'
             code = value.substring(label.length)
         }
-
         return {
             label,
             key,
@@ -207,7 +283,10 @@ export class Parser {
                 case 'plot':
                     builded.figures = this._generatePlot(label, code)
                     break
-                case 'zone':
+                case 'parametric':
+                    builded.figures = this._generateParametricPlot(label, code)
+                    break
+                case 'fill':
                     builded.figures = this._generateFillBetween(label, code)
                     break
                 default:
@@ -359,15 +438,14 @@ export class Parser {
 
             if (equ.equation.variables.includes('y')) {
                 // Get the point
-                let A = this._graph.point(0, equ.getValueAtX(0).value)
+                let A = this._graph.point(0, equ.getValueAtX(0).value),
+                    B = this._graph.point(equ.getValueAtY(0).value, 0)
                 A.hide().label.hide()
+                B.hide().label.hide()
 
                 figures = [
-                    A,
-                    this._graph.line(A, null, {
-                        rule: LINECONSTRUCTION.SLOPE,
-                        value: equ.slope.value
-                    })
+                    A, B,
+                    this._graph.line(A, B)
                 ]
             } else {
                 // It's a vertical line.
@@ -494,11 +572,33 @@ export class Parser {
         return figures
     }
 
+    private _generateParametricPlot(name: string, step: string): Figure[] {
+        let figures: Figure[],
+            data = step.split(',')
+
+        if(data.length<3){return []}
+
+        let fx = data[0],
+            fy = data[1],
+            a = !isNaN(+data[2])?+data[2]:0,
+            b = !isNaN(+data[3])?+data[3]:2*Math.PI
+
+        figures = [
+            this._graph.parametric(fx, fy, {
+                samples: 100,
+                domain: {
+                    min: Math.min(a, b),
+                    max: Math.max(a, b)
+                }
+            })
+        ]
+        return figures
+    }
     private _generateFillBetween(name: string, step: string): Figure[] {
         let figures: Figure[] = [],
             match, f: string = null, g: string = null, min: number, max: number
 
-        match = [...step.matchAll(/fill ([a-z]),?([a-z])?.?(([\-\d.]+),([\-\d.]+))?/g)]
+        match = [...step.matchAll(/([a-z]),?([a-z])?.?(([\-\d.]+),([\-\d.]+))?/g)]
 
         if (match.length > 0) {
             f = match[0][1] || null

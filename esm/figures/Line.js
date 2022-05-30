@@ -5,7 +5,7 @@ const Figure_1 = require("./Figure");
 const svg_js_1 = require("@svgdotjs/svg.js");
 const line_1 = require("pimath/esm/maths/geometry/line");
 const point_1 = require("pimath/esm/maths/geometry/point");
-const esm_1 = require("pimath/esm");
+const fraction_1 = require("pimath/esm/maths/coefficients/fraction");
 var LINECONSTRUCTION;
 (function (LINECONSTRUCTION) {
     LINECONSTRUCTION["PARALLEL"] = "parallel";
@@ -14,6 +14,13 @@ var LINECONSTRUCTION;
     LINECONSTRUCTION["SLOPE"] = "slope";
 })(LINECONSTRUCTION = exports.LINECONSTRUCTION || (exports.LINECONSTRUCTION = {}));
 class Line extends Figure_1.Figure {
+    _A;
+    _B;
+    _construction;
+    _math;
+    _segment;
+    _segmentEnd;
+    _segmentStart;
     constructor(graph, name, A, B, construction) {
         super(graph, name);
         this._A = A;
@@ -26,25 +33,18 @@ class Line extends Figure_1.Figure {
         this.svg = this.graph.svg.line(0, 0, 0, 0).stroke('black');
         this.updateFigure();
     }
-    _A;
     get A() {
         return this._A;
     }
-    _B;
     get B() {
         return this._B;
     }
-    _construction;
     get construction() {
         return this._construction;
     }
-    _math;
     get math() {
         return this._math;
     }
-    _segment;
-    _segmentStart;
-    _segmentEnd;
     get segment() {
         return this._segment;
     }
@@ -102,8 +102,6 @@ class Line extends Figure_1.Figure {
     }
     _updateLineThroughAandB() {
         this._math = new line_1.Line(new point_1.Point(this._A.x, this._A.y), new point_1.Point(this._B.x, this._B.y));
-        console.log('A', this._A.x, this._A.y);
-        console.log('B', this._B.x, this._B.y);
         if (this._math.slope.isInfinity()) {
             if (this.svg instanceof svg_js_1.Line) {
                 if (this._segmentStart === this._segmentEnd) {
@@ -158,7 +156,7 @@ class Line extends Figure_1.Figure {
             }
             if ((this._construction.rule === LINECONSTRUCTION.SLOPE)) {
                 if (!(this._construction.value instanceof Figure_1.Figure)) {
-                    let value = new esm_1.PiMath.Fraction(this._construction.value).value;
+                    let value = new fraction_1.Fraction(this._construction.value).value;
                     this._math = new line_1.Line(new point_1.Point(this._A.x, this._A.y), new point_1.Point(this._A.x + 1, this._A.y - value));
                 }
             }

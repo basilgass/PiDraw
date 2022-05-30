@@ -12,12 +12,12 @@ export declare class Figure {
     get graph(): Graph;
     /**
      * Define if the object should update or not.
-     * @type {Boolean}
+     * @type {boolean}
      * @private
      */
     private _freeze;
-    get freeze(): Boolean;
-    set freeze(value: Boolean);
+    get freeze(): boolean;
+    set freeze(value: boolean);
     /**
      * Name of the figure
      * @type {string}
@@ -43,7 +43,7 @@ export declare class Figure {
     get label(): Label;
     set label(value: Label);
     draw(): void;
-    update(): void;
+    update(): Figure;
     updateFigure(): Figure;
     updateLabel(): Figure;
     remove(): void;

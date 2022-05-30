@@ -4,12 +4,12 @@ import {Point} from "./Point";
 import {Line as svgLine} from "@svgdotjs/svg.js";
 import {Line as mathLine} from "pimath/esm/maths/geometry/line"
 import {Point as mathPoint} from "pimath/esm/maths/geometry/point"
-import {PiMath} from "pimath/esm";
+import {Fraction} from "pimath/esm/maths/coefficients/fraction";
 
 export interface LineConfig {
-    rule: string,
-    value?: Figure|number|string,
     k?: number
+    rule: string,
+    value?: Figure | number | string,
 }
 
 export enum LINECONSTRUCTION {
@@ -20,6 +20,14 @@ export enum LINECONSTRUCTION {
 }
 
 export class Line extends Figure {
+    private _A: Point
+    private _B: Point
+    private _construction: LineConfig
+    private _math: mathLine
+    private _segment: boolean
+    private _segmentEnd: boolean
+    private _segmentStart: boolean
+
     constructor(graph: Graph, name: string, A: Point, B: Point, construction?: LineConfig) {
         super(graph, name)
 
@@ -40,33 +48,21 @@ export class Line extends Figure {
         this.updateFigure()
     }
 
-    private _A: Point
-
     get A(): Point {
         return this._A;
     }
-
-    private _B: Point
 
     get B(): Point {
         return this._B;
     }
 
-    private _construction: LineConfig
-
     get construction(): LineConfig {
         return this._construction;
     }
 
-    private _math: mathLine
-
     get math(): mathLine {
         return this._math;
     }
-
-    private _segment: boolean
-    private _segmentStart:boolean
-    private _segmentEnd: boolean
 
     get segment(): boolean {
         return this._segment;
@@ -99,7 +95,7 @@ export class Line extends Figure {
     }
 
     asSegment(value?: boolean): Line {
-        this.segment = value===undefined || value
+        this.segment = value === undefined || value
         return this
     }
 
@@ -141,41 +137,39 @@ export class Line extends Figure {
             new mathPoint(this._B.x, this._B.y)
         )
 
-        console.log('A', this._A.x, this._A.y)
-        console.log('B', this._B.x, this._B.y)
         if (this._math.slope.isInfinity()) {
             if (this.svg instanceof svgLine) {
-                if(this._segmentStart===this._segmentEnd) {
+                if (this._segmentStart === this._segmentEnd) {
                     this.svg.plot(
-                        this._A.x, this._segmentStart?this._A.y:0,
-                        this._A.x, this.segmentEnd?this._B.y: this.graph.height
+                        this._A.x, this._segmentStart ? this._A.y : 0,
+                        this._A.x, this.segmentEnd ? this._B.y : this.graph.height
                     )
-                }else{
-                    if(this._segmentStart){
+                } else {
+                    if (this._segmentStart) {
                         this.svg.plot(
-                            this._A.x, this._A.y>this._B.y?0:this._A.y,
-                            this._A.x, this._A.y>this._B.y?this._A.y:this.graph.height
+                            this._A.x, this._A.y > this._B.y ? 0 : this._A.y,
+                            this._A.x, this._A.y > this._B.y ? this._A.y : this.graph.height
                         )
-                    }else{
+                    } else {
                         this.svg.plot(
-                            this._A.x, this._A.y>this._B.y?this._B.y:0,
-                            this._A.x, this._A.y>this._B.y?this.graph.height:this._B.y
+                            this._A.x, this._A.y > this._B.y ? this._B.y : 0,
+                            this._A.x, this._A.y > this._B.y ? this.graph.height : this._B.y
                         )
                     }
                 }
             }
         } else {
             let x1, x2
-            if(this._segmentStart===this._segmentEnd) {
+            if (this._segmentStart === this._segmentEnd) {
                 x1 = this._segmentStart ? this._A.x : 0
                 x2 = this._segmentEnd ? this._B.x : this.graph.width
-            }else{
-                if(this._segmentStart){
-                    x1 = this.A.x>this.B.x?0:this.A.x
-                    x2 = this.A.x>this.B.x?this.A.x:this.graph.width
-                }else{
-                    x1 = this.A.x>this.B.x?this._B.x:0
-                    x2 = this.A.x>this.B.x?this.graph.width:this.B.x
+            } else {
+                if (this._segmentStart) {
+                    x1 = this.A.x > this.B.x ? 0 : this.A.x
+                    x2 = this.A.x > this.B.x ? this.A.x : this.graph.width
+                } else {
+                    x1 = this.A.x > this.B.x ? this._B.x : 0
+                    x2 = this.A.x > this.B.x ? this.graph.width : this.B.x
                 }
             }
             // [AB]=[BA] OK
@@ -198,7 +192,6 @@ export class Line extends Figure {
         let x1 = 0, y1 = 0, x2 = this.graph.width, y2 = this.graph.height
 
         if (this._construction) {
-
             if ((this._construction.rule === LINECONSTRUCTION.PARALLEL)) {
                 if (this._construction.value instanceof Line) {
                     this._math = new mathLine(
@@ -219,9 +212,10 @@ export class Line extends Figure {
                 }
             }
 
-            if((this._construction.rule === LINECONSTRUCTION.SLOPE)) {
-                if (! (this._construction.value instanceof Figure)) {
-                    let value = new PiMath.Fraction(this._construction.value).value
+            if ((this._construction.rule === LINECONSTRUCTION.SLOPE)) {
+                if (!(this._construction.value instanceof Figure)) {
+                    let value = new Fraction(this._construction.value).value
+
                     this._math = new mathLine(
                         new mathPoint(this._A.x, this._A.y),
                         new mathPoint(this._A.x + 1, this._A.y - value)

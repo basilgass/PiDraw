@@ -1,19 +1,19 @@
 import { G } from "@svgdotjs/svg.js";
 import { GRIDTYPE } from "./enums";
 export interface IDrawConfig {
-    origin?: {
-        x: number;
-        y: number;
-    };
     grid?: {
         x: number;
         y: number;
         type?: GRIDTYPE;
     };
+    origin?: {
+        x: number;
+        y: number;
+    };
 }
 export interface IDrawConfigWidthHeight extends IDrawConfig {
-    width: number;
     height: number;
+    width: number;
 }
 export interface IDrawConfigUnitWidthHeight extends IDrawConfig {
     dx: number;
@@ -21,21 +21,21 @@ export interface IDrawConfigUnitWidthHeight extends IDrawConfig {
     pixelsPerUnit: number;
 }
 export interface IDrawConfigUnitMinMax extends IDrawConfig {
-    xMin: number;
-    xMax: number;
-    yMin: number;
-    yMax: number;
     pixelsPerUnit: number;
+    xMax: number;
+    xMin: number;
+    yMax: number;
+    yMin: number;
 }
 export interface ILayers {
-    background: G;
-    grids: G;
     axis: G;
-    main: G;
-    plotsBG: G;
-    plots: G;
-    plotsFG: G;
+    background: G;
     foreground: G;
+    grids: G;
+    main: G;
+    plots: G;
+    plotsBG: G;
+    plotsFG: G;
     points: G;
 }
 export declare function isDrawConfigWidthHeight(config: any): config is IDrawConfigWidthHeight;

@@ -94,6 +94,10 @@
                     <td class="font-thin">Tracer une fonction y=f(x)</td>
                 </tr>
                 <tr>
+                    <td class="font-mono">f(t)=sin(t),cos(t),a,b</td>
+                    <td class="font-thin">Tracer une fonction paramétrique, en utilisant a et b comme borne.</td>
+                </tr>
+                <tr>
                     <td class="font-mono">zone=fill f,g? a,b</td>
                     <td class="font-thin">Remplir l'espace entre deux fonctions, borné par a et b</td>
                 </tr>
@@ -104,9 +108,10 @@
     <div class="text-center font-xs text-gray-300 mt-20 mb-5">Made with love (and some coffee) by B. Gass</div>
 </div>
 <script>
-    /*
-
-    A(4,6)->drag
+   function autoParse () {
+		let graph = new PiDraw('root'),
+            axis = graph.axis(),
+            construct = `A(4,6)->drag
 B(10,8)->drag
 C(8,1)->drag
 v=vAC
@@ -118,20 +123,15 @@ d2=line 3x+4y-9=0
 p1=perp d,B
 p2=para d,C
 c=circ B,2
-f(x)=sin(x)
-     */
-	function autoParse () {
-		let graph = new PiDraw('root'),
-            axis = graph.axis(),
-            construct = `A(10,8)->drag
-B(10,6)->drag
-bc=[AB[`
-        let parser = graph.parse(construct)
+f(x)=sin(x)`
+        let parser = graph.parse(construct),
+            parameters = 'grid,axis,x=-3:15,y=-4:17'
 
+       parser.updateLayout(parameters)
 		return {
 			figures: graph.figures.map(x => x.name),
 			construct,
-            parameters: '',
+            parameters,
 			build () {
 				parser.update(this.construct)
 			},
