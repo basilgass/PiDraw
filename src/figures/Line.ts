@@ -5,6 +5,8 @@ import {Line as svgLine} from "@svgdotjs/svg.js";
 import {Line as mathLine} from "pimath/esm/maths/geometry/line"
 import {Point as mathPoint} from "pimath/esm/maths/geometry/point"
 import {Fraction} from "pimath/esm/maths/coefficients/fraction";
+import {Vector} from "pimath/esm/maths/geometry/vector";
+import {Numeric} from "pimath/esm/maths/numeric";
 
 export interface LineConfig {
     k?: number
@@ -46,6 +48,44 @@ export class Line extends Figure {
         ).stroke('black');
 
         this.updateFigure()
+    }
+
+    get tex(): string {
+        let A: {x:number, y:number},B: { x:number, y:number }
+        let m: mathLine
+
+        A = this.graph.pixelsToUnits(this.A)
+        m = new mathLine(new mathPoint(A.x, A.y), this.d)
+
+        return `${this.name}: ${m.tex.canonical}`
+    }
+
+    get d(): Vector {
+
+        if(this.B){
+            let A = this.graph.pixelsToUnits(this.A),
+                B = this.graph.pixelsToUnits(this.B)
+            return new Vector(B.x-A.x, B.y-A.y)
+        }else{
+            switch(this._construction.rule){
+                case LINECONSTRUCTION.SLOPE:
+                    let slope = new Fraction(this._construction.value)
+                    return new Vector(slope.denominator, slope.numerator)
+                case LINECONSTRUCTION.PARALLEL:
+                    if(this._construction.value instanceof Line){
+                        return this._construction.value.d
+                    }
+                    break
+                case LINECONSTRUCTION.PERPENDICULAR:
+                    if(this._construction.value instanceof Line){
+                        return this._construction.value.d.clone().normal()
+                    }
+                    break
+                case LINECONSTRUCTION.TANGENT:
+                    return new Vector()
+            }
+        }
+        return new Vector()
     }
 
     get A(): Point {
@@ -100,7 +140,7 @@ export class Line extends Figure {
     }
 
     asVector(value?: boolean): Line {
-        this._segment = value === undefined || value
+        this.segment = value === undefined || value
 
         if (this.svg instanceof svgLine) {
             this.svg.marker('end', this.graph.markers.end)

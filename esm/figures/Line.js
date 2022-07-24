@@ -6,6 +6,7 @@ const svg_js_1 = require("@svgdotjs/svg.js");
 const line_1 = require("pimath/esm/maths/geometry/line");
 const point_1 = require("pimath/esm/maths/geometry/point");
 const fraction_1 = require("pimath/esm/maths/coefficients/fraction");
+const vector_1 = require("pimath/esm/maths/geometry/vector");
 var LINECONSTRUCTION;
 (function (LINECONSTRUCTION) {
     LINECONSTRUCTION["PARALLEL"] = "parallel";
@@ -32,6 +33,39 @@ class Line extends Figure_1.Figure {
         }
         this.svg = this.graph.svg.line(0, 0, 0, 0).stroke('black');
         this.updateFigure();
+    }
+    get tex() {
+        let A, B;
+        let m;
+        A = this.graph.pixelsToUnits(this.A);
+        m = new line_1.Line(new point_1.Point(A.x, A.y), this.d);
+        return `${this.name}: ${m.tex.canonical}`;
+    }
+    get d() {
+        if (this.B) {
+            let A = this.graph.pixelsToUnits(this.A), B = this.graph.pixelsToUnits(this.B);
+            return new vector_1.Vector(B.x - A.x, B.y - A.y);
+        }
+        else {
+            switch (this._construction.rule) {
+                case LINECONSTRUCTION.SLOPE:
+                    let slope = new fraction_1.Fraction(this._construction.value);
+                    return new vector_1.Vector(slope.denominator, slope.numerator);
+                case LINECONSTRUCTION.PARALLEL:
+                    if (this._construction.value instanceof Line) {
+                        return this._construction.value.d;
+                    }
+                    break;
+                case LINECONSTRUCTION.PERPENDICULAR:
+                    if (this._construction.value instanceof Line) {
+                        return this._construction.value.d.clone().normal();
+                    }
+                    break;
+                case LINECONSTRUCTION.TANGENT:
+                    return new vector_1.Vector();
+            }
+        }
+        return new vector_1.Vector();
     }
     get A() {
         return this._A;
@@ -73,7 +107,7 @@ class Line extends Figure_1.Figure {
         return this;
     }
     asVector(value) {
-        this._segment = value === undefined || value;
+        this.segment = value === undefined || value;
         if (this.svg instanceof svg_js_1.Line) {
             this.svg.marker('end', this.graph.markers.end);
         }

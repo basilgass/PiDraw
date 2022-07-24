@@ -60,6 +60,10 @@ export class Point extends Figure {
         return this.graph.pixelsToUnits(this)
     }
 
+    get tex(): string {
+        let P = this.graph.pixelsToUnits(this)
+        return `${this.name}\\left( ${P.x} ; ${P.y} \\right)`
+    }
     generateName(): string {
         if (this.name === undefined) {
             this.name = `P${Object.keys(this.graph.points).length}`
@@ -182,10 +186,19 @@ export class Point extends Figure {
             point.graph.update()
 
             // TODO: add after drag event ?
+
         }
 
         this.svg.draggable()
             .on('dragmove', dragmove)
+            // TODO: Add event listener.
+            // .on('dragend', ()=>{
+            //     let event = new CustomEvent('PiDrawPointDragEnd',
+            //         {
+            //             detail: this
+            //         })
+            //     document.dispatchEvent(event)
+            // })
         return this
     }
 

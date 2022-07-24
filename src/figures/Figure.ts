@@ -83,6 +83,10 @@ export class Figure {
         this._label = value;
     }
 
+    get tex(): string {
+        return ' - '
+    }
+
     draw() {
         this._freeze = false
         this.update()

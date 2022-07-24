@@ -7,14 +7,15 @@ const line_1 = require("pimath/esm/maths/geometry/line");
 const Point_1 = require("./figures/Point");
 const Axis_1 = require("./figures/Axis");
 class Parser {
-    figures;
-    step;
     _buildedSteps; // {'A(4,6)': ['A']} {step: [list of object names]}
     _construction;
     _graph;
     constructor(graph, construction) {
         this._graph = graph;
         this.update(construction);
+    }
+    get buildedSteps() {
+        return this._buildedSteps;
     }
     /**
      * Update the graph using a new construction string.
@@ -40,17 +41,30 @@ class Parser {
             // Go through each already built steps.
             // It must be the same than the current one, in this order !
             if (this._buildedSteps[i].step !== steps[i]) {
-                // Not the same step ! Everything after this must be removed from the graph!
-                for (let j = +i; j < this._buildedSteps.length; j++) {
-                    if (this._buildedSteps[j].figures === undefined) {
-                        continue;
-                    }
-                    for (let fig of this._buildedSteps[j].figures) {
-                        fig.remove();
-                    }
+                // Maybe it's the same object and it just needs to be updated !
+                // This means that every beyond must be modified.
+                const currentStepProcess = this._preprocess(steps[i]), prevStepProcess = this._preprocess(this._buildedSteps[i].step);
+                // Actually, updating works only for plot
+                // TODO: handle multiple element to be updated...
+                let updateResult = false;
+                if (currentStepProcess.key === prevStepProcess.key &&
+                    currentStepProcess.label === prevStepProcess.label &&
+                    currentStepProcess.key === 'plot') {
+                    updateResult = this._updatePlot(this._buildedSteps[i], currentStepProcess.code);
                 }
-                this._buildedSteps = this._buildedSteps.slice(0, i);
-                break;
+                if (!updateResult) {
+                    // Not the same step ! Everything after this must be removed from the graph!
+                    for (let j = +i; j < this._buildedSteps.length; j++) {
+                        if (this._buildedSteps[j].figures === undefined) {
+                            continue;
+                        }
+                        for (let fig of this._buildedSteps[j].figures) {
+                            fig.remove();
+                        }
+                    }
+                    this._buildedSteps = this._buildedSteps.slice(0, i);
+                    break;
+                }
             }
         }
         // Build the new steps from the current point
@@ -58,13 +72,12 @@ class Parser {
     }
     updateLayout(parameters) {
         // x=3:-5,y=-5:2                            min/max
-        // dx=20,dy=12                              number of units
         // ppu=50                                   pixels per unit
         // grid/nogrid                              show / hide grid
         // axis/miniaxis/noaxes                     show full axes, min axes (one unit long), hide axis
         // origin=bl/bc/br/ml/mc/mr/tl/tc/tr/mc     place the origin to top, bottom, middle, left, center or right
         let values = parameters.split(',');
-        let xMin = -1, xMax = 10, yMin = -1, yMax = 10;
+        let xMin = -1, xMax = 10, yMin = -1, yMax = 10, ppu = null;
         for (let param of values) {
             if (param.includes('=')) {
                 let keyValue = param.split('=');
@@ -80,9 +93,15 @@ class Parser {
                         yMax = +keyValue[1].split(':')[1];
                     }
                 }
+                else if (keyValue[0] === 'ppu') {
+                    let value = +keyValue[1];
+                    if (!isNaN(value) && value > 0) {
+                        ppu = +keyValue[1];
+                    }
+                }
             }
         }
-        let pixelsPerUnitX = this._graph.width / (Math.max(xMin, xMax) - Math.min(xMin, xMax));
+        let pixelsPerUnitX = ppu !== null ? ppu : this._graph.width / (Math.max(xMin, xMax) - Math.min(xMin, xMax));
         this._graph.updateLayout({
             xMin,
             xMax,
@@ -124,37 +143,7 @@ class Parser {
         this.update(this._construction, true);
         return this;
     }
-    // updateLayout(parameters: string): Parser {
-    //     // x=3:-5,y=-5:2                            min/max
-    //     // dx=20,dy=12                              number of units
-    //     // ppu=50                                   pixels per unit
-    //     // grid/nogrid                              show / hide grid
-    //     // axes/miniaxes/noaxes                     show full axes, min axes (one unit long), hide axis
-    //     // origin=bl/bc/br/ml/mc/mr/tl/tc/tr/mc     place the origin to top, bottom, middle, left, center or right
-    //     let values = parameters.split(',')
-    //
-    //     let xMin = -1, xMax = 10, yMin = -1, yMax = 10
-    //
-    //     if (values.length >= 4) {
-    //         xMin = +values[0]
-    //         xMax = +values[1]
-    //         yMin = +values[2]
-    //         yMax = +values[3]
-    //     }
-    //
-    //     let pixelsPerUnitX = this._graph.width / (Math.max(xMin, xMax) - Math.min(xMin, xMax))
-    //     this._graph.updateLayout({
-    //         xMin,
-    //         xMax,
-    //         yMin,
-    //         yMax,
-    //         pixelsPerUnit: pixelsPerUnitX
-    //     })
-    //
-    //     this.update(this._construction, true)
-    //     return this
-    // }
-    preprocess(step) {
+    _preprocess(step) {
         let label = "", key = "", code = "", options = [], value = step + '';
         // Remove the options.
         if (value.includes('->')) {
@@ -234,7 +223,7 @@ class Parser {
                 figures: []
             };
             // Preprocess the step
-            let { label, key, code, options } = this.preprocess(construct);
+            let { label, key, code, options } = this._preprocess(construct);
             // console.log(construct, label, key, code, options)
             switch (key) {
                 case 'pt':
@@ -456,9 +445,25 @@ class Parser {
         }
         return figures;
     }
+    _updatePlot(BStep, fx) {
+        if (BStep.figures.length > 0 && BStep.figures[0] instanceof Plot_1.Plot) {
+            BStep.figures[0].plot(fx);
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
     _generatePlot(name, step) {
         let figures;
-        let domain = this._graph.unitXDomain, fx = step;
+        let domain = this._graph.unitXDomain, fx = step.split(',')[0].split('@')[0], samples, sampleMatch = step.match(/@([0-9]+)/);
+        if (sampleMatch) {
+            samples = +sampleMatch[1];
+        }
+        else {
+            samples = 100;
+        }
+        // Analyse the value.
         // Domain of the function
         if (step.includes(',')) {
             let values = step.split(',');
@@ -474,7 +479,7 @@ class Parser {
         // Plottings
         // PLot the function
         figures = [this._graph.plot(fx, {
-                samples: 100,
+                samples,
                 domain
             }, name)];
         return figures;

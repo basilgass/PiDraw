@@ -2,6 +2,7 @@ import { Figure } from "./Figure";
 import { Graph } from "../Graph";
 import { Point } from "./Point";
 import { Line as mathLine } from "pimath/esm/maths/geometry/line";
+import { Vector } from "pimath/esm/maths/geometry/vector";
 export interface LineConfig {
     k?: number;
     rule: string;
@@ -22,6 +23,8 @@ export declare class Line extends Figure {
     private _segmentEnd;
     private _segmentStart;
     constructor(graph: Graph, name: string, A: Point, B: Point, construction?: LineConfig);
+    get tex(): string;
+    get d(): Vector;
     get A(): Point;
     get B(): Point;
     get construction(): LineConfig;

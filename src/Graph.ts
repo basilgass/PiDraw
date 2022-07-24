@@ -19,6 +19,7 @@ import {GraphConfig} from "./variables/types";
 import {Arc} from "./figures/Arc";
 import {Parser} from "./Parser";
 import {Parametric} from "./figures/Parametric";
+import {Numeric} from "pimath/esm/maths/numeric";
 
 export class Graph {
     /**
@@ -238,10 +239,16 @@ export class Graph {
 
     pixelsToUnits(point: IPoint): IPoint {
         // TODO: handle other grid types.
-        return {
-            x: (point.x - this.origin.x) / this._pixelsPerUnit.x,
-            y: -(point.y - this.origin.y) / this._pixelsPerUnit.y
-        }
+
+        // Handle "rounding" issue.
+        let x =(point.x - this.origin.x) / this._pixelsPerUnit.x,
+        y =    -(point.y - this.origin.y) / this._pixelsPerUnit.y
+
+        // TODO: should handle "rounding" problems externally (from PiMath ?)
+        
+
+
+        return {x: Numeric.numberCorrection(x), y: Numeric.numberCorrection(y) }
     }
 
     getFigure(name: string): Figure {

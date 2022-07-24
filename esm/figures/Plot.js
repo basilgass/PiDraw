@@ -11,6 +11,7 @@ class Plot extends Figure_1.Figure {
     _config;
     _precision;
     _fx;
+    _rawFx;
     _plugins;
     _riemann;
     constructor(graph, name, fn, config) {
@@ -28,16 +29,23 @@ class Plot extends Figure_1.Figure {
         this.plot(fn);
         this._plugins = [];
     }
+    get tex() {
+        if (this._fx instanceof numexp_1.NumExp) {
+            return this._rawFx.replaceAll('*', '\\cdot ');
+        }
+        else {
+            return '?';
+        }
+    }
+    get fx() {
+        return this._fx;
+    }
     generateName() {
         if (this.name === undefined) {
             let n = this.graph.figures.filter(fig => fig instanceof Plot).length, idx = Math.trunc(n / 5);
             this.name = 'fghij'[n % 5] + (idx >= 1 ? idx : '');
         }
         return this.name;
-    }
-    updateFigure() {
-        // Update the plot (using the plot function - so it's already done !)
-        return this;
     }
     updatePlugins() {
         if (this._plugins !== undefined) {
@@ -119,7 +127,11 @@ class Plot extends Figure_1.Figure {
     _parse(fn) {
         // TODO : must calculate differently
         if (typeof fn === 'string') {
+            this._rawFx = fn;
             return new numexp_1.NumExp(fn);
+        }
+        else {
+            this._rawFx = '';
         }
         return fn;
     }

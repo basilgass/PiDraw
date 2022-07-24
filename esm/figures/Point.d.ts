@@ -19,6 +19,7 @@ export declare class Point extends Figure {
     get y(): number;
     set y(value: number);
     get coord(): IPoint;
+    get tex(): string;
     generateName(): string;
     asCross(): Point;
     asCircle(size?: number): Point;

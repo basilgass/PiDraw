@@ -14,6 +14,7 @@ const enums_1 = require("./variables/enums");
 const Arc_1 = require("./figures/Arc");
 const Parser_1 = require("./Parser");
 const Parametric_1 = require("./figures/Parametric");
+const numeric_1 = require("pimath/esm/maths/numeric");
 class Graph {
     /**
      * HTML container
@@ -204,10 +205,10 @@ class Graph {
     }
     pixelsToUnits(point) {
         // TODO: handle other grid types.
-        return {
-            x: (point.x - this.origin.x) / this._pixelsPerUnit.x,
-            y: -(point.y - this.origin.y) / this._pixelsPerUnit.y
-        };
+        // Handle "rounding" issue.
+        let x = (point.x - this.origin.x) / this._pixelsPerUnit.x, y = -(point.y - this.origin.y) / this._pixelsPerUnit.y;
+        // TODO: should handle "rounding" problems externally (from PiMath ?)
+        return { x: numeric_1.Numeric.numberCorrection(x), y: numeric_1.Numeric.numberCorrection(y) };
     }
     getFigure(name) {
         for (let figure of this._figures) {

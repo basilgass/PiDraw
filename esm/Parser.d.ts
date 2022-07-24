@@ -1,11 +1,15 @@
 import { Graph } from "./Graph";
+import { Figure } from "./figures/Figure";
+declare type BuildStep = {
+    step: string;
+    figures: Figure[];
+};
 export declare class Parser {
-    figures: [];
-    step: "";
     private _buildedSteps;
     private _construction;
     private _graph;
     constructor(graph: Graph, construction: string);
+    get buildedSteps(): BuildStep[];
     /**
      * Update the graph using a new construction string.
      * @param {string} construction
@@ -13,12 +17,7 @@ export declare class Parser {
      */
     update(construction: string, refresh?: boolean): void;
     updateLayout(parameters: string): Parser;
-    preprocess(step: string): {
-        label: string;
-        key: string;
-        code: string;
-        options: string[];
-    };
+    private _preprocess;
     generate(steps: string[]): void;
     private _postprocess;
     /**
@@ -36,7 +35,9 @@ export declare class Parser {
     private _generatePerpendicular;
     private _generateParallel;
     private _generateCircle;
+    private _updatePlot;
     private _generatePlot;
     private _generateParametricPlot;
     private _generateFillBetween;
 }
+export {};

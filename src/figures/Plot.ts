@@ -16,6 +16,7 @@ export class Plot extends Figure {
     private _config: PlotConfig
     private _precision: number
     private _fx: Function | NumExp
+    private _rawFx: string
     private _plugins: any[]
     private _riemann: { svg: G, rectangles: Rect[] }
 
@@ -40,6 +41,18 @@ export class Plot extends Figure {
         this._plugins = []
     }
 
+    get tex(): string {
+        if(this._fx instanceof NumExp){
+            return this._rawFx.replaceAll('*', '\\cdot ')
+        }else{
+            return '?'
+        }
+    }
+
+    get fx(): Function | NumExp {
+        return this._fx;
+    }
+
     generateName(): string {
         if (this.name === undefined) {
             let n = this.graph.figures.filter(fig => fig instanceof Plot).length,
@@ -48,11 +61,6 @@ export class Plot extends Figure {
         }
 
         return this.name
-    }
-
-    updateFigure(): Plot {
-        // Update the plot (using the plot function - so it's already done !)
-        return this
     }
 
     updatePlugins(): Plot {
@@ -152,7 +160,10 @@ export class Plot extends Figure {
     private _parse(fn: Function | string): Function | NumExp {
         // TODO : must calculate differently
         if (typeof fn === 'string') {
+            this._rawFx = fn
             return new NumExp(fn)
+        }else{
+            this._rawFx = ''
         }
 
         return fn

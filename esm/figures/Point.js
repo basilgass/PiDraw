@@ -40,6 +40,10 @@ class Point extends Figure_1.Figure {
     get coord() {
         return this.graph.pixelsToUnits(this);
     }
+    get tex() {
+        let P = this.graph.pixelsToUnits(this);
+        return `${this.name}\\left( ${P.x} ; ${P.y} \\right)`;
+    }
     generateName() {
         if (this.name === undefined) {
             this.name = `P${Object.keys(this.graph.points).length}`;
@@ -139,6 +143,14 @@ class Point extends Figure_1.Figure {
         }
         this.svg.draggable()
             .on('dragmove', dragmove);
+        // TODO: Add event listener.
+        // .on('dragend', ()=>{
+        //     let event = new CustomEvent('PiDrawPointDragEnd',
+        //         {
+        //             detail: this
+        //         })
+        //     document.dispatchEvent(event)
+        // })
         return this;
     }
     _updateShape() {
