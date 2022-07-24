@@ -447,7 +447,7 @@ class Parser {
     }
     _updatePlot(BStep, fx) {
         if (BStep.figures.length > 0 && BStep.figures[0] instanceof Plot_1.Plot) {
-            BStep.figures[0].plot(fx);
+            BStep.figures[0].plot(fx, 100);
             return true;
         }
         else {

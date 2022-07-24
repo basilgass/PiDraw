@@ -538,7 +538,7 @@ export class Parser {
 
     private _updatePlot(BStep: BuildStep, fx: string): boolean {
         if(BStep.figures.length>0 && BStep.figures[0] instanceof Plot){
-            BStep.figures[0].plot(fx)
+            BStep.figures[0].plot(fx, 100)
             return true
         }else{
             return false

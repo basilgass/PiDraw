@@ -89,7 +89,7 @@ export class Plot extends Figure {
             if (points.length === this.svg.array().length) {
                 if (this.svg instanceof Path) {
                     // @ts-ignore
-                    this.svg.animate(speed === undefined ? 500 : speed).plot(d)
+                    this.svg.animate(speed === undefined ? 100 : speed).plot(d)
                 }
             } else {
                 this.svg.hide().plot(d)

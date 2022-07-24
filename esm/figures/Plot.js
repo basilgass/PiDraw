@@ -69,7 +69,7 @@ class Plot extends Figure_1.Figure {
             if (points.length === this.svg.array().length) {
                 if (this.svg instanceof svg_js_1.Path) {
                     // @ts-ignore
-                    this.svg.animate(speed === undefined ? 500 : speed).plot(d);
+                    this.svg.animate(speed === undefined ? 100 : speed).plot(d);
                 }
             }
             else {
