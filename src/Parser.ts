@@ -543,7 +543,7 @@ export class Parser {
     }
 
     private _generateArc(name: string, step: string): Figure[] {
-        let match = [...step.matchAll(/^([A-Z]_?[0-9]?),([A-Z]_?[0-9]?),([A-Z]_?[0-9]?),?([0-9]*)?/g)],
+        let match = [...step.matchAll(/^([A-Z]_?[0-9]?),([A-Z]_?[0-9]?),([A-Z]_?[0-9]?),?([0-9.]*)?/g)],
             figures: Figure[]
 
         if (match.length > 0) {
@@ -552,7 +552,10 @@ export class Parser {
                 B = this._graph.getPoint(match[0][3]),
                 radius = match[0][4]===undefined?undefined:+match[0][4]
 
-            figures = [this._graph.arc(A, O, B, this._graph.distanceToPixels(radius))]
+            console.log(match[0][1])
+            console.log(this._graph.getPoint(match[0][1]))
+            console.log(A)
+            figures = [this._graph.arc(A, O, B, this._graph.distanceToPixels(radius), name)]
         }
         return figures
     }
