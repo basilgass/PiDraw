@@ -82,6 +82,9 @@ class Arc extends Figure_1.Figure {
     }
     generateName() {
         if (this.name === undefined) {
+            console.log(this._start);
+            console.log(this._center);
+            console.log(this._end);
             return `a_${this._start.name}${this._center.name}${this._end.name}`;
         }
         return super.generateName();

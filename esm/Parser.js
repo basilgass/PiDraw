@@ -454,10 +454,13 @@ class Parser {
         return figures;
     }
     _generateArc(name, step) {
-        let match = [...step.matchAll(/^([A-Z]_?[0-9]?),([A-Z]_?[0-9]?),([A-Z]_?[0-9]?),?([0-9]*)?/g)], figures;
+        let match = [...step.matchAll(/^([A-Z]_?[0-9]?),([A-Z]_?[0-9]?),([A-Z]_?[0-9]?),?([0-9.]*)?/g)], figures;
         if (match.length > 0) {
             let A = this._graph.getPoint(match[0][1]), O = this._graph.getPoint(match[0][2]), B = this._graph.getPoint(match[0][3]), radius = match[0][4] === undefined ? undefined : +match[0][4];
-            figures = [this._graph.arc(A, O, B, this._graph.distanceToPixels(radius))];
+            console.log(match[0][1]);
+            console.log(this._graph.getPoint(match[0][1]));
+            console.log(A);
+            figures = [this._graph.arc(A, O, B, this._graph.distanceToPixels(radius), name)];
         }
         return figures;
     }
