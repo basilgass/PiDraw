@@ -247,6 +247,9 @@ class Parser {
                 case 'circ':
                     builded.figures = this._generateCircle(label, code);
                     break;
+                case 'arc':
+                    builded.figures = this._generateArc(label, code);
+                    break;
                 case 'plot':
                     builded.figures = this._generatePlot(label, code);
                     break;
@@ -291,6 +294,12 @@ class Parser {
                     else if (el === 'ultrathin') {
                         fig.ultrathin();
                     }
+                    else if (el === '?') {
+                        fig.label.hide();
+                    }
+                    else if (el === '!') {
+                        fig.hide();
+                    }
                     else {
                         fig.color(el);
                     }
@@ -332,10 +341,9 @@ class Parser {
         // Create the point
         const pt = this._graph.point(x, y, name);
         pt.label.displayName = label;
-        if (match.length >= 3) {
-            if (match[3] === '*') {
-                pt.asCircle();
-            }
+        // By default, use a circle as point
+        if (!(match.length >= 3 && match[3] === '*')) {
+            pt.asCircle();
         }
         // Generate and return the figures.
         figures = [pt];
@@ -442,6 +450,14 @@ class Parser {
         if (match.length > 0) {
             let A = this._graph.getPoint(match[0][1]), radius = +match[0][2];
             figures = [this._graph.circle(A, radius, name)];
+        }
+        return figures;
+    }
+    _generateArc(name, step) {
+        let match = [...step.matchAll(/^([A-Z]_?[0-9]?),([A-Z]_?[0-9]?),([A-Z]_?[0-9]?),?([0-9]*)?/g)], figures;
+        if (match.length > 0) {
+            let A = this._graph.getPoint(match[0][1]), O = this._graph.getPoint(match[0][2]), B = this._graph.getPoint(match[0][3]), radius = match[0][4] === undefined ? undefined : +match[0][4];
+            figures = [this._graph.arc(A, O, B, this._graph.distanceToPixels(radius))];
         }
         return figures;
     }
