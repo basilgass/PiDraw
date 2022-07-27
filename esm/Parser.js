@@ -51,6 +51,7 @@ class Parser {
                     currentStepProcess.label === prevStepProcess.label &&
                     currentStepProcess.key === 'plot') {
                     updateResult = this._updatePlot(this._buildedSteps[i], currentStepProcess.code);
+                    this._postprocess(this._buildedSteps[i], currentStepProcess.options);
                 }
                 if (!updateResult) {
                     // Not the same step ! Everything after this must be removed from the graph!
@@ -457,9 +458,6 @@ class Parser {
         let match = [...step.matchAll(/^([A-Z]_?[0-9]?),([A-Z]_?[0-9]?),([A-Z]_?[0-9]?),?([0-9.]*)?/g)], figures;
         if (match.length > 0) {
             let A = this._graph.getPoint(match[0][1]), O = this._graph.getPoint(match[0][2]), B = this._graph.getPoint(match[0][3]), radius = match[0][4] === undefined ? undefined : +match[0][4];
-            console.log(match[0][1]);
-            console.log(this._graph.getPoint(match[0][1]));
-            console.log(A);
             figures = [this._graph.arc(A, O, B, this._graph.distanceToPixels(radius), name)];
         }
         return figures;

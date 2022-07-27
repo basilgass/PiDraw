@@ -160,9 +160,7 @@ class Plot extends Figure_1.Figure {
                 pt.y = 0;
                 nextToken = 'M';
             }
-            if (errorCounter > samples * 2) {
-                return { d, points };
-            }
+            // if(errorCounter>samples*2){return {d, points}}
             // store the previous token.
             prevToken = '' + nextToken;
             // If it was already a line before (or will be after), add a L (lineto)

@@ -65,6 +65,7 @@ export class Parser {
                     currentStepProcess.key === 'plot'
                 ){
                     updateResult = this._updatePlot(this._buildedSteps[i], currentStepProcess.code)
+                    this._postprocess(this._buildedSteps[i], currentStepProcess.options)
                 }
 
                 if(!updateResult){
@@ -552,9 +553,6 @@ export class Parser {
                 B = this._graph.getPoint(match[0][3]),
                 radius = match[0][4]===undefined?undefined:+match[0][4]
 
-            console.log(match[0][1])
-            console.log(this._graph.getPoint(match[0][1]))
-            console.log(A)
             figures = [this._graph.arc(A, O, B, this._graph.distanceToPixels(radius), name)]
         }
         return figures

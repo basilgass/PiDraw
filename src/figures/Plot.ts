@@ -209,7 +209,7 @@ export class Plot extends Figure {
                 pt.y = 0
                 nextToken = 'M'
             }
-            if(errorCounter>samples*2){return {d, points}}
+            // if(errorCounter>samples*2){return {d, points}}
 
             // store the previous token.
             prevToken = '' + nextToken
