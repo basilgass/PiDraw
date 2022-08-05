@@ -50,6 +50,7 @@ class Parser {
                 if (currentStepProcess.key === prevStepProcess.key &&
                     currentStepProcess.label === prevStepProcess.label &&
                     currentStepProcess.key === 'plot') {
+                    this._buildedSteps[i].step = steps[i];
                     updateResult = this._updatePlot(this._buildedSteps[i], currentStepProcess.code);
                     this._postprocess(this._buildedSteps[i], currentStepProcess.options);
                 }
@@ -464,6 +465,7 @@ class Parser {
     }
     _updatePlot(BStep, fx) {
         if (BStep.figures.length > 0 && BStep.figures[0] instanceof Plot_1.Plot) {
+            // Modify the plot.
             BStep.figures[0].plot(fx, 100);
             return true;
         }

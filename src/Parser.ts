@@ -64,6 +64,7 @@ export class Parser {
                     currentStepProcess.label===prevStepProcess.label &&
                     currentStepProcess.key === 'plot'
                 ){
+                    this._buildedSteps[i].step = steps[i]
                     updateResult = this._updatePlot(this._buildedSteps[i], currentStepProcess.code)
                     this._postprocess(this._buildedSteps[i], currentStepProcess.options)
                 }
@@ -560,6 +561,7 @@ export class Parser {
 
     private _updatePlot(BStep: BuildStep, fx: string): boolean {
         if(BStep.figures.length>0 && BStep.figures[0] instanceof Plot){
+            // Modify the plot.
             BStep.figures[0].plot(fx, 100)
             return true
         }else{
