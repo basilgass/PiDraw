@@ -12,12 +12,13 @@ export class Parser {
     private _buildedSteps: BuildStep[] // {'A(4,6)': ['A']} {step: [list of object names]}
     private _construction: string
     private _graph: Graph
+    private _vars: {[Key:string]: number}
 
     constructor(graph: Graph, construction: string) {
         this._graph = graph
         this.update(construction)
+        this._vars = {}
     }
-
 
     get buildedSteps(): BuildStep[] {
         return this._buildedSteps;
@@ -440,16 +441,29 @@ export class Parser {
             // type is      d = line 3x-2y=0    From equation
             let equ = new mathLine(step)
 
-            if (equ.equation.variables.includes('y')) {
+            if (equ.equation.variables.includes('y') && equ.equation.variables.includes('x')) {
                 // Get the point
-                let A = this._graph.point(0, equ.getValueAtX(0).value),
-                    B = this._graph.point(equ.getValueAtY(0).value, 0)
+                let A = this._graph.point(0, equ.getValueAtX(0).value)
                 A.hide().label.hide()
-                B.hide().label.hide()
-
                 figures = [
-                    A, B,
-                    this._graph.line(A, B)
+                    A,
+                    this._graph.line(A, null, {
+                        rule: LINECONSTRUCTION.SLOPE,
+                        value: equ.slope.display
+                    },
+                        name)
+                ]
+            }else if (equ.equation.variables.includes('y')){
+                // HORIZONTAL LINE
+                let A = this._graph.point(0, equ.getValueAtX(0).value)
+                A.hide().label.hide()
+                figures = [
+                    A,
+                    this._graph.line(A, null, {
+                        rule: LINECONSTRUCTION.SLOPE,
+                        value: equ.slope.display
+                    },
+                        name)
                 ]
             } else {
                 // It's a vertical line.
@@ -461,7 +475,7 @@ export class Parser {
                 B.hide().label.hide()
                 figures = [
                     A, B,
-                    this._graph.line(A, B)
+                    this._graph.line(A, B, null, name)
                 ]
             }
 

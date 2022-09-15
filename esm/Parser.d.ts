@@ -8,6 +8,7 @@ export declare class Parser {
     private _buildedSteps;
     private _construction;
     private _graph;
+    private _vars;
     constructor(graph: Graph, construction: string);
     get buildedSteps(): BuildStep[];
     /**

@@ -10,9 +10,11 @@ class Parser {
     _buildedSteps; // {'A(4,6)': ['A']} {step: [list of object names]}
     _construction;
     _graph;
+    _vars;
     constructor(graph, construction) {
         this._graph = graph;
         this.update(construction);
+        this._vars = {};
     }
     get buildedSteps() {
         return this._buildedSteps;
@@ -386,14 +388,28 @@ class Parser {
         else if (step.includes('=')) {
             // type is      d = line 3x-2y=0    From equation
             let equ = new line_1.Line(step);
-            if (equ.equation.variables.includes('y')) {
+            if (equ.equation.variables.includes('y') && equ.equation.variables.includes('x')) {
                 // Get the point
-                let A = this._graph.point(0, equ.getValueAtX(0).value), B = this._graph.point(equ.getValueAtY(0).value, 0);
+                let A = this._graph.point(0, equ.getValueAtX(0).value);
                 A.hide().label.hide();
-                B.hide().label.hide();
                 figures = [
-                    A, B,
-                    this._graph.line(A, B)
+                    A,
+                    this._graph.line(A, null, {
+                        rule: Line_1.LINECONSTRUCTION.SLOPE,
+                        value: equ.slope.display
+                    }, name)
+                ];
+            }
+            else if (equ.equation.variables.includes('y')) {
+                // HORIZONTAL LINE
+                let A = this._graph.point(0, equ.getValueAtX(0).value);
+                A.hide().label.hide();
+                figures = [
+                    A,
+                    this._graph.line(A, null, {
+                        rule: Line_1.LINECONSTRUCTION.SLOPE,
+                        value: equ.slope.display
+                    }, name)
                 ];
             }
             else {
@@ -404,7 +420,7 @@ class Parser {
                 B.hide().label.hide();
                 figures = [
                     A, B,
-                    this._graph.line(A, B)
+                    this._graph.line(A, B, null, name)
                 ];
             }
         }
