@@ -34,7 +34,7 @@ export declare class Point extends Figure {
      * @returns {Point}
      */
     middleOf(A: Point, B: Point): Point;
-    draggable(grid?: Grid): Point;
+    draggable(grid?: Grid, constrain?: (string | Figure)[]): Point;
     private _updateShape;
     private _updateCoordinate;
 }

@@ -4,6 +4,10 @@ import {IPoint} from "../variables/interfaces";
 import {Grid} from "./Grid";
 import {POINTCONSTRAIN, POINTSHAPE} from "../variables/enums";
 import {Label} from "./Label";
+import {Circle} from "./Circle";
+import {Line} from "./Line";
+import {Plot} from "./Plot";
+import {Vector} from "pimath/esm/maths/geometry/vector";
 
 export interface PointConfig {
     type: POINTCONSTRAIN,
@@ -138,7 +142,7 @@ export class Point extends Figure {
         return this
     }
 
-    draggable(grid?: Grid): Point {
+    draggable(grid?: Grid, constrain?: (string|Figure)[]): Point {
         this._shape = POINTSHAPE.HANDLE
         this.updateFigure()
 
@@ -172,10 +176,31 @@ export class Point extends Figure {
                 }
             }
 
-            // Move the circle to the current positiovn
-            handler.move(x, y)
-
             // TODO: Work with constrains.
+            // Constrain
+            if( constrain.includes('x')){
+                y = point.y
+            }else if (constrain.includes('y')){
+                x = point.x
+            }else{
+                for(let c of constrain){
+                    if(c instanceof Circle){
+                         let v = new Vector(c.center, {x,y}),
+                             r = c.getRadiusAsPixels()
+
+                        x = c.center.x + v.x.value/v.norm*r
+                        y = c.center.y + v.y.value/v.norm*r
+                    }else if(c instanceof Line){
+                        // TODO: constrain line
+                    }else if(c instanceof Plot){
+                        // TODO: constrain Plot
+                    }
+                }
+
+            }
+
+            // Move the circle to the current position
+            handler.move(x, y)
 
             // Set the point shape coordinate
             point.x = x //handler.el.cx()

@@ -114,7 +114,7 @@
    function autoParse () {
 		let graph = new PiDraw('root'),
             axis = graph.axis(),
-            construct2 = `A(4,6)->drag
+            construct = `A(4,6)->drag
 B(10,8)->drag
 C(8,1)->drag
 v=vAC
@@ -127,18 +127,13 @@ p1=perp d,B
 p2=para d,C
 c=circ B,2
 f(x)=sin(x)`,
-       construct = `A(8,3)
+       construct2 = `A(8,3)
 d=line 3x-2y+5=0`
 
         let parser = graph.parse(construct),
             parameters = 'grid,axis,x=-3:15,y=-4:17'
 
        parser.updateLayout(parameters)
-
-       // function updateFigures(){
-       //     return
-       // }
-       // document.addEventListener('PiDrawPointDragEnd', updateFigures)
 
 		return {
             figures: graph.figures.map(x=>katex.renderToString(x.tex)),

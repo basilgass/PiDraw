@@ -5,6 +5,7 @@ import {Plot} from "./figures/Plot";
 import {Line as mathLine} from "pimath/esm/maths/geometry/line"
 import {Point} from "./figures/Point";
 import {Axis} from "./figures/Axis";
+import {Bezier} from "./figures/Bezier";
 
 type BuildStep = { step: string, figures: Figure[] }
 
@@ -12,12 +13,10 @@ export class Parser {
     private _buildedSteps: BuildStep[] // {'A(4,6)': ['A']} {step: [list of object names]}
     private _construction: string
     private _graph: Graph
-    private _vars: {[Key:string]: number}
 
     constructor(graph: Graph, construction: string) {
         this._graph = graph
         this.update(construction)
-        this._vars = {}
     }
 
     get buildedSteps(): BuildStep[] {
@@ -291,6 +290,9 @@ export class Parser {
                 case 'fill':
                     builded.figures = this._generateFillBetween(label, code)
                     break
+                case 'bezier':
+                    builded.figures = this._generateBezier(label, code)
+                    break
                 default:
                     console.log('No key found for ' + construct)
                     continue
@@ -306,10 +308,19 @@ export class Parser {
 
     private _postprocess(builded:BuildStep, options:string[]){
         if (options.length > 0) {
-            options.forEach(el => {
+            options.forEach(elWithOptions => {
+                let options = elWithOptions.split(':'),
+                    el = options.shift()
+
                 builded.figures.forEach(fig => {
                     if (el === 'drag' && fig instanceof Point) {
-                        fig.draggable(this._graph.getGrid())
+                        fig.draggable(options.includes('grid')?this._graph.getGrid():null, options.map(opt=>{
+                            if(['x', 'y', 'grid'].indexOf(opt)===-1){
+                                return this._graph.getFigure(opt)
+                            }else{
+                                return opt
+                            }
+                        }))
                     } else if (el === 'dash') {
                         fig.dash(this._graph.pixelsPerUnit.x / 4)
                     } else if (el ==='dot') {
@@ -322,6 +333,9 @@ export class Parser {
                         fig.ultrathick()
                     } else if (el === 'ultrathin') {
                         fig.ultrathin()
+                    } else if (el ==='hide'){
+                        fig.label.hide()
+                        fig.hide()
                     } else if (el === '?' ){
                         fig.label.hide()
                     } else if (el === '!' ){
@@ -676,6 +690,19 @@ export class Parser {
          g(x)=1/2*x+3
          zone=fill f,g 3,6
          */
+        return figures
+    }
+
+    private _generateBezier(name: string, step: string){
+        let figures: Figure[] = [],
+            match:string,
+            points:string[] = []
+
+        let bezier = this._graph.bezier(step.split(','))
+
+        figures = [
+            bezier
+        ]
         return figures
     }
 }

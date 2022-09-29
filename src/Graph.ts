@@ -20,6 +20,7 @@ import {Arc} from "./figures/Arc";
 import {Parser} from "./Parser";
 import {Parametric} from "./figures/Parametric";
 import {Numeric} from "pimath/esm/maths/numeric";
+import {Bezier} from "./figures/Bezier";
 
 export class Graph {
     /**
@@ -410,6 +411,13 @@ export class Graph {
 
     arc(A: Point | string, O: Point | string, B: Point | string, radius?: number | Point, name?: string): Arc {
         const figure = new Arc(this, name, this.getPoint(O), this.getPoint(A), this.getPoint(B), radius)
+
+        this._validateFigure(figure)
+        return figure
+    }
+
+    bezier(values: (Point|string)[], name?: string): Bezier {
+        const figure = new Bezier(this, name, values)
 
         this._validateFigure(figure)
         return figure

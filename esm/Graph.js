@@ -15,6 +15,7 @@ const Arc_1 = require("./figures/Arc");
 const Parser_1 = require("./Parser");
 const Parametric_1 = require("./figures/Parametric");
 const numeric_1 = require("pimath/esm/maths/numeric");
+const Bezier_1 = require("./figures/Bezier");
 class Graph {
     /**
      * HTML container
@@ -310,6 +311,11 @@ class Graph {
     }
     arc(A, O, B, radius, name) {
         const figure = new Arc_1.Arc(this, name, this.getPoint(O), this.getPoint(A), this.getPoint(B), radius);
+        this._validateFigure(figure);
+        return figure;
+    }
+    bezier(values, name) {
+        const figure = new Bezier_1.Bezier(this, name, values);
         this._validateFigure(figure);
         return figure;
     }

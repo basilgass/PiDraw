@@ -5,6 +5,10 @@ const Figure_1 = require("./Figure");
 const Grid_1 = require("./Grid");
 const enums_1 = require("../variables/enums");
 const Label_1 = require("./Label");
+const Circle_1 = require("./Circle");
+const Line_1 = require("./Line");
+const Plot_1 = require("./Plot");
+const vector_1 = require("pimath/esm/maths/geometry/vector");
 class Point extends Figure_1.Figure {
     _scale;
     _shape;
@@ -103,7 +107,7 @@ class Point extends Figure_1.Figure {
         this.update();
         return this;
     }
-    draggable(grid) {
+    draggable(grid, constrain) {
         this._shape = enums_1.POINTSHAPE.HANDLE;
         this.updateFigure();
         let point = this;
@@ -130,9 +134,31 @@ class Point extends Figure_1.Figure {
                     y = intersection.y;
                 }
             }
-            // Move the circle to the current positiovn
-            handler.move(x, y);
             // TODO: Work with constrains.
+            // Constrain
+            if (constrain.includes('x')) {
+                y = point.y;
+            }
+            else if (constrain.includes('y')) {
+                x = point.x;
+            }
+            else {
+                for (let c of constrain) {
+                    if (c instanceof Circle_1.Circle) {
+                        let v = new vector_1.Vector(c.center, { x, y }), r = c.getRadiusAsPixels();
+                        x = c.center.x + v.x.value / v.norm * r;
+                        y = c.center.y + v.y.value / v.norm * r;
+                    }
+                    else if (c instanceof Line_1.Line) {
+                        // TODO: constrain line
+                    }
+                    else if (c instanceof Plot_1.Plot) {
+                        // TODO: constrain Plot
+                    }
+                }
+            }
+            // Move the circle to the current position
+            handler.move(x, y);
             // Set the point shape coordinate
             point.x = x; //handler.el.cx()
             point.y = y; //handler.el.cy()

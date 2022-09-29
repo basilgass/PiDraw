@@ -8,7 +8,6 @@ export declare class Parser {
     private _buildedSteps;
     private _construction;
     private _graph;
-    private _vars;
     constructor(graph: Graph, construction: string);
     get buildedSteps(): BuildStep[];
     /**
@@ -41,5 +40,6 @@ export declare class Parser {
     private _generatePlot;
     private _generateParametricPlot;
     private _generateFillBetween;
+    private _generateBezier;
 }
 export {};

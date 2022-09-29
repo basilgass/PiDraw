@@ -10,11 +10,9 @@ class Parser {
     _buildedSteps; // {'A(4,6)': ['A']} {step: [list of object names]}
     _construction;
     _graph;
-    _vars;
     constructor(graph, construction) {
         this._graph = graph;
         this.update(construction);
-        this._vars = {};
     }
     get buildedSteps() {
         return this._buildedSteps;
@@ -263,6 +261,9 @@ class Parser {
                 case 'fill':
                     builded.figures = this._generateFillBetween(label, code);
                     break;
+                case 'bezier':
+                    builded.figures = this._generateBezier(label, code);
+                    break;
                 default:
                     console.log('No key found for ' + construct);
                     continue;
@@ -275,10 +276,18 @@ class Parser {
     }
     _postprocess(builded, options) {
         if (options.length > 0) {
-            options.forEach(el => {
+            options.forEach(elWithOptions => {
+                let options = elWithOptions.split(':'), el = options.shift();
                 builded.figures.forEach(fig => {
                     if (el === 'drag' && fig instanceof Point_1.Point) {
-                        fig.draggable(this._graph.getGrid());
+                        fig.draggable(options.includes('grid') ? this._graph.getGrid() : null, options.map(opt => {
+                            if (['x', 'y', 'grid'].indexOf(opt) === -1) {
+                                return this._graph.getFigure(opt);
+                            }
+                            else {
+                                return opt;
+                            }
+                        }));
                     }
                     else if (el === 'dash') {
                         fig.dash(this._graph.pixelsPerUnit.x / 4);
@@ -297,6 +306,10 @@ class Parser {
                     }
                     else if (el === 'ultrathin') {
                         fig.ultrathin();
+                    }
+                    else if (el === 'hide') {
+                        fig.label.hide();
+                        fig.hide();
                     }
                     else if (el === '?') {
                         fig.label.hide();
@@ -557,6 +570,14 @@ class Parser {
          g(x)=1/2*x+3
          zone=fill f,g 3,6
          */
+        return figures;
+    }
+    _generateBezier(name, step) {
+        let figures = [], match, points = [];
+        let bezier = this._graph.bezier(step.split(','));
+        figures = [
+            bezier
+        ];
         return figures;
     }
 }

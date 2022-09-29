@@ -13,6 +13,7 @@ import { GraphConfig } from "./variables/types";
 import { Arc } from "./figures/Arc";
 import { Parser } from "./Parser";
 import { Parametric } from "./figures/Parametric";
+import { Bezier } from "./figures/Bezier";
 export declare class Graph {
     /**
      * HTML container
@@ -135,6 +136,7 @@ export declare class Graph {
     plot(fn: Function | string, config?: PlotConfig, name?: string): Plot;
     parametric(fx: Function | string, fy: Function | string, config?: PlotConfig, name?: string): Parametric;
     arc(A: Point | string, O: Point | string, B: Point | string, radius?: number | Point, name?: string): Arc;
+    bezier(values: (Point | string)[], name?: string): Bezier;
     update(): Graph;
     updateLayout(config: GraphConfig, updateConstructions?: boolean): Graph;
     createMarker(scale: number): {
