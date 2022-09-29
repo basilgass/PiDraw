@@ -142,6 +142,20 @@ export class Point extends Figure {
         return this
     }
 
+    /**
+     * Constrain the point to be bound to an axis or projection
+     * @param A
+     * @param to
+     */
+    projection(A: Point, to: Line|string): Point {
+        this._constrain  = {
+            type: POINTCONSTRAIN.PROJECTION,
+            data: [A, to]
+        }
+        this.update()
+        return this
+    }
+
     draggable(grid?: Grid, constrain?: (string|Figure)[]): Point {
         this._shape = POINTSHAPE.HANDLE
         this.updateFigure()
@@ -261,6 +275,28 @@ export class Point extends Figure {
 
             this._x = (A.x + B.x) / 2
             this._y = (A.y + B.y) / 2
+        }
+
+        if(this._constrain.type === POINTCONSTRAIN.PROJECTION) {
+            const M: Point = this._constrain.data[0],
+                to: Line|string = this._constrain.data[1]
+
+            if(to==='Ox'){
+                this._x = M.x
+                this._y = this.graph.origin.y
+            }else if(to==='Oy'){
+                this._x = this.graph.origin.x
+                this._y = M.y
+            }else if(to instanceof Line){
+                // Get the projection to a line.
+                let u = to.math.director,
+                    A = {x: 0, y: to.math.getValueAtX(0).value},  // Point on the line
+                    AP = new Vector(A, M),
+                    k = Vector.scalarProduct(AP, u)/u.normSquare.value
+
+                this._x = A.x + k * u.x.value
+                this._y = A.y + k * u.y.value
+            }
         }
     }
 }

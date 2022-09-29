@@ -51,6 +51,10 @@
                     <td class="font-thin">milieu de A et B</td>
                 </tr>
                 <tr>
+                    <td class="font-mono">P=proj A,d|Ox|Oy</td>
+                    <td class="font-thin">projection de A sur la droite d ou sur l'axe Ox ou Oy</td>
+                </tr>
+                <tr>
                     <td class="font-mono">d=AB</td>
                     <td class="font-thin">droite passant par A et B</td>
                 </tr>
@@ -114,7 +118,7 @@
    function autoParse () {
 		let graph = new PiDraw('root'),
             axis = graph.axis(),
-            construct = `A(4,6)->drag
+            construct2 = `A(4,6)->drag
 B(10,8)->drag
 C(8,1)->drag
 v=vAC
@@ -127,8 +131,10 @@ p1=perp d,B
 p2=para d,C
 c=circ B,2
 f(x)=sin(x)`,
-       construct2 = `A(8,3)
-d=line 3x-2y+5=0`
+       construct = `A(8,3)->drag
+B=proj A,Ox
+d=line 3x-4y+5=0
+C=proj A,d`
 
         let parser = graph.parse(construct),
             parameters = 'grid,axis,x=-3:15,y=-4:17'

@@ -107,6 +107,19 @@ class Point extends Figure_1.Figure {
         this.update();
         return this;
     }
+    /**
+     * Constrain the point to be bound to an axis or projection
+     * @param A
+     * @param to
+     */
+    projection(A, to) {
+        this._constrain = {
+            type: enums_1.POINTCONSTRAIN.PROJECTION,
+            data: [A, to]
+        };
+        this.update();
+        return this;
+    }
     draggable(grid, constrain) {
         this._shape = enums_1.POINTSHAPE.HANDLE;
         this.updateFigure();
@@ -204,6 +217,24 @@ class Point extends Figure_1.Figure {
             const A = this._constrain.data[0], B = this._constrain.data[1];
             this._x = (A.x + B.x) / 2;
             this._y = (A.y + B.y) / 2;
+        }
+        if (this._constrain.type === enums_1.POINTCONSTRAIN.PROJECTION) {
+            const M = this._constrain.data[0], to = this._constrain.data[1];
+            if (to === 'Ox') {
+                this._x = M.x;
+                this._y = this.graph.origin.y;
+            }
+            else if (to === 'Oy') {
+                this._x = this.graph.origin.x;
+                this._y = M.y;
+            }
+            else if (to instanceof Line_1.Line) {
+                // Get the projection to a line.
+                let u = to.math.director, A = { x: 0, y: to.math.getValueAtX(0).value }, // Point on the line
+                AP = new vector_1.Vector(A, M), k = vector_1.Vector.scalarProduct(AP, u) / u.normSquare.value;
+                this._x = A.x + k * u.x.value;
+                this._y = A.y + k * u.y.value;
+            }
         }
     }
 }

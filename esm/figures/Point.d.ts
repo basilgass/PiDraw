@@ -3,6 +3,7 @@ import { Figure } from "./Figure";
 import { IPoint } from "../variables/interfaces";
 import { Grid } from "./Grid";
 import { POINTCONSTRAIN } from "../variables/enums";
+import { Line } from "./Line";
 export interface PointConfig {
     type: POINTCONSTRAIN;
     data?: any;
@@ -34,6 +35,12 @@ export declare class Point extends Figure {
      * @returns {Point}
      */
     middleOf(A: Point, B: Point): Point;
+    /**
+     * Constrain the point to be bound to an axis or projection
+     * @param A
+     * @param to
+     */
+    projection(A: Point, to: Line | string): Point;
     draggable(grid?: Grid, constrain?: (string | Figure)[]): Point;
     private _updateShape;
     private _updateCoordinate;

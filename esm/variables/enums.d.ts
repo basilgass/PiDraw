@@ -41,7 +41,8 @@ export declare enum POINTSHAPE {
 export declare enum POINTCONSTRAIN {
     FREE = 0,
     MIDDLE = 1,
-    FIXED = 2
+    FIXED = 2,
+    PROJECTION = 3
 }
 /**
  * Line constrain

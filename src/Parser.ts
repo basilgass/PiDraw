@@ -1,11 +1,12 @@
 import {Graph} from "./Graph";
-import {LINECONSTRUCTION} from "./figures/Line";
+import {Line, LINECONSTRUCTION} from "./figures/Line";
 import {Figure} from "./figures/Figure";
 import {Plot} from "./figures/Plot";
 import {Line as mathLine} from "pimath/esm/maths/geometry/line"
 import {Point} from "./figures/Point";
 import {Axis} from "./figures/Axis";
 import {Bezier} from "./figures/Bezier";
+import {IPoint} from "./variables/interfaces";
 
 type BuildStep = { step: string, figures: Figure[] }
 
@@ -263,6 +264,9 @@ export class Parser {
                 case 'mid':
                     builded.figures = this._generateMidPoint(label, code)
                     break
+                case 'proj':
+                    builded.figures = this._generateProjectionPoint(label, code)
+                    break
                 case 'v':
                     builded.figures = this._generateVector(label, code)
                     break
@@ -375,13 +379,39 @@ export class Parser {
 
         // analyse the step/code value and extract the data
         let match = [...step.matchAll(/^\((-?[0-9.]+)[,;](-?[0-9.]+)\)(\*?)/g)].shift()
-
         if (match === undefined || match.length < 2) return figures
+        let x = +match[1],
+            y = +match[2]
+
+            // Alternative way to handle the point.
+        // let match = [...step.matchAll(/^\((-?[0-9.A-Za-z]+),(-?[0-9.A-Za-z]+)\)/g)].shift(),
+        //     x: number, y: number, refPoint: string, axis: string,
+        //     coordY: string, coordX: string
+        //
+        // if (match === undefined || match.length < 2) {return figures}
+        // coordX = match[1]
+        // coordY = match[2]
+        //
+        // if(coordY===undefined)return figures
+        // if(isNaN(+coordX)){
+        //     // It's maybe a point like "A.x" or "A.y".
+        //     [refPoint, axis] = coordX.split('.')
+        //     let P:IPoint = this._graph.pixelsToUnits(this._graph.getPoint(refPoint))
+        //     x = axis==='x'?P.x:P.y;
+        // }else{
+        //     x = +coordX
+        // }
+        // if(isNaN(+coordY)){
+        //     // It's maybe a point like "A.x" or "A.y".
+        //     [refPoint, axis] = coordY.split('.')
+        //     let P:IPoint = this._graph.pixelsToUnits(this._graph.getPoint(refPoint))
+        //     y = axis==='x'?P.x:P.y;
+        // }else{
+        //     y = +coordY
+        // }
 
         // Everything should be fine now
-        let x = +match[1],
-            y = +match[2],
-            label = showCoords ? `${name}(${x},${y})` : name
+        let label = showCoords ? `${name}(${x},${y})` : name
 
         // The point already exists
         if (this._graph.getPoint(name)) return figures
@@ -499,6 +529,29 @@ export class Parser {
                 segmentEnd = step[step.length-1]===']'
 
             return this._generateLineThroughTwoPoints(name, step, segmentStart, segmentEnd)
+        }
+        return figures
+    }
+
+    private _generateProjectionPoint(name: string, step: string): Figure[] {
+        let figures: Figure[]
+
+        // let match = [...step.matchAll(/^([A-Z]_?[0-9]?),(([A-Za-z]_?[0-9]?)|(Ox)|(Oy))/g)]
+        let match = [...step.matchAll(/^([A-Z]_?[0-9]?),([A-Za-z_0-9]+)/g)].shift()
+
+        if (match) {
+            let A = this._graph.getPoint(match[1]),
+                to = ['Ox', 'Oy'].indexOf(match[2])===-1?this._graph.getFigure(match[2]):match[2],
+                pt
+
+            if (to instanceof Line || typeof to === 'string') {
+                pt = this._graph.point(0, 0, name).projection(A, to)
+            } else {
+                return []
+            }
+
+            // pt.label.displayName = name
+            figures = [pt]
         }
         return figures
     }
