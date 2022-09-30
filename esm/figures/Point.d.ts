@@ -5,18 +5,18 @@ import { Grid } from "./Grid";
 import { POINTCONSTRAIN } from "../variables/enums";
 import { Line } from "./Line";
 export interface PointConfig {
-    type: POINTCONSTRAIN;
     data?: any;
+    type: POINTCONSTRAIN;
 }
 export declare class Point extends Figure {
+    private _constrain;
     private _scale;
     private _shape;
-    private _constrain;
-    constructor(graph: Graph, name: string, pixels: IPoint);
     private _x;
+    private _y;
+    constructor(graph: Graph, name: string, pixels: IPoint);
     get x(): number;
     set x(value: number);
-    private _y;
     get y(): number;
     set y(value: number);
     get coord(): IPoint;
@@ -41,7 +41,11 @@ export declare class Point extends Figure {
      * @param to
      */
     projection(A: Point, to: Line | string): Point;
-    draggable(grid?: Grid, constrain?: (string | Figure)[]): Point;
+    draggable(options: {
+        grid?: Grid;
+        constrain?: (string | Figure)[];
+        callback?: Function;
+    }): Point;
     private _updateShape;
     private _updateCoordinate;
 }

@@ -141,6 +141,10 @@ class Figure {
         this.svg.stroke(value);
         return this;
     }
+    fill(value) {
+        this.svg.fill(value);
+        return this;
+    }
     hide() {
         this._svg.hide();
         return this;

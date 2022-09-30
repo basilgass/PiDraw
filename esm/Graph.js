@@ -16,6 +16,7 @@ const Parser_1 = require("./Parser");
 const Parametric_1 = require("./figures/Parametric");
 const numeric_1 = require("pimath/esm/maths/numeric");
 const Bezier_1 = require("./figures/Bezier");
+const Path_1 = require("./figures/Path");
 class Graph {
     /**
      * HTML container
@@ -298,6 +299,11 @@ class Graph {
     plot(fn, config, name) {
         //TODO: plot auto config ?
         const figure = new Plot_1.Plot(this, name, fn, config);
+        this._validateFigure(figure, enums_1.LAYER.PLOTS);
+        return figure;
+    }
+    path(d, name) {
+        const figure = new Path_1.Path(this, name, d);
         this._validateFigure(figure, enums_1.LAYER.PLOTS);
         return figure;
     }

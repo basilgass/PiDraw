@@ -318,13 +318,16 @@ export class Parser {
 
                 builded.figures.forEach(fig => {
                     if (el === 'drag' && fig instanceof Point) {
-                        fig.draggable(options.includes('grid')?this._graph.getGrid():null, options.map(opt=>{
-                            if(['x', 'y', 'grid'].indexOf(opt)===-1){
-                                return this._graph.getFigure(opt)
-                            }else{
-                                return opt
-                            }
-                        }))
+                        fig.draggable({
+                            grid: options.includes('grid')?this._graph.getGrid():null,
+                            constrain: options.map(opt=>{
+                                if(['x', 'y', 'grid'].indexOf(opt)===-1){
+                                    return this._graph.getFigure(opt)
+                                }else{
+                                    return opt
+                                }
+                            })
+                        })
                     } else if (el === 'dash') {
                         fig.dash(this._graph.pixelsPerUnit.x / 4)
                     } else if (el ==='dot') {

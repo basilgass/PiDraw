@@ -41,6 +41,16 @@ class Label extends Figure_1.Figure {
         // Update the label text and position
         this.updateFigure();
     }
+    center() {
+        this._config.position.horizontal = LABELPOS.CENTER;
+        this.updateFigure();
+        return this;
+    }
+    middle() {
+        this._config.position.vertical = LABELPOS.MIDDLE;
+        this.updateFigure();
+        return this;
+    }
     generateName() {
         if (this.name === undefined) {
             this.name = '?';

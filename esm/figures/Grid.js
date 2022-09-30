@@ -5,6 +5,7 @@ const Figure_1 = require("./Figure");
 const enums_1 = require("../variables/enums");
 class Grid extends Figure_1.Figure {
     _config;
+    _refresh;
     // _origin: IPoint;
     constructor(graph, name, config) {
         super(graph, name);
@@ -21,6 +22,8 @@ class Grid extends Figure_1.Figure {
         }
         // Storing the previous value.
         // this._origin = {x: 0, y: this.graph.height}
+        this._refresh = true;
+        this.svg = this.graph.svg.group();
         this.load();
     }
     get config() {
@@ -29,9 +32,17 @@ class Grid extends Figure_1.Figure {
     set config(value) {
         this._config = value;
         // Update the grid on config changes !!!!
+        this._refresh = true;
+        this.load();
     }
     load() {
-        this.svg = this.graph.svg.group();
+        // No need to refresh
+        if (!this._refresh) {
+            return this;
+        }
+        if (this.svg) {
+            this.svg.find('line').each(x => x.remove());
+        }
         const w = this.graph.width, h = this.graph.height, x = this._config.axisX, y = this._config.axisY, xOffset = this.graph.origin.x % x, yOffset = this.graph.origin.y % y;
         // Vertical lines
         for (let pos = -x; pos <= w; pos += x) {
@@ -63,7 +74,6 @@ class Grid extends Figure_1.Figure {
         return nearestPoint;
     };
     update() {
-        this.svg.remove();
         this.load();
         return this;
     }

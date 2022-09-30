@@ -13,7 +13,6 @@ class Plot extends Figure_1.Figure {
     _fx;
     _rawFx;
     _plugins;
-    _riemann;
     constructor(graph, name, fn, config) {
         super(graph, name);
         this._config = {

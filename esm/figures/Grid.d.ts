@@ -9,6 +9,7 @@ export interface GridConfig {
 }
 export declare class Grid extends Figure {
     private _config;
+    private _refresh;
     constructor(graph: Graph, name: string, config?: GridConfig);
     get config(): GridConfig;
     set config(value: GridConfig);

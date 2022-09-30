@@ -61,6 +61,7 @@ export declare class Figure {
         color?: string;
         opacity?: number;
     }): Figure;
+    fill(value: string): Figure;
     hide(): Figure;
     show(): Figure;
 }

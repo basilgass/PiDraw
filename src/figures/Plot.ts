@@ -18,7 +18,6 @@ export class Plot extends Figure {
     private _fx: Function | NumExp
     private _rawFx: string
     private _plugins: any[]
-    private _riemann: { svg: G, rectangles: Rect[] }
 
     constructor(graph: Graph, name: string, fn: Function | string, config?: PlotConfig) {
         super(graph, name);

@@ -14,6 +14,7 @@ import { Arc } from "./figures/Arc";
 import { Parser } from "./Parser";
 import { Parametric } from "./figures/Parametric";
 import { Bezier } from "./figures/Bezier";
+import { Path } from "./figures/Path";
 export declare class Graph {
     /**
      * HTML container
@@ -134,6 +135,7 @@ export declare class Graph {
     perpendicular(line: Line, P: Point | string, name?: string): Line;
     circle(center: Point | IPoint | string, radius: number, name?: string): Circle;
     plot(fn: Function | string, config?: PlotConfig, name?: string): Plot;
+    path(d: string, name?: string): Path;
     parametric(fx: Function | string, fy: Function | string, config?: PlotConfig, name?: string): Parametric;
     arc(A: Point | string, O: Point | string, B: Point | string, radius?: number | Point, name?: string): Arc;
     bezier(values: (Point | string)[], name?: string): Bezier;

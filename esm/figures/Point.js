@@ -10,9 +10,11 @@ const Line_1 = require("./Line");
 const Plot_1 = require("./Plot");
 const vector_1 = require("pimath/esm/maths/geometry/vector");
 class Point extends Figure_1.Figure {
+    _constrain;
     _scale;
     _shape;
-    _constrain;
+    _x;
+    _y;
     constructor(graph, name, pixels) {
         super(graph, name);
         this._x = pixels.x;
@@ -25,7 +27,6 @@ class Point extends Figure_1.Figure {
         // Add the label
         this.label = new Label_1.Label(this.graph, name, { el: this });
     }
-    _x;
     get x() {
         return this._x;
     }
@@ -33,7 +34,6 @@ class Point extends Figure_1.Figure {
         this._x = value;
         this.update();
     }
-    _y;
     get y() {
         return this._y;
     }
@@ -120,7 +120,7 @@ class Point extends Figure_1.Figure {
         this.update();
         return this;
     }
-    draggable(grid, constrain) {
+    draggable(options) {
         this._shape = enums_1.POINTSHAPE.HANDLE;
         this.updateFigure();
         let point = this;
@@ -140,33 +140,35 @@ class Point extends Figure_1.Figure {
                 return;
             }
             // Update the value to match the grid
-            if (grid !== null) {
-                if (grid instanceof Grid_1.Grid) {
-                    const intersection = grid.nearestPoint({ x, y });
+            if (options.grid) {
+                if (options.grid instanceof Grid_1.Grid) {
+                    const intersection = options.grid.nearestPoint({ x, y });
                     x = intersection.x;
                     y = intersection.y;
                 }
             }
             // TODO: Work with constrains.
             // Constrain
-            if (constrain.includes('x')) {
-                y = point.y;
-            }
-            else if (constrain.includes('y')) {
-                x = point.x;
-            }
-            else {
-                for (let c of constrain) {
-                    if (c instanceof Circle_1.Circle) {
-                        let v = new vector_1.Vector(c.center, { x, y }), r = c.getRadiusAsPixels();
-                        x = c.center.x + v.x.value / v.norm * r;
-                        y = c.center.y + v.y.value / v.norm * r;
-                    }
-                    else if (c instanceof Line_1.Line) {
-                        // TODO: constrain line
-                    }
-                    else if (c instanceof Plot_1.Plot) {
-                        // TODO: constrain Plot
+            if (options.constrain) {
+                if (options.constrain.includes('x')) {
+                    y = point.y;
+                }
+                else if (options.constrain.includes('y')) {
+                    x = point.x;
+                }
+                else {
+                    for (let c of options.constrain) {
+                        if (c instanceof Circle_1.Circle) {
+                            let v = new vector_1.Vector(c.center, { x, y }), r = c.getRadiusAsPixels();
+                            x = c.center.x + v.x.value / v.norm * r;
+                            y = c.center.y + v.y.value / v.norm * r;
+                        }
+                        else if (c instanceof Line_1.Line) {
+                            // TODO: constrain line
+                        }
+                        else if (c instanceof Plot_1.Plot) {
+                            // TODO: constrain Plot
+                        }
                     }
                 }
             }
@@ -178,7 +180,10 @@ class Point extends Figure_1.Figure {
             // console.log(handler.el.cy())
             // Update the figures and labels.
             point.graph.update();
-            // TODO: add after drag event ?
+            // Callback at the end, with the point
+            if (options.callback) {
+                options.callback(point);
+            }
         }
         this.svg.draggable()
             .on('dragmove', dragmove);

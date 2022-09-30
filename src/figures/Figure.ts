@@ -178,6 +178,11 @@ export class Figure {
         return this
     }
 
+    fill(value: string): Figure {
+        this.svg.fill(value)
+        return this
+    }
+
     hide(): Figure {
         this._svg.hide()
         return this

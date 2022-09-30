@@ -11,6 +11,7 @@ export interface GridConfig {
 
 export class Grid extends Figure {
     private _config: GridConfig
+    private _refresh: boolean
     // _origin: IPoint;
 
     constructor(graph: Graph, name: string, config?: GridConfig) {
@@ -30,6 +31,8 @@ export class Grid extends Figure {
         // Storing the previous value.
 
         // this._origin = {x: 0, y: this.graph.height}
+        this._refresh = true
+        this.svg = this.graph.svg.group()
         this.load()
     }
 
@@ -40,10 +43,18 @@ export class Grid extends Figure {
     set config(value: GridConfig) {
         this._config = value;
         // Update the grid on config changes !!!!
+        this._refresh = true
+        this.load()
     }
 
     load(): Grid {
-        this.svg = this.graph.svg.group()
+        // No need to refresh
+        if(!this._refresh){return this}
+
+        if(this.svg) {
+            this.svg.find('line').each(x=>x.remove())
+        }
+
         const w = this.graph.width,
             h = this.graph.height,
             x = this._config.axisX,
@@ -95,7 +106,6 @@ export class Grid extends Figure {
     };
 
     update(): Grid {
-        this.svg.remove()
         this.load()
         return this
     }

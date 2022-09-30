@@ -61,6 +61,19 @@ export class Label extends Figure {
         this.updateFigure()
     }
 
+    center(): Label {
+        this._config.position.horizontal = LABELPOS.CENTER
+
+        this.updateFigure()
+        return this
+    }
+    middle(): Label {
+        this._config.position.vertical = LABELPOS.MIDDLE
+
+        this.updateFigure()
+        return this
+    }
+
     generateName(): string {
         if(this.name===undefined){
             this.name = '?'

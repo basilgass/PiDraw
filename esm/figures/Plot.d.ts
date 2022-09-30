@@ -18,7 +18,6 @@ export declare class Plot extends Figure {
     private _fx;
     private _rawFx;
     private _plugins;
-    private _riemann;
     constructor(graph: Graph, name: string, fn: Function | string, config?: PlotConfig);
     get tex(): string;
     get fx(): Function | NumExp;

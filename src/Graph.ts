@@ -21,6 +21,7 @@ import {Parser} from "./Parser";
 import {Parametric} from "./figures/Parametric";
 import {Numeric} from "pimath/esm/maths/numeric";
 import {Bezier} from "./figures/Bezier";
+import {Path} from "./figures/Path";
 
 export class Graph {
     /**
@@ -391,6 +392,18 @@ export class Graph {
         )
 
         this._validateFigure(figure, LAYER.PLOTS)
+        return figure
+    }
+
+    path(d: string, name?: string): Path {
+        const figure = new Path(
+            this,
+            name,
+            d
+        )
+
+        this._validateFigure(figure, LAYER.PLOTS)
+
         return figure
     }
 
