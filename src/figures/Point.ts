@@ -209,9 +209,10 @@ export class Point extends Figure {
                             x = c.center.x + v.x.value / v.norm * r
                             y = c.center.y + v.y.value / v.norm * r
                         } else if (c instanceof Line) {
-                            // TODO: constrain line
+                            y = c.math.getValueAtX(x).value
                         } else if (c instanceof Plot) {
-                            // TODO: constrain Plot
+                            const pt = point.graph.pixelsToUnits({x, y})
+                            y = point.graph.unitsToPixels(c.evaluate(pt.x)).y
                         }
                     }
 

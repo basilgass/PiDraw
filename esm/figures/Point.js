@@ -164,10 +164,11 @@ class Point extends Figure_1.Figure {
                             y = c.center.y + v.y.value / v.norm * r;
                         }
                         else if (c instanceof Line_1.Line) {
-                            // TODO: constrain line
+                            y = c.math.getValueAtX(x).value;
                         }
                         else if (c instanceof Plot_1.Plot) {
-                            // TODO: constrain Plot
+                            const pt = point.graph.pixelsToUnits({ x, y });
+                            y = point.graph.unitsToPixels(c.evaluate(pt.x)).y;
                         }
                     }
                 }
