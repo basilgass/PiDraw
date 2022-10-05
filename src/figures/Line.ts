@@ -51,13 +51,17 @@ export class Line extends Figure {
     }
 
     get tex(): string {
+        return `${this.name}: ${this.texMath.canonical}`
+    }
+
+    get texMath() {
         let A: {x:number, y:number},B: { x:number, y:number }
         let m: mathLine
 
         A = this.graph.pixelsToUnits(this.A)
         m = new mathLine(new mathPoint(A.x, A.y), this.d)
 
-        return `${this.name}: ${m.tex.canonical}`
+        return m.tex
     }
 
     get d(): Vector {

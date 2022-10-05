@@ -187,8 +187,8 @@ class Graph {
     }
     get unitYDomain() {
         return {
-            max: Math.round(-(this._height - this._origin.y) / this._pixelsPerUnit.y),
-            min: Math.round(this._origin.y / this._pixelsPerUnit.y)
+            min: Math.round(-(this._height - this._origin.y) / this._pixelsPerUnit.y),
+            max: Math.round(this._origin.y / this._pixelsPerUnit.y)
         };
     }
     distanceToPixels(distance, direction) {

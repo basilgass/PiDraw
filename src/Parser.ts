@@ -656,6 +656,10 @@ export class Parser {
     private _generatePlot(name: string, step: string): Figure[] {
         let figures: Figure[]
 
+        // TODO: rework sample/domain/
+        // f=plot func,min:max,@500
+
+
         let domain = this._graph.unitXDomain,
             fx = step.split(',')[0].split('@')[0],
             samples: number,

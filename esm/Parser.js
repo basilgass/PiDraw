@@ -554,6 +554,8 @@ class Parser {
     }
     _generatePlot(name, step) {
         let figures;
+        // TODO: rework sample/domain/
+        // f=plot func,min:max,@500
         let domain = this._graph.unitXDomain, fx = step.split(',')[0].split('@')[0], samples, sampleMatch = step.match(/@([0-9]+)/);
         if (sampleMatch) {
             samples = +sampleMatch[1];
