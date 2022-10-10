@@ -17,8 +17,8 @@ export enum LAYER {
  * Axis values
  */
 export enum AXIS {
-    HORIZONTAL,
-    VERTICAL
+    HORIZONTAL='x',
+    VERTICAL='y'
 }
 
 /**

@@ -2,7 +2,7 @@ import { Graph } from "../Graph";
 import { Figure } from "./Figure";
 import { IPoint } from "../variables/interfaces";
 import { Grid } from "./Grid";
-import { POINTCONSTRAIN } from "../variables/enums";
+import { AXIS, POINTCONSTRAIN } from "../variables/enums";
 import { Line } from "./Line";
 export interface PointConfig {
     data?: any;
@@ -20,6 +20,10 @@ export declare class Point extends Figure {
     get y(): number;
     set y(value: number);
     get coord(): IPoint;
+    set coord(value: IPoint);
+    set coordX(value: number);
+    set coordY(value: number);
+    addUnit(value: number, axis?: AXIS): Point;
     get tex(): string;
     generateName(): string;
     asCross(): Point;

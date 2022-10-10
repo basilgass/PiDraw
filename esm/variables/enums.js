@@ -21,8 +21,8 @@ var LAYER;
  */
 var AXIS;
 (function (AXIS) {
-    AXIS[AXIS["HORIZONTAL"] = 0] = "HORIZONTAL";
-    AXIS[AXIS["VERTICAL"] = 1] = "VERTICAL";
+    AXIS["HORIZONTAL"] = "x";
+    AXIS["VERTICAL"] = "y";
 })(AXIS = exports.AXIS || (exports.AXIS = {}));
 /**
  * Grid values

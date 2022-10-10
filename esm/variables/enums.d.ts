@@ -16,8 +16,8 @@ export declare enum LAYER {
  * Axis values
  */
 export declare enum AXIS {
-    HORIZONTAL = 0,
-    VERTICAL = 1
+    HORIZONTAL = "x",
+    VERTICAL = "y"
 }
 /**
  * Grid values

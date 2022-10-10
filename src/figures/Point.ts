@@ -2,7 +2,7 @@ import {Graph} from "../Graph";
 import {Figure} from "./Figure";
 import {IPoint} from "../variables/interfaces";
 import {Grid} from "./Grid";
-import {POINTCONSTRAIN, POINTSHAPE} from "../variables/enums";
+import {AXIS, POINTCONSTRAIN, POINTSHAPE} from "../variables/enums";
 import {Label} from "./Label";
 import {Circle} from "./Circle";
 import {Line} from "./Line";
@@ -60,6 +60,28 @@ export class Point extends Figure {
 
     get coord(): IPoint {
         return this.graph.pixelsToUnits(this)
+    }
+
+    set coord(value) {
+        this.coordX = value.x
+        this.coordY = value.y
+    }
+
+    set coordX(value: number) {
+        this._x = this.graph.distanceToPixels(value, AXIS.HORIZONTAL)
+    }
+
+    set coordY(value: number) {
+        this._y = this.graph.distanceToPixels(value, AXIS.VERTICAL)
+    }
+
+    addUnit(value:number, axis?: AXIS): Point {
+        if(axis===undefined || axis===AXIS.HORIZONTAL){
+            this.coordX = this.coord.x + value
+        }else{
+            this.coordY = this.coord.y + value
+        }
+        return this
     }
 
     get tex(): string {

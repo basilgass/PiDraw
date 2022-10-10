@@ -44,6 +44,25 @@ class Point extends Figure_1.Figure {
     get coord() {
         return this.graph.pixelsToUnits(this);
     }
+    set coord(value) {
+        this.coordX = value.x;
+        this.coordY = value.y;
+    }
+    set coordX(value) {
+        this._x = this.graph.distanceToPixels(value, enums_1.AXIS.HORIZONTAL);
+    }
+    set coordY(value) {
+        this._y = this.graph.distanceToPixels(value, enums_1.AXIS.VERTICAL);
+    }
+    addUnit(value, axis) {
+        if (axis === undefined || axis === enums_1.AXIS.HORIZONTAL) {
+            this.coordX = this.coord.x + value;
+        }
+        else {
+            this.coordY = this.coord.y + value;
+        }
+        return this;
+    }
     get tex() {
         let P = this.graph.pixelsToUnits(this);
         return `${this.name}\\left( ${P.x} ; ${P.y} \\right)`;
