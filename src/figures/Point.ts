@@ -68,11 +68,17 @@ export class Point extends Figure {
     }
 
     set coordX(value: number) {
-        this._x = this.graph.distanceToPixels(value, AXIS.HORIZONTAL)
+        this._x = this.graph.unitsToPixels({
+            x: value,
+            y: 0
+        }).x
     }
 
     set coordY(value: number) {
-        this._y = this.graph.distanceToPixels(value, AXIS.VERTICAL)
+        this._y = this.graph.unitsToPixels({
+            x: 0,
+            y: value
+        }).y
     }
 
     addUnit(value:number, axis?: AXIS): Point {

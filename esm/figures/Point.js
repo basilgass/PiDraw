@@ -49,10 +49,16 @@ class Point extends Figure_1.Figure {
         this.coordY = value.y;
     }
     set coordX(value) {
-        this._x = this.graph.distanceToPixels(value, enums_1.AXIS.HORIZONTAL);
+        this._x = this.graph.unitsToPixels({
+            x: value,
+            y: 0
+        }).x;
     }
     set coordY(value) {
-        this._y = this.graph.distanceToPixels(value, enums_1.AXIS.VERTICAL);
+        this._y = this.graph.unitsToPixels({
+            x: 0,
+            y: value
+        }).y;
     }
     addUnit(value, axis) {
         if (axis === undefined || axis === enums_1.AXIS.HORIZONTAL) {
