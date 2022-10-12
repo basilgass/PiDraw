@@ -171,8 +171,8 @@ export class Point extends Figure {
 
     /**
      * Constrain the point to be bound to an axis or projection
-     * @param A
-     * @param to
+     * @param A: Point
+     * @param to: Line | string
      */
     projection(A: Point, to: Line | string): Point {
         this._constrain = {
