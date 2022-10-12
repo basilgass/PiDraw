@@ -5,7 +5,8 @@ const Figure_1 = require("./Figure");
 const svg_js_1 = require("@svgdotjs/svg.js");
 const line_1 = require("pimath/esm/maths/geometry/line");
 const point_1 = require("pimath/esm/maths/geometry/point");
-const esm_1 = require("pimath/esm");
+const fraction_1 = require("pimath/esm/maths/coefficients/fraction");
+const vector_1 = require("pimath/esm/maths/geometry/vector");
 var LINECONSTRUCTION;
 (function (LINECONSTRUCTION) {
     LINECONSTRUCTION["PARALLEL"] = "parallel";
@@ -14,6 +15,13 @@ var LINECONSTRUCTION;
     LINECONSTRUCTION["SLOPE"] = "slope";
 })(LINECONSTRUCTION = exports.LINECONSTRUCTION || (exports.LINECONSTRUCTION = {}));
 class Line extends Figure_1.Figure {
+    _A;
+    _B;
+    _construction;
+    _math;
+    _segment;
+    _segmentEnd;
+    _segmentStart;
     constructor(graph, name, A, B, construction) {
         super(graph, name);
         this._A = A;
@@ -26,36 +34,83 @@ class Line extends Figure_1.Figure {
         this.svg = this.graph.svg.line(0, 0, 0, 0).stroke('black');
         this.updateFigure();
     }
-    _A;
+    get tex() {
+        return `${this.name}: ${this.texMath.canonical}`;
+    }
+    get texMath() {
+        let A, B;
+        let m;
+        A = this.graph.pixelsToUnits(this.A);
+        m = new line_1.Line(new point_1.Point(A.x, A.y), this.d);
+        return m.tex;
+    }
+    get d() {
+        if (this.B) {
+            let A = this.graph.pixelsToUnits(this.A), B = this.graph.pixelsToUnits(this.B);
+            return new vector_1.Vector(B.x - A.x, B.y - A.y);
+        }
+        else {
+            switch (this._construction.rule) {
+                case LINECONSTRUCTION.SLOPE:
+                    let slope = new fraction_1.Fraction(this._construction.value);
+                    return new vector_1.Vector(slope.denominator, slope.numerator);
+                case LINECONSTRUCTION.PARALLEL:
+                    if (this._construction.value instanceof Line) {
+                        return this._construction.value.d;
+                    }
+                    break;
+                case LINECONSTRUCTION.PERPENDICULAR:
+                    if (this._construction.value instanceof Line) {
+                        return this._construction.value.d.clone().normal();
+                    }
+                    break;
+                case LINECONSTRUCTION.TANGENT:
+                    return new vector_1.Vector();
+            }
+        }
+        return new vector_1.Vector();
+    }
     get A() {
         return this._A;
     }
-    _B;
     get B() {
         return this._B;
     }
-    _construction;
     get construction() {
         return this._construction;
     }
-    _math;
     get math() {
         return this._math;
     }
-    _segment;
     get segment() {
         return this._segment;
     }
     set segment(value) {
+        this._segmentStart = value;
+        this._segmentEnd = value;
         this._segment = value;
+        this.update();
+    }
+    get segmentStart() {
+        return this._segmentStart;
+    }
+    set segmentStart(value) {
+        this._segmentStart = value;
+        this.update();
+    }
+    get segmentEnd() {
+        return this._segmentEnd;
+    }
+    set segmentEnd(value) {
+        this._segmentEnd = value;
+        this.update();
     }
     asSegment(value) {
-        this._segment = value === undefined || value;
-        this.update();
+        this.segment = value === undefined || value;
         return this;
     }
     asVector(value) {
-        this._segment = value === undefined || value;
+        this.segment = value === undefined || value;
         if (this.svg instanceof svg_js_1.Line) {
             this.svg.marker('end', this.graph.markers.end);
         }
@@ -86,11 +141,38 @@ class Line extends Figure_1.Figure {
         this._math = new line_1.Line(new point_1.Point(this._A.x, this._A.y), new point_1.Point(this._B.x, this._B.y));
         if (this._math.slope.isInfinity()) {
             if (this.svg instanceof svg_js_1.Line) {
-                this.svg.plot(this._A.x, 0, this._A.x, this.graph.height);
+                if (this._segmentStart === this._segmentEnd) {
+                    this.svg.plot(this._A.x, this._segmentStart ? this._A.y : 0, this._A.x, this.segmentEnd ? this._B.y : this.graph.height);
+                }
+                else {
+                    if (this._segmentStart) {
+                        this.svg.plot(this._A.x, this._A.y > this._B.y ? 0 : this._A.y, this._A.x, this._A.y > this._B.y ? this._A.y : this.graph.height);
+                    }
+                    else {
+                        this.svg.plot(this._A.x, this._A.y > this._B.y ? this._B.y : 0, this._A.x, this._A.y > this._B.y ? this.graph.height : this._B.y);
+                    }
+                }
             }
         }
         else {
-            let x1 = this._segment ? this._A.x : 0, x2 = this._segment ? this._B.x : this.graph.width;
+            let x1, x2;
+            if (this._segmentStart === this._segmentEnd) {
+                x1 = this._segmentStart ? this._A.x : 0;
+                x2 = this._segmentEnd ? this._B.x : this.graph.width;
+            }
+            else {
+                if (this._segmentStart) {
+                    x1 = this.A.x > this.B.x ? 0 : this.A.x;
+                    x2 = this.A.x > this.B.x ? this.A.x : this.graph.width;
+                }
+                else {
+                    x1 = this.A.x > this.B.x ? this._B.x : 0;
+                    x2 = this.A.x > this.B.x ? this.graph.width : this.B.x;
+                }
+            }
+            // [AB]=[BA] OK
+            // ]AB[=]BA[ OK
+            // the problem comes for half rules - the order is then important depending of the relative position of each reference point
             if (this.svg instanceof svg_js_1.Line) {
                 this.svg.plot(x1, this._math.getValueAtX(x1).value, x2, this._math.getValueAtX(x2).value);
             }
@@ -101,21 +183,17 @@ class Line extends Figure_1.Figure {
         if (this._construction) {
             if ((this._construction.rule === LINECONSTRUCTION.PARALLEL)) {
                 if (this._construction.value instanceof Line) {
-                    let director = this._construction.value.math.director;
-                    this._math = new line_1.Line(new point_1.Point(this._A.x, this._A.y), director, 1 //TODO: LINECONSTRUCTION.PARALLEL
-                    );
+                    this._math = new line_1.Line(new point_1.Point(this._A.x, this._A.y), this._construction.value.math.director, LINECONSTRUCTION.PARALLEL);
                 }
             }
             if ((this._construction.rule === LINECONSTRUCTION.PERPENDICULAR)) {
                 if (this._construction.value instanceof Line) {
-                    let normal = this._construction.value.math.normal;
-                    this._math = new line_1.Line(new point_1.Point(this._A.x, this._A.y), normal, 1 //TODO: LINECONSTRUCTION.PERPENDICULAR
-                    );
+                    this._math = new line_1.Line(new point_1.Point(this._A.x, this._A.y), this._construction.value.math.director, LINECONSTRUCTION.PERPENDICULAR);
                 }
             }
             if ((this._construction.rule === LINECONSTRUCTION.SLOPE)) {
                 if (!(this._construction.value instanceof Figure_1.Figure)) {
-                    let value = new esm_1.PiMath.Fraction(this._construction.value).value;
+                    let value = new fraction_1.Fraction(this._construction.value).value;
                     this._math = new line_1.Line(new point_1.Point(this._A.x, this._A.y), new point_1.Point(this._A.x + 1, this._A.y - value));
                 }
             }

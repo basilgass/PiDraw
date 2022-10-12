@@ -2,29 +2,27 @@ import {Figure} from "./Figure";
 import {Graph} from "../Graph";
 import {IPoint} from "../variables/interfaces";
 import {G, Path, Rect} from "@svgdotjs/svg.js";
-import {Riemann} from "./PlotPlugins/Riemann";
-import {Follow} from "./PlotPlugins/Follow";
-import {FillBetween} from "./PlotPlugins/FillBetween";
 import {NumExp} from "pimath/esm/maths/expressions/numexp";
+import {PlotConfig} from "./Plot";
 
-export interface PlotConfig {
-    domain: { min: number, max: number },
-    samples: number
-}
 
-export class Plot extends Figure {
+export class Parametric extends Figure {
     private _config: PlotConfig
-    private _precision: number
     private _fx: Function | NumExp
-    private _rawFx: string
+    private _fy: Function | NumExp
     private _plugins: any[]
+    private _precision: number
+    private _riemann: { svg: G, rectangles: Rect[] }
 
-    constructor(graph: Graph, name: string, fn: Function | string, config?: PlotConfig) {
+    constructor(graph: Graph, name: string, fn: { x: Function | string, y: Function | string }, config?: PlotConfig) {
         super(graph, name);
 
         this._config = {
             samples: 20,
-            domain: this.graph.unitXDomain
+            domain: {
+                min: 0,
+                max: 2 * Math.PI
+            }
         }
 
         if (config !== undefined) {
@@ -40,21 +38,10 @@ export class Plot extends Figure {
         this._plugins = []
     }
 
-    get tex(): string {
-        if(this._fx instanceof NumExp){
-            return this._rawFx.replaceAll('*', '\\cdot ')
-        }else{
-            return '?'
-        }
-    }
-
-    get fx(): Function | NumExp {
-        return this._fx;
-    }
-
     generateName(): string {
+        // TODO: Maybe the generated name should be more robust.
         if (this.name === undefined) {
-            let n = this.graph.figures.filter(fig => fig instanceof Plot).length,
+            let n = this.graph.figures.filter(fig => fig instanceof Parametric).length,
                 idx = Math.trunc(n / 5)
             this.name = 'fghij'[n % 5] + (idx >= 1 ? idx : '')
         }
@@ -62,7 +49,12 @@ export class Plot extends Figure {
         return this.name
     }
 
-    updatePlugins(): Plot {
+    updateFigure(): Parametric {
+        // Update the plot (using the plot function - so it's already done !)
+        return this
+    }
+
+    updatePlugins(): Parametric {
         if (this._plugins !== undefined) {
             for (let P of this._plugins) {
                 P.update()
@@ -71,12 +63,13 @@ export class Plot extends Figure {
         return this
     }
 
-    plot(fn: string | Function, speed?: number): Plot {
+    plot(fn: { x: string | Function, y: string | Function }, speed?: number): Parametric {
         // Parse the function
-        this._fx = this._parse(fn)
+        this._fx = this._parse(fn.x)
+        this._fy = this._parse(fn.y)
 
         // Create the path
-        const {d, points} = this._getPath(this._config.domain.min, this._config.domain.max, this._config.samples)
+        const {d, points} = this._getPath()
 
         // Draw the path.
         if (this.svg instanceof Path) {
@@ -88,7 +81,7 @@ export class Plot extends Figure {
             if (points.length === this.svg.array().length) {
                 if (this.svg instanceof Path) {
                     // @ts-ignore
-                    this.svg.animate(speed === undefined ? 100 : speed).plot(d)
+                    this.svg.animate(speed === undefined ? 500 : speed).plot(d)
                 }
             } else {
                 this.svg.hide().plot(d)
@@ -109,106 +102,73 @@ export class Plot extends Figure {
         return this
     }
 
-
-    riemann(from: number, to: number, rectangles: number, pos?: number): Riemann {
-        let R = new Riemann(this, from, to, rectangles, pos)
-
-        this._plugins.push(R)
-        return R
-    }
-
-    follow(showTangent?: boolean): Follow {
-        let P = new Follow(this, showTangent)
-
-        this._plugins.push(P)
-        return P
-    }
-
-    fillBetween(plot: Plot, from: number, to: number, samples?: number): FillBetween {
-        let P = new FillBetween(this, plot, from, to, samples === undefined ? this._config.samples : samples)
-
-        this._plugins.push(P)
-        return P
-    }
-
-    getPartialPath(from: number, to: number, samples?: number, reversed?: boolean, firstToken?: string): string {
-        let {d, points} = this._getPath(from, to, samples === undefined ? this._config.samples : samples, firstToken)
-
-        if (reversed) {
-            let reversed = ((firstToken === undefined ? 'L' : firstToken) + d.substring(1, d.length)).split(' ').reverse()
-            d = reversed.join(' ')
+    evaluate(t: number): IPoint {
+        let x, y
+        if (this._fx instanceof NumExp) { //&& this._fx.isValid
+            x = this._fx.evaluate({t: +t})
+        } else if (typeof this._fx === 'function') {
+            x = this._fx(+t)
+        } else {
+            x = NaN
         }
 
-        return d
-    }
-
-    evaluate(x: number): IPoint {
-        let y
-        if (this._fx instanceof NumExp && this._fx.isValid) {
-            y = this._fx.evaluate({x: +x})
-        } else if (typeof this._fx === 'function') {
-            y = this._fx(x)
+        if (this._fy instanceof NumExp) { // && this._fy.isValid
+            y = this._fy.evaluate({t: +t})
+        } else if (typeof this._fy === 'function') {
+            y = this._fy(+t)
         } else {
             y = NaN
-            // console.log('Function type error: ', typeof this._fx)
         }
 
         return {x, y}
     }
 
+    public remove() {
+        // Remove all plugins.
+        for (let P of this._plugins) {
+            P.remove()
+        }
+
+        super.remove()
+    }
+
     private _parse(fn: Function | string): Function | NumExp {
         // TODO : must calculate differently
         if (typeof fn === 'string') {
-            this._rawFx = fn
             return new NumExp(fn)
-        }else{
-            this._rawFx = ''
         }
 
         return fn
     }
 
-    private _getFlatPath(numberOfPoints?: number): string {
-        if (numberOfPoints === undefined) {
-            numberOfPoints = (this._config.domain.max - this._config.domain.min) * this._config.samples
-        }
-
-        let h = this.graph.origin.y,
-            pt = this.graph.unitsToPixels({x: this._config.domain.min, y: 0}),
-            d: string = `M${pt.x},${pt.y}`
-
-        for (let x = 1; x < numberOfPoints; x++) {
-            pt = this.graph.unitsToPixels({x: this._config.domain.min + x / this._config.samples, y: 0})
-            d += `L${pt.x},${pt.y}`
-        }
-
-        return d
-    }
-
-    private _getPath(from: number, to: number, samples: number, firstToken?: string): { d: string, points: IPoint[] } {
+    private _getPath(): { d: string, points: IPoint[] } {
         let d = '',
             points: IPoint[] = [],
-            nextToken = firstToken === undefined ? 'M' : firstToken,
+            nextToken = 'M',
             prevToken = '',
             graphHeight = this.graph.height,
-            x = +from,
+            t = +this._config.domain.min,
             y = 0,
             errorCounter = 0
 
         // Make sure the samples is a positive number.
-        if (samples <= 0) {
-            samples = 20
+        if (this._config.samples <= 0) {
+            this._config.samples = 20
         }
 
-        while (x <= to + 1 / samples) {
+        while (t <= this._config.domain.max + 1 / this._config.samples) {
             // Evaluate the function at the point.
-           const pt = this.graph.unitsToPixels(this.evaluate(x))
-            if(isNaN(pt.y)){
+            const pt = this.graph.unitsToPixels(this.evaluate(t))
+
+            if (isNaN(pt.y)) {
                 errorCounter++
                 pt.y = 0
                 nextToken = 'M'
             }
-            // if(errorCounter>samples*2){return {d, points}}
+
+            if (errorCounter > this._config.samples * 2) {
+                return {d, points}
+            }
 
             // store the previous token.
             prevToken = '' + nextToken
@@ -239,18 +199,9 @@ export class Plot extends Figure {
             }
 
             // Next point
-            x += 1 / samples;
+            t += 1 / this._config.samples;
         }
 
         return {d, points}
-    }
-
-    public remove(){
-        // Remove all plugins.
-        for(let P of this._plugins){
-            P.remove()
-        }
-
-        super.remove()
     }
 }

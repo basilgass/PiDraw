@@ -4,6 +4,7 @@ import { IPoint } from "../variables/interfaces";
 import { Riemann } from "./PlotPlugins/Riemann";
 import { Follow } from "./PlotPlugins/Follow";
 import { FillBetween } from "./PlotPlugins/FillBetween";
+import { NumExp } from "pimath/esm/maths/expressions/numexp";
 export interface PlotConfig {
     domain: {
         min: number;
@@ -15,11 +16,12 @@ export declare class Plot extends Figure {
     private _config;
     private _precision;
     private _fx;
+    private _rawFx;
     private _plugins;
-    private _riemann;
     constructor(graph: Graph, name: string, fn: Function | string, config?: PlotConfig);
+    get tex(): string;
+    get fx(): Function | NumExp;
     generateName(): string;
-    updateFigure(): Plot;
     updatePlugins(): Plot;
     plot(fn: string | Function, speed?: number): Plot;
     riemann(from: number, to: number, rectangles: number, pos?: number): Riemann;

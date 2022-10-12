@@ -2,6 +2,8 @@ import {Graph} from "../Graph";
 import {Figure} from "./Figure";
 import {Point} from "./Point";
 import {Circle as svgCircle} from "@svgdotjs/svg.js";
+import {Circle as mathCircle} from "pimath/esm/maths/geometry/circle"
+import {Point as mathPoint} from "pimath/esm/maths/geometry/point"
 
 export class Circle extends Figure {
     _center: Point;
@@ -24,6 +26,14 @@ export class Circle extends Figure {
 
 
         return this
+    }
+
+    get tex(): string {
+        let PTO = this.graph.pixelsToUnits(this.center)
+        let P = new mathPoint(PTO.x, PTO.y)
+        let c = new mathCircle(P, this.radius)
+
+        return `(${this.name}): ${c.tex}`
     }
 
     get center(): Point {

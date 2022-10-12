@@ -21,8 +21,8 @@ var LAYER;
  */
 var AXIS;
 (function (AXIS) {
-    AXIS[AXIS["HORIZONTAL"] = 0] = "HORIZONTAL";
-    AXIS[AXIS["VERTICAL"] = 1] = "VERTICAL";
+    AXIS["HORIZONTAL"] = "x";
+    AXIS["VERTICAL"] = "y";
 })(AXIS = exports.AXIS || (exports.AXIS = {}));
 /**
  * Grid values
@@ -51,6 +51,7 @@ var POINTCONSTRAIN;
     POINTCONSTRAIN[POINTCONSTRAIN["FREE"] = 0] = "FREE";
     POINTCONSTRAIN[POINTCONSTRAIN["MIDDLE"] = 1] = "MIDDLE";
     POINTCONSTRAIN[POINTCONSTRAIN["FIXED"] = 2] = "FIXED";
+    POINTCONSTRAIN[POINTCONSTRAIN["PROJECTION"] = 3] = "PROJECTION";
 })(POINTCONSTRAIN = exports.POINTCONSTRAIN || (exports.POINTCONSTRAIN = {}));
 /**
  * Line constrain

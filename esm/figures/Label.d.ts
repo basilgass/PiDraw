@@ -25,6 +25,8 @@ export declare class Label extends Figure {
     get displayName(): string;
     set displayName(value: string);
     constructor(graph: Graph, name: string, config?: LabelConfig);
+    center(): Label;
+    middle(): Label;
     generateName(): string;
     updateFigure(): Label;
 }

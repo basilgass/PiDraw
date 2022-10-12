@@ -16,8 +16,8 @@ export declare enum LAYER {
  * Axis values
  */
 export declare enum AXIS {
-    HORIZONTAL = 0,
-    VERTICAL = 1
+    HORIZONTAL = "x",
+    VERTICAL = "y"
 }
 /**
  * Grid values
@@ -42,7 +42,8 @@ export declare enum POINTSHAPE {
 export declare enum POINTCONSTRAIN {
     FREE = 0,
     MIDDLE = 1,
-    FIXED = 2
+    FIXED = 2,
+    PROJECTION = 3
 }
 /**
  * Line constrain

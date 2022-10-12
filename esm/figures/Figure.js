@@ -130,25 +130,11 @@ class Figure {
         return this.width(3);
     }
     color(value) {
-        if (typeof value === 'string') {
-            value = { color: value, opacity: 1 };
-        }
-        console.log(value);
-        this.svg.stroke(value);
-        this.svg.fill(value);
+        this.svg.stroke({ color: value });
         return this;
     }
     stroke(value) {
         this.svg.stroke(value);
-        return this;
-    }
-    fill(value) {
-        if (typeof value === "string") {
-            this.svg.fill({ color: value, opacity: 1 });
-        }
-        else {
-            this.svg.fill(value);
-        }
         return this;
     }
     hide() {
@@ -157,14 +143,6 @@ class Figure {
     }
     show() {
         this._svg.show();
-        return this;
-    }
-    hideLabel() {
-        this._label.hide();
-        return this;
-    }
-    showLabel() {
-        this._label.show();
         return this;
     }
 }
