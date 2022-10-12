@@ -36,13 +36,15 @@ class Bezier extends Figure_1.Figure {
             if (x instanceof Point_1.Point || typeof x === 'string') {
                 return {
                     point: this.graph.getPoint(x),
-                    control: 'smooth' // min | max | flat | smooth
+                    control: 'smooth',
+                    ratio: this.ratio
                 };
             }
             else {
                 return {
                     point: this.graph.getPoint(x.point),
-                    control: x.control
+                    control: x.control,
+                    ratio: x.ratio === undefined ? this.ratio : x.ratio
                 };
             }
         }).filter(pt => pt.point);
@@ -107,10 +109,10 @@ class Bezier extends Figure_1.Figure {
         // Build the control points
         let ctrlPoints = [], ratio = 0.3;
         for (let i = 1; i < pts.length - 1; i++) {
-            ctrlPoints.push(this.getCtrlPoint(pts[i - 1].point, pts[i].point, pts[i + 1].point, pts[i].control));
+            ctrlPoints.push(this.getCtrlPoint(pts[i - 1].point, pts[i].point, pts[i + 1].point, pts[i].control, pts[i].ratio));
         }
-        ctrlPoints.unshift(this.getCtrlPoint(pts[0].point, ctrlPoints[0], null, pts[0].control));
-        ctrlPoints.push(this.getCtrlPoint(null, ctrlPoints[ctrlPoints.length - 1], pts[pts.length - 1].point, pts[pts.length - 1].control));
+        ctrlPoints.unshift(this.getCtrlPoint(pts[0].point, ctrlPoints[0], null, pts[0].control, pts[0].ratio));
+        ctrlPoints.push(this.getCtrlPoint(null, ctrlPoints[ctrlPoints.length - 1], pts[pts.length - 1].point, pts[pts.length - 1].control, pts[pts.length - 1].ratio));
         // Starting point
         path = `M${pts[0].point.x},${pts[0].point.y} `;
         for (let i = 1; i < pts.length; i++) {

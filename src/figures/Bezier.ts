@@ -5,10 +5,10 @@ import {Path} from "@svgdotjs/svg.js";
 
 export class Bezier extends Figure {
     private _path: string
-    private _points: { point: Point, control: string }[]
+    private _points: { point: Point, control: string, ratio?: number }[]
     private _ratio: number
 
-    constructor(graph: Graph, name: string, values: (string | Point | {point: string|Point, control: string})[]) {
+    constructor(graph: Graph, name: string, values: (string | Point | {point: string|Point, control: string, ratio?: number})[]) {
         // TODO : build the path class
         super(graph, name);
 
@@ -39,17 +39,19 @@ export class Bezier extends Figure {
         this.update()
     }
 
-    definePoints(values: (string | Point | {point: string|Point, control: string})[]) {
+    definePoints(values: (string | Point | {point: string|Point, control: string, ratio?: number})[]) {
         this._points = values.map(x => {
             if(x instanceof Point || typeof x ==='string') {
                 return {
                     point: this.graph.getPoint(x),
-                    control: 'smooth' // min | max | flat | smooth
+                    control: 'smooth', // min | max | flat | smooth,
+                    ratio: this.ratio
                 }
             }else{
                 return {
                     point: this.graph.getPoint(x.point),
-                    control: x.control
+                    control: x.control,
+                    ratio: x.ratio===undefined?this.ratio:x.ratio
                 }
             }
         }).filter(pt => pt.point)
@@ -139,10 +141,10 @@ export class Bezier extends Figure {
             ratio = 0.3
 
         for (let i = 1; i < pts.length - 1; i++) {
-            ctrlPoints.push(this.getCtrlPoint(pts[i - 1].point, pts[i].point, pts[i + 1].point, pts[i].control))
+            ctrlPoints.push(this.getCtrlPoint(pts[i - 1].point, pts[i].point, pts[i + 1].point, pts[i].control, pts[i].ratio))
         }
-        ctrlPoints.unshift(this.getCtrlPoint(pts[0].point, ctrlPoints[0], null, pts[0].control))
-        ctrlPoints.push(this.getCtrlPoint(null, ctrlPoints[ctrlPoints.length - 1], pts[pts.length - 1].point, pts[pts.length-1].control))
+        ctrlPoints.unshift(this.getCtrlPoint(pts[0].point, ctrlPoints[0], null, pts[0].control, pts[0].ratio))
+        ctrlPoints.push(this.getCtrlPoint(null, ctrlPoints[ctrlPoints.length - 1], pts[pts.length - 1].point, pts[pts.length-1].control, pts[pts.length-1].ratio))
 
         // Starting point
         path = `M${pts[0].point.x},${pts[0].point.y} `
@@ -159,7 +161,7 @@ export class Bezier extends Figure {
         return path
     }
 
-    plot(values?: (string | Point | {point: string|Point, control: string})[], speed?: number): Bezier {
+    plot(values?: (string | Point | {point: string|Point, control: string, ratio?: number})[], speed?: number): Bezier {
         // The update mechanism is frozen.
         if (this.freeze || this.graph.freeze) {
             return this

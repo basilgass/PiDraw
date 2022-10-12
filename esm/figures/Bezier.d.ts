@@ -8,6 +8,7 @@ export declare class Bezier extends Figure {
     constructor(graph: Graph, name: string, values: (string | Point | {
         point: string | Point;
         control: string;
+        ratio?: number;
     })[]);
     get points(): {
         point: Point;
@@ -19,6 +20,7 @@ export declare class Bezier extends Figure {
     definePoints(values: (string | Point | {
         point: string | Point;
         control: string;
+        ratio?: number;
     })[]): void;
     generateName(): string;
     isFlat(control: string): boolean;
@@ -38,6 +40,7 @@ export declare class Bezier extends Figure {
     plot(values?: (string | Point | {
         point: string | Point;
         control: string;
+        ratio?: number;
     })[], speed?: number): Bezier;
     updateFigure(): Bezier;
 }
