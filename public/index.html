@@ -64,11 +64,11 @@
 		const a = graph.arc('B', 'A', c2.center, k)
 		a.mark = true
 		a.sector = true
-		a.svg.fill('blue')
+		a.stroke({color: 'blue', opacity: 0.5})
 		const f2 = graph.plot('2/3*sin(x^2)', {
 			domain: { min: -2, max: 14 },
 			samples: 50
-		}).ultrathick().color('red')
+		}).ultrathick().stroke('red')
 
 		return {
 			graph,
