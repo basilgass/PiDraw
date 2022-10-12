@@ -2,19 +2,24 @@ import {Graph} from "../Graph";
 import {Figure} from "./Figure";
 import {IPoint} from "../variables/interfaces";
 import {Grid} from "./Grid";
-import {POINTCONSTRAIN, POINTSHAPE} from "../variables/enums";
+import {AXIS, POINTCONSTRAIN, POINTSHAPE} from "../variables/enums";
 import {Label} from "./Label";
-import {Vector as mathVector} from "pimath/esm/maths/geometry/vector"
+import {Circle} from "./Circle";
+import {Line} from "./Line";
+import {Plot} from "./Plot";
+import {Vector} from "pimath/esm/maths/geometry/vector"
 
 export interface PointConfig {
-    type: POINTCONSTRAIN,
     data?: any
+    type: POINTCONSTRAIN,
 }
 
 export class Point extends Figure {
+    private _constrain: PointConfig
     private _scale: number
     private _shape: POINTSHAPE
-    private _constrain: PointConfig
+    private _x: number
+    private _y: number
 
     constructor(graph: Graph, name: string, pixels: IPoint) {
         super(graph, name);
@@ -32,10 +37,8 @@ export class Point extends Figure {
         this._updateShape()
 
         // Add the label
-        this.label = new Label(this.graph, 'LABEL', {el: this})
+        this.label = new Label(this.graph, name, {el: this})
     }
-
-    private _x: number
 
     get x(): number {
         return this._x;
@@ -45,8 +48,6 @@ export class Point extends Figure {
         this._x = value;
         this.update()
     }
-
-    private _y: number
 
     get y(): number {
         return this._y;
@@ -59,6 +60,39 @@ export class Point extends Figure {
 
     get coord(): IPoint {
         return this.graph.pixelsToUnits(this)
+    }
+
+    set coord(value) {
+        this.coordX = value.x
+        this.coordY = value.y
+    }
+
+    set coordX(value: number) {
+        this._x = this.graph.unitsToPixels({
+            x: value,
+            y: 0
+        }).x
+    }
+
+    set coordY(value: number) {
+        this._y = this.graph.unitsToPixels({
+            x: 0,
+            y: value
+        }).y
+    }
+
+    addUnit(value:number, axis?: AXIS): Point {
+        if(axis===undefined || axis===AXIS.HORIZONTAL){
+            this.coordX = this.coord.x + value
+        }else{
+            this.coordY = this.coord.y + value
+        }
+        return this
+    }
+
+    get tex(): string {
+        let P = this.graph.pixelsToUnits(this)
+        return `${this.name}\\left( ${P.x} ; ${P.y} \\right)`
     }
 
     generateName(): string {
@@ -85,7 +119,7 @@ export class Point extends Figure {
         return this
     }
 
-    asSquare(size?: number, orientation?: mathVector): Point {
+    asSquare(size?: number, orientation?:Vector): Point {
         if (size !== undefined && size > 0) {
             this._scale = size
         }
@@ -149,7 +183,25 @@ export class Point extends Figure {
         return this
     }
 
-    draggable(grid?: Grid): Point {
+    /**
+     * Constrain the point to be bound to an axis or projection
+     * @param A: Point
+     * @param to: Line | string
+     */
+    projection(A: Point, to: Line | string): Point {
+        this._constrain = {
+            type: POINTCONSTRAIN.PROJECTION,
+            data: [A, to]
+        }
+        this.update()
+        return this
+    }
+
+    draggable(options: {
+        grid?: Grid,
+        constrain?: (string | Figure)[],
+        callback?: Function
+    }): Point {
         this._shape = POINTSHAPE.HANDLE
         this.updateFigure()
 
@@ -175,18 +227,42 @@ export class Point extends Figure {
             }
 
             // Update the value to match the grid
-            if (grid !== null) {
-                if (grid instanceof Grid) {
-                    const intersection = grid.nearestPoint({x, y})
+            if (options.grid) {
+                if (options.grid instanceof Grid) {
+                    const intersection = options.grid.nearestPoint({x, y})
                     x = intersection.x
                     y = intersection.y
                 }
             }
 
-            // Move the circle to the current positiovn
-            handler.move(x, y)
-
             // TODO: Work with constrains.
+            // Constrain
+            if (options.constrain) {
+                if (options.constrain.includes('x')) {
+                    y = point.y
+                } else if (options.constrain.includes('y')) {
+                    x = point.x
+                } else {
+                    for (let c of options.constrain) {
+                        if (c instanceof Circle) {
+                            let v = new Vector(c.center, {x, y}),
+                                r = c.getRadiusAsPixels()
+
+                            x = c.center.x + v.x.value / v.norm * r
+                            y = c.center.y + v.y.value / v.norm * r
+                        } else if (c instanceof Line) {
+                            y = c.math.getValueAtX(x).value
+                        } else if (c instanceof Plot) {
+                            const pt = point.graph.pixelsToUnits({x, y})
+                            y = point.graph.unitsToPixels(c.evaluate(pt.x)).y
+                        }
+                    }
+
+                }
+            }
+
+            // Move the circle to the current position
+            handler.move(x, y)
 
             // Set the point shape coordinate
             point.x = x //handler.el.cx()
@@ -196,11 +272,22 @@ export class Point extends Figure {
             // Update the figures and labels.
             point.graph.update()
 
-            // TODO: add after drag event ?
+            // Callback at the end, with the point
+            if (options.callback) {
+                options.callback(point)
+            }
         }
 
         this.svg.draggable()
             .on('dragmove', dragmove)
+        // TODO: Add event listener.
+        // .on('dragend', ()=>{
+        //     let event = new CustomEvent('PiDrawPointDragEnd',
+        //         {
+        //             detail: this
+        //         })
+        //     document.dispatchEvent(event)
+        // })
         return this
     }
 
@@ -242,6 +329,28 @@ export class Point extends Figure {
 
             this._x = (A.x + B.x) / 2
             this._y = (A.y + B.y) / 2
+        }
+
+        if (this._constrain.type === POINTCONSTRAIN.PROJECTION) {
+            const M: Point = this._constrain.data[0],
+                to: Line | string = this._constrain.data[1]
+
+            if (to === 'Ox') {
+                this._x = M.x
+                this._y = this.graph.origin.y
+            } else if (to === 'Oy') {
+                this._x = this.graph.origin.x
+                this._y = M.y
+            } else if (to instanceof Line) {
+                // Get the projection to a line.
+                let u = to.math.director,
+                    A = {x: 0, y: to.math.getValueAtX(0).value},  // Point on the line
+                    AP = new Vector(A, M),
+                    k = Vector.scalarProduct(AP, u) / u.normSquare.value
+
+                this._x = A.x + k * u.x.value
+                this._y = A.y + k * u.y.value
+            }
         }
     }
 }
