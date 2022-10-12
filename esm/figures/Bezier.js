@@ -7,6 +7,7 @@ const svg_js_1 = require("@svgdotjs/svg.js");
 class Bezier extends Figure_1.Figure {
     _path;
     _points;
+    _ratio;
     constructor(graph, name, values) {
         // TODO : build the path class
         super(graph, name);
@@ -14,6 +15,7 @@ class Bezier extends Figure_1.Figure {
         this.definePoints(values);
         this._path = this.getCurve();
         this.svg = graph.svg.path(this._path).stroke('black').fill('none');
+        this._ratio = 0.3;
         this.updateFigure();
     }
     get points() {
@@ -21,6 +23,13 @@ class Bezier extends Figure_1.Figure {
     }
     get path() {
         return this._path;
+    }
+    get ratio() {
+        return this._ratio;
+    }
+    set ratio(value) {
+        this._ratio = value;
+        this.update();
     }
     definePoints(values) {
         this._points = values.map(x => {
@@ -42,17 +51,23 @@ class Bezier extends Figure_1.Figure {
         return super.generateName();
     }
     isFlat(control) {
-        return control === 'flat' || control === 'min' || control === 'max';
+        return control === 'flat' || control === 'min' || control === 'max' || control === 'ah';
     }
-    getCtrlPoint(p0, p1, p2, ratio) {
+    isVertical(control) {
+        return control === 'vertical' || control === "av";
+    }
+    getCtrlPoint(p0, p1, p2, control, ratio) {
         if (ratio === undefined) {
-            ratio = 0.3;
+            ratio = this._ratio;
+        }
+        if (control === undefined) {
+            control = "smooth";
         }
         if (p2 === null) {
             // It's a starting point.
             return {
-                x: p0.x + (p1.x - p0.x) * ratio,
-                y: p0.y + (p1.y - p0.y) * ratio,
+                x: this.isVertical(control) ? p0.x : p0.x + (p1.x - p0.x) * ratio,
+                y: this.isFlat(control) ? p0.y : p0.y + (p1.y - p0.y) * ratio,
                 px: p0.x,
                 py: p0.y
             };
@@ -62,16 +77,16 @@ class Bezier extends Figure_1.Figure {
             // Control point (p1) must use the symmetric version
             // 2*p1 - p1x
             return {
-                x: p2.x - (p2.x - (!(p1 instanceof Point_1.Point) ? 2 * p1.x - p1.px : 0)) * ratio,
-                y: p2.y - (p2.y - (!(p1 instanceof Point_1.Point) ? 2 * p1.y - p1.py : 0)) * ratio,
+                x: this.isVertical(control) ? p2.x : p2.x - (p2.x - (!(p1 instanceof Point_1.Point) ? 2 * p1.x - p1.px : 0)) * ratio,
+                y: this.isFlat(control) ? p2.y : p2.y - (p2.y - (!(p1 instanceof Point_1.Point) ? 2 * p1.y - p1.py : 0)) * ratio,
                 px: p2.x,
                 py: p2.y
             };
         }
         const dx = p2.x - p0.x, dy = p2.y - p0.y, n = Math.sqrt(dx * dx + dy * dy), n1 = Math.sqrt((p1.x - p0.x) ** 2 + (p1.y - p0.y) ** 2), n2 = Math.sqrt((p2.x - p1.x) ** 2 + (p2.y - p1.y) ** 2);
         return {
-            x: p1.x - dx * ratio / n * Math.min(n1, n2),
-            y: p1.y - dy * ratio / n * Math.min(n1, n2),
+            x: this.isVertical(control) ? p1.x : p1.x - dx * ratio / n * Math.min(n1, n2),
+            y: this.isFlat(control) ? p1.y : p1.y - dy * ratio / n * Math.min(n1, n2),
             px: p1.x,
             py: p1.y
         };
@@ -92,10 +107,10 @@ class Bezier extends Figure_1.Figure {
         // Build the control points
         let ctrlPoints = [], ratio = 0.3;
         for (let i = 1; i < pts.length - 1; i++) {
-            ctrlPoints.push(this.getCtrlPoint(pts[i - 1].point, pts[i].point, pts[i + 1].point));
+            ctrlPoints.push(this.getCtrlPoint(pts[i - 1].point, pts[i].point, pts[i + 1].point, pts[i].control));
         }
-        ctrlPoints.unshift(this.getCtrlPoint(pts[0].point, ctrlPoints[0], null));
-        ctrlPoints.push(this.getCtrlPoint(null, ctrlPoints[ctrlPoints.length - 1], pts[pts.length - 1].point));
+        ctrlPoints.unshift(this.getCtrlPoint(pts[0].point, ctrlPoints[0], null, pts[0].control));
+        ctrlPoints.push(this.getCtrlPoint(null, ctrlPoints[ctrlPoints.length - 1], pts[pts.length - 1].point, pts[pts.length - 1].control));
         // Starting point
         path = `M${pts[0].point.x},${pts[0].point.y} `;
         for (let i = 1; i < pts.length; i++) {

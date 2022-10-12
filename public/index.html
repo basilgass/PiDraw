@@ -70,6 +70,23 @@
 			samples: 50
 		}).ultrathick().stroke('red')
 
+
+        let X1 = graph.point(1,4).draggable(),
+            X2 = graph.point(3,8).draggable(),
+            X3 = graph.point(5,2).draggable(),
+            X4 = graph.point(7,5).draggable(),
+            X5 = graph.point(9,8).draggable(),
+            b = graph.bezier([
+                {point: X1, control: "av"},
+                {point: X2, control: "flat"},
+                {point: X3, control: "smooth"},
+                {point: X4, control: "flat"},
+                {point: X5, control: "flat"},
+            ]).stroke({width: 3, color: "green"})
+
+
+        b.ratio = 0.3
+
 		return {
 			graph,
 			figures: graph.figures.map(x => x.name),

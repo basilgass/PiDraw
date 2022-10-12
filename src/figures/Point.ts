@@ -205,6 +205,8 @@ export class Point extends Figure {
         this._shape = POINTSHAPE.HANDLE
         this.updateFigure()
 
+        if(options===undefined)options = {}
+
         let point = this
 
         // let grid = this.graph.getFigure('MAINGRID')

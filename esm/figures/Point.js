@@ -160,6 +160,8 @@ class Point extends Figure_1.Figure {
     draggable(options) {
         this._shape = enums_1.POINTSHAPE.HANDLE;
         this.updateFigure();
+        if (options === undefined)
+            options = {};
         let point = this;
         // let grid = this.graph.getFigure('MAINGRID')
         function dragmove(e) {
