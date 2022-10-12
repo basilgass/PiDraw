@@ -54,12 +54,21 @@ export declare class Figure {
     ultrathin(): Figure;
     thick(): Figure;
     ultrathick(): Figure;
-    color(value: string): Figure;
+    color(value: {
+        color: string;
+        opacity?: number;
+    } | string): Figure;
     stroke(value: {
         width?: number;
         color?: string;
         opacity?: number;
     }): Figure;
+    fill(value: {
+        color: string;
+        opacity?: number;
+    } | string): Figure;
     hide(): Figure;
     show(): Figure;
+    hideLabel(): Figure;
+    showLabel(): Figure;
 }

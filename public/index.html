@@ -47,7 +47,7 @@
 
 		const c1 = graph.circle(p, 2)
 		const c2 = graph.circle({ x: 8, y: 6 }, p3)
-		const k = graph.point(0, 0).middleOf(p, c2.center).asCircle()
+		const k = graph.point(0, 0).middleOf(p, c2.center).asSquare().color('blue')
 
 		const PP = graph.segment(p, c2.center)
 		const v = graph.vector(p, 'B')

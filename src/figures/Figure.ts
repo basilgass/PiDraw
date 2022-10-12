@@ -161,13 +161,29 @@ export class Figure {
         return this.width(3)
     }
 
-    color(value: string): Figure {
-        this.svg.stroke({color: value})
+    color(value: { color: string, opacity?: number }|string): Figure {
+
+        if(typeof value === 'string'){
+            value = {color: value, opacity: 1}
+        }
+
+        console.log(value)
+        this.svg.stroke(value)
+        this.svg.fill(value)
         return this
     }
 
     stroke(value: { width?: number, color?: string, opacity?: number }): Figure {
         this.svg.stroke(value)
+        return this
+    }
+
+    fill(value: { color: string, opacity?: number }|string): Figure {
+        if(typeof value === "string"){
+            this.svg.fill({color: value, opacity: 1})
+        }else {
+            this.svg.fill(value)
+        }
         return this
     }
 
@@ -177,6 +193,15 @@ export class Figure {
     }
     show(): Figure {
         this._svg.show()
+        return this
+    }
+
+    hideLabel(): Figure {
+        this._label.hide()
+        return this
+    }
+    showLabel(): Figure {
+        this._label.show()
         return this
     }
 

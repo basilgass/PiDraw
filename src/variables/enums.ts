@@ -36,7 +36,8 @@ export enum GRIDTYPE {
 export enum POINTSHAPE {
     CIRCLE,
     CROSS,
-    HANDLE
+    HANDLE,
+    SQUARE
 }
 
 /**

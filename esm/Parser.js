@@ -4,6 +4,7 @@ exports.Parser = void 0;
 const Line_1 = require("./figures/Line");
 const Plot_1 = require("./figures/Plot");
 const line_1 = require("pimath/esm/maths/geometry/line");
+const Point_1 = require("./figures/Point");
 class Parser {
     figures;
     step;
@@ -174,7 +175,10 @@ class Parser {
             if (figureConfig !== null) {
                 figureConfig.split(',').forEach(el => {
                     builded.figures.forEach(fig => {
-                        if (el === 'dash') {
+                        if (el === 'drag' && fig instanceof Point_1.Point) {
+                            fig.draggable(this._graph.getGrid());
+                        }
+                        else if (el === 'dash') {
                             fig.dash(this._graph.pixelsPerUnit.x / 4);
                         }
                         else if (el === 'thick') {
@@ -341,6 +345,7 @@ class Parser {
     _generatePlot(name, step) {
         let figures;
         let domain = this._graph.unitXDomain, fx = step;
+        // Domain of the function
         if (step.includes(',')) {
             let values = step.split(',');
             if (values.length >= 3) {
@@ -352,6 +357,7 @@ class Parser {
             }
             fx = values[0];
         }
+        // Plottings
         // PLot the function
         figures = [this._graph.plot(fx, {
                 samples: 100,

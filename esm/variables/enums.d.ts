@@ -33,7 +33,8 @@ export declare enum GRIDTYPE {
 export declare enum POINTSHAPE {
     CIRCLE = 0,
     CROSS = 1,
-    HANDLE = 2
+    HANDLE = 2,
+    SQUARE = 3
 }
 /**
  * Point constrain

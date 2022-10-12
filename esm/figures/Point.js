@@ -59,6 +59,18 @@ class Point extends Figure_1.Figure {
         this.update();
         return this;
     }
+    asSquare(size, orientation) {
+        if (size !== undefined && size > 0) {
+            this._scale = size;
+        }
+        if (orientation !== undefined) {
+            // TODO: add the orientation to the square - really useful ?
+            console.log(orientation.tex);
+        }
+        this._shape = enums_1.POINTSHAPE.SQUARE;
+        this.update();
+        return this;
+    }
     setSize(value) {
         this._scale = value;
         // Force update
@@ -156,6 +168,9 @@ class Point extends Figure_1.Figure {
         }
         else if (this._shape === enums_1.POINTSHAPE.CROSS) {
             this.svg = this.graph.svg.path(`M${-this._scale},${-this._scale} L${+this._scale},${+this._scale} M${+this._scale},${-this._scale} L${-this._scale},${+this._scale}`).stroke('black').center(0, 0).data('shape', enums_1.POINTSHAPE.CROSS);
+        }
+        else if (this._shape === enums_1.POINTSHAPE.SQUARE) {
+            this.svg = this.graph.svg.path(`M${-this._scale},${-this._scale} L${+this._scale},${-this._scale} L${+this._scale},${+this._scale} L${-this._scale},${+this._scale} Z`).stroke('black').center(0, 0).data('shape', enums_1.POINTSHAPE.SQUARE);
         }
         else if (this._shape === enums_1.POINTSHAPE.HANDLE) {
             this.svg = this.graph.svg.circle(20).stroke('black').fill('white').opacity(0.4).data('shape', enums_1.POINTSHAPE.HANDLE);

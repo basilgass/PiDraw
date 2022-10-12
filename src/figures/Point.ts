@@ -4,6 +4,7 @@ import {IPoint} from "../variables/interfaces";
 import {Grid} from "./Grid";
 import {POINTCONSTRAIN, POINTSHAPE} from "../variables/enums";
 import {Label} from "./Label";
+import {Vector as mathVector} from "pimath/esm/maths/geometry/vector"
 
 export interface PointConfig {
     type: POINTCONSTRAIN,
@@ -80,6 +81,20 @@ export class Point extends Figure {
         }
 
         this._shape = POINTSHAPE.CIRCLE
+        this.update()
+        return this
+    }
+
+    asSquare(size?: number, orientation?: mathVector): Point {
+        if (size !== undefined && size > 0) {
+            this._scale = size
+        }
+        if(orientation !== undefined ){
+            // TODO: add the orientation to the square - really useful ?
+            console.log(orientation.tex)
+        }
+
+        this._shape = POINTSHAPE.SQUARE
         this.update()
         return this
     }
@@ -209,6 +224,10 @@ export class Point extends Figure {
             this.svg = this.graph.svg.path(
                 `M${-this._scale},${-this._scale} L${+this._scale},${+this._scale} M${+this._scale},${-this._scale} L${-this._scale},${+this._scale}`
             ).stroke('black').center(0, 0).data('shape', POINTSHAPE.CROSS);
+        } else if(this._shape === POINTSHAPE.SQUARE) {
+            this.svg = this.graph.svg.path(
+                `M${-this._scale},${-this._scale} L${+this._scale},${-this._scale} L${+this._scale},${+this._scale} L${-this._scale},${+this._scale} Z`
+            ).stroke('black').center(0, 0).data('shape', POINTSHAPE.SQUARE);
         } else if (this._shape === POINTSHAPE.HANDLE) {
             this.svg = this.graph.svg.circle(
                 20
