@@ -24,10 +24,18 @@ class Bezier extends Figure_1.Figure {
     }
     definePoints(values) {
         this._points = values.map(x => {
-            return {
-                point: this.graph.getPoint(x),
-                control: 'smooth' // min | max | flat | smooth
-            };
+            if (x instanceof Point_1.Point || typeof x === 'string') {
+                return {
+                    point: this.graph.getPoint(x),
+                    control: 'smooth' // min | max | flat | smooth
+                };
+            }
+            else {
+                return {
+                    point: this.graph.getPoint(x.point),
+                    control: x.control
+                };
+            }
         }).filter(pt => pt.point);
     }
     generateName() {

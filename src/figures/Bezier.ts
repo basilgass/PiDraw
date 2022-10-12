@@ -7,7 +7,7 @@ export class Bezier extends Figure {
     private _path: string
     private _points: { point: Point, control: string }[]
 
-    constructor(graph: Graph, name: string, values: (Point | string)[]) {
+    constructor(graph: Graph, name: string, values: (string | Point | {point: string|Point, control: string})[]) {
         // TODO : build the path class
         super(graph, name);
 
@@ -28,11 +28,18 @@ export class Bezier extends Figure {
         return this._path;
     }
 
-    definePoints(values: (string | Point)[]) {
+    definePoints(values: (string | Point | {point: string|Point, control: string})[]) {
         this._points = values.map(x => {
-            return {
-                point: this.graph.getPoint(x),
-                control: 'smooth' // min | max | flat | smooth
+            if(x instanceof Point || typeof x ==='string') {
+                return {
+                    point: this.graph.getPoint(x),
+                    control: 'smooth' // min | max | flat | smooth
+                }
+            }else{
+                return {
+                    point: this.graph.getPoint(x.point),
+                    control: x.control
+                }
             }
         }).filter(pt => pt.point)
     }
@@ -45,7 +52,12 @@ export class Bezier extends Figure {
         return control === 'flat' || control === 'min' || control === 'max'
     }
 
-    getCtrlPoint(p0: Point, p1: Point | { x: number, y: number, px: number, py: number }, p2: Point, ratio?: number): { x: number, y: number, px: number, py:number } {
+    getCtrlPoint(
+        p0: Point,
+        p1: Point | { x: number, y: number, px: number, py: number },
+        p2: Point,
+        ratio?: number
+    ): { x: number, y: number, px: number, py:number } {
         if (ratio === undefined) {
             ratio = 0.3
         }
@@ -77,6 +89,7 @@ export class Bezier extends Figure {
             n = Math.sqrt(dx * dx + dy * dy),
             n1 = Math.sqrt((p1.x - p0.x) ** 2 + (p1.y - p0.y) ** 2),
             n2 = Math.sqrt((p2.x - p1.x) ** 2 + (p2.y - p1.y) ** 2)
+
         return {
             x: p1.x - dx * ratio / n * Math.min(n1, n2),
             y: p1.y - dy * ratio / n * Math.min(n1, n2),
@@ -127,7 +140,7 @@ export class Bezier extends Figure {
         return path
     }
 
-    plot(values?: (Point | string)[], speed?: number): Bezier {
+    plot(values?: (string | Point | {point: string|Point, control: string})[], speed?: number): Bezier {
         // The update mechanism is frozen.
         if (this.freeze || this.graph.freeze) {
             return this
