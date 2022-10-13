@@ -61,6 +61,9 @@ export class Bezier extends Figure {
         return super.generateName();
     }
 
+    isSmooth(control: string): boolean {
+        return !(this.isFlat(control) || this.isVertical(control))
+    }
     isFlat(control: string): boolean {
         return control === 'flat' || control === 'min' || control === 'max' || control === 'ah'
     }
@@ -131,7 +134,29 @@ export class Bezier extends Figure {
             return ""
         }
         if (pts.length === 2) {
-            return `M${pts[0].point.x},${pts[0].point.y} L${pts[1].point.x},${pts[1].point.y}`
+            if(this.isSmooth(pts[0].control) && this.isSmooth(pts[1].control)) {
+                // Two smooth point => it is a straight line.
+                return `M${pts[0].point.x},${pts[0].point.y} L${pts[1].point.x},${pts[1].point.y}`
+            }else{
+                // at least of of the two point is flat or vertical - make the control
+                let dx = pts[1].point.x - pts[0].point.x,
+                    dy = pts[1].point.y - pts[0].point.y,
+                    c1 = {x: pts[0].point.x, y: pts[0].point.y}, c2 = {x: pts[1].point.x, y: pts[1].point.y}
+
+                if(this.isFlat(pts[0].control)){
+                    c1 = {x: pts[0].point.x + dx*this.ratio, y: pts[0].point.y}
+                }else if(this.isVertical(pts[0].control)){
+                    c1 = {x: pts[0].point.x, y: pts[0].point.y + dy*this.ratio}
+                }
+
+                if(this.isFlat(pts[1].control)){
+                    c2 = {x: pts[1].point.x - dx*this.ratio, y: pts[1].point.y}
+                }else if(this.isVertical(pts[1].control)){
+                    c2 = {x: pts[1].point.x, y: pts[1].point.y - dy*this.ratio}
+                }
+
+                return `M${pts[0].point.x},${pts[0].point.y} C ${c1.x},${c1.y} ${c2.x},${c2.y} ${pts[1].point.x},${pts[1].point.y}`
+            }
         }
 
         // Bezier curve
