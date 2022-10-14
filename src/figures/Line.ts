@@ -54,6 +54,16 @@ export class Line extends Figure {
         return `${this.name}: ${this.texMath.canonical}`
     }
 
+    get display(): { canonical: string; mxh: string; parametric: string } {
+        let A: {x:number, y:number},B: { x:number, y:number }
+        let m: mathLine
+
+        A = this.graph.pixelsToUnits(this.A)
+        m = new mathLine(new mathPoint(A.x, A.y), this.d)
+
+        return m.display
+    }
+
     get texMath() {
         let A: {x:number, y:number},B: { x:number, y:number }
         let m: mathLine

@@ -37,6 +37,13 @@ class Line extends Figure_1.Figure {
     get tex() {
         return `${this.name}: ${this.texMath.canonical}`;
     }
+    get display() {
+        let A, B;
+        let m;
+        A = this.graph.pixelsToUnits(this.A);
+        m = new line_1.Line(new point_1.Point(A.x, A.y), this.d);
+        return m.display;
+    }
     get texMath() {
         let A, B;
         let m;
