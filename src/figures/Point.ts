@@ -92,7 +92,12 @@ export class Point extends Figure {
 
     get tex(): string {
         let P = this.graph.pixelsToUnits(this)
-        return `${this.name}\\left( ${P.x} ; ${P.y} \\right)`
+        return `${this.name}${this.coordAsTex}`
+    }
+
+    get coordAsTex(): string {
+        let P = this.graph.pixelsToUnits(this)
+        return `\\left( ${P.x} ; ${P.y} \\right)`
     }
 
     generateName(): string {

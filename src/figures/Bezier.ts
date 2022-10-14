@@ -108,17 +108,25 @@ export class Bezier extends Figure {
             }
         }
 
-        const dx = p2.x - p0.x,
-            dy = p2.y - p0.y,
-            n = Math.sqrt(dx * dx + dy * dy),
-            n1 = Math.sqrt((p1.x - p0.x) ** 2 + (p1.y - p0.y) ** 2),
-            n2 = Math.sqrt((p2.x - p1.x) ** 2 + (p2.y - p1.y) ** 2)
+        // const dx = p2.x - p0.x,
+        //     dy = p2.y - p0.y,
+        //     n = Math.sqrt(dx * dx + dy * dy),
+        //     n1 = Math.sqrt((p1.x - p0.x) ** 2 + (p1.y - p0.y) ** 2),
+        //     n2 = Math.sqrt((p2.x - p1.x) ** 2 + (p2.y - p1.y) ** 2)
+        // return {
+        //     x: this.isVertical(control)?p1.x:p1.x - dx * ratio / n * Math.min(n1, n2),
+        //     y: this.isFlat(control)?p1.y:p1.y - dy * ratio / n * Math.min(n1, n2),
+        //     px: p1.x,
+        //     py: p1.y
+        // }
+        // Modify to use only the "x" dimension for sizing.
+        const d = Math.min(Math.abs(p1.x-p0.x), Math.abs(p2.x-p1.x))
 
         return {
-            x: this.isVertical(control)?p1.x:p1.x - dx * ratio / n * Math.min(n1, n2),
-            y: this.isFlat(control)?p1.y:p1.y - dy * ratio / n * Math.min(n1, n2),
-            px: p1.x,
-            py: p1.y
+                x: this.isVertical(control)?p1.x:p1.x - d*ratio,
+                y: this.isFlat(control)?p1.y:p1.y - d*ratio,
+                px: p1.x,
+                py: p1.y
         }
     }
 

@@ -71,7 +71,11 @@ class Point extends Figure_1.Figure {
     }
     get tex() {
         let P = this.graph.pixelsToUnits(this);
-        return `${this.name}\\left( ${P.x} ; ${P.y} \\right)`;
+        return `${this.name}${this.coordAsTex}`;
+    }
+    get coordAsTex() {
+        let P = this.graph.pixelsToUnits(this);
+        return `\\left( ${P.x} ; ${P.y} \\right)`;
     }
     generateName() {
         if (this.name === undefined) {
