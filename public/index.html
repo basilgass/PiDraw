@@ -85,6 +85,13 @@
             ]).stroke({width: 3, color: "green"})
 
 
+        let T1 = graph.point(3,5).draggable(),
+            T2 = graph.point(10,9).draggable(),
+            b2 = graph.bezier([
+                {point: T1, control: "flat", ratio: 0.1},
+                {point: T2, control: "vertical", ratio: 0.9}
+            ])
+
         b.ratio = 0.3
 
 		return {

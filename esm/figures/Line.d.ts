@@ -24,6 +24,11 @@ export declare class Line extends Figure {
     private _segmentStart;
     constructor(graph: Graph, name: string, A: Point, B: Point, construction?: LineConfig);
     get tex(): string;
+    get display(): {
+        canonical: string;
+        mxh: string;
+        parametric: string;
+    };
     get texMath(): {
         canonical: string;
         mxh: string;

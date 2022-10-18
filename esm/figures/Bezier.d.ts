@@ -23,6 +23,7 @@ export declare class Bezier extends Figure {
         ratio?: number;
     })[]): void;
     generateName(): string;
+    isSmooth(control: string): boolean;
     isFlat(control: string): boolean;
     isVertical(control: string): boolean;
     getCtrlPoint(p0: Point, p1: Point | {
