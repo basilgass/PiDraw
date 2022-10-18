@@ -202,6 +202,10 @@ export class Graph {
         return this._freeze;
     }
 
+    set freeze(value: boolean) {
+        this._freeze = value;
+    }
+
     get layers(): ILayers {
         return this._layers;
     }

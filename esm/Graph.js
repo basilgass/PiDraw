@@ -173,6 +173,9 @@ class Graph {
     get freeze() {
         return this._freeze;
     }
+    set freeze(value) {
+        this._freeze = value;
+    }
     get layers() {
         return this._layers;
     }

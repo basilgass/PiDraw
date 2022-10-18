@@ -97,6 +97,7 @@ export class Figure {
         if (this._freeze || this._graph.freeze) {
             return
         }
+
         this.updateFigure()
         if (this._label) {
             this._label.update()

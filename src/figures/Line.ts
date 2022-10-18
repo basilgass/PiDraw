@@ -145,6 +145,7 @@ export class Line extends Figure {
 
     set segmentEnd(value: boolean) {
         this._segmentEnd = value;
+
         this.update()
     }
 
@@ -159,6 +160,7 @@ export class Line extends Figure {
         if (this.svg instanceof svgLine) {
             this.svg.marker('end', this.graph.markers.end)
         }
+
         this.update()
         return this
     }

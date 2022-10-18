@@ -104,6 +104,7 @@ export declare class Graph {
         [p: string]: Point;
     };
     get freeze(): boolean;
+    set freeze(value: boolean);
     get layers(): ILayers;
     get markers(): {
         start: Marker;

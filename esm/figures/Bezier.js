@@ -8,14 +8,15 @@ class Bezier extends Figure_1.Figure {
     _path;
     _points;
     _ratio;
+    _showControlPoints;
     constructor(graph, name, values) {
         // TODO : build the path class
         super(graph, name);
         this.generateName();
         this.definePoints(values);
-        this._path = this.getCurve();
-        this.svg = graph.svg.path(this._path).stroke('black').fill('none');
         this._ratio = 0.3;
+        this.svg = graph.svg.path("").stroke('black').fill('none');
+        this._showControlPoints = false;
         this.updateFigure();
     }
     get points() {
@@ -31,23 +32,106 @@ class Bezier extends Figure_1.Figure {
         this._ratio = value;
         this.update();
     }
+    get showControlPoints() {
+        return this._showControlPoints;
+    }
+    set showControlPoints(value) {
+        this._showControlPoints = value;
+        if (value === false) {
+            // Remove all !
+            this._resetControlPoints();
+        }
+        this.update();
+    }
+    _resetControlPoints() {
+        if (this._points) {
+            let index = 0;
+            for (let pt of this._points) {
+                if (pt.c1.point instanceof Point_1.Point) {
+                    pt.c1.point.remove();
+                    pt.c1.segment.remove();
+                }
+                if (pt.c2.point instanceof Point_1.Point) {
+                    pt.c2.point.remove();
+                    pt.c2.segment.remove();
+                }
+                pt.c1 = index > 0 ? { x: 0, y: 0 } : null;
+                pt.c2 = index < this._points.length - 1 ? { x: 0, y: 0 } : null;
+                index++;
+            }
+        }
+    }
+    _resetAllPoints() {
+        if (this._points) {
+            for (let pt of this._points) {
+                if (pt.point instanceof Point_1.Point) {
+                    pt.point.remove();
+                }
+            }
+        }
+        this._resetControlPoints();
+    }
     definePoints(values) {
-        this._points = values.map(x => {
+        // Reset all control points and existing points before doing anything else.
+        this._resetControlPoints();
+        this._points = values.map((x, index) => {
             if (x instanceof Point_1.Point || typeof x === 'string') {
                 return {
                     point: this.graph.getPoint(x),
                     control: 'smooth',
-                    ratio: this.ratio
+                    ratio: this.ratio,
+                    c1: index > 0 ? { x: 0, y: 0 } : null,
+                    c2: index < values.length - 1 ? { x: 0, y: 0 } : null
                 };
             }
             else {
                 return {
                     point: this.graph.getPoint(x.point),
                     control: x.control,
-                    ratio: x.ratio === undefined ? this.ratio : x.ratio
+                    ratio: x.ratio === undefined ? this.ratio : x.ratio,
+                    c1: index > 0 ? { x: 0, y: 0 } : null,
+                    c2: index < values.length - 1 ? { x: 0, y: 0 } : null
                 };
             }
         }).filter(pt => pt.point);
+    }
+    _updateControlPoints() {
+        if (this._points.length <= 1)
+            return;
+        if (this._points.length === 2) {
+            // Special case
+            // TODO: generate for two points
+            return "";
+        }
+        let pts = this._points, path = `M${pts[0].point.x},${pts[0].point.y}`, n = 0;
+        while (n < pts.length) {
+            if (n === 0) {
+                // First point
+                let dx = pts[n + 1].point.x - pts[n].point.x, dy = pts[n + 1].point.y - pts[n].point.y, ratio = pts[n].ratio === undefined ? this.ratio : pts[n].ratio;
+                pts[n].c2.x = this.isVertical(pts[0].control) ? pts[0].point.x : pts[0].point.x + dx * ratio / 2;
+                pts[n].c2.y = this.isFlat(pts[0].control) ? pts[0].point.y : pts[0].point.y + dy * ratio / 2;
+            }
+            else if (n === this._points.length - 1) {
+                // Last point
+                let dx = pts[n].point.x - pts[n - 1].point.x, dy = pts[n].point.y - pts[n - 1].point.y, ratio = pts[n].ratio === undefined ? this.ratio : pts[n].ratio;
+                pts[n].c1.x = this.isVertical(pts[n].control) ? pts[0].point.x : pts[n].point.x - dx * ratio / 2;
+                pts[n].c1.y = this.isFlat(pts[n].control) ? pts[0].point.y : pts[n].point.y - dy * ratio / 2;
+            }
+            else {
+                // Other point
+                let dx = pts[n + 1].point.x - pts[n - 1].point.x, dy = pts[n + 1].point.y - pts[n - 1].point.y, norm = Math.sqrt(dx ** 2 + dy ** 2), dx1 = pts[n].point.x - pts[n - 1].point.x, dx2 = pts[n + 1].point.x - pts[n].point.x, ratio = pts[n].ratio === undefined ? this.ratio : pts[n].ratio;
+                if (norm !== 0) {
+                    dx = dx / norm;
+                    dy = dy / norm;
+                }
+                pts[n].c1.x = this.isVertical(pts[n].control) ? pts[n].point.x : pts[n].point.x - dx * dx1 * ratio;
+                pts[n].c1.y = this.isFlat(pts[n].control) ? pts[n].point.y : pts[n].point.y - dy * dx1 * ratio;
+                pts[n].c2.x = this.isVertical(pts[n].control) ? pts[n].point.x : pts[n].point.x + dx * dx2 * ratio;
+                pts[n].c2.y = this.isFlat(pts[n].control) ? pts[n].point.y : pts[n].point.y + dy * dx2 * ratio;
+            }
+            // Go to the next point
+            n++;
+        }
     }
     generateName() {
         return super.generateName();
@@ -61,121 +145,73 @@ class Bezier extends Figure_1.Figure {
     isVertical(control) {
         return control === 'vertical' || control === "av";
     }
-    getCtrlPoint(p0, p1, p2, control, ratio) {
-        if (ratio === undefined) {
-            ratio = this._ratio;
-        }
-        if (control === undefined) {
-            control = "smooth";
-        }
-        if (p2 === null) {
-            // It's a starting point.
-            return {
-                x: this.isVertical(control) ? p0.x : p0.x + (p1.x - p0.x) * ratio,
-                y: this.isFlat(control) ? p0.y : p0.y + (p1.y - p0.y) * ratio,
-                px: p0.x,
-                py: p0.y
-            };
-        }
-        if (p0 === null) {
-            // It's an ending point
-            // Control point (p1) must use the symmetric version
-            // 2*p1 - p1x
-            return {
-                x: this.isVertical(control) ? p2.x : p2.x - (p2.x - (!(p1 instanceof Point_1.Point) ? 2 * p1.x - p1.px : 0)) * ratio,
-                y: this.isFlat(control) ? p2.y : p2.y - (p2.y - (!(p1 instanceof Point_1.Point) ? 2 * p1.y - p1.py : 0)) * ratio,
-                px: p2.x,
-                py: p2.y
-            };
-        }
-        // const dx = p2.x - p0.x,
-        //     dy = p2.y - p0.y,
-        //     n = Math.sqrt(dx * dx + dy * dy),
-        //     n1 = Math.sqrt((p1.x - p0.x) ** 2 + (p1.y - p0.y) ** 2),
-        //     n2 = Math.sqrt((p2.x - p1.x) ** 2 + (p2.y - p1.y) ** 2)
-        // return {
-        //     x: this.isVertical(control)?p1.x:p1.x - dx * ratio / n * Math.min(n1, n2),
-        //     y: this.isFlat(control)?p1.y:p1.y - dy * ratio / n * Math.min(n1, n2),
-        //     px: p1.x,
-        //     py: p1.y
-        // }
-        // Modify to use only the "x" dimension for sizing.
-        const d = Math.min(Math.abs(p1.x - p0.x), Math.abs(p2.x - p1.x));
-        return {
-            x: this.isVertical(control) ? p1.x : p1.x - d * ratio,
-            y: this.isFlat(control) ? p1.y : p1.y - d * ratio,
-            px: p1.x,
-            py: p1.y
-        };
-    }
     getCurve() {
-        let path = '', pts = this._points;
+        if (this._points.length <= 1) {
+            return "";
+        }
+        // Update the control points for each point.
+        this._updateControlPoints();
+        let path = `M${this._points[0].point.x},${this._points[0].point.y} C${this._points[0].c2.x},${this._points[0].c2.y} `;
+        for (let n = 1; n < this._points.length - 1; n++) {
+            path += `${this._points[n].c1.x},${this._points[n].c1.y} ${this._points[n].point.x},${this._points[n].point.y} C ${this._points[n].c2.x},${this._points[n].c2.y} `;
+        }
+        let n = this._points.length - 1;
+        path += `${this._points[n].c1.x},${this._points[n].c1.y} ${this._points[n].point.x},${this._points[n].point.y}`;
         // Initialize
-        if (pts.length === 0) {
-            return "";
-        }
-        if (pts.length === 1) {
-            return "";
-        }
-        if (pts.length === 2) {
-            if (this.isSmooth(pts[0].control) && this.isSmooth(pts[1].control)) {
-                // Two smooth point => it is a straight line.
-                return `M${pts[0].point.x},${pts[0].point.y} L${pts[1].point.x},${pts[1].point.y}`;
-            }
-            else {
-                // at least of of the two point is flat or vertical - make the control
-                let dx = pts[1].point.x - pts[0].point.x, dy = pts[1].point.y - pts[0].point.y, c1 = { x: pts[0].point.x, y: pts[0].point.y }, c2 = { x: pts[1].point.x, y: pts[1].point.y };
-                if (this.isFlat(pts[0].control)) {
-                    c1 = { x: pts[0].point.x + dx * this.ratio, y: pts[0].point.y };
-                }
-                else if (this.isVertical(pts[0].control)) {
-                    c1 = { x: pts[0].point.x, y: pts[0].point.y + dy * this.ratio };
-                }
-                if (this.isFlat(pts[1].control)) {
-                    c2 = { x: pts[1].point.x - dx * this.ratio, y: pts[1].point.y };
-                }
-                else if (this.isVertical(pts[1].control)) {
-                    c2 = { x: pts[1].point.x, y: pts[1].point.y - dy * this.ratio };
-                }
-                return `M${pts[0].point.x},${pts[0].point.y} C ${c1.x},${c1.y} ${c2.x},${c2.y} ${pts[1].point.x},${pts[1].point.y}`;
-            }
-        }
-        // Bezier curve
-        // Build the control points
-        let ctrlPoints = [], ratio = 0.3;
-        for (let i = 1; i < pts.length - 1; i++) {
-            ctrlPoints.push(this.getCtrlPoint(pts[i - 1].point, pts[i].point, pts[i + 1].point, pts[i].control, pts[i].ratio));
-        }
-        ctrlPoints.unshift(this.getCtrlPoint(pts[0].point, ctrlPoints[0], null, pts[0].control, pts[0].ratio));
-        ctrlPoints.push(this.getCtrlPoint(null, ctrlPoints[ctrlPoints.length - 1], pts[pts.length - 1].point, pts[pts.length - 1].control, pts[pts.length - 1].ratio));
-        // Starting point
-        path = `M${pts[0].point.x},${pts[0].point.y} `;
-        for (let i = 1; i < pts.length; i++) {
-            // Initialize the path
-            if (i === 1) {
-                // Add the control point
-                path += `C${ctrlPoints[i - 1].x},${ctrlPoints[i - 1].y} ${ctrlPoints[i].x},${ctrlPoints[i].y} ${pts[i].point.x},${pts[i].point.y}`;
-            }
-            else {
-                path += `S${ctrlPoints[i].x},${ctrlPoints[i].y}  ${pts[i].point.x},${pts[i].point.y}`;
-            }
-        }
         return path;
     }
     plot(values, speed) {
         // The update mechanism is frozen.
-        if (this.freeze || this.graph.freeze) {
+        if (this.freeze || this.graph.freeze)
             return this;
-        }
         // Generate the new values.
-        if (values !== undefined) {
+        if (values !== undefined)
             this.definePoints(values);
-        }
         this._path = this.getCurve();
         // Build the path.
         if (this.svg instanceof svg_js_1.Path) {
             // @ts-ignore
             this.svg.plot(this._path);
+        }
+        // Show the control points.
+        if (this._showControlPoints) {
+            this.graph.freeze = true;
+            let segments = [];
+            for (let pt of this._points) {
+                if (pt.c1 !== null) {
+                    if (pt.c1.point === undefined) {
+                        // Create the point
+                        pt.c1.point = this.graph.point(0, 0, `${pt.point.name}_c1`).asCircle();
+                        pt.c1.point.hideLabel();
+                        pt.c1.segment = this.graph.line(pt.c1.point, pt.point).asSegment();
+                    }
+                    pt.c1.point.x = pt.c1.x;
+                    pt.c1.point.y = pt.c1.y;
+                    segments.push(pt.c1.segment);
+                }
+                if (pt.c2 !== null) {
+                    if (pt.c2.point === undefined) {
+                        // Create the point
+                        pt.c2.point = this.graph.point(0, 0, `${pt.point.name}_c2`).asCircle();
+                        pt.c2.point.hideLabel();
+                        pt.c2.segment = this.graph.line(pt.c2.point, pt.point).asSegment();
+                    }
+                    pt.c2.point.x = pt.c2.x;
+                    pt.c2.point.y = pt.c2.y;
+                    segments.push(pt.c2.segment);
+                }
+            }
+            this.graph.freeze = false;
+            this._points.forEach(pt => {
+                if (pt.c1) {
+                    pt.c1.point.update();
+                    pt.c1.segment.update();
+                }
+                if (pt.c2) {
+                    pt.c2.point.update();
+                    pt.c2.segment.update();
+                }
+            });
         }
         return this;
     }
