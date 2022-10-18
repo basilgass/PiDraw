@@ -114,8 +114,8 @@ class Bezier extends Figure_1.Figure {
             else if (n === this._points.length - 1) {
                 // Last point
                 let dx = pts[n].point.x - pts[n - 1].point.x, dy = pts[n].point.y - pts[n - 1].point.y, ratio = pts[n].ratio === undefined ? this.ratio : pts[n].ratio;
-                pts[n].c1.x = this.isVertical(pts[n].control) ? pts[0].point.x : pts[n].point.x - dx * ratio / 2;
-                pts[n].c1.y = this.isFlat(pts[n].control) ? pts[0].point.y : pts[n].point.y - dy * ratio / 2;
+                pts[n].c1.x = this.isVertical(pts[n].control) ? pts[n].point.x : pts[n].point.x - dx * ratio / 2;
+                pts[n].c1.y = this.isFlat(pts[n].control) ? pts[n].point.y : pts[n].point.y - dy * ratio / 2;
             }
             else {
                 // Other point
