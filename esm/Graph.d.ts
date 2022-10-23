@@ -82,6 +82,7 @@ export declare class Graph {
      * @private
      */
     private _width;
+    private _texConverter;
     /**
      * Create the main graph canvas element
      * config: {origin: {x: number, y: number}, grid: {x: number, y: number, type: GRIDTYPE}}
@@ -99,6 +100,7 @@ export declare class Graph {
     get origin(): IPoint;
     set origin(value: IPoint);
     get pixelsPerUnit(): IPoint;
+    set pixelsPerUnit(value: IPoint);
     get figures(): Figure[];
     get points(): {
         [p: string]: Point;
@@ -118,6 +120,11 @@ export declare class Graph {
         min: number;
         max: number;
     };
+    set texConverter(value: {
+        toTex: Function;
+        options: {};
+    });
+    toTex(value: string): string;
     distanceToPixels(distance: number, direction?: AXIS): number;
     unitsToPixels(point: IPoint): IPoint;
     pixelsToUnits(point: IPoint): IPoint;

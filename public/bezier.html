@@ -26,37 +26,28 @@
     <script src="../dev/pidraw.js"></script>
 </head>
 <body>
-<div x-data="graphExample">
     <div id="root"></div>
-</div>
 <script>
-	function graphExample () {
-		let graph = new PiDraw('root')
-		graph.axis()
+    let graph = new PiDraw('root')
+    graph.axis()
 
-		graph.getFigure('MAINGRID')
+    graph.getFigure('MAINGRID')
 
-        let X1 = graph.point(1,4, "A").draggable(),
-            X2 = graph.point(3,8, "B").draggable(),
-            X3 = graph.point(5,2, "C").draggable(),
-            X4 = graph.point(7,8, "D").draggable(),
-            X5 = graph.point(11,8, "E").draggable(),
-            b = graph.bezier([
-                {point: X1, control: "av"},
-                {point: X2, control: "flat"},
-                {point: X3, control: "smooth"},
-                {point: X4, control: "flat", ratio: 0.5},
-                {point: X5, control: "av"},
-            ]).stroke({width: 3, color: "green"})
+    let X1 = graph.point(1,4, "A").draggable(),
+        X2 = graph.point(3,8, "B").draggable(),
+        X3 = graph.point(5,2, "C").draggable(),
+        X4 = graph.point(7,8, "D").draggable(),
+        X5 = graph.point(11,8, "E").draggable(),
+        b = graph.bezier([
+            {point: X1, control: "av"},
+            {point: X2, control: "flat"},
+            {point: X3, control: "smooth"},
+            {point: X4, control: "flat", ratio: 0.5},
+            {point: X5, control: "av"},
+        ]).stroke({width: 3, color: "green"})
 
-		return {
-			graph,
-			figures: graph.figures.map(x => x.name),
-			changePlot (name, plot) {
-				graph.getFigure(name).plot(plot, 200)
-			}
-		}
-	}
+    X3.label.addHtml(katex.renderToString('\\infty'))
+    X3.label.position('bc')
 </script>
 </body>
 </html>

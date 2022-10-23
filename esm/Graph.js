@@ -84,6 +84,7 @@ class Graph {
      * @private
      */
     _width;
+    _texConverter;
     /**
      * Create the main graph canvas element
      * config: {origin: {x: number, y: number}, grid: {x: number, y: number, type: GRIDTYPE}}
@@ -142,6 +143,12 @@ class Graph {
         this._layers.grids.add(g.svg);
         // Create the markers
         this._markers = this.createMarker(10);
+        // Initialize the ToTex converter.
+        // @ts-ignore
+        this.texConverter = {
+            toTex: null,
+            options: {}
+        };
     }
     get container() {
         return this._container;
@@ -163,6 +170,9 @@ class Graph {
     }
     get pixelsPerUnit() {
         return this._pixelsPerUnit;
+    }
+    set pixelsPerUnit(value) {
+        this._pixelsPerUnit = value;
     }
     get figures() {
         return this._figures;
@@ -193,6 +203,12 @@ class Graph {
             min: Math.round(-(this._height - this._origin.y) / this._pixelsPerUnit.y),
             max: Math.round(this._origin.y / this._pixelsPerUnit.y)
         };
+    }
+    set texConverter(value) {
+        this._texConverter = value;
+    }
+    toTex(value) {
+        return this._texConverter.toTex(value, this._texConverter.options);
     }
     distanceToPixels(distance, direction) {
         if (direction === undefined || direction === enums_1.AXIS.HORIZONTAL) {
@@ -335,7 +351,7 @@ class Graph {
         return this;
     }
     updateLayout(config, updateConstructions) {
-        let grid = this.getFigure('MAINGRID'), axisX = this.getFigure('Ox'), axisY = this.getFigure('Oy');
+        let grid = this.getFigure('MAINGRID');
         // This sets the origin and width
         this._initSetWidthAndHeight(config);
         this._svg.viewbox(0, 0, this._width, this._height);
@@ -349,14 +365,7 @@ class Graph {
                 axisY: this._pixelsPerUnit.y,
                 type: enums_1.GRIDTYPE.ORTHOGONAL
             };
-            // grid.update()
         }
-        // if(axisX instanceof Axis){
-        //     axisX.update()
-        // }
-        // if(axisY instanceof Axis){
-        //     axisY.update()
-        // }
         if (updateConstructions === true) {
             this.update();
         }

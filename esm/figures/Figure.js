@@ -92,6 +92,7 @@ class Figure {
         // Remove the label
         if (this.label) {
             this.label.svg.remove();
+            this.label.html.remove();
         }
         // Remove the svg
         this.svg.remove();
@@ -137,7 +138,6 @@ class Figure {
         if (typeof value === 'string') {
             value = { color: value, opacity: 1 };
         }
-        console.log(value);
         this.svg.stroke(value);
         this.svg.fill(value);
         return this;

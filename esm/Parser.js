@@ -7,13 +7,13 @@ const line_1 = require("pimath/esm/maths/geometry/line");
 const Point_1 = require("./figures/Point");
 const Axis_1 = require("./figures/Axis");
 class Parser {
-    _buildedSteps; // {'A(4,6)': ['A']} {step: [list of object names]}
     _construction;
     _graph;
     constructor(graph, construction) {
         this._graph = graph;
         this.update(construction);
     }
+    _buildedSteps; // {'A(4,6)': ['A']} {step: [list of object names]}
     get buildedSteps() {
         return this._buildedSteps;
     }
@@ -77,9 +77,9 @@ class Parser {
         // ppu=50                                   pixels per unit
         // grid/nogrid                              show / hide grid
         // axis/miniaxis/noaxes                     show full axes, min axes (one unit long), hide axis
-        // origin=bl/bc/br/ml/mc/mr/tl/tc/tr/mc     place the origin to top, bottom, middle, left, center or right
+        // unit=1:5                                 unit on x scale / y scale
         let values = parameters.split(',');
-        let xMin = -1, xMax = 10, yMin = -1, yMax = 10, ppu = null;
+        let xMin = -1, xMax = 10, yMin = -1, yMax = 10, ppu = null, xUnit = 1, yUnit = 1;
         for (let param of values) {
             if (param.includes('=')) {
                 let keyValue = param.split('=');
@@ -101,6 +101,18 @@ class Parser {
                         ppu = +keyValue[1];
                     }
                 }
+                else if (keyValue[0] === "unit") {
+                    if (keyValue[1].includes(':')) {
+                        xUnit = +keyValue[1].split(':')[0];
+                        yUnit = +keyValue[1].split(':')[1];
+                    }
+                    if (xUnit <= 0) {
+                        xUnit = 1;
+                    }
+                    if (yUnit <= 0) {
+                        yUnit = 1;
+                    }
+                }
             }
         }
         let pixelsPerUnitX = ppu !== null ? ppu : this._graph.width / (Math.max(xMin, xMax) - Math.min(xMin, xMax));
@@ -111,6 +123,13 @@ class Parser {
             yMax,
             pixelsPerUnit: pixelsPerUnitX
         }, false);
+        // Update the grid for different ppuX / ppuY
+        if (xUnit !== yUnit) {
+            this._graph.pixelsPerUnit = {
+                x: this._graph.pixelsPerUnit.x / xUnit,
+                y: this._graph.pixelsPerUnit.y / yUnit
+            };
+        }
         // Update the visibility.
         if (values.includes('grid')) {
             this._graph.getFigure('MAINGRID').update().show();
@@ -144,68 +163,6 @@ class Parser {
         }
         this.update(this._construction, true);
         return this;
-    }
-    _preprocess(step) {
-        let label = "", key = "", code = "", options = [], value = step + '';
-        // Remove the options.
-        if (value.includes('->')) {
-            let arr = value.split('->');
-            // The last item from the array is the option string
-            options = arr.pop().split(',');
-            // Rebuilt the value, without the option
-            value = arr.length > 1 ? arr.join('->') : arr[0];
-        }
-        // Get the label and the key - code
-        if (value.includes('=')) {
-            let arr = value.split('=');
-            // First item of the array concern the label
-            label = arr.shift();
-            // Rebuit the rest of the value string
-            value = arr.length > 1 ? arr.join('=') : arr[0];
-            // Get the key
-            arr = value.trim().split(' ');
-            if (arr.length === 1) {
-                // special case of line, segment, vector or plot
-                if (arr[0][0] === 'v') {
-                    key = 'v';
-                    code = arr[0].substring(1);
-                }
-                else if ([']', '['].includes(arr[0][0])) {
-                    key = 'line';
-                    code = arr[0];
-                }
-                else if (label.match(/^[a-zA-z_0-9]+\(x\)/g)) {
-                    label = label.split('(')[0];
-                    key = 'plot';
-                    code = arr[0];
-                }
-                else if (label.match(/^[a-zA-z_0-9]+\(t\)/g)) {
-                    label = label.split('(')[0];
-                    key = 'parametric';
-                    code = arr[0];
-                }
-                else {
-                    key = 'line';
-                    code = arr[0];
-                }
-            }
-            else {
-                key = arr.shift();
-                code = arr.join(' ');
-            }
-        }
-        else {
-            // special case of a point
-            label = value.split('(')[0];
-            key = 'pt';
-            code = value.substring(label.length);
-        }
-        return {
-            label,
-            key,
-            code,
-            options
-        };
     }
     generate(steps) {
         // get all current figures.
@@ -277,6 +234,68 @@ class Parser {
             this._buildedSteps.push(builded);
         }
     }
+    _preprocess(step) {
+        let label = "", key = "", code = "", options = [], value = step + '';
+        // Remove the options.
+        if (value.includes('->')) {
+            let arr = value.split('->');
+            // The last item from the array is the option string
+            options = arr.pop().split(',');
+            // Rebuilt the value, without the option
+            value = arr.length > 1 ? arr.join('->') : arr[0];
+        }
+        // Get the label and the key - code
+        if (value.includes('=')) {
+            let arr = value.split('=');
+            // First item of the array concern the label
+            label = arr.shift();
+            // Rebuit the rest of the value string
+            value = arr.length > 1 ? arr.join('=') : arr[0];
+            // Get the key
+            arr = value.trim().split(' ');
+            if (arr.length === 1) {
+                // special case of line, segment, vector or plot
+                if (arr[0][0] === 'v') {
+                    key = 'v';
+                    code = arr[0].substring(1);
+                }
+                else if ([']', '['].includes(arr[0][0])) {
+                    key = 'line';
+                    code = arr[0];
+                }
+                else if (label.match(/^[a-zA-z_0-9]+\(x\)/g)) {
+                    label = label.split('(')[0];
+                    key = 'plot';
+                    code = arr[0];
+                }
+                else if (label.match(/^[a-zA-z_0-9]+\(t\)/g)) {
+                    label = label.split('(')[0];
+                    key = 'parametric';
+                    code = arr[0];
+                }
+                else {
+                    key = 'line';
+                    code = arr[0];
+                }
+            }
+            else {
+                key = arr.shift();
+                code = arr.join(' ');
+            }
+        }
+        else {
+            // special case of a point
+            label = value.split('(')[0];
+            key = 'pt';
+            code = value.substring(label.length);
+        }
+        return {
+            label,
+            key,
+            code,
+            options
+        };
+    }
     _postprocess(builded, options) {
         if (options.length > 0) {
             options.forEach(elWithOptions => {
@@ -301,6 +320,9 @@ class Parser {
                     else if (el === 'dot') {
                         fig.dash(`2 ${this._graph.pixelsPerUnit.x / 4}`);
                     }
+                    else if (!isNaN(+el)) {
+                        fig.width(+el);
+                    }
                     else if (el === 'thick') {
                         fig.thick();
                     }
@@ -317,14 +339,46 @@ class Parser {
                         fig.label.hide();
                         fig.hide();
                     }
+                    else if (el.startsWith('#')) {
+                        // Label configuration
+                        // #name/position/x:y
+                        let [label, position, offset] = el.substring(1).split("/");
+                        // Setting display name
+                        if (label.startsWith('$')) {
+                            fig.label.addHtml(this._graph.toTex(label.substring(1)));
+                        }
+                        else {
+                            fig.label.displayName = label;
+                        }
+                        // Changing the default position
+                        if (position !== undefined && position !== "") {
+                            fig.label.position(position);
+                        }
+                        // Adding offsets
+                        if (offset !== undefined) {
+                            let x = +offset, y = options.length === 1 ? +options[0] : 0;
+                            if (!isNaN(x) && !isNaN(y)) {
+                                fig.label.offset({ x, y });
+                            }
+                        }
+                    }
                     else if (el === '?') {
                         fig.label.hide();
                     }
                     else if (el === '!') {
                         fig.hide();
                     }
+                    else if (el.startsWith('-')) {
+                        let [color, opacity] = el.substring(1).split('/');
+                        fig.stroke({ color, opacity: opacity === undefined ? 1 : +opacity });
+                    }
+                    else if (el.startsWith('_')) {
+                        let [color, opacity] = el.substring(1).split('/');
+                        fig.fill({ color, opacity: opacity === undefined ? 1 : +opacity });
+                    }
                     else {
-                        fig.color(el);
+                        let [color, opacity] = el.split('/');
+                        fig.color({ color, opacity: opacity === undefined ? 1 : +opacity });
                     }
                 });
             });
@@ -354,32 +408,6 @@ class Parser {
         if (match === undefined || match.length < 2)
             return figures;
         let x = +match[1], y = +match[2];
-        // Alternative way to handle the point.
-        // let match = [...step.matchAll(/^\((-?[0-9.A-Za-z]+),(-?[0-9.A-Za-z]+)\)/g)].shift(),
-        //     x: number, y: number, refPoint: string, axis: string,
-        //     coordY: string, coordX: string
-        //
-        // if (match === undefined || match.length < 2) {return figures}
-        // coordX = match[1]
-        // coordY = match[2]
-        //
-        // if(coordY===undefined)return figures
-        // if(isNaN(+coordX)){
-        //     // It's maybe a point like "A.x" or "A.y".
-        //     [refPoint, axis] = coordX.split('.')
-        //     let P:IPoint = this._graph.pixelsToUnits(this._graph.getPoint(refPoint))
-        //     x = axis==='x'?P.x:P.y;
-        // }else{
-        //     x = +coordX
-        // }
-        // if(isNaN(+coordY)){
-        //     // It's maybe a point like "A.x" or "A.y".
-        //     [refPoint, axis] = coordY.split('.')
-        //     let P:IPoint = this._graph.pixelsToUnits(this._graph.getPoint(refPoint))
-        //     y = axis==='x'?P.x:P.y;
-        // }else{
-        //     y = +coordY
-        // }
         // Everything should be fine now
         let label = showCoords ? `${name}(${x},${y})` : name;
         // The point already exists
