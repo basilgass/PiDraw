@@ -298,89 +298,97 @@ class Parser {
     }
     _postprocess(builded, options) {
         if (options.length > 0) {
+            // Reset the colors
+            builded.figures.forEach(fig => fig.stroke('black').fill('transparent'));
             options.forEach(elWithOptions => {
                 let options = elWithOptions.split(':'), el = options.shift();
-                builded.figures.forEach(fig => {
-                    if (el === 'drag' && fig instanceof Point_1.Point) {
-                        fig.draggable({
-                            grid: options.includes('grid') ? this._graph.getGrid() : null,
-                            constrain: options.map(opt => {
-                                if (['x', 'y', 'grid'].indexOf(opt) === -1) {
-                                    return this._graph.getFigure(opt);
+                if (el !== '') {
+                    builded.figures.forEach(fig => {
+                        if (el === 'drag' && fig instanceof Point_1.Point) {
+                            fig.draggable({
+                                grid: options.includes('grid') ? this._graph.getGrid() : null,
+                                constrain: options.map(opt => {
+                                    if (['x', 'y', 'grid'].indexOf(opt) === -1) {
+                                        return this._graph.getFigure(opt);
+                                    }
+                                    else {
+                                        return opt;
+                                    }
+                                })
+                            });
+                        }
+                        else if (el === 'dash') {
+                            fig.dash(this._graph.pixelsPerUnit.x / 4);
+                        }
+                        else if (el === 'dot') {
+                            fig.dash(`2 ${this._graph.pixelsPerUnit.x / 4}`);
+                        }
+                        else if (!isNaN(+el)) {
+                            console.log('change width to zero.');
+                            fig.width(+el);
+                        }
+                        else if (el === 'thick') {
+                            fig.thick();
+                        }
+                        else if (el === 'thin') {
+                            fig.thin();
+                        }
+                        else if (el === 'ultrathick') {
+                            fig.ultrathick();
+                        }
+                        else if (el === 'ultrathin') {
+                            fig.ultrathin();
+                        }
+                        else if (el === 'hide') {
+                            fig.label.hide();
+                            fig.hide();
+                        }
+                        else if (el.startsWith('#')) {
+                            // Label configuration
+                            // #name/position/x:y
+                            let [label, position, offset] = el.substring(1).split("/");
+                            // Setting display name
+                            if (label.startsWith('$')) {
+                                fig.label.addHtml(this._graph.toTex(label.substring(1)));
+                            }
+                            else {
+                                fig.label.displayName = label;
+                            }
+                            // Changing the default position
+                            if (position !== undefined && position !== "") {
+                                fig.label.position(position);
+                            }
+                            // Adding offsets
+                            if (offset !== undefined) {
+                                let x = +offset, y = options.length === 1 ? +options[0] : 0;
+                                if (!isNaN(x) && !isNaN(y)) {
+                                    fig.label.offset({ x, y });
                                 }
-                                else {
-                                    return opt;
-                                }
-                            })
-                        });
-                    }
-                    else if (el === 'dash') {
-                        fig.dash(this._graph.pixelsPerUnit.x / 4);
-                    }
-                    else if (el === 'dot') {
-                        fig.dash(`2 ${this._graph.pixelsPerUnit.x / 4}`);
-                    }
-                    else if (!isNaN(+el)) {
-                        fig.width(+el);
-                    }
-                    else if (el === 'thick') {
-                        fig.thick();
-                    }
-                    else if (el === 'thin') {
-                        fig.thin();
-                    }
-                    else if (el === 'ultrathick') {
-                        fig.ultrathick();
-                    }
-                    else if (el === 'ultrathin') {
-                        fig.ultrathin();
-                    }
-                    else if (el === 'hide') {
-                        fig.label.hide();
-                        fig.hide();
-                    }
-                    else if (el.startsWith('#')) {
-                        // Label configuration
-                        // #name/position/x:y
-                        let [label, position, offset] = el.substring(1).split("/");
-                        // Setting display name
-                        if (label.startsWith('$')) {
-                            fig.label.addHtml(this._graph.toTex(label.substring(1)));
-                        }
-                        else {
-                            fig.label.displayName = label;
-                        }
-                        // Changing the default position
-                        if (position !== undefined && position !== "") {
-                            fig.label.position(position);
-                        }
-                        // Adding offsets
-                        if (offset !== undefined) {
-                            let x = +offset, y = options.length === 1 ? +options[0] : 0;
-                            if (!isNaN(x) && !isNaN(y)) {
-                                fig.label.offset({ x, y });
                             }
                         }
-                    }
-                    else if (el === '?') {
-                        fig.label.hide();
-                    }
-                    else if (el === '!') {
-                        fig.hide();
-                    }
-                    else if (el.startsWith('-')) {
-                        let [color, opacity] = el.substring(1).split('/');
-                        fig.stroke({ color, opacity: opacity === undefined ? 1 : +opacity });
-                    }
-                    else if (el.startsWith('_')) {
-                        let [color, opacity] = el.substring(1).split('/');
-                        fig.fill({ color, opacity: opacity === undefined ? 1 : +opacity });
-                    }
-                    else {
-                        let [color, opacity] = el.split('/');
-                        fig.color({ color, opacity: opacity === undefined ? 1 : +opacity });
-                    }
-                });
+                        else if (el === '?') {
+                            fig.label.hide();
+                        }
+                        else if (el === '!') {
+                            fig.hide();
+                        }
+                        else if (el.startsWith('-')) {
+                            // fill color
+                            let [color, opacity] = el.substring(1).split('/');
+                            fig.fill({ color, opacity: opacity === undefined ? 1 : +opacity });
+                        }
+                        else if (el.startsWith('_')) {
+                            // fill and stroke color
+                            let [color, opacity] = el.substring(1).split('/');
+                            fig.color({ color, opacity: opacity === undefined ? 1 : +opacity });
+                        }
+                        else {
+                            let [color, opacity] = el.split('/');
+                            // stroke
+                            fig.stroke({ color, opacity: opacity === undefined ? 1 : +opacity });
+                        }
+                    });
+                }
             });
         }
     }

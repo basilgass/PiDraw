@@ -143,7 +143,12 @@ class Figure {
         return this;
     }
     stroke(value) {
-        this.svg.stroke(value);
+        if (typeof value === "string") {
+            this.svg.stroke({ color: value, opacity: 1 });
+        }
+        else {
+            this.svg.stroke(value);
+        }
         return this;
     }
     fill(value) {

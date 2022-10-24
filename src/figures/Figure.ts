@@ -181,8 +181,12 @@ export class Figure {
         return this
     }
 
-    stroke(value: { width?: number, color?: string, opacity?: number }): Figure {
-        this.svg.stroke(value)
+    stroke(value: { width?: number, color?: string, opacity?: number }|string): Figure {
+        if(typeof value === "string"){
+            this.svg.stroke({color: value, opacity: 1})
+        }else {
+            this.svg.stroke(value)
+        }
         return this
     }
 
