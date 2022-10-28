@@ -733,7 +733,8 @@ export class Parser {
         // PLot the function
         figures = [this._graph.plot(fx, {
             samples,
-            domain
+            domain,
+            animate: false
         }, name)]
 
         return figures
@@ -758,7 +759,8 @@ export class Parser {
                 domain: {
                     min: Math.min(a, b),
                     max: Math.max(a, b)
-                }
+                },
+                animate: false
             })
         ]
         return figures
