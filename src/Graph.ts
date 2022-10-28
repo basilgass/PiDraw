@@ -91,6 +91,8 @@ export class Graph {
      */
     private _width: number;
 
+    private _texConverter: {toTex: Function, options: {}};
+
     /**
      * Create the main graph canvas element
      * config: {origin: {x: number, y: number}, grid: {x: number, y: number, type: GRIDTYPE}}
@@ -160,6 +162,14 @@ export class Graph {
 
         // Create the markers
         this._markers = this.createMarker(10)
+
+        // Initialize the ToTex converter.
+
+        // @ts-ignore
+        this.texConverter = {
+            toTex: null,
+            options: {}
+        }
     }
 
     get container(): HTMLElement {
@@ -190,6 +200,10 @@ export class Graph {
         return this._pixelsPerUnit;
     }
 
+    set pixelsPerUnit(value:IPoint ) {
+        this._pixelsPerUnit = value
+    }
+
     get figures(): Figure[] {
         return this._figures;
     }
@@ -200,6 +214,10 @@ export class Graph {
 
     get freeze(): boolean {
         return this._freeze;
+    }
+
+    set freeze(value: boolean) {
+        this._freeze = value;
     }
 
     get layers(): ILayers {
@@ -222,6 +240,15 @@ export class Graph {
             min: Math.round(-(this._height - this._origin.y) / this._pixelsPerUnit.y),
             max: Math.round(this._origin.y / this._pixelsPerUnit.y)
         }
+    }
+
+
+    set texConverter(value: { toTex: Function; options: {} }) {
+        this._texConverter = value;
+    }
+
+    toTex(value: string): string {
+        return this._texConverter.toTex(value, this._texConverter.options)
     }
 
     distanceToPixels(distance: number, direction?: AXIS): number {
@@ -444,31 +471,24 @@ export class Graph {
     }
 
     updateLayout(config: GraphConfig, updateConstructions?: boolean): Graph {
-        let grid = this.getFigure('MAINGRID'),
-            axisX = this.getFigure('Ox'),
-            axisY = this.getFigure('Oy')
+        let grid = this.getFigure('MAINGRID')
 
         // This sets the origin and width
         this._initSetWidthAndHeight(config)
         this._svg.viewbox(0, 0, this._width, this._height)
+
         if (grid instanceof Grid) {
             if (isDrawConfigUnitMinMax(config)) {
                 this._pixelsPerUnit.x = config.pixelsPerUnit
                 this._pixelsPerUnit.y = config.pixelsPerUnit
             }
+
             grid.config = {
                 axisX: this._pixelsPerUnit.x,
                 axisY: this._pixelsPerUnit.y,
                 type: GRIDTYPE.ORTHOGONAL
             }
-            // grid.update()
         }
-        // if(axisX instanceof Axis){
-        //     axisX.update()
-        // }
-        // if(axisY instanceof Axis){
-        //     axisY.update()
-        // }
 
         if (updateConstructions === true) {
             this.update()

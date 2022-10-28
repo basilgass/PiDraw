@@ -5,10 +5,10 @@ declare type BuildStep = {
     figures: Figure[];
 };
 export declare class Parser {
-    private _buildedSteps;
     private _construction;
     private _graph;
     constructor(graph: Graph, construction: string);
+    private _buildedSteps;
     get buildedSteps(): BuildStep[];
     /**
      * Update the graph using a new construction string.
@@ -17,8 +17,8 @@ export declare class Parser {
      */
     update(construction: string, refresh?: boolean): void;
     updateLayout(parameters: string): Parser;
-    private _preprocess;
     generate(steps: string[]): void;
+    private _preprocess;
     private _postprocess;
     /**
      * Parse the main input string and sanitize it.

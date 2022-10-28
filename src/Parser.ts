@@ -5,13 +5,11 @@ import {Plot} from "./figures/Plot";
 import {Line as mathLine} from "pimath/esm/maths/geometry/line"
 import {Point} from "./figures/Point";
 import {Axis} from "./figures/Axis";
-import {Bezier} from "./figures/Bezier";
-import {IPoint} from "./variables/interfaces";
+import {Grid} from "./figures/Grid";
 
 type BuildStep = { step: string, figures: Figure[] }
 
 export class Parser {
-    private _buildedSteps: BuildStep[] // {'A(4,6)': ['A']} {step: [list of object names]}
     private _construction: string
     private _graph: Graph
 
@@ -19,6 +17,8 @@ export class Parser {
         this._graph = graph
         this.update(construction)
     }
+
+    private _buildedSteps: BuildStep[] // {'A(4,6)': ['A']} {step: [list of object names]}
 
     get buildedSteps(): BuildStep[] {
         return this._buildedSteps;
@@ -61,16 +61,16 @@ export class Parser {
                 // Actually, updating works only for plot
                 // TODO: handle multiple element to be updated...
                 let updateResult = false
-                if(currentStepProcess.key===prevStepProcess.key &&
-                    currentStepProcess.label===prevStepProcess.label &&
+                if (currentStepProcess.key === prevStepProcess.key &&
+                    currentStepProcess.label === prevStepProcess.label &&
                     currentStepProcess.key === 'plot'
-                ){
+                ) {
                     this._buildedSteps[i].step = steps[i]
                     updateResult = this._updatePlot(this._buildedSteps[i], currentStepProcess.code)
                     this._postprocess(this._buildedSteps[i], currentStepProcess.options)
                 }
 
-                if(!updateResult){
+                if (!updateResult) {
                     // Not the same step ! Everything after this must be removed from the graph!
                     for (let j = +i; j < this._buildedSteps.length; j++) {
                         if (this._buildedSteps[j].figures === undefined) {
@@ -97,34 +97,46 @@ export class Parser {
         // ppu=50                                   pixels per unit
         // grid/nogrid                              show / hide grid
         // axis/miniaxis/noaxes                     show full axes, min axes (one unit long), hide axis
-        // origin=bl/bc/br/ml/mc/mr/tl/tc/tr/mc     place the origin to top, bottom, middle, left, center or right
+        // unit=1:5                                 unit on x scale / y scale
         let values = parameters.split(',')
 
-        let xMin = -1, xMax = 10, yMin = -1, yMax = 10, ppu = null
+        let xMin = -1, xMax = 10, yMin = -1, yMax = 10, ppu = null, xUnit = 1, yUnit = 1
 
-        for(let param of values){
-            if(param.includes('=')){
+        for (let param of values) {
+            if (param.includes('=')) {
                 let keyValue = param.split('=')
-                if(keyValue[0]==='x'){
-                    if(keyValue[1].includes(':')){
+                if (keyValue[0] === 'x') {
+                    if (keyValue[1].includes(':')) {
                         xMin = +keyValue[1].split(':')[0]
                         xMax = +keyValue[1].split(':')[1]
                     }
-                }else if(keyValue[0]==='y'){
-                    if(keyValue[1].includes(':')){
+                } else if (keyValue[0] === 'y') {
+                    if (keyValue[1].includes(':')) {
                         yMin = +keyValue[1].split(':')[0]
                         yMax = +keyValue[1].split(':')[1]
                     }
-                }else if(keyValue[0]==='ppu'){
+                } else if (keyValue[0] === 'ppu') {
                     let value = +keyValue[1]
-                    if(!isNaN(value) && value>0){
+                    if (!isNaN(value) && value > 0) {
                         ppu = +keyValue[1]
+                    }
+                } else if (keyValue[0] === "unit") {
+                    if (keyValue[1].includes(':')) {
+                        xUnit = +keyValue[1].split(':')[0]
+                        yUnit = +keyValue[1].split(':')[1]
+                    }
+
+                    if (xUnit <= 0) {
+                        xUnit = 1
+                    }
+                    if (yUnit <= 0) {
+                        yUnit = 1
                     }
                 }
             }
         }
 
-        let pixelsPerUnitX = ppu!==null?ppu:this._graph.width / (Math.max(xMin, xMax) - Math.min(xMin, xMax))
+        let pixelsPerUnitX = ppu !== null ? ppu : this._graph.width / (Math.max(xMin, xMax) - Math.min(xMin, xMax))
 
         this._graph.updateLayout({
             xMin,
@@ -134,102 +146,49 @@ export class Parser {
             pixelsPerUnit: pixelsPerUnitX
         }, false)
 
+        // Update the grid for different ppuX / ppuY
+        if(xUnit!==yUnit){
+            this._graph.pixelsPerUnit = {
+                x: this._graph.pixelsPerUnit.x/xUnit,
+                y: this._graph.pixelsPerUnit.y/yUnit
+            }
+        }
+
+
         // Update the visibility.
-        if(values.includes('grid')){
+        if (values.includes('grid')) {
             this._graph.getFigure('MAINGRID').update().show()
-        }else{
+        } else {
             this._graph.getFigure('MAINGRID').hide()
         }
 
-        if(values.includes('axis')) {
+        if (values.includes('axis')) {
             let axis = this._graph.getFigure('Ox')
-            if(axis instanceof Axis) {
+            if (axis instanceof Axis) {
                 axis.setMinAxis(false).update().show()
             }
             axis = this._graph.getFigure('Oy')
 
-            if(axis instanceof Axis) {
+            if (axis instanceof Axis) {
                 axis.setMinAxis(false).update().show()
             }
-        }else if(values.includes('minaxis')){
+        } else if (values.includes('minaxis')) {
             let axis = this._graph.getFigure('Ox')
-            if(axis instanceof Axis) {
+            if (axis instanceof Axis) {
                 axis.setMinAxis(true).update().show()
             }
             axis = this._graph.getFigure('Oy')
 
-            if(axis instanceof Axis) {
+            if (axis instanceof Axis) {
                 axis.setMinAxis(true).update().show()
             }
-        }else{
+        } else {
             this._graph.getFigure('Ox').hide()
             this._graph.getFigure('Oy').hide()
         }
 
         this.update(this._construction, true)
         return this
-    }
-
-    private _preprocess(step: string): { label: string, key: string, code: string, options: string[] } {
-        let label = "", key = "", code = "", options: string[] = [],
-            value = step + ''
-
-        // Remove the options.
-        if (value.includes('->')) {
-            let arr = value.split('->')
-            // The last item from the array is the option string
-            options = arr.pop().split(',')
-            // Rebuilt the value, without the option
-            value = arr.length > 1 ? arr.join('->') : arr[0];
-        }
-
-        // Get the label and the key - code
-        if (value.includes('=')) {
-            let arr = value.split('=')
-            // First item of the array concern the label
-            label = arr.shift()
-
-            // Rebuit the rest of the value string
-            value = arr.length > 1 ? arr.join('=') : arr[0];
-
-            // Get the key
-            arr = value.trim().split(' ')
-            if (arr.length === 1) {
-                // special case of line, segment, vector or plot
-                if (arr[0][0] === 'v') {
-                    key = 'v'
-                    code = arr[0].substring(1)
-                } else if ([']', '['].includes(arr[0][0])) {
-                    key = 'line'
-                    code = arr[0]
-                } else if (label.match(/^[a-zA-z_0-9]+\(x\)/g)) {
-                    label = label.split('(')[0]
-                    key = 'plot'
-                    code = arr[0]
-                } else if (label.match(/^[a-zA-z_0-9]+\(t\)/g)) {
-                    label = label.split('(')[0]
-                    key = 'parametric'
-                    code = arr[0]
-                } else {
-                    key = 'line'
-                    code = arr[0]
-                }
-            } else {
-                key = arr.shift()
-                code = arr.join(' ')
-            }
-        } else {
-            // special case of a point
-            label = value.split('(')[0]
-            key = 'pt'
-            code = value.substring(label.length)
-        }
-        return {
-            label,
-            key,
-            code,
-            options
-        }
     }
 
     generate(steps: string[]) {
@@ -310,47 +269,155 @@ export class Parser {
         }
     }
 
-    private _postprocess(builded:BuildStep, options:string[]){
+    private _preprocess(step: string): { label: string, key: string, code: string, options: string[] } {
+        let label = "", key = "", code = "", options: string[] = [],
+            value = step + ''
+
+        // Remove the options.
+        if (value.includes('->')) {
+            let arr = value.split('->')
+            // The last item from the array is the option string
+            options = arr.pop().split(',')
+            // Rebuilt the value, without the option
+            value = arr.length > 1 ? arr.join('->') : arr[0];
+        }
+
+        // Get the label and the key - code
+        if (value.includes('=')) {
+            let arr = value.split('=')
+            // First item of the array concern the label
+            label = arr.shift()
+
+            // Rebuit the rest of the value string
+            value = arr.length > 1 ? arr.join('=') : arr[0];
+
+            // Get the key
+            arr = value.trim().split(' ')
+            if (arr.length === 1) {
+                // special case of line, segment, vector or plot
+                if (arr[0][0] === 'v') {
+                    key = 'v'
+                    code = arr[0].substring(1)
+                } else if ([']', '['].includes(arr[0][0])) {
+                    key = 'line'
+                    code = arr[0]
+                } else if (label.match(/^[a-zA-z_0-9]+\(x\)/g)) {
+                    label = label.split('(')[0]
+                    key = 'plot'
+                    code = arr[0]
+                } else if (label.match(/^[a-zA-z_0-9]+\(t\)/g)) {
+                    label = label.split('(')[0]
+                    key = 'parametric'
+                    code = arr[0]
+                } else {
+                    key = 'line'
+                    code = arr[0]
+                }
+            } else {
+                key = arr.shift()
+                code = arr.join(' ')
+            }
+        } else {
+            // special case of a point
+            label = value.split('(')[0]
+            key = 'pt'
+            code = value.substring(label.length)
+        }
+        return {
+            label,
+            key,
+            code,
+            options
+        }
+    }
+
+    private _postprocess(builded: BuildStep, options: string[]) {
         if (options.length > 0) {
+            // Reset the colors
+            builded.figures.forEach(fig => fig.stroke('black').fill('transparent'))
+
             options.forEach(elWithOptions => {
                 let options = elWithOptions.split(':'),
                     el = options.shift()
 
-                builded.figures.forEach(fig => {
-                    if (el === 'drag' && fig instanceof Point) {
-                        fig.draggable({
-                            grid: options.includes('grid')?this._graph.getGrid():null,
-                            constrain: options.map(opt=>{
-                                if(['x', 'y', 'grid'].indexOf(opt)===-1){
-                                    return this._graph.getFigure(opt)
-                                }else{
-                                    return opt
-                                }
+                if(el!=='') {
+                    builded.figures.forEach(fig => {
+                        if (el === 'drag' && fig instanceof Point) {
+                            fig.draggable({
+                                grid: options.includes('grid') ? this._graph.getGrid() : null,
+                                constrain: options.map(opt => {
+                                    if (['x', 'y', 'grid'].indexOf(opt) === -1) {
+                                        return this._graph.getFigure(opt)
+                                    } else {
+                                        return opt
+                                    }
+                                })
                             })
-                        })
-                    } else if (el === 'dash') {
-                        fig.dash(this._graph.pixelsPerUnit.x / 4)
-                    } else if (el ==='dot') {
-                        fig.dash(`2 ${this._graph.pixelsPerUnit.x / 4}`)
-                    } else if (el === 'thick') {
-                        fig.thick()
-                    } else if (el === 'thin') {
-                        fig.thin()
-                    } else if (el === 'ultrathick') {
-                        fig.ultrathick()
-                    } else if (el === 'ultrathin') {
-                        fig.ultrathin()
-                    } else if (el ==='hide'){
-                        fig.label.hide()
-                        fig.hide()
-                    } else if (el === '?' ){
-                        fig.label.hide()
-                    } else if (el === '!' ){
-                        fig.hide()
-                    } else {
-                        fig.color(el)
-                    }
-                })
+                        } else if (el === 'dash') {
+                            fig.dash(this._graph.pixelsPerUnit.x / 4)
+                        } else if (el === 'dot') {
+                            fig.dash(`2 ${this._graph.pixelsPerUnit.x / 4}`)
+                        } else if (!isNaN(+el)) {
+                            console.log('change width to zero.')
+                            fig.width(+el)
+                        } else if (el === 'thick') {
+                            fig.thick()
+                        } else if (el === 'thin') {
+                            fig.thin()
+                        } else if (el === 'ultrathick') {
+                            fig.ultrathick()
+                        } else if (el === 'ultrathin') {
+                            fig.ultrathin()
+                        } else if (el === 'hide') {
+                            fig.label.hide()
+                            fig.hide()
+                        } else if (el.startsWith('#')) {
+                            // Label configuration
+                            // #name/position/x:y
+                            let [label, position, offset] = el.substring(1).split("/")
+
+                            // Setting display name
+                            if (label.startsWith('$')) {
+                                fig.label.addHtml(this._graph.toTex(label.substring(1)))
+                            } else {
+                                fig.label.displayName = label
+                            }
+
+                            // Changing the default position
+                            if (position !== undefined && position !== "") {
+                                fig.label.position(position)
+                            }
+
+                            // Adding offsets
+                            if (offset !== undefined) {
+                                let x = +offset,
+                                    y = options.length === 1 ? +options[0] : 0
+
+                                if (!isNaN(x) && !isNaN(y)) {
+                                    fig.label.offset({x, y})
+                                }
+                            }
+
+
+                        } else if (el === '?') {
+                            fig.label.hide()
+                        } else if (el === '!') {
+                            fig.hide()
+                        } else if (el.startsWith('-')) {
+                            // fill color
+                            let [color, opacity] = el.substring(1).split('/')
+                            fig.fill({color, opacity: opacity === undefined ? 1 : +opacity})
+                        } else if (el.startsWith('_')) {
+                            // fill and stroke color
+                            let [color, opacity] = el.substring(1).split('/')
+                            fig.color({color, opacity: opacity === undefined ? 1 : +opacity})
+                        } else {
+                            let [color, opacity] = el.split('/')
+                            // stroke
+                            fig.stroke({color, opacity: opacity === undefined ? 1 : +opacity})
+                        }
+                    })
+                }
             })
 
         }
@@ -385,33 +452,6 @@ export class Parser {
         if (match === undefined || match.length < 2) return figures
         let x = +match[1],
             y = +match[2]
-
-            // Alternative way to handle the point.
-        // let match = [...step.matchAll(/^\((-?[0-9.A-Za-z]+),(-?[0-9.A-Za-z]+)\)/g)].shift(),
-        //     x: number, y: number, refPoint: string, axis: string,
-        //     coordY: string, coordX: string
-        //
-        // if (match === undefined || match.length < 2) {return figures}
-        // coordX = match[1]
-        // coordY = match[2]
-        //
-        // if(coordY===undefined)return figures
-        // if(isNaN(+coordX)){
-        //     // It's maybe a point like "A.x" or "A.y".
-        //     [refPoint, axis] = coordX.split('.')
-        //     let P:IPoint = this._graph.pixelsToUnits(this._graph.getPoint(refPoint))
-        //     x = axis==='x'?P.x:P.y;
-        // }else{
-        //     x = +coordX
-        // }
-        // if(isNaN(+coordY)){
-        //     // It's maybe a point like "A.x" or "A.y".
-        //     [refPoint, axis] = coordY.split('.')
-        //     let P:IPoint = this._graph.pixelsToUnits(this._graph.getPoint(refPoint))
-        //     y = axis==='x'?P.x:P.y;
-        // }else{
-        //     y = +coordY
-        // }
 
         // Everything should be fine now
         let label = showCoords ? `${name}(${x},${y})` : name
@@ -495,21 +535,21 @@ export class Parser {
                 figures = [
                     A,
                     this._graph.line(A, null, {
-                        rule: LINECONSTRUCTION.SLOPE,
-                        value: equ.slope.display
-                    },
+                            rule: LINECONSTRUCTION.SLOPE,
+                            value: equ.slope.display
+                        },
                         name)
                 ]
-            }else if (equ.equation.variables.includes('y')){
+            } else if (equ.equation.variables.includes('y')) {
                 // HORIZONTAL LINE
                 let A = this._graph.point(0, equ.getValueAtX(0).value)
                 A.hide().label.hide()
                 figures = [
                     A,
                     this._graph.line(A, null, {
-                        rule: LINECONSTRUCTION.SLOPE,
-                        value: equ.slope.display
-                    },
+                            rule: LINECONSTRUCTION.SLOPE,
+                            value: equ.slope.display
+                        },
                         name)
                 ]
             } else {
@@ -528,8 +568,8 @@ export class Parser {
 
         } else {
             // Must check if it's a segment or not.
-            let segmentStart = step[0]==='[',
-                segmentEnd = step[step.length-1]===']'
+            let segmentStart = step[0] === '[',
+                segmentEnd = step[step.length - 1] === ']'
 
             return this._generateLineThroughTwoPoints(name, step, segmentStart, segmentEnd)
         }
@@ -544,7 +584,7 @@ export class Parser {
 
         if (match) {
             let A = this._graph.getPoint(match[1]),
-                to = ['Ox', 'Oy'].indexOf(match[2])===-1?this._graph.getFigure(match[2]):match[2],
+                to = ['Ox', 'Oy'].indexOf(match[2]) === -1 ? this._graph.getFigure(match[2]) : match[2],
                 pt
 
             if (to instanceof Line || typeof to === 'string') {
@@ -636,7 +676,7 @@ export class Parser {
             let A = this._graph.getPoint(match[0][1]),
                 O = this._graph.getPoint(match[0][2]),
                 B = this._graph.getPoint(match[0][3]),
-                radius = match[0][4]===undefined?undefined:+match[0][4]
+                radius = match[0][4] === undefined ? undefined : +match[0][4]
 
             figures = [this._graph.arc(A, O, B, this._graph.distanceToPixels(radius), name)]
         }
@@ -644,11 +684,11 @@ export class Parser {
     }
 
     private _updatePlot(BStep: BuildStep, fx: string): boolean {
-        if(BStep.figures.length>0 && BStep.figures[0] instanceof Plot){
+        if (BStep.figures.length > 0 && BStep.figures[0] instanceof Plot) {
             // Modify the plot.
             BStep.figures[0].plot(fx, 100)
             return true
-        }else{
+        } else {
             return false
         }
     }
@@ -665,9 +705,9 @@ export class Parser {
             samples: number,
             sampleMatch = step.match(/@([0-9]+)/)
 
-        if(sampleMatch){
+        if (sampleMatch) {
             samples = +sampleMatch[1]
-        }else{
+        } else {
             samples = 100
         }
 
@@ -693,7 +733,8 @@ export class Parser {
         // PLot the function
         figures = [this._graph.plot(fx, {
             samples,
-            domain
+            domain,
+            animate: false
         }, name)]
 
         return figures
@@ -703,12 +744,14 @@ export class Parser {
         let figures: Figure[],
             data = step.split(',')
 
-        if(data.length<3){return []}
+        if (data.length < 3) {
+            return []
+        }
 
         let fx = data[0],
             fy = data[1],
-            a = !isNaN(+data[2])?+data[2]:0,
-            b = !isNaN(+data[3])?+data[3]:2*Math.PI
+            a = !isNaN(+data[2]) ? +data[2] : 0,
+            b = !isNaN(+data[3]) ? +data[3] : 2 * Math.PI
 
         figures = [
             this._graph.parametric(fx, fy, {
@@ -716,7 +759,8 @@ export class Parser {
                 domain: {
                     min: Math.min(a, b),
                     max: Math.max(a, b)
-                }
+                },
+                animate: false
             })
         ]
         return figures
@@ -753,10 +797,10 @@ export class Parser {
         return figures
     }
 
-    private _generateBezier(name: string, step: string){
+    private _generateBezier(name: string, step: string) {
         let figures: Figure[] = [],
-            match:string,
-            points:string[] = []
+            match: string,
+            points: string[] = []
 
         let bezier = this._graph.bezier(step.split(','))
 

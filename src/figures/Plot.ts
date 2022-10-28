@@ -9,7 +9,8 @@ import {NumExp} from "pimath/esm/maths/expressions/numexp";
 
 export interface PlotConfig {
     domain: { min: number, max: number },
-    samples: number
+    samples: number,
+    animate: boolean
 }
 
 export class Plot extends Figure {
@@ -24,7 +25,8 @@ export class Plot extends Figure {
 
         this._config = {
             samples: 20,
-            domain: this.graph.unitXDomain
+            domain: this.graph.unitXDomain,
+            animate: false
         }
 
         if (config !== undefined) {
@@ -95,12 +97,14 @@ export class Plot extends Figure {
 
                 let L = this.svg.node.getTotalLength() * 2
 
-                this.svg.attr({
-                    'stroke-dasharray': L + ' ' + L,
-                    'stroke-dashoffset': L
-                }).show().animate(1000).attr({
-                    'stroke-dashoffset': 0
-                })
+                if(this._config.animate) {
+                    this.svg.attr({
+                        'stroke-dasharray': L + ' ' + L,
+                        'stroke-dashoffset': L
+                    }).show().animate(1000).attr({
+                        'stroke-dashoffset': 0
+                    })
+                }
             }
         }
 

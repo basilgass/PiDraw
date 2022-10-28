@@ -169,7 +169,6 @@ export class Point extends Figure {
     }
 
     updateLabel(): Point {
-
         return this
     }
 

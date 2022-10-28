@@ -63,7 +63,7 @@ export declare class Figure {
         width?: number;
         color?: string;
         opacity?: number;
-    }): Figure;
+    } | string): Figure;
     fill(value: {
         color: string;
         opacity?: number;

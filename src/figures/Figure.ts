@@ -97,6 +97,7 @@ export class Figure {
         if (this._freeze || this._graph.freeze) {
             return
         }
+
         this.updateFigure()
         if (this._label) {
             this._label.update()
@@ -117,6 +118,7 @@ export class Figure {
         // Remove the label
         if (this.label) {
             this.label.svg.remove()
+            this.label.html.remove()
         }
         // Remove the svg
         this.svg.remove()
@@ -174,14 +176,17 @@ export class Figure {
             value = {color: value, opacity: 1}
         }
 
-        console.log(value)
         this.svg.stroke(value)
         this.svg.fill(value)
         return this
     }
 
-    stroke(value: { width?: number, color?: string, opacity?: number }): Figure {
-        this.svg.stroke(value)
+    stroke(value: { width?: number, color?: string, opacity?: number }|string): Figure {
+        if(typeof value === "string"){
+            this.svg.stroke({color: value, opacity: 1})
+        }else {
+            this.svg.stroke(value)
+        }
         return this
     }
 

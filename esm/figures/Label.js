@@ -9,13 +9,56 @@ var LABELPOS;
 (function (LABELPOS) {
     LABELPOS["LEFT"] = "left";
     LABELPOS["RIGHT"] = "right";
-    LABELPOS["CENTER"] = "cener";
+    LABELPOS["CENTER"] = "center";
     LABELPOS["TOP"] = "top";
     LABELPOS["BOTTOM"] = "bottom";
     LABELPOS["MIDDLE"] = "middle";
 })(LABELPOS = exports.LABELPOS || (exports.LABELPOS = {}));
 class Label extends Figure_1.Figure {
     _config;
+    constructor(graph, name, config) {
+        super(graph, name);
+        // default configuration
+        this._config = {
+            el: null,
+            position: {
+                horizontal: LABELPOS.RIGHT,
+                vertical: LABELPOS.BOTTOM
+            },
+            offset: { x: 0, y: 0 }
+        };
+        this._config = Object.assign({}, this._config, config);
+        this.generateName();
+        // Create the text object.
+        this.svg = this.graph.svg.text(this._config.el.name).font({ 'anchor': 'middle' });
+        this.graph.layers.foreground.add(this.svg);
+        // How to handle dimension efficiently ?
+        this._html = this.graph.svg.foreignObject(1, 1);
+        this._html.attr('style', "overflow:visible");
+        this.graph.layers.foreground.add(this._html);
+        this.isHtml = false;
+        // Update the label text and position
+        this.updateFigure();
+    }
+    _isHtml;
+    get isHtml() {
+        return this._isHtml;
+    }
+    set isHtml(value) {
+        this._isHtml = value;
+        if (this._isHtml) {
+            this.svg.hide();
+            this.html.show();
+        }
+        else {
+            this.svg.show();
+            this.html.hide();
+        }
+    }
+    _html;
+    get html() {
+        return this._html;
+    }
     get displayName() {
         return this._config.name === undefined ? this.name : this._config.name;
     }
@@ -23,23 +66,40 @@ class Label extends Figure_1.Figure {
         this._config.name = value;
         this.updateFigure();
     }
-    constructor(graph, name, config) {
-        super(graph, name);
-        this.generateName();
-        // default configuration
-        this._config = {
-            el: null,
-            position: {
-                horizontal: LABELPOS.RIGHT,
-                vertical: LABELPOS.BOTTOM
-            }
-        };
-        this._config = Object.assign({}, this._config, config);
-        // Create the text object.
-        this.svg = this.graph.svg.text(this._config.el.name).font({ 'anchor': 'middle' });
-        this.graph.layers.foreground.add(this.svg);
-        // Update the label text and position
+    addHtml(value) {
+        this.html.children().forEach(child => child.remove());
+        // @ts-ignore
+        this.html.add((0, svg_js_1.SVG)(value, true));
+        this.isHtml = true;
         this.updateFigure();
+        return this;
+    }
+    offset(value) {
+        this._config.offset = value;
+        this.updateFigure();
+        return this;
+    }
+    position(value) {
+        if (value.includes('l')) {
+            this._config.position.horizontal = LABELPOS.LEFT;
+        }
+        if (value.includes('c')) {
+            this._config.position.horizontal = LABELPOS.CENTER;
+        }
+        if (value.includes('r')) {
+            this._config.position.horizontal = LABELPOS.RIGHT;
+        }
+        if (value.includes('t')) {
+            this._config.position.vertical = LABELPOS.TOP;
+        }
+        if (value.includes('m')) {
+            this._config.position.vertical = LABELPOS.MIDDLE;
+        }
+        if (value.includes('b')) {
+            this._config.position.vertical = LABELPOS.BOTTOM;
+        }
+        this.updateFigure();
+        return this;
     }
     center() {
         this._config.position.horizontal = LABELPOS.CENTER;
@@ -67,18 +127,27 @@ class Label extends Figure_1.Figure {
         if (this.svg instanceof svg_js_1.Text) {
             this.svg.text(this.displayName);
         }
+        // Get the default position
         if (this._config.el instanceof Point_1.Point) {
             x = this._config.el.x;
             y = this._config.el.y;
         }
         else if (this._config.el instanceof Line_1.Line) {
-            //TODO: set the label for a line
+            //TODO: set the label for a line or a segment.
         }
         // Label position relative to the current (x,y) coordinate
-        if (this.svg instanceof svg_js_1.Text) {
-            w = this.svg.length();
+        if (this.isHtml) {
+            w = this._html.node.children[0].getClientRects()[0].width;
+            h = this._html.node.children[0].getClientRects()[0].height;
+            this.html.width(w);
+            this.html.height(h);
         }
-        h = this._config.el.svg.bbox().h;
+        else {
+            if (this.svg instanceof svg_js_1.Text) {
+                w = this.svg.length();
+            }
+            h = this._config.el.svg.bbox().h;
+        }
         if (this._config.position) {
             if (this._config.position.horizontal === LABELPOS.LEFT) {
                 x = x - w / 2;
@@ -99,7 +168,12 @@ class Label extends Figure_1.Figure {
                 y = y + h / 2;
             }
         }
-        this.svg.center(x, y);
+        if (this.isHtml) {
+            this.html.center(x + this._config.offset.x, y - this._config.offset.y);
+        }
+        else {
+            this.svg.center(x + this._config.offset.x, y - this._config.offset.y);
+        }
         return this;
     }
 }
