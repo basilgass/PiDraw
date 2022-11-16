@@ -603,7 +603,7 @@ class Parser {
         // Analyse the value.
         // Domain of the function
         if (step.includes(':')) {
-            let domainMatch = step.match(/([0-9.]+):([0-9.])/);
+            let domainMatch = step.match(/(-?[0-9.]+):(-?[0-9.]+)/);
             console.log(domainMatch);
             if (domainMatch) {
                 domain.min = +domainMatch[1];
