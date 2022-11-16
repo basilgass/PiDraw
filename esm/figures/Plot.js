@@ -17,14 +17,18 @@ class Plot extends Figure_1.Figure {
         super(graph, name);
         this._config = {
             samples: 20,
-            domain: this.graph.unitXDomain
+            domain: this.graph.unitXDomain,
+            animate: false
         };
         if (config !== undefined) {
             this._config = Object.assign({}, this._config, config);
         }
         this.generateName();
         this._precision = 2;
-        this.svg = this.graph.svg.path().fill('none').stroke({ color: 'black', width: 2 });
+        this.svg = this.graph.svg
+            .path()
+            .fill('none')
+            .stroke({ color: 'black', width: 2 });
         this.plot(fn);
         this._plugins = [];
     }
@@ -72,14 +76,19 @@ class Plot extends Figure_1.Figure {
                 }
             }
             else {
-                this.svg.hide().plot(d);
-                let L = this.svg.node.getTotalLength() * 2;
-                this.svg.attr({
-                    'stroke-dasharray': L + ' ' + L,
-                    'stroke-dashoffset': L
-                }).show().animate(1000).attr({
-                    'stroke-dashoffset': 0
-                });
+                if (this._config.animate) {
+                    this.svg.hide().plot(d);
+                    let L = this.svg.node.getTotalLength() * 2;
+                    this.svg.attr({
+                        'stroke-dasharray': L + ' ' + L,
+                        'stroke-dashoffset': L
+                    }).show().animate(1000).attr({
+                        'stroke-dashoffset': 0
+                    });
+                }
+                else {
+                    this.svg.plot(d);
+                }
             }
         }
         // Update the plugins.
@@ -124,7 +133,6 @@ class Plot extends Figure_1.Figure {
         return { x, y };
     }
     _parse(fn) {
-        // TODO : must calculate differently
         if (typeof fn === 'string') {
             this._rawFx = fn;
             return new numexp_1.NumExp(fn);

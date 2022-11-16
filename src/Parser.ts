@@ -50,9 +50,9 @@ export class Parser {
         let i
         for (i = 0; i < this._buildedSteps.length; i++) {
             // Go through each already built steps.
+
             // It must be the same than the current one, in this order !
             if (this._buildedSteps[i].step !== steps[i]) {
-
                 // Maybe it's the same object and it just needs to be updated !
                 // This means that every beyond must be modified.
                 const currentStepProcess = this._preprocess(steps[i]),
@@ -61,14 +61,14 @@ export class Parser {
                 // Actually, updating works only for plot
                 // TODO: handle multiple element to be updated...
                 let updateResult = false
-                if (currentStepProcess.key === prevStepProcess.key &&
-                    currentStepProcess.label === prevStepProcess.label &&
-                    currentStepProcess.key === 'plot'
-                ) {
-                    this._buildedSteps[i].step = steps[i]
-                    updateResult = this._updatePlot(this._buildedSteps[i], currentStepProcess.code)
-                    this._postprocess(this._buildedSteps[i], currentStepProcess.options)
-                }
+                // if (currentStepProcess.key === prevStepProcess.key &&
+                //     currentStepProcess.label === prevStepProcess.label &&
+                //     currentStepProcess.key === 'plot'
+                // ) {
+                //     this._buildedSteps[i].step = steps[i]
+                //     updateResult = this._updatePlot(this._buildedSteps[i], currentStepProcess.code)
+                //     this._postprocess(this._buildedSteps[i], currentStepProcess.options)
+                // }
 
                 if (!updateResult) {
                     // Not the same step ! Everything after this must be removed from the graph!
@@ -698,8 +698,6 @@ export class Parser {
 
         // TODO: rework sample/domain/
         // f=plot func,min:max,@500
-
-
         let domain = this._graph.unitXDomain,
             fx = step.split(',')[0].split('@')[0],
             samples: number,
@@ -714,7 +712,14 @@ export class Parser {
         // Analyse the value.
 
         // Domain of the function
-        if (step.includes(',')) {
+        if (step.includes(':')) {
+            let domainMatch = step.match(/([0-9.]+):([0-9.])/)
+            console.log(domainMatch)
+
+            if(domainMatch){
+                domain.min = +domainMatch[1]
+                domain.max = +domainMatch[2]
+            }
             let values = step.split(',')
 
             if (values.length >= 3) {

@@ -18,7 +18,8 @@ class Parametric extends Figure_1.Figure {
             domain: {
                 min: 0,
                 max: 2 * Math.PI
-            }
+            },
+            animate: false
         };
         if (config !== undefined) {
             this._config = Object.assign({}, this._config, config);

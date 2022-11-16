@@ -47,13 +47,14 @@ class Parser {
                 // Actually, updating works only for plot
                 // TODO: handle multiple element to be updated...
                 let updateResult = false;
-                if (currentStepProcess.key === prevStepProcess.key &&
-                    currentStepProcess.label === prevStepProcess.label &&
-                    currentStepProcess.key === 'plot') {
-                    this._buildedSteps[i].step = steps[i];
-                    updateResult = this._updatePlot(this._buildedSteps[i], currentStepProcess.code);
-                    this._postprocess(this._buildedSteps[i], currentStepProcess.options);
-                }
+                // if (currentStepProcess.key === prevStepProcess.key &&
+                //     currentStepProcess.label === prevStepProcess.label &&
+                //     currentStepProcess.key === 'plot'
+                // ) {
+                //     this._buildedSteps[i].step = steps[i]
+                //     updateResult = this._updatePlot(this._buildedSteps[i], currentStepProcess.code)
+                //     this._postprocess(this._buildedSteps[i], currentStepProcess.options)
+                // }
                 if (!updateResult) {
                     // Not the same step ! Everything after this must be removed from the graph!
                     for (let j = +i; j < this._buildedSteps.length; j++) {
@@ -601,7 +602,13 @@ class Parser {
         }
         // Analyse the value.
         // Domain of the function
-        if (step.includes(',')) {
+        if (step.includes(':')) {
+            let domainMatch = step.match(/([0-9.]+):([0-9.])/);
+            console.log(domainMatch);
+            if (domainMatch) {
+                domain.min = +domainMatch[1];
+                domain.max = +domainMatch[2];
+            }
             let values = step.split(',');
             if (values.length >= 3) {
                 let x = +values[1], y = +values[2];
@@ -616,7 +623,8 @@ class Parser {
         // PLot the function
         figures = [this._graph.plot(fx, {
                 samples,
-                domain
+                domain,
+                animate: false
             }, name)];
         return figures;
     }
@@ -632,7 +640,8 @@ class Parser {
                 domain: {
                     min: Math.min(a, b),
                     max: Math.max(a, b)
-                }
+                },
+                animate: false
             })
         ];
         return figures;

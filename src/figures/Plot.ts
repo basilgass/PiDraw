@@ -36,7 +36,10 @@ export class Plot extends Figure {
         this.generateName()
         this._precision = 2
 
-        this.svg = this.graph.svg.path().fill('none').stroke({color: 'black', width: 2});
+        this.svg = this.graph.svg
+            .path()
+            .fill('none')
+            .stroke({color: 'black', width: 2});
         this.plot(fn);
 
         this._plugins = []
@@ -93,17 +96,20 @@ export class Plot extends Figure {
                     this.svg.animate(speed === undefined ? 100 : speed).plot(d)
                 }
             } else {
-                this.svg.hide().plot(d)
-
-                let L = this.svg.node.getTotalLength() * 2
 
                 if(this._config.animate) {
+                    this.svg.hide().plot(d)
+
+                    let L = this.svg.node.getTotalLength() * 2
+
                     this.svg.attr({
                         'stroke-dasharray': L + ' ' + L,
                         'stroke-dashoffset': L
                     }).show().animate(1000).attr({
                         'stroke-dashoffset': 0
                     })
+                }else{
+                    this.svg.plot(d)
                 }
             }
         }
@@ -161,7 +167,6 @@ export class Plot extends Figure {
     }
 
     private _parse(fn: Function | string): Function | NumExp {
-        // TODO : must calculate differently
         if (typeof fn === 'string') {
             this._rawFx = fn
             return new NumExp(fn)

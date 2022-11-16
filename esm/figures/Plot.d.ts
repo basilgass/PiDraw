@@ -11,6 +11,7 @@ export interface PlotConfig {
         max: number;
     };
     samples: number;
+    animate: boolean;
 }
 export declare class Plot extends Figure {
     private _config;

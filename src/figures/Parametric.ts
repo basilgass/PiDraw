@@ -22,7 +22,8 @@ export class Parametric extends Figure {
             domain: {
                 min: 0,
                 max: 2 * Math.PI
-            }
+            },
+            animate: false
         }
 
         if (config !== undefined) {
