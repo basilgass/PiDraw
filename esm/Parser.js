@@ -325,7 +325,6 @@ class Parser {
                             fig.dash(`2 ${this._graph.pixelsPerUnit.x / 4}`);
                         }
                         else if (!isNaN(+el)) {
-                            console.log('change width to zero.');
                             fig.width(+el);
                         }
                         else if (el === 'thick') {
@@ -591,41 +590,37 @@ class Parser {
     }
     _generatePlot(name, step) {
         let figures;
-        // TODO: rework sample/domain/
-        // f=plot func,min:max,@500
-        let domain = this._graph.unitXDomain, fx = step.split(',')[0].split('@')[0], samples, sampleMatch = step.match(/@([0-9]+)/);
+        //TODO: plot with follow does not work !
+        // f=plot func,min:max,@500,follow
+        let domain = this._graph.unitXDomain, config = step.split(','), fx = config.shift(), 
+        // fx = step.split(',')[0],//.split('@')[0],
+        samples, sampleMatch = step.match(/@([0-9]+)/);
         if (sampleMatch) {
             samples = +sampleMatch[1];
         }
         else {
             samples = 100;
         }
-        // Analyse the value.
         // Domain of the function
         if (step.includes(':')) {
             let domainMatch = step.match(/(-?[0-9.]+):(-?[0-9.]+)/);
-            console.log(domainMatch);
             if (domainMatch) {
                 domain.min = +domainMatch[1];
                 domain.max = +domainMatch[2];
             }
-            let values = step.split(',');
-            if (values.length >= 3) {
-                let x = +values[1], y = +values[2];
-                if (!isNaN(x) && !isNaN(y)) {
-                    domain.min = x;
-                    domain.max = y;
-                }
-            }
-            fx = values[0];
+        }
+        let plot = this._graph.plot(fx, {
+            samples,
+            domain,
+            animate: false
+        }, name);
+        // Must follow ?
+        if (config.includes('follow')) {
+            plot.follow(true);
         }
         // Plottings
         // PLot the function
-        figures = [this._graph.plot(fx, {
-                samples,
-                domain,
-                animate: false
-            }, name)];
+        figures = [plot];
         return figures;
     }
     _generateParametricPlot(name, step) {
