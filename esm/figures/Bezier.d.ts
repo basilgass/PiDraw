@@ -2,7 +2,7 @@ import { Figure } from "./Figure";
 import { Graph } from "../Graph";
 import { Point } from "./Point";
 import { Line } from "./Line";
-export declare type BezierPoint = {
+export type BezierPoint = {
     point: Point;
     control: string;
     ratio: number;

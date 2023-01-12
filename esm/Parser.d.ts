@@ -1,6 +1,6 @@
 import { Graph } from "./Graph";
 import { Figure } from "./figures/Figure";
-declare type BuildStep = {
+type BuildStep = {
     step: string;
     figures: Figure[];
 };

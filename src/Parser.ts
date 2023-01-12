@@ -511,13 +511,13 @@ export class Parser {
     private _generateLine(name: string, step: string): Figure[] {
         let figures: Figure[]
 
+        console.log(name, step)
         if (step.includes(',')) {
             // type is      d = line A,3/4      Point through and slope
             let pointSlope = step.split(',')
 
             // Get another point
             let A = this._graph.getPoint(pointSlope[0])
-
             // Get the figures.
             figures = [this._graph.line(A, null, {
                 rule: LINECONSTRUCTION.SLOPE,
@@ -527,10 +527,17 @@ export class Parser {
             // type is      d = line 3x-2y=0    From equation
             let equ = new mathLine(step)
 
+            console.log('MATHLINE')
+            console.log(equ.equation.variables.includes('y'), equ.equation.variables.includes('x'))
             if (equ.equation.variables.includes('y') && equ.equation.variables.includes('x')) {
                 // Get the point
+                console.log('GET A POINT')
+                console.log(equ.getValueAtX(0))
                 let A = this._graph.point(0, equ.getValueAtX(0).value)
+                console.log(A.tex)
                 A.hide().label.hide()
+                console.log(equ.tex)
+                console.log(equ.slope.display)
                 figures = [
                     A,
                     this._graph.line(A, null, {
