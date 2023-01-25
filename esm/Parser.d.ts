@@ -32,6 +32,7 @@ export declare class Parser {
     private _generateLineThroughTwoPoints;
     private _generateLine;
     private _generateProjectionPoint;
+    private _generatePointFromVector;
     private _generateMidPoint;
     private _generatePerpendicular;
     private _generateParallel;

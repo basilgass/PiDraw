@@ -6,6 +6,7 @@ import {Line as mathLine} from "pimath/esm/maths/geometry/line"
 import {Point} from "./figures/Point";
 import {Axis} from "./figures/Axis";
 import {Grid} from "./figures/Grid";
+import {Vector} from "pimath/esm/maths/geometry/vector";
 
 type BuildStep = { step: string, figures: Figure[] }
 
@@ -223,6 +224,9 @@ export class Parser {
                 case 'mid':
                     builded.figures = this._generateMidPoint(label, code)
                     break
+                case 'vpt':
+                    builded.figures = this._generatePointFromVector(label, code)
+                    break
                 case 'proj':
                     builded.figures = this._generateProjectionPoint(label, code)
                     break
@@ -288,7 +292,7 @@ export class Parser {
             // First item of the array concern the label
             label = arr.shift()
 
-            // Rebuit the rest of the value string
+            // Rebuid the rest of the value string
             value = arr.length > 1 ? arr.join('=') : arr[0];
 
             // Get the key
@@ -484,7 +488,18 @@ export class Parser {
             let A = this._graph.getPoint(match[0][1]),
                 B = this._graph.getPoint(match[0][2])
 
-            figures = [this._graph.line(A, B, null, name).asVector()]
+            let vectorOptions = step.split(',')
+            vectorOptions.shift()
+
+            let k = 1
+            for(let opt of vectorOptions){
+                if(opt.startsWith('*')){
+                    k = +opt.substring(1)
+                    if(isNaN(k)){k = 1}
+                }
+            }
+
+            figures = [this._graph.line(A, B, null, name).asVector(true, k)]
         }
 
         return figures
@@ -597,6 +612,22 @@ export class Parser {
         return figures
     }
 
+    private _generatePointFromVector(name: string, step: string): Figure[] {
+        let match = [...step.matchAll(/^([0-9.]+)\*?([A-Z]_?[0-9]?)([A-Z]_?[0-9]?)/g)],
+            figures: Figure[]
+
+        if (match.length > 0) {
+            let A = this._graph.getPoint(match[0][2]),
+                B = this._graph.getPoint(match[0][3]),
+                k = match[0][1],
+                pt = this._graph.point(0,0, name).fromVector(A, B, +k)
+            pt.asCircle().svg.fill('black')
+            // pt.label.displayName = name
+            figures = [pt]
+        }
+
+        return figures
+    }
     private _generateMidPoint(name: string, step: string): Figure[] {
         let match = [...step.matchAll(/^([A-Z]_?[0-9]?)([A-Z]_?[0-9]?)/g)],
             figures: Figure[]

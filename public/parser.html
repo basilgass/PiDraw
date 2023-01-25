@@ -54,6 +54,10 @@
                     <td class="font-thin">milieu de A et B</td>
                 </tr>
                 <tr>
+                    <td class="font-mono">P=vpt k*AB</td>
+                    <td class="font-thin">point construit par un vecteur de A et B, multiplié par k</td>
+                </tr>
+                <tr>
                     <td class="font-mono">P=proj A,d|Ox|Oy</td>
                     <td class="font-thin">projection de A sur la droite d ou sur l'axe Ox ou Oy</td>
                 </tr>
@@ -78,8 +82,8 @@
                     <td class="font-thin">demi droite AB, ouverte en B</td>
                 </tr>
                 <tr>
-                    <td class="font-mono">a=vAB</td>
-                    <td class="font-thin">vecteur AB</td>
+                    <td class="font-mono">a=vAB,*k</td>
+                    <td class="font-thin">vecteur AB, multiplié par k</td>
                 </tr>
                 <tr>
                     <td class="font-mono">p=perp d,A</td>
@@ -134,10 +138,14 @@ p1=perp d,B
 p2=para d,C
 c=circ B,2
 f(x)=sin(x)`,
-            construct = `A(8,3)->drag
+            construct3 = `A(8,3)->drag
 B=proj A,Ox
 d=line 3x-4y+5=0
-C=proj A,d`
+C=proj A,d`,
+            construct = `A(0,0)
+B(3,2)->drag:grid
+C=mid AB
+D=vpt 3*AB`
 
         let parser = graph.parse(construct),
             parameters = 'grid,axis,x=-3:15,y=-4:17'

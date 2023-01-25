@@ -187,6 +187,14 @@ export class Point extends Figure {
         return this
     }
 
+    fromVector(A: Point, B: Point, scale: number): Point {
+        this._constrain = {
+            type: POINTCONSTRAIN.VECTOR,
+            data: [A,B, scale]
+        }
+        this.update()
+        return this
+    }
     /**
      * Constrain the point to be bound to an axis or projection
      * @param A: Point
@@ -357,6 +365,15 @@ export class Point extends Figure {
                 this._x = A.x + k * u.x.value
                 this._y = A.y + k * u.y.value
             }
+        }
+
+        if(this._constrain.type === POINTCONSTRAIN.VECTOR) {
+            const A: Point = this._constrain.data[0],
+                B: Point = this._constrain.data[1],
+                scale: number = this._constrain.data[2]
+
+            this._x = A.x + (B.x-A.x)*scale
+            this._y = A.y + (B.y-A.y)*scale
         }
     }
 }

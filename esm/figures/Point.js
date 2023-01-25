@@ -148,6 +148,14 @@ class Point extends Figure_1.Figure {
         this.update();
         return this;
     }
+    fromVector(A, B, scale) {
+        this._constrain = {
+            type: enums_1.POINTCONSTRAIN.VECTOR,
+            data: [A, B, scale]
+        };
+        this.update();
+        return this;
+    }
     /**
      * Constrain the point to be bound to an axis or projection
      * @param A: Point
@@ -287,6 +295,11 @@ class Point extends Figure_1.Figure {
                 this._x = A.x + k * u.x.value;
                 this._y = A.y + k * u.y.value;
             }
+        }
+        if (this._constrain.type === enums_1.POINTCONSTRAIN.VECTOR) {
+            const A = this._constrain.data[0], B = this._constrain.data[1], scale = this._constrain.data[2];
+            this._x = A.x + (B.x - A.x) * scale;
+            this._y = A.y + (B.y - A.y) * scale;
         }
     }
 }

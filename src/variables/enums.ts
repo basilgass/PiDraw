@@ -47,7 +47,8 @@ export enum POINTCONSTRAIN {
     FREE,
     MIDDLE,
     FIXED,
-    PROJECTION
+    PROJECTION,
+    VECTOR
 }
 
 /**

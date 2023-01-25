@@ -22,6 +22,7 @@ export declare class Line extends Figure {
     private _segment;
     private _segmentEnd;
     private _segmentStart;
+    private _scale;
     constructor(graph: Graph, name: string, A: Point, B: Point, construction?: LineConfig);
     get tex(): string;
     get display(): {
@@ -45,8 +46,10 @@ export declare class Line extends Figure {
     set segmentStart(value: boolean);
     get segmentEnd(): boolean;
     set segmentEnd(value: boolean);
-    asSegment(value?: boolean): Line;
-    asVector(value?: boolean): Line;
+    asSegment(value?: boolean, scale?: number): Line;
+    asVector(value?: boolean, scale?: number): Line;
+    get scale(): number;
+    set scale(value: number);
     generateName(): string;
     updateFigure(): Line;
     private _updateLineThroughAandB;

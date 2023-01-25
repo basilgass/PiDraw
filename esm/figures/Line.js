@@ -22,10 +22,12 @@ class Line extends Figure_1.Figure {
     _segment;
     _segmentEnd;
     _segmentStart;
+    _scale;
     constructor(graph, name, A, B, construction) {
         super(graph, name);
         this._A = A;
         this._B = B;
+        this._scale = 1;
         this.generateName();
         // Construction
         if (construction) {
@@ -112,17 +114,30 @@ class Line extends Figure_1.Figure {
         this._segmentEnd = value;
         this.update();
     }
-    asSegment(value) {
+    asSegment(value, scale) {
+        if (scale !== undefined) {
+            this.scale = scale;
+        }
         this.segment = value === undefined || value;
         return this;
     }
-    asVector(value) {
+    asVector(value, scale) {
         this.segment = value === undefined || value;
+        if (scale !== undefined) {
+            this.scale = scale;
+        }
+        // TODO: remove the end marker
         if (this.svg instanceof svg_js_1.Line) {
             this.svg.marker('end', this.graph.markers.end);
         }
         this.update();
         return this;
+    }
+    get scale() {
+        return this._scale;
+    }
+    set scale(value) {
+        this._scale = value;
     }
     generateName() {
         if (this.name === undefined) {
@@ -149,7 +164,7 @@ class Line extends Figure_1.Figure {
         if (this._math.slope.isInfinity()) {
             if (this.svg instanceof svg_js_1.Line) {
                 if (this._segmentStart === this._segmentEnd) {
-                    this.svg.plot(this._A.x, this._segmentStart ? this._A.y : 0, this._A.x, this.segmentEnd ? this._B.y : this.graph.height);
+                    this.svg.plot(this._A.x, this._segmentStart ? this._A.y : 0, this._A.x, this.segmentEnd ? this._B.y + (this._B.y - this._A.y) * (this.scale - 1) : this.graph.height);
                 }
                 else {
                     if (this._segmentStart) {
@@ -165,7 +180,7 @@ class Line extends Figure_1.Figure {
             let x1, x2;
             if (this._segmentStart === this._segmentEnd) {
                 x1 = this._segmentStart ? this._A.x : 0;
-                x2 = this._segmentEnd ? this._B.x : this.graph.width;
+                x2 = this._segmentEnd ? this._B.x + (this._B.x - this._A.x) * (this.scale - 1) : this.graph.width;
             }
             else {
                 if (this._segmentStart) {
