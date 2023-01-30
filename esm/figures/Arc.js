@@ -11,7 +11,6 @@ class Arc extends Figure_1.Figure {
     _radius;
     _radiusReference;
     constructor(graph, name, center, start, stop, radius) {
-        // TODO : build the arc class
         super(graph, name);
         // Points that describe the arc
         this._center = center;
@@ -68,7 +67,6 @@ class Arc extends Figure_1.Figure {
         this.update();
     }
     get getRadius() {
-        // TODO: Must handle dynamic radius
         if (this._radiusReference !== null) {
             return this._center.getDistanceTo(this._radiusReference);
         }
@@ -189,6 +187,17 @@ class Arc extends Figure_1.Figure {
             p = p.concat(['L', center.x, center.y, 'L', start.x, start.y]);
         }
         return p.join(" ");
+    }
+    angleDirection(enable) {
+        if (this.svg instanceof svg_js_1.Path) {
+            if (enable) {
+                this.svg.marker('end', this.graph.markers.end);
+            }
+            else {
+                this.svg.marker('end', null);
+            }
+        }
+        return this;
     }
 }
 exports.Arc = Arc;

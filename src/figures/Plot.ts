@@ -257,7 +257,7 @@ export class Plot extends Figure {
     public remove(){
         // Remove all plugins.
         for(let P of this._plugins){
-            P.remove()
+            P.clean()
         }
 
         super.remove()

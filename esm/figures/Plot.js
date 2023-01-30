@@ -202,7 +202,7 @@ class Plot extends Figure_1.Figure {
     remove() {
         // Remove all plugins.
         for (let P of this._plugins) {
-            P.remove();
+            P.clean();
         }
         super.remove();
     }

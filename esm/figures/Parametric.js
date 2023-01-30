@@ -31,7 +31,6 @@ class Parametric extends Figure_1.Figure {
         this._plugins = [];
     }
     generateName() {
-        // TODO: Maybe the generated name should be more robust.
         if (this.name === undefined) {
             let n = this.graph.figures.filter(fig => fig instanceof Parametric).length, idx = Math.trunc(n / 5);
             this.name = 'fghij'[n % 5] + (idx >= 1 ? idx : '');
@@ -113,7 +112,6 @@ class Parametric extends Figure_1.Figure {
         super.remove();
     }
     _parse(fn) {
-        // TODO : must calculate differently
         if (typeof fn === 'string') {
             return new numexp_1.NumExp(fn);
         }

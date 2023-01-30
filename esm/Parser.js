@@ -4,16 +4,18 @@ exports.Parser = void 0;
 const Line_1 = require("./figures/Line");
 const Plot_1 = require("./figures/Plot");
 const line_1 = require("pimath/esm/maths/geometry/line");
+const svg_js_1 = require("@svgdotjs/svg.js");
 const Point_1 = require("./figures/Point");
 const Axis_1 = require("./figures/Axis");
+const svg_js_2 = require("@svgdotjs/svg.js");
 class Parser {
+    _buildedSteps; // {'A(4,6)': ['A']} {step: [list of object names]}
     _construction;
     _graph;
     constructor(graph, construction) {
         this._graph = graph;
         this.update(construction);
     }
-    _buildedSteps; // {'A(4,6)': ['A']} {step: [list of object names]}
     get buildedSteps() {
         return this._buildedSteps;
     }
@@ -44,17 +46,7 @@ class Parser {
                 // Maybe it's the same object and it just needs to be updated !
                 // This means that every beyond must be modified.
                 const currentStepProcess = this._preprocess(steps[i]), prevStepProcess = this._preprocess(this._buildedSteps[i].step);
-                // Actually, updating works only for plot
-                // TODO: handle multiple element to be updated...
                 let updateResult = false;
-                // if (currentStepProcess.key === prevStepProcess.key &&
-                //     currentStepProcess.label === prevStepProcess.label &&
-                //     currentStepProcess.key === 'plot'
-                // ) {
-                //     this._buildedSteps[i].step = steps[i]
-                //     updateResult = this._updatePlot(this._buildedSteps[i], currentStepProcess.code)
-                //     this._postprocess(this._buildedSteps[i], currentStepProcess.options)
-                // }
                 if (!updateResult) {
                     // Not the same step ! Everything after this must be removed from the graph!
                     for (let j = +i; j < this._buildedSteps.length; j++) {
@@ -346,6 +338,27 @@ class Parser {
                             fig.label.hide();
                             fig.hide();
                         }
+                        else if (el.startsWith('mark')) {
+                            if (options.length === 0) {
+                                options = ["start", "mid", "end"];
+                            }
+                            if ((fig.svg instanceof svg_js_2.Path) || (fig.svg instanceof svg_js_1.Line)) {
+                                for (let pos of options) {
+                                    switch (pos) {
+                                        case "start":
+                                            fig.svg.marker(pos, this._graph.markers.start);
+                                            break;
+                                        case "end":
+                                            fig.svg.marker(pos, this._graph.markers.end);
+                                            break;
+                                        case "mid":
+                                            // TODO : handle mid marker ?
+                                            // fig.svg.marker(pos, this._graph.markers.mid)
+                                            break;
+                                    }
+                                }
+                            }
+                        }
                         else if (el.startsWith('#')) {
                             // Label configuration
                             // #name/position/x:y
@@ -368,6 +381,9 @@ class Parser {
                                     fig.label.offset({ x, y });
                                 }
                             }
+                        }
+                        else if (el === 'label') {
+                            fig.label.show();
                         }
                         else if (el === '?') {
                             fig.label.hide();
@@ -453,7 +469,8 @@ class Parser {
                     }
                 }
             }
-            figures = [this._graph.line(A, B, null, name).asVector(true, k)];
+            let v = this._graph.line(A, B, null, name).asVector(true, k);
+            figures = [v];
         }
         return figures;
     }
@@ -595,10 +612,16 @@ class Parser {
         return figures;
     }
     _generateArc(name, step) {
-        let match = [...step.matchAll(/^([A-Z]_?[0-9]?),([A-Z]_?[0-9]?),([A-Z]_?[0-9]?),?([0-9.]*)?/g)], figures;
+        let match = [...step.matchAll(/^([A-Z]_?[0-9]?),([A-Z]_?[0-9]?),([A-Z]_?[0-9]?),?([0-9.]*|[A-Z]_?[0-9]?)?/g)], figures;
         if (match.length > 0) {
-            let A = this._graph.getPoint(match[0][1]), O = this._graph.getPoint(match[0][2]), B = this._graph.getPoint(match[0][3]), radius = match[0][4] === undefined ? undefined : +match[0][4];
-            figures = [this._graph.arc(A, O, B, this._graph.distanceToPixels(radius), name)];
+            let A = this._graph.getPoint(match[0][1]), O = this._graph.getPoint(match[0][2]), B = this._graph.getPoint(match[0][3]), radiusValue = match[0][4] === undefined ? undefined : match[0][4], radius;
+            if (isNaN(+radiusValue)) {
+                radius = this._graph.getPoint(radiusValue);
+            }
+            else {
+                radius = this._graph.distanceToPixels(+radiusValue);
+            }
+            figures = [this._graph.arc(A, O, B, radius, name)];
         }
         return figures;
     }
@@ -614,7 +637,6 @@ class Parser {
     }
     _generatePlot(name, step) {
         let figures;
-        //TODO: plot with follow does not work !
         // f=plot func,min:max,@500,follow
         let domain = this._graph.unitXDomain, config = step.split(','), fx = config.shift(), 
         // fx = step.split(',')[0],//.split('@')[0],

@@ -51,4 +51,5 @@ export declare class Arc extends Figure {
     getPath(): string;
     private _describeSquare;
     private _describeArc;
+    angleDirection(enable: Boolean): Arc;
 }

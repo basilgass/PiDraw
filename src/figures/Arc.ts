@@ -12,7 +12,6 @@ export class Arc extends Figure {
     private _radiusReference: Point
 
     constructor(graph: Graph, name: string, center: Point, start: Point, stop: Point, radius?: number | Point) {
-        // TODO : build the arc class
         super(graph, name);
 
         // Points that describe the arc
@@ -84,7 +83,6 @@ export class Arc extends Figure {
     }
 
     get getRadius(): number {
-        // TODO: Must handle dynamic radius
         if (this._radiusReference !== null) {
             return this._center.getDistanceTo(this._radiusReference)
         } else if (this._radius > 0) {
@@ -227,5 +225,16 @@ export class Arc extends Figure {
         }
 
         return p.join(" ");
+    }
+
+    angleDirection(enable: Boolean) : Arc {
+        if(this.svg instanceof Path) {
+            if(enable) {
+                this.svg.marker('end', this.graph.markers.end)
+            }else{
+                this.svg.marker('end', null)
+            }
+        }
+        return this
     }
 }

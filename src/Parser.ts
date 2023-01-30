@@ -3,14 +3,15 @@ import {Line, LINECONSTRUCTION} from "./figures/Line";
 import {Figure} from "./figures/Figure";
 import {Plot} from "./figures/Plot";
 import {Line as mathLine} from "pimath/esm/maths/geometry/line"
+import {Line as svgLine} from "@svgdotjs/svg.js";
 import {Point} from "./figures/Point";
 import {Axis} from "./figures/Axis";
-import {Grid} from "./figures/Grid";
-import {Vector} from "pimath/esm/maths/geometry/vector";
+import {Path} from "@svgdotjs/svg.js";
 
 type BuildStep = { step: string, figures: Figure[] }
 
 export class Parser {
+    private _buildedSteps: BuildStep[] // {'A(4,6)': ['A']} {step: [list of object names]}
     private _construction: string
     private _graph: Graph
 
@@ -18,8 +19,6 @@ export class Parser {
         this._graph = graph
         this.update(construction)
     }
-
-    private _buildedSteps: BuildStep[] // {'A(4,6)': ['A']} {step: [list of object names]}
 
     get buildedSteps(): BuildStep[] {
         return this._buildedSteps;
@@ -59,17 +58,7 @@ export class Parser {
                 const currentStepProcess = this._preprocess(steps[i]),
                     prevStepProcess = this._preprocess(this._buildedSteps[i].step)
 
-                // Actually, updating works only for plot
-                // TODO: handle multiple element to be updated...
                 let updateResult = false
-                // if (currentStepProcess.key === prevStepProcess.key &&
-                //     currentStepProcess.label === prevStepProcess.label &&
-                //     currentStepProcess.key === 'plot'
-                // ) {
-                //     this._buildedSteps[i].step = steps[i]
-                //     updateResult = this._updatePlot(this._buildedSteps[i], currentStepProcess.code)
-                //     this._postprocess(this._buildedSteps[i], currentStepProcess.options)
-                // }
 
                 if (!updateResult) {
                     // Not the same step ! Everything after this must be removed from the graph!
@@ -148,10 +137,10 @@ export class Parser {
         }, false)
 
         // Update the grid for different ppuX / ppuY
-        if(xUnit!==yUnit){
+        if (xUnit !== yUnit) {
             this._graph.pixelsPerUnit = {
-                x: this._graph.pixelsPerUnit.x/xUnit,
-                y: this._graph.pixelsPerUnit.y/yUnit
+                x: this._graph.pixelsPerUnit.x / xUnit,
+                y: this._graph.pixelsPerUnit.y / yUnit
             }
         }
 
@@ -344,7 +333,7 @@ export class Parser {
                 let options = elWithOptions.split(':'),
                     el = options.shift()
 
-                if(el!=='') {
+                if (el !== '') {
                     builded.figures.forEach(fig => {
                         if (el === 'drag' && fig instanceof Point) {
                             fig.draggable({
@@ -374,6 +363,29 @@ export class Parser {
                         } else if (el === 'hide') {
                             fig.label.hide()
                             fig.hide()
+                        } else if(el.startsWith('mark')){
+                            if(options.length===0){
+                               options = ["start", "mid", "end"]
+                            }
+
+                            if((fig.svg instanceof Path) || (fig.svg instanceof svgLine)) {
+                                for(let pos of options){
+                                    switch (pos){
+                                        case "start":
+                                            fig.svg.marker(pos, this._graph.markers.start)
+                                            break
+                                        case "end":
+                                            fig.svg.marker(pos, this._graph.markers.end)
+                                            break
+                                        case "mid":
+                                            // TODO : handle mid marker ?
+                                            // fig.svg.marker(pos, this._graph.markers.mid)
+                                            break
+                                    }
+
+                                }
+
+                            }
                         } else if (el.startsWith('#')) {
                             // Label configuration
                             // #name/position/x:y
@@ -401,7 +413,8 @@ export class Parser {
                                 }
                             }
 
-
+                        } else if (el === 'label') {
+                            fig.label.show()
                         } else if (el === '?') {
                             fig.label.hide()
                         } else if (el === '!') {
@@ -492,14 +505,18 @@ export class Parser {
             vectorOptions.shift()
 
             let k = 1
-            for(let opt of vectorOptions){
-                if(opt.startsWith('*')){
+            for (let opt of vectorOptions) {
+                if (opt.startsWith('*')) {
                     k = +opt.substring(1)
-                    if(isNaN(k)){k = 1}
+                    if (isNaN(k)) {
+                        k = 1
+                    }
                 }
             }
 
-            figures = [this._graph.line(A, B, null, name).asVector(true, k)]
+            let v = this._graph.line(A, B, null, name).asVector(true, k)
+
+            figures = [v]
         }
 
         return figures
@@ -620,7 +637,7 @@ export class Parser {
             let A = this._graph.getPoint(match[0][2]),
                 B = this._graph.getPoint(match[0][3]),
                 k = match[0][1],
-                pt = this._graph.point(0,0, name).fromVector(A, B, +k)
+                pt = this._graph.point(0, 0, name).fromVector(A, B, +k)
             pt.asCircle().svg.fill('black')
             // pt.label.displayName = name
             figures = [pt]
@@ -628,6 +645,7 @@ export class Parser {
 
         return figures
     }
+
     private _generateMidPoint(name: string, step: string): Figure[] {
         let match = [...step.matchAll(/^([A-Z]_?[0-9]?)([A-Z]_?[0-9]?)/g)],
             figures: Figure[]
@@ -698,16 +716,22 @@ export class Parser {
     }
 
     private _generateArc(name: string, step: string): Figure[] {
-        let match = [...step.matchAll(/^([A-Z]_?[0-9]?),([A-Z]_?[0-9]?),([A-Z]_?[0-9]?),?([0-9.]*)?/g)],
+        let match = [...step.matchAll(/^([A-Z]_?[0-9]?),([A-Z]_?[0-9]?),([A-Z]_?[0-9]?),?([0-9.]*|[A-Z]_?[0-9]?)?/g)],
             figures: Figure[]
 
         if (match.length > 0) {
             let A = this._graph.getPoint(match[0][1]),
                 O = this._graph.getPoint(match[0][2]),
                 B = this._graph.getPoint(match[0][3]),
-                radius = match[0][4] === undefined ? undefined : +match[0][4]
+                radiusValue = match[0][4] === undefined ? undefined : match[0][4],
+                radius: number | Point
 
-            figures = [this._graph.arc(A, O, B, this._graph.distanceToPixels(radius), name)]
+            if(isNaN(+radiusValue)){
+                radius = this._graph.getPoint(radiusValue)
+            }else{
+                radius = this._graph.distanceToPixels(+radiusValue)
+            }
+            figures = [this._graph.arc(A, O, B, radius, name)]
         }
         return figures
     }
@@ -725,7 +749,6 @@ export class Parser {
     private _generatePlot(name: string, step: string): Figure[] {
         let figures: Figure[]
 
-        //TODO: plot with follow does not work !
         // f=plot func,min:max,@500,follow
         let domain = this._graph.unitXDomain,
             config = step.split(','),
@@ -743,7 +766,7 @@ export class Parser {
         // Domain of the function
         if (step.includes(':')) {
             let domainMatch = step.match(/(-?[0-9.]+):(-?[0-9.]+)/)
-            if(domainMatch){
+            if (domainMatch) {
                 domain.min = +domainMatch[1]
                 domain.max = +domainMatch[2]
             }
@@ -754,8 +777,9 @@ export class Parser {
             domain,
             animate: false
         }, name)
+
         // Must follow ?
-        if(config.includes('follow')){
+        if (config.includes('follow')) {
             plot.follow(true)
         }
 

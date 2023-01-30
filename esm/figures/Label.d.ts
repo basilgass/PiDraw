@@ -13,22 +13,22 @@ export declare enum LABELPOS {
 export interface LabelConfig {
     el: Figure;
     name?: string;
-    position?: {
-        horizontal: string;
-        vertical: string;
-    };
     offset?: {
         x: number;
         y: number;
     };
+    position?: {
+        horizontal: string;
+        vertical: string;
+    };
 }
 export declare class Label extends Figure {
     private _config;
-    constructor(graph: Graph, name: string, config?: LabelConfig);
+    private _html;
     private _isHtml;
+    constructor(graph: Graph, name: string, config?: LabelConfig);
     get isHtml(): Boolean;
     set isHtml(value: Boolean);
-    private _html;
     get html(): ForeignObject;
     get displayName(): string;
     set displayName(value: string);

@@ -7,6 +7,7 @@ const line_1 = require("pimath/esm/maths/geometry/line");
 const point_1 = require("pimath/esm/maths/geometry/point");
 const fraction_1 = require("pimath/esm/maths/coefficients/fraction");
 const vector_1 = require("pimath/esm/maths/geometry/vector");
+const Label_1 = require("./Label");
 var LINECONSTRUCTION;
 (function (LINECONSTRUCTION) {
     LINECONSTRUCTION["PARALLEL"] = "parallel";
@@ -19,10 +20,10 @@ class Line extends Figure_1.Figure {
     _B;
     _construction;
     _math;
+    _scale;
     _segment;
     _segmentEnd;
     _segmentStart;
-    _scale;
     constructor(graph, name, A, B, construction) {
         super(graph, name);
         this._A = A;
@@ -35,6 +36,9 @@ class Line extends Figure_1.Figure {
         }
         this.svg = this.graph.svg.line(0, 0, 0, 0).stroke('black');
         this.updateFigure();
+        // Add the label
+        this.label = new Label_1.Label(this.graph, name, { el: this });
+        this.label.hide();
     }
     get tex() {
         return `${this.name}: ${this.texMath.canonical}`;
@@ -105,6 +109,7 @@ class Line extends Figure_1.Figure {
     }
     set segmentStart(value) {
         this._segmentStart = value;
+        this._segment = this._segmentStart && this._segmentEnd;
         this.update();
     }
     get segmentEnd() {
@@ -112,13 +117,21 @@ class Line extends Figure_1.Figure {
     }
     set segmentEnd(value) {
         this._segmentEnd = value;
+        this._segment = this._segmentStart && this._segmentEnd;
         this.update();
+    }
+    get scale() {
+        return this._scale;
+    }
+    set scale(value) {
+        this._scale = value;
     }
     asSegment(value, scale) {
         if (scale !== undefined) {
             this.scale = scale;
         }
         this.segment = value === undefined || value;
+        this._addMarker(false);
         return this;
     }
     asVector(value, scale) {
@@ -126,18 +139,20 @@ class Line extends Figure_1.Figure {
         if (scale !== undefined) {
             this.scale = scale;
         }
-        // TODO: remove the end marker
-        if (this.svg instanceof svg_js_1.Line) {
-            this.svg.marker('end', this.graph.markers.end);
-        }
+        this._addMarker(true);
         this.update();
         return this;
     }
-    get scale() {
-        return this._scale;
-    }
-    set scale(value) {
-        this._scale = value;
+    _addMarker(enable) {
+        if (this.svg instanceof svg_js_1.Line) {
+            if (enable) {
+                this.svg.marker('end', this.graph.markers.end);
+            }
+            else {
+                this.svg.marker('end', null);
+            }
+        }
+        return this;
     }
     generateName() {
         if (this.name === undefined) {

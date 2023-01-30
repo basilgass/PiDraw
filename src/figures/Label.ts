@@ -18,18 +18,20 @@ export enum LABELPOS {
 export interface LabelConfig {
     el: Figure,
     name?: string,
-    position?: {
-        horizontal: string,
-        vertical: string
-    },
     offset?: {
         x: number,
         y: number
     }
+    position?: {
+        horizontal: string,
+        vertical: string
+    },
 }
 
 export class Label extends Figure {
     private _config: LabelConfig
+    private _html: ForeignObject
+    private _isHtml: Boolean
 
     constructor(graph: Graph, name: string, config?: LabelConfig) {
         super(graph, name);
@@ -51,7 +53,8 @@ export class Label extends Figure {
         // Create the text object.
         this.svg = this.graph.svg.text(this._config.el.name).font({'anchor': 'middle'})
         this.graph.layers.foreground.add(this.svg)
-        // How to handle dimension efficiently ?
+
+        // How to handle dimension
         this._html = this.graph.svg.foreignObject(1, 1)
         this._html.attr('style', "overflow:visible")
         this.graph.layers.foreground.add(this._html)
@@ -61,8 +64,6 @@ export class Label extends Figure {
         // Update the label text and position
         this.updateFigure()
     }
-
-    private _isHtml: Boolean
 
     get isHtml(): Boolean {
         return this._isHtml;
@@ -80,8 +81,6 @@ export class Label extends Figure {
         }
     }
 
-    private _html: ForeignObject
-
     get html(): ForeignObject {
         return this._html;
     }
@@ -96,9 +95,11 @@ export class Label extends Figure {
     }
 
     addHtml(value: string): Label {
-        this.html.children().forEach(child=>child.remove())
+        // Remove existing values.
+        this.html.children().forEach(child => child.remove())
+
         // @ts-ignore
-        this.html.add(SVG(value, true))
+        this.html.add(SVG(`<div style="display: inline-block">${value}</div>`, true))
 
         this.isHtml = true
         this.updateFigure()
@@ -174,27 +175,37 @@ export class Label extends Figure {
             x = this._config.el.x
             y = this._config.el.y
         } else if (this._config.el instanceof Line) {
-            //TODO: set the label for a line or a segment.
+            if (this._config.el.segment) {
+                x = (this._config.el.A.x + this._config.el.B.x) / 2
+                y = (this._config.el.A.y + this._config.el.B.y) / 2
+            } else {
+                //TODO: set the label for a line
+            }
         }
+
 
         // Label position relative to the current (x,y) coordinate
         if (this.isHtml) {
-            w = this._html.node.children[0].getClientRects()[0].width
-            h = this._html.node.children[0].getClientRects()[0].height
+            // Getting the width and height of the HTML element
+            w = this._html.node.children[0].clientWidth
+            h = this._html.node.children[0].clientHeight
+
             this.html.width(w)
             this.html.height(h)
+            //
+            // this._HtmlLabelRefresh()
         } else {
             if (this.svg instanceof Text) {
                 w = this.svg.length()
             }
-            h = this._config.el.svg.bbox().h
+            h = this.svg.bbox().h
         }
 
         if (this._config.position) {
             if (this._config.position.horizontal === LABELPOS.LEFT) {
                 x = x - w / 2
             } else if (this._config.position.horizontal === LABELPOS.RIGHT) {
-                x = x + w
+                x = x + w / 2
             } else if (this._config.position.horizontal === LABELPOS.CENTER) {
                 x = +x
             }
@@ -216,4 +227,14 @@ export class Label extends Figure {
 
         return this
     }
+
+    // private _HtmlLabelRefresh(timeout?: number) {
+    //     setTimeout(() => {
+    //         let w = this._html.node.children[0].clientWidth,
+    //             h = this._html.node.children[0].clientHeight
+    //         // Getting the width and height of the HTML element
+    //         this.html.width(w)
+    //         this.html.height(h)
+    //     }, timeout || 500)
+    // }
 }

@@ -40,7 +40,6 @@ export class Parametric extends Figure {
     }
 
     generateName(): string {
-        // TODO: Maybe the generated name should be more robust.
         if (this.name === undefined) {
             let n = this.graph.figures.filter(fig => fig instanceof Parametric).length,
                 idx = Math.trunc(n / 5)
@@ -134,7 +133,6 @@ export class Parametric extends Figure {
     }
 
     private _parse(fn: Function | string): Function | NumExp {
-        // TODO : must calculate differently
         if (typeof fn === 'string') {
             return new NumExp(fn)
         }

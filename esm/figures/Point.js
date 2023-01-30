@@ -198,7 +198,6 @@ class Point extends Figure_1.Figure {
                     y = intersection.y;
                 }
             }
-            // TODO: Work with constrains.
             // Constrain
             if (options.constrain) {
                 if (options.constrain.includes('x')) {
@@ -239,14 +238,6 @@ class Point extends Figure_1.Figure {
         }
         this.svg.draggable()
             .on('dragmove', dragmove);
-        // TODO: Add event listener.
-        // .on('dragend', ()=>{
-        //     let event = new CustomEvent('PiDrawPointDragEnd',
-        //         {
-        //             detail: this
-        //         })
-        //     document.dispatchEvent(event)
-        // })
         return this;
     }
     _updateShape() {

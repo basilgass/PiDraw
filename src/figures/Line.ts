@@ -6,7 +6,7 @@ import {Line as mathLine} from "pimath/esm/maths/geometry/line"
 import {Point as mathPoint} from "pimath/esm/maths/geometry/point"
 import {Fraction} from "pimath/esm/maths/coefficients/fraction";
 import {Vector} from "pimath/esm/maths/geometry/vector";
-import {Numeric} from "pimath/esm/maths/numeric";
+import {Label} from "./Label";
 
 export interface LineConfig {
     k?: number
@@ -26,11 +26,10 @@ export class Line extends Figure {
     private _B: Point
     private _construction: LineConfig
     private _math: mathLine
+    private _scale: number
     private _segment: boolean
     private _segmentEnd: boolean
     private _segmentStart: boolean
-
-    private _scale: number
 
     constructor(graph: Graph, name: string, A: Point, B: Point, construction?: LineConfig) {
         super(graph, name)
@@ -51,6 +50,10 @@ export class Line extends Figure {
         ).stroke('black');
 
         this.updateFigure()
+
+        // Add the label
+        this.label = new Label(this.graph, name, {el: this})
+        this.label.hide()
     }
 
     get tex(): string {
@@ -58,7 +61,7 @@ export class Line extends Figure {
     }
 
     get display(): { canonical: string; mxh: string; parametric: string } {
-        let A: {x:number, y:number},B: { x:number, y:number }
+        let A: { x: number, y: number }, B: { x: number, y: number }
         let m: mathLine
 
         A = this.graph.pixelsToUnits(this.A)
@@ -68,7 +71,7 @@ export class Line extends Figure {
     }
 
     get texMath() {
-        let A: {x:number, y:number},B: { x:number, y:number }
+        let A: { x: number, y: number }, B: { x: number, y: number }
         let m: mathLine
 
         A = this.graph.pixelsToUnits(this.A)
@@ -79,22 +82,22 @@ export class Line extends Figure {
 
     get d(): Vector {
 
-        if(this.B){
+        if (this.B) {
             let A = this.graph.pixelsToUnits(this.A),
                 B = this.graph.pixelsToUnits(this.B)
-            return new Vector(B.x-A.x, B.y-A.y)
-        }else{
-            switch(this._construction.rule){
+            return new Vector(B.x - A.x, B.y - A.y)
+        } else {
+            switch (this._construction.rule) {
                 case LINECONSTRUCTION.SLOPE:
                     let slope = new Fraction(this._construction.value)
                     return new Vector(slope.denominator, slope.numerator)
                 case LINECONSTRUCTION.PARALLEL:
-                    if(this._construction.value instanceof Line){
+                    if (this._construction.value instanceof Line) {
                         return this._construction.value.d
                     }
                     break
                 case LINECONSTRUCTION.PERPENDICULAR:
-                    if(this._construction.value instanceof Line){
+                    if (this._construction.value instanceof Line) {
                         return this._construction.value.d.clone().normal()
                     }
                     break
@@ -139,6 +142,8 @@ export class Line extends Figure {
 
     set segmentStart(value: boolean) {
         this._segmentStart = value;
+        this._segment = this._segmentStart && this._segmentEnd;
+
         this.update()
     }
 
@@ -148,27 +153,9 @@ export class Line extends Figure {
 
     set segmentEnd(value: boolean) {
         this._segmentEnd = value;
+        this._segment = this._segmentStart && this._segmentEnd;
 
         this.update()
-    }
-
-    asSegment(value?: boolean, scale?: number): Line {
-        if(scale !== undefined){this.scale = scale}
-        this.segment = value === undefined || value
-        return this
-    }
-
-    asVector(value?: boolean, scale?: number): Line {
-        this.segment = value === undefined || value
-        if(scale !== undefined){this.scale = scale}
-
-        // TODO: remove the end marker
-        if (this.svg instanceof svgLine) {
-            this.svg.marker('end', this.graph.markers.end)
-        }
-
-        this.update()
-        return this
     }
 
     get scale(): number {
@@ -177,6 +164,40 @@ export class Line extends Figure {
 
     set scale(value: number) {
         this._scale = value;
+    }
+
+    asSegment(value?: boolean, scale?: number): Line {
+        if (scale !== undefined) {
+            this.scale = scale
+        }
+        this.segment = value === undefined || value
+
+        this._addMarker(false)
+
+        return this
+    }
+
+    asVector(value?: boolean, scale?: number): Line {
+        this.segment = value === undefined || value
+        if (scale !== undefined) {
+            this.scale = scale
+        }
+
+        this._addMarker(true)
+
+        this.update()
+        return this
+    }
+
+    private _addMarker(enable: Boolean): Line {
+        if (this.svg instanceof svgLine) {
+            if(enable) {
+                this.svg.marker('end', this.graph.markers.end)
+            }else{
+                this.svg.marker('end', null)
+            }
+        }
+        return this
     }
 
     generateName(): string {
@@ -212,7 +233,7 @@ export class Line extends Figure {
                 if (this._segmentStart === this._segmentEnd) {
                     this.svg.plot(
                         this._A.x, this._segmentStart ? this._A.y : 0,
-                        this._A.x, this.segmentEnd ? this._B.y + (this._B.y-this._A.y)*(this.scale-1) : this.graph.height
+                        this._A.x, this.segmentEnd ? this._B.y + (this._B.y - this._A.y) * (this.scale - 1) : this.graph.height
                     )
                 } else {
                     if (this._segmentStart) {
@@ -232,7 +253,7 @@ export class Line extends Figure {
             let x1, x2
             if (this._segmentStart === this._segmentEnd) {
                 x1 = this._segmentStart ? this._A.x : 0
-                x2 = this._segmentEnd ? this._B.x + (this._B.x-this._A.x)*(this.scale-1) : this.graph.width
+                x2 = this._segmentEnd ? this._B.x + (this._B.x - this._A.x) * (this.scale - 1) : this.graph.width
             } else {
                 if (this._segmentStart) {
                     x1 = this.A.x > this.B.x ? 0 : this.A.x

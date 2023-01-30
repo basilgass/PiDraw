@@ -16,6 +16,8 @@ var LABELPOS;
 })(LABELPOS = exports.LABELPOS || (exports.LABELPOS = {}));
 class Label extends Figure_1.Figure {
     _config;
+    _html;
+    _isHtml;
     constructor(graph, name, config) {
         super(graph, name);
         // default configuration
@@ -32,7 +34,7 @@ class Label extends Figure_1.Figure {
         // Create the text object.
         this.svg = this.graph.svg.text(this._config.el.name).font({ 'anchor': 'middle' });
         this.graph.layers.foreground.add(this.svg);
-        // How to handle dimension efficiently ?
+        // How to handle dimension
         this._html = this.graph.svg.foreignObject(1, 1);
         this._html.attr('style', "overflow:visible");
         this.graph.layers.foreground.add(this._html);
@@ -40,7 +42,6 @@ class Label extends Figure_1.Figure {
         // Update the label text and position
         this.updateFigure();
     }
-    _isHtml;
     get isHtml() {
         return this._isHtml;
     }
@@ -55,7 +56,6 @@ class Label extends Figure_1.Figure {
             this.html.hide();
         }
     }
-    _html;
     get html() {
         return this._html;
     }
@@ -67,9 +67,10 @@ class Label extends Figure_1.Figure {
         this.updateFigure();
     }
     addHtml(value) {
+        // Remove existing values.
         this.html.children().forEach(child => child.remove());
         // @ts-ignore
-        this.html.add((0, svg_js_1.SVG)(value, true));
+        this.html.add((0, svg_js_1.SVG)(`<div style="display: inline-block">${value}</div>`, true));
         this.isHtml = true;
         this.updateFigure();
         return this;
@@ -133,27 +134,36 @@ class Label extends Figure_1.Figure {
             y = this._config.el.y;
         }
         else if (this._config.el instanceof Line_1.Line) {
-            //TODO: set the label for a line or a segment.
+            if (this._config.el.segment) {
+                x = (this._config.el.A.x + this._config.el.B.x) / 2;
+                y = (this._config.el.A.y + this._config.el.B.y) / 2;
+            }
+            else {
+                //TODO: set the label for a line
+            }
         }
         // Label position relative to the current (x,y) coordinate
         if (this.isHtml) {
-            w = this._html.node.children[0].getClientRects()[0].width;
-            h = this._html.node.children[0].getClientRects()[0].height;
+            // Getting the width and height of the HTML element
+            w = this._html.node.children[0].clientWidth;
+            h = this._html.node.children[0].clientHeight;
             this.html.width(w);
             this.html.height(h);
+            //
+            // this._HtmlLabelRefresh()
         }
         else {
             if (this.svg instanceof svg_js_1.Text) {
                 w = this.svg.length();
             }
-            h = this._config.el.svg.bbox().h;
+            h = this.svg.bbox().h;
         }
         if (this._config.position) {
             if (this._config.position.horizontal === LABELPOS.LEFT) {
                 x = x - w / 2;
             }
             else if (this._config.position.horizontal === LABELPOS.RIGHT) {
-                x = x + w;
+                x = x + w / 2;
             }
             else if (this._config.position.horizontal === LABELPOS.CENTER) {
                 x = +x;
