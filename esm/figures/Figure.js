@@ -2,62 +2,70 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Figure = void 0;
 class Figure {
-    constructor(graph, name) {
-        this._freeze = false;
-        this._graph = graph;
-        this._name = name;
-    }
-    /**
-     * Canvas root object.
-     * @type {Graph}
-     * @private
-     */
-    _graph;
-    get graph() {
-        return this._graph;
-    }
+    _displayName;
     /**
      * Define if the object should update or not.
      * @type {boolean}
      * @private
      */
     _freeze;
-    get freeze() {
-        return this._freeze;
-    }
-    set freeze(value) {
-        this._freeze = value;
-    }
     /**
-     * Name of the figure
-     * @type {string}
+     * Canvas root object.
+     * @type {Graph}
      * @private
      */
-    _name;
-    get name() {
-        return this._name;
-    }
-    set name(value) {
-        this._name = value;
-    }
-    /**
-     * The SVG object
-     * @type {unknown}
-     * @private
-     */
-    _svg;
-    get svg() {
-        return this._svg;
-    }
-    set svg(value) {
-        this._svg = value;
-    }
+    _graph;
     /**
      * Label figure
      * @type {Label}
      * @private
      */
     _label;
+    /**
+     * Name of the figure
+     * @type {string}
+     * @private
+     */
+    _name;
+    /**
+     * The SVG object
+     * @type {unknown}
+     * @private
+     */
+    _svg;
+    constructor(graph, name) {
+        this._freeze = false;
+        this._graph = graph;
+        this._name = name;
+    }
+    get graph() {
+        return this._graph;
+    }
+    get freeze() {
+        return this._freeze;
+    }
+    set freeze(value) {
+        this._freeze = value;
+    }
+    get name() {
+        return this._name;
+    }
+    set name(value) {
+        this._name = value;
+    }
+    get displayName() {
+        return this._displayName;
+    }
+    set displayName(value) {
+        this._displayName = value;
+        this.generateDisplayName();
+    }
+    get svg() {
+        return this._svg;
+    }
+    set svg(value) {
+        this._svg = value;
+    }
     get label() {
         return this._label;
     }
@@ -86,6 +94,7 @@ class Figure {
         return this;
     }
     updateLabel() {
+        this.label.updateFigure();
         return this;
     }
     remove() {
@@ -174,6 +183,15 @@ class Figure {
     }
     showLabel() {
         this._label.show();
+        return this;
+    }
+    generateDisplayName() {
+        if (this._displayName) {
+            this.label.displayName = this._displayName;
+        }
+        else {
+            this.label.displayName = this.name;
+        }
         return this;
     }
 }

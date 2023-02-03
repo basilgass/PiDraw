@@ -135,7 +135,15 @@ class Plot extends Figure_1.Figure {
     _parse(fn) {
         if (typeof fn === 'string') {
             this._rawFx = fn;
-            return new numexp_1.NumExp(fn);
+            // must accept more complex fn, with auto normalize.
+            const expr = new numexp_1.NumExp(fn, true);
+            if (expr.isValid) {
+                return new numexp_1.NumExp(fn, true);
+            }
+            else {
+                // The expression is not valid.
+                return (x) => 0;
+            }
         }
         else {
             this._rawFx = '';

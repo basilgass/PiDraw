@@ -5,6 +5,7 @@ const Figure_1 = require("./Figure");
 const Point_1 = require("./Point");
 const Line_1 = require("./Line");
 const svg_js_1 = require("@svgdotjs/svg.js");
+const Arc_1 = require("./Arc");
 var LABELPOS;
 (function (LABELPOS) {
     LABELPOS["LEFT"] = "left";
@@ -18,6 +19,7 @@ class Label extends Figure_1.Figure {
     _config;
     _html;
     _isHtml;
+    _isTex;
     constructor(graph, name, config) {
         super(graph, name);
         // default configuration
@@ -56,6 +58,13 @@ class Label extends Figure_1.Figure {
             this.html.hide();
         }
     }
+    get isTex() {
+        return this._isTex;
+    }
+    set isTex(value) {
+        this._isHtml = value || this._isHtml;
+        this._isTex = value;
+    }
     get html() {
         return this._html;
     }
@@ -70,9 +79,8 @@ class Label extends Figure_1.Figure {
         // Remove existing values.
         this.html.children().forEach(child => child.remove());
         // @ts-ignore
-        this.html.add((0, svg_js_1.SVG)(`<div style="display: inline-block">${value}</div>`, true));
+        this.html.add((0, svg_js_1.SVG)(`<div style="display: inline-block">${this.isTex ? this._graph.toTex(value) : value}</div>`, true));
         this.isHtml = true;
-        this.updateFigure();
         return this;
     }
     offset(value) {
@@ -125,8 +133,11 @@ class Label extends Figure_1.Figure {
     updateFigure() {
         let x = 0, y = 0, w = 0, h = 0;
         // Update the name
-        if (this.svg instanceof svg_js_1.Text) {
+        if (!this.isHtml && this.svg instanceof svg_js_1.Text) {
             this.svg.text(this.displayName);
+        }
+        else {
+            this.addHtml(this.displayName);
         }
         // Get the default position
         if (this._config.el instanceof Point_1.Point) {
@@ -141,6 +152,17 @@ class Label extends Figure_1.Figure {
             else {
                 //TODO: set the label for a line
             }
+        }
+        else if (this._config.el instanceof Arc_1.Arc) {
+            /**
+             * A(3,2)->drag
+             * B(2,7)->drag
+             * C(10,7)->drag
+             * a=arc A,B,C
+             */
+            const arc = this._config.el, v1 = { x: arc.start.x - arc.center.x, y: arc.start.y - arc.center.y }, v2 = { x: arc.end.x - arc.center.x, y: arc.end.y - arc.center.y }, vr = { x: v1.x + v2.x, y: v1.y + v2.y }, norm = Math.sqrt(vr.x ** 2 + vr.y ** 2), r = arc.getRadius, d = arc.angle < 180 ? 1 : -1, vn = { x: vr.x / norm * (r + 20), y: vr.y / norm * (r + 20) };
+            x = arc.center.x + d * vn.x;
+            y = arc.center.y + d * vn.y;
         }
         // Label position relative to the current (x,y) coordinate
         if (this.isHtml) {

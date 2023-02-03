@@ -2,9 +2,40 @@ import {Graph} from "../Graph";
 import {Label} from "./Label";
 import {Shape} from "@svgdotjs/svg.js";
 import {svgShape} from "../variables/types";
-import {Grid} from "./Grid";
 
 export class Figure {
+    private _displayName: string
+    /**
+     * Define if the object should update or not.
+     * @type {boolean}
+     * @private
+     */
+    private _freeze: boolean
+    /**
+     * Canvas root object.
+     * @type {Graph}
+     * @private
+     */
+    private _graph: Graph
+    /**
+     * Label figure
+     * @type {Label}
+     * @private
+     */
+    private _label: Label
+    /**
+     * Name of the figure
+     * @type {string}
+     * @private
+     */
+    private _name: string
+    /**
+     * The SVG object
+     * @type {unknown}
+     * @private
+     */
+    private _svg: svgShape
+
     constructor(graph: Graph, name: string) {
         this._freeze = false
 
@@ -12,23 +43,9 @@ export class Figure {
         this._name = name
     }
 
-    /**
-     * Canvas root object.
-     * @type {Graph}
-     * @private
-     */
-    private _graph: Graph
-
     get graph(): Graph {
         return this._graph;
     }
-
-    /**
-     * Define if the object should update or not.
-     * @type {boolean}
-     * @private
-     */
-    private _freeze: boolean
 
     get freeze(): boolean {
         return this._freeze;
@@ -38,13 +55,6 @@ export class Figure {
         this._freeze = value;
     }
 
-    /**
-     * Name of the figure
-     * @type {string}
-     * @private
-     */
-    private _name: string
-
     get name(): string {
         return this._name;
     }
@@ -53,12 +63,14 @@ export class Figure {
         this._name = value;
     }
 
-    /**
-     * The SVG object
-     * @type {unknown}
-     * @private
-     */
-    private _svg: svgShape
+    get displayName(): string {
+        return this._displayName;
+    }
+
+    set displayName(value: string) {
+        this._displayName = value;
+        this.generateDisplayName()
+    }
 
     get svg(): Shape {
         return this._svg;
@@ -67,13 +79,6 @@ export class Figure {
     set svg(value: Shape) {
         this._svg = value;
     }
-
-    /**
-     * Label figure
-     * @type {Label}
-     * @private
-     */
-    private _label: Label
 
     get label(): Label {
         return this._label;
@@ -111,6 +116,7 @@ export class Figure {
     }
 
     updateLabel(): Figure {
+        this.label.updateFigure()
         return this
     }
 
@@ -170,9 +176,9 @@ export class Figure {
         return this.width(3)
     }
 
-    color(value: { color: string, opacity?: number }|string): Figure {
+    color(value: { color: string, opacity?: number } | string): Figure {
 
-        if(typeof value === 'string'){
+        if (typeof value === 'string') {
             value = {color: value, opacity: 1}
         }
 
@@ -181,19 +187,19 @@ export class Figure {
         return this
     }
 
-    stroke(value: { width?: number, color?: string, opacity?: number }|string): Figure {
-        if(typeof value === "string"){
+    stroke(value: { width?: number, color?: string, opacity?: number } | string): Figure {
+        if (typeof value === "string") {
             this.svg.stroke({color: value, opacity: 1})
-        }else {
+        } else {
             this.svg.stroke(value)
         }
         return this
     }
 
-    fill(value: { color: string, opacity?: number }|string): Figure {
-        if(typeof value === "string"){
+    fill(value: { color: string, opacity?: number } | string): Figure {
+        if (typeof value === "string") {
             this.svg.fill({color: value, opacity: 1})
-        }else {
+        } else {
             this.svg.fill(value)
         }
         return this
@@ -203,6 +209,7 @@ export class Figure {
         this._svg.hide()
         return this
     }
+
     show(): Figure {
         this._svg.show()
         return this
@@ -212,9 +219,19 @@ export class Figure {
         this._label.hide()
         return this
     }
+
     showLabel(): Figure {
         this._label.show()
         return this
     }
 
+    generateDisplayName() : Figure{
+        if (this._displayName) {
+            this.label.displayName = this._displayName
+        } else {
+            this.label.displayName = this.name
+        }
+
+        return this
+    }
 }

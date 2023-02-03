@@ -168,7 +168,7 @@ D=vpt 3*AB`
             construct,
             parameters,
             build() {
-                    parser.update(this.construct)
+                parser.update(this.construct)
                 this.figures = graph.figures.map(x => katex.renderToString(x.tex))
             },
             modify() {

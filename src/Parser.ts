@@ -3,10 +3,9 @@ import {Line, LINECONSTRUCTION} from "./figures/Line";
 import {Figure} from "./figures/Figure";
 import {Plot} from "./figures/Plot";
 import {Line as mathLine} from "pimath/esm/maths/geometry/line"
-import {Line as svgLine} from "@svgdotjs/svg.js";
+import {Line as svgLine, Path} from "@svgdotjs/svg.js";
 import {Point} from "./figures/Point";
 import {Axis} from "./figures/Axis";
-import {Path} from "@svgdotjs/svg.js";
 
 type BuildStep = { step: string, figures: Figure[] }
 
@@ -192,7 +191,7 @@ export class Parser {
             }
 
             if (!construct.match(/^[A-Za-z0-9_]+/g)) {
-                console.log('The current step is not a valid step: ', construct)
+                console.warn('The current step is not a valid step: ', construct)
                 continue
             }
 
@@ -363,14 +362,14 @@ export class Parser {
                         } else if (el === 'hide') {
                             fig.label.hide()
                             fig.hide()
-                        } else if(el.startsWith('mark')){
-                            if(options.length===0){
-                               options = ["start", "mid", "end"]
+                        } else if (el.startsWith('mark')) {
+                            if (options.length === 0) {
+                                options = ["start", "mid", "end"]
                             }
 
-                            if((fig.svg instanceof Path) || (fig.svg instanceof svgLine)) {
-                                for(let pos of options){
-                                    switch (pos){
+                            if ((fig.svg instanceof Path) || (fig.svg instanceof svgLine)) {
+                                for (let pos of options) {
+                                    switch (pos) {
                                         case "start":
                                             fig.svg.marker(pos, this._graph.markers.start)
                                             break
@@ -386,17 +385,16 @@ export class Parser {
                                 }
 
                             }
-                        } else if (el.startsWith('#')) {
+                        } else if (el.startsWith('#') || el.startsWith('$')) {
                             // Label configuration
                             // #name/position/x:y
                             let [label, position, offset] = el.substring(1).split("/")
 
                             // Setting display name
-                            if (label.startsWith('$')) {
-                                fig.label.addHtml(this._graph.toTex(label.substring(1)))
-                            } else {
-                                fig.label.displayName = label
+                            if (el.startsWith('$')) {
+                                fig.label.isTex = true
                             }
+                            fig.displayName = label
 
                             // Changing the default position
                             if (position !== undefined && position !== "") {
@@ -464,13 +462,13 @@ export class Parser {
         }
 
         // analyse the step/code value and extract the data
-        let match = [...step.matchAll(/^\((-?[0-9.]+)[,;](-?[0-9.]+)\)(\*?)/g)].shift()
+        let match = [...step.matchAll(/^\((-?[0-9.]+)[,;](-?[0-9.]+)\)(\*?)(\/?[0-9]*)/g)].shift()
         if (match === undefined || match.length < 2) return figures
         let x = +match[1],
             y = +match[2]
 
         // Everything should be fine now
-        let label = showCoords ? `${name}(${x},${y})` : name
+        // let label = showCoords ? `${name} = (${x},${y})` : name
 
         // The point already exists
         if (this._graph.getPoint(name)) return figures
@@ -480,11 +478,20 @@ export class Parser {
 
         // Create the point
         const pt = this._graph.point(x, y, name)
-        pt.label.displayName = label
+        // pt.label.displayName = label
 
         // By default, use a circle as point
         if (!(match.length >= 3 && match[3] === '*')) {
             pt.asCircle()
+        }
+
+        if (match.length >= 4 && !isNaN(+match[4].substring(1))) {
+            pt.setSize(+match[4].substring(1))
+        }
+
+        if (showCoords) {
+            pt.label.isTex = true
+            pt.displayName = `${name} = \( ${x} ; ${y} \)`
         }
 
         // Generate and return the figures.
@@ -717,8 +724,10 @@ export class Parser {
 
     private _generateArc(name: string, step: string): Figure[] {
         let match = [...step.matchAll(/^([A-Z]_?[0-9]?),([A-Z]_?[0-9]?),([A-Z]_?[0-9]?),?([0-9.]*|[A-Z]_?[0-9]?)?/g)],
-            figures: Figure[]
+            figures: Figure[],
+            showAngle = name.includes('@')
 
+        name = name.split('@')[0]
         if (match.length > 0) {
             let A = this._graph.getPoint(match[0][1]),
                 O = this._graph.getPoint(match[0][2]),
@@ -726,12 +735,18 @@ export class Parser {
                 radiusValue = match[0][4] === undefined ? undefined : match[0][4],
                 radius: number | Point
 
-            if(isNaN(+radiusValue)){
+            if (isNaN(+radiusValue)) {
                 radius = this._graph.getPoint(radiusValue)
-            }else{
+            } else {
                 radius = this._graph.distanceToPixels(+radiusValue)
             }
-            figures = [this._graph.arc(A, O, B, radius, name)]
+
+            const arc = this._graph.arc(A, O, B, radius, name)
+            if (showAngle) {
+                arc.label.isTex = true
+                arc.displayName = `${name} = @°`
+            }
+            figures = [arc]
         }
         return figures
     }

@@ -3,26 +3,30 @@ import { Graph } from "../Graph";
 import { Point } from "./Point";
 import { IPoint } from "../variables/interfaces";
 export declare class Arc extends Figure {
+    private _angle;
     private _center;
-    private _start;
     private _end;
+    private _mark;
     private _radius;
     private _radiusReference;
+    private _sector;
+    private _square;
+    private _start;
     constructor(graph: Graph, name: string, center: Point, start: Point, stop: Point, radius?: number | Point);
-    private _angle;
+    get center(): Point;
+    get start(): Point;
+    get end(): Point;
     get angle(): number;
-    private _mark;
     get mark(): boolean;
     set mark(value: boolean);
-    private _square;
     get square(): boolean;
     set square(value: boolean);
-    private _sector;
     get sector(): boolean;
     set sector(value: boolean);
     get getRadius(): number;
     get isSquare(): boolean;
     generateName(): string;
+    generateDisplayName(): Arc;
     updateFigure(): Arc;
     /**
      * Get coordinate by radius / angle
@@ -49,7 +53,7 @@ export declare class Arc extends Figure {
         end: number;
     };
     getPath(): string;
+    angleDirection(enable: Boolean): Arc;
     private _describeSquare;
     private _describeArc;
-    angleDirection(enable: Boolean): Arc;
 }

@@ -4,6 +4,7 @@ import {Point} from "./Point";
 import {Line} from "./Line";
 import {ForeignObject, SVG, Text} from "@svgdotjs/svg.js";
 import {IPoint} from "../variables/interfaces";
+import {Arc} from "./Arc";
 
 export enum LABELPOS {
     LEFT = 'left',
@@ -32,6 +33,7 @@ export class Label extends Figure {
     private _config: LabelConfig
     private _html: ForeignObject
     private _isHtml: Boolean
+    private _isTex: Boolean
 
     constructor(graph: Graph, name: string, config?: LabelConfig) {
         super(graph, name);
@@ -81,6 +83,16 @@ export class Label extends Figure {
         }
     }
 
+
+    get isTex(): Boolean {
+        return this._isTex;
+    }
+
+    set isTex(value: Boolean) {
+        this._isHtml = value || this._isHtml
+        this._isTex = value;
+    }
+
     get html(): ForeignObject {
         return this._html;
     }
@@ -99,10 +111,9 @@ export class Label extends Figure {
         this.html.children().forEach(child => child.remove())
 
         // @ts-ignore
-        this.html.add(SVG(`<div style="display: inline-block">${value}</div>`, true))
+        this.html.add(SVG(`<div style="display: inline-block">${this.isTex?this._graph.toTex(value):value}</div>`, true))
 
         this.isHtml = true
-        this.updateFigure()
         return this
     }
 
@@ -159,6 +170,7 @@ export class Label extends Figure {
         if (this.name.includes('_')) {
             // it has subscript part.
         }
+
         return this.name
     }
 
@@ -166,8 +178,10 @@ export class Label extends Figure {
         let x = 0, y = 0, w = 0, h = 0
 
         // Update the name
-        if (this.svg instanceof Text) {
+        if (!this.isHtml && this.svg instanceof Text) {
             this.svg.text(this.displayName)
+        }else {
+            this.addHtml(this.displayName)
         }
 
         // Get the default position
@@ -181,6 +195,24 @@ export class Label extends Figure {
             } else {
                 //TODO: set the label for a line
             }
+        } else if (this._config.el instanceof Arc) {
+            /**
+             * A(3,2)->drag
+             * B(2,7)->drag
+             * C(10,7)->drag
+             * a=arc A,B,C
+             */
+            const arc = this._config.el,
+                v1 = {x: arc.start.x - arc.center.x, y: arc.start.y - arc.center.y},
+                v2 = {x: arc.end.x - arc.center.x, y: arc.end.y - arc.center.y},
+                vr = {x: v1.x + v2.x, y: v1.y + v2.y},
+                norm = Math.sqrt(vr.x**2+vr.y**2),
+                r = arc.getRadius,
+                d = arc.angle<180?1:-1,
+                vn = {x: vr.x/norm*(r+20), y: vr.y/norm*(r+20)}
+
+            x = arc.center.x + d*vn.x
+            y = arc.center.y + d*vn.y
         }
 
 

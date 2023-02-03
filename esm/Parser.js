@@ -7,7 +7,6 @@ const line_1 = require("pimath/esm/maths/geometry/line");
 const svg_js_1 = require("@svgdotjs/svg.js");
 const Point_1 = require("./figures/Point");
 const Axis_1 = require("./figures/Axis");
-const svg_js_2 = require("@svgdotjs/svg.js");
 class Parser {
     _buildedSteps; // {'A(4,6)': ['A']} {step: [list of object names]}
     _construction;
@@ -166,7 +165,7 @@ class Parser {
                 continue;
             }
             if (!construct.match(/^[A-Za-z0-9_]+/g)) {
-                console.log('The current step is not a valid step: ', construct);
+                console.warn('The current step is not a valid step: ', construct);
                 continue;
             }
             // Current building steps.
@@ -342,7 +341,7 @@ class Parser {
                             if (options.length === 0) {
                                 options = ["start", "mid", "end"];
                             }
-                            if ((fig.svg instanceof svg_js_2.Path) || (fig.svg instanceof svg_js_1.Line)) {
+                            if ((fig.svg instanceof svg_js_1.Path) || (fig.svg instanceof svg_js_1.Line)) {
                                 for (let pos of options) {
                                     switch (pos) {
                                         case "start":
@@ -359,17 +358,15 @@ class Parser {
                                 }
                             }
                         }
-                        else if (el.startsWith('#')) {
+                        else if (el.startsWith('#') || el.startsWith('$')) {
                             // Label configuration
                             // #name/position/x:y
                             let [label, position, offset] = el.substring(1).split("/");
                             // Setting display name
-                            if (label.startsWith('$')) {
-                                fig.label.addHtml(this._graph.toTex(label.substring(1)));
+                            if (el.startsWith('$')) {
+                                fig.label.isTex = true;
                             }
-                            else {
-                                fig.label.displayName = label;
-                            }
+                            fig.displayName = label;
                             // Changing the default position
                             if (position !== undefined && position !== "") {
                                 fig.label.position(position);
@@ -431,12 +428,12 @@ class Parser {
             return figures;
         }
         // analyse the step/code value and extract the data
-        let match = [...step.matchAll(/^\((-?[0-9.]+)[,;](-?[0-9.]+)\)(\*?)/g)].shift();
+        let match = [...step.matchAll(/^\((-?[0-9.]+)[,;](-?[0-9.]+)\)(\*?)(\/?[0-9]*)/g)].shift();
         if (match === undefined || match.length < 2)
             return figures;
         let x = +match[1], y = +match[2];
         // Everything should be fine now
-        let label = showCoords ? `${name}(${x},${y})` : name;
+        // let label = showCoords ? `${name} = (${x},${y})` : name
         // The point already exists
         if (this._graph.getPoint(name))
             return figures;
@@ -445,10 +442,17 @@ class Parser {
             return figures;
         // Create the point
         const pt = this._graph.point(x, y, name);
-        pt.label.displayName = label;
+        // pt.label.displayName = label
         // By default, use a circle as point
         if (!(match.length >= 3 && match[3] === '*')) {
             pt.asCircle();
+        }
+        if (match.length >= 4 && !isNaN(+match[4].substring(1))) {
+            pt.setSize(+match[4].substring(1));
+        }
+        if (showCoords) {
+            pt.label.isTex = true;
+            pt.displayName = `${name} = \( ${x} ; ${y} \)`;
         }
         // Generate and return the figures.
         figures = [pt];
@@ -612,7 +616,8 @@ class Parser {
         return figures;
     }
     _generateArc(name, step) {
-        let match = [...step.matchAll(/^([A-Z]_?[0-9]?),([A-Z]_?[0-9]?),([A-Z]_?[0-9]?),?([0-9.]*|[A-Z]_?[0-9]?)?/g)], figures;
+        let match = [...step.matchAll(/^([A-Z]_?[0-9]?),([A-Z]_?[0-9]?),([A-Z]_?[0-9]?),?([0-9.]*|[A-Z]_?[0-9]?)?/g)], figures, showAngle = name.includes('@');
+        name = name.split('@')[0];
         if (match.length > 0) {
             let A = this._graph.getPoint(match[0][1]), O = this._graph.getPoint(match[0][2]), B = this._graph.getPoint(match[0][3]), radiusValue = match[0][4] === undefined ? undefined : match[0][4], radius;
             if (isNaN(+radiusValue)) {
@@ -621,7 +626,12 @@ class Parser {
             else {
                 radius = this._graph.distanceToPixels(+radiusValue);
             }
-            figures = [this._graph.arc(A, O, B, radius, name)];
+            const arc = this._graph.arc(A, O, B, radius, name);
+            if (showAngle) {
+                arc.label.isTex = true;
+                arc.displayName = `${name} = @°`;
+            }
+            figures = [arc];
         }
         return figures;
     }

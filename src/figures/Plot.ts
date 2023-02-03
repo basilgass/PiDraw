@@ -162,14 +162,20 @@ export class Plot extends Figure {
             y = NaN
             // console.log('Function type error: ', typeof this._fx)
         }
-
         return {x, y}
     }
 
     private _parse(fn: Function | string): Function | NumExp {
         if (typeof fn === 'string') {
             this._rawFx = fn
-            return new NumExp(fn)
+            // must accept more complex fn, with auto normalize.
+            const expr = new NumExp(fn, true)
+            if(expr.isValid) {
+                return new NumExp(fn, true)
+            }else{
+                // The expression is not valid.
+                return (x:number)=>0
+            }
         }else{
             this._rawFx = ''
         }

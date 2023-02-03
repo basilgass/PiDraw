@@ -2,44 +2,47 @@ import { Graph } from "../Graph";
 import { Label } from "./Label";
 import { Shape } from "@svgdotjs/svg.js";
 export declare class Figure {
-    constructor(graph: Graph, name: string);
-    /**
-     * Canvas root object.
-     * @type {Graph}
-     * @private
-     */
-    private _graph;
-    get graph(): Graph;
+    private _displayName;
     /**
      * Define if the object should update or not.
      * @type {boolean}
      * @private
      */
     private _freeze;
-    get freeze(): boolean;
-    set freeze(value: boolean);
     /**
-     * Name of the figure
-     * @type {string}
+     * Canvas root object.
+     * @type {Graph}
      * @private
      */
-    private _name;
-    get name(): string;
-    set name(value: string);
-    /**
-     * The SVG object
-     * @type {unknown}
-     * @private
-     */
-    private _svg;
-    get svg(): Shape;
-    set svg(value: Shape);
+    private _graph;
     /**
      * Label figure
      * @type {Label}
      * @private
      */
     private _label;
+    /**
+     * Name of the figure
+     * @type {string}
+     * @private
+     */
+    private _name;
+    /**
+     * The SVG object
+     * @type {unknown}
+     * @private
+     */
+    private _svg;
+    constructor(graph: Graph, name: string);
+    get graph(): Graph;
+    get freeze(): boolean;
+    set freeze(value: boolean);
+    get name(): string;
+    set name(value: string);
+    get displayName(): string;
+    set displayName(value: string);
+    get svg(): Shape;
+    set svg(value: Shape);
     get label(): Label;
     set label(value: Label);
     get tex(): string;
@@ -72,4 +75,5 @@ export declare class Figure {
     show(): Figure;
     hideLabel(): Figure;
     showLabel(): Figure;
+    generateDisplayName(): Figure;
 }

@@ -3,13 +3,18 @@ import {Graph} from "../Graph";
 import {Point} from "./Point";
 import {IPoint} from "../variables/interfaces";
 import {Path} from "@svgdotjs/svg.js";
+import {Label} from "./Label";
 
 export class Arc extends Figure {
+    private _angle: number
     private _center: Point;
-    private _start: Point;
     private _end: Point;
+    private _mark: boolean
     private _radius: number
     private _radiusReference: Point
+    private _sector: boolean
+    private _square: boolean
+    private _start: Point;
 
     constructor(graph: Graph, name: string, center: Point, start: Point, stop: Point, radius?: number | Point) {
         super(graph, name);
@@ -39,17 +44,32 @@ export class Arc extends Figure {
 
         this.generateName()
         this.svg = this.graph.svg.path(this.getPath()).stroke('black').fill('none')
+
+        // Add the label
+        this.label = new Label(this.graph, name, {el: this})
+        this.label.center().middle()
     }
 
-    private _angle: number
+    get center(): Point {
+        return this._center;
+    }
+
+    get start(): Point {
+        return this._start;
+    }
+
+    get end(): Point {
+        return this._end;
+    }
 
     get angle(): number {
         let {start, end} = this.getAngles()
         this._angle = end - start
+        if (this._angle < 0) {
+            this._angle = 360 + this._angle
+        }
         return this._angle
     }
-
-    private _mark: boolean
 
     get mark(): boolean {
         return this._mark;
@@ -60,8 +80,6 @@ export class Arc extends Figure {
         this.update()
     }
 
-    private _square: boolean
-
     get square(): boolean {
         return this._square;
     }
@@ -70,8 +88,6 @@ export class Arc extends Figure {
         this._square = value;
         this.update()
     }
-
-    private _sector: boolean
 
     get sector(): boolean {
         return this._sector;
@@ -95,20 +111,38 @@ export class Arc extends Figure {
         return (this._start.x - this._center.x) * (this._end.x - this._center.x) + (this._start.y - this._center.y) * (this._end.y - this._center.y) === 0
     }
 
+
+
     generateName(): string {
         if (this.name === undefined) {
-            console.log(this._start)
-            console.log(this._center)
-            console.log(this._end)
             return `a_${this._start.name}${this._center.name}${this._end.name}`
         }
         return super.generateName();
+    }
+
+    generateDisplayName(): Arc {
+        if (this.displayName) {
+            this.label.displayName = this.displayName
+                .replace('?', this.name)
+                .replace('@', this.angle.toFixed(2))
+        } else {
+            this.label.displayName = this.name
+        }
+
+        if(this.label.isHtml){
+            this.label.updateFigure()
+        }
+
+        return this
     }
 
     updateFigure(): Arc {
         if (this.svg instanceof Path) {
             this.svg.plot(this.getPath())
         }
+
+        this.generateDisplayName()
+
         return this
     }
 
@@ -198,6 +232,17 @@ export class Arc extends Figure {
         }
     }
 
+    angleDirection(enable: Boolean): Arc {
+        if (this.svg instanceof Path) {
+            if (enable) {
+                this.svg.marker('end', this.graph.markers.end)
+            } else {
+                this.svg.marker('end', null)
+            }
+        }
+        return this
+    }
+
     private _describeSquare(center: IPoint, start: IPoint, end: IPoint): string {
         return [
             "M", start.x, start.y,
@@ -225,16 +270,5 @@ export class Arc extends Figure {
         }
 
         return p.join(" ");
-    }
-
-    angleDirection(enable: Boolean) : Arc {
-        if(this.svg instanceof Path) {
-            if(enable) {
-                this.svg.marker('end', this.graph.markers.end)
-            }else{
-                this.svg.marker('end', null)
-            }
-        }
-        return this
     }
 }

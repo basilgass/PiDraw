@@ -26,9 +26,12 @@ export declare class Label extends Figure {
     private _config;
     private _html;
     private _isHtml;
+    private _isTex;
     constructor(graph: Graph, name: string, config?: LabelConfig);
     get isHtml(): Boolean;
     set isHtml(value: Boolean);
+    get isTex(): Boolean;
+    set isTex(value: Boolean);
     get html(): ForeignObject;
     get displayName(): string;
     set displayName(value: string);

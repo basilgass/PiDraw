@@ -4,12 +4,17 @@ exports.Arc = void 0;
 const Figure_1 = require("./Figure");
 const Point_1 = require("./Point");
 const svg_js_1 = require("@svgdotjs/svg.js");
+const Label_1 = require("./Label");
 class Arc extends Figure_1.Figure {
+    _angle;
     _center;
-    _start;
     _end;
+    _mark;
     _radius;
     _radiusReference;
+    _sector;
+    _square;
+    _start;
     constructor(graph, name, center, start, stop, radius) {
         super(graph, name);
         // Points that describe the arc
@@ -35,14 +40,27 @@ class Arc extends Figure_1.Figure {
         }
         this.generateName();
         this.svg = this.graph.svg.path(this.getPath()).stroke('black').fill('none');
+        // Add the label
+        this.label = new Label_1.Label(this.graph, name, { el: this });
+        this.label.center().middle();
     }
-    _angle;
+    get center() {
+        return this._center;
+    }
+    get start() {
+        return this._start;
+    }
+    get end() {
+        return this._end;
+    }
     get angle() {
         let { start, end } = this.getAngles();
         this._angle = end - start;
+        if (this._angle < 0) {
+            this._angle = 360 + this._angle;
+        }
         return this._angle;
     }
-    _mark;
     get mark() {
         return this._mark;
     }
@@ -50,7 +68,6 @@ class Arc extends Figure_1.Figure {
         this._mark = value;
         this.update();
     }
-    _square;
     get square() {
         return this._square;
     }
@@ -58,7 +75,6 @@ class Arc extends Figure_1.Figure {
         this._square = value;
         this.update();
     }
-    _sector;
     get sector() {
         return this._sector;
     }
@@ -80,17 +96,29 @@ class Arc extends Figure_1.Figure {
     }
     generateName() {
         if (this.name === undefined) {
-            console.log(this._start);
-            console.log(this._center);
-            console.log(this._end);
             return `a_${this._start.name}${this._center.name}${this._end.name}`;
         }
         return super.generateName();
+    }
+    generateDisplayName() {
+        if (this.displayName) {
+            this.label.displayName = this.displayName
+                .replace('?', this.name)
+                .replace('@', this.angle.toFixed(2));
+        }
+        else {
+            this.label.displayName = this.name;
+        }
+        if (this.label.isHtml) {
+            this.label.updateFigure();
+        }
+        return this;
     }
     updateFigure() {
         if (this.svg instanceof svg_js_1.Path) {
             this.svg.plot(this.getPath());
         }
+        this.generateDisplayName();
         return this;
     }
     /**
@@ -166,6 +194,17 @@ class Arc extends Figure_1.Figure {
             return this._describeArc(this._center, startXY, endXY, radius, end - start);
         }
     }
+    angleDirection(enable) {
+        if (this.svg instanceof svg_js_1.Path) {
+            if (enable) {
+                this.svg.marker('end', this.graph.markers.end);
+            }
+            else {
+                this.svg.marker('end', null);
+            }
+        }
+        return this;
+    }
     _describeSquare(center, start, end) {
         return [
             "M", start.x, start.y,
@@ -187,17 +226,6 @@ class Arc extends Figure_1.Figure {
             p = p.concat(['L', center.x, center.y, 'L', start.x, start.y]);
         }
         return p.join(" ");
-    }
-    angleDirection(enable) {
-        if (this.svg instanceof svg_js_1.Path) {
-            if (enable) {
-                this.svg.marker('end', this.graph.markers.end);
-            }
-            else {
-                this.svg.marker('end', null);
-            }
-        }
-        return this;
     }
 }
 exports.Arc = Arc;
