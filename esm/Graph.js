@@ -17,6 +17,7 @@ const Parametric_1 = require("./figures/Parametric");
 const numeric_1 = require("pimath/esm/maths/numeric");
 const Bezier_1 = require("./figures/Bezier");
 const Path_1 = require("./figures/Path");
+const Polygon_1 = require("./figures/Polygon");
 class Graph {
     /**
      * HTML container
@@ -312,6 +313,26 @@ class Graph {
             return this.circle(this.point(center.x, center.y), radius, name);
         }
         let figure = new Circle_1.Circle(this, name, center, radius);
+        this._validateFigure(figure);
+        return figure;
+    }
+    polygon(points, name) {
+        // Case the point is given as xy coordinate instead of an existing point.
+        let polyPoints = points.map(pt => {
+            if (typeof pt === 'string') {
+                return this.getPoint(pt);
+            }
+            else if (!(pt instanceof Point_1.Point)) {
+                return this.point(pt.x, pt.y);
+            }
+            else if (pt instanceof Point_1.Point) {
+                return pt;
+            }
+            else {
+                return null;
+            }
+        });
+        let figure = new Polygon_1.Polygon(this, name, polyPoints);
         this._validateFigure(figure);
         return figure;
     }

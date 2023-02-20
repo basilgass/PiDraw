@@ -237,6 +237,9 @@ export class Parser {
                 case 'circ':
                     builded.figures = this._generateCircle(label, code)
                     break
+                case 'poly':
+                    builded.figures = this._generatePolygon(label, code)
+                    break
                 case 'arc':
                     builded.figures = this._generateArc(label, code)
                     break
@@ -749,6 +752,18 @@ export class Parser {
 
             figures = [this._graph.circle(A, radius, name)]
         }
+        return figures
+    }
+
+    private _generatePolygon(name: string, step: string): Figure[] {
+        let pts = step.split(','),
+            figures: Figure[]
+
+        if(pts.length>2){
+            let polyPoints = pts.map(pt => this._graph.getPoint(pt)).filter(x=>x!==null)
+            figures = [this._graph.polygon(pts)]
+        }
+
         return figures
     }
 

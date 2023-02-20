@@ -15,6 +15,7 @@ import { Parser } from "./Parser";
 import { Parametric } from "./figures/Parametric";
 import { Bezier } from "./figures/Bezier";
 import { Path } from "./figures/Path";
+import { Polygon } from "./figures/Polygon";
 export declare class Graph {
     /**
      * HTML container
@@ -142,6 +143,7 @@ export declare class Graph {
     parallel(line: Line, P: Point | string, name?: string): Line;
     perpendicular(line: Line, P: Point | string, name?: string): Line;
     circle(center: Point | IPoint | string, radius: number, name?: string): Circle;
+    polygon(points: Point[] | IPoint[] | string[], name?: string): Polygon;
     plot(fn: Function | string, config?: PlotConfig, name?: string): Plot;
     path(d: string, name?: string): Path;
     parametric(fx: Function | string, fy: Function | string, config?: PlotConfig, name?: string): Parametric;

@@ -22,6 +22,7 @@ import {Parametric} from "./figures/Parametric";
 import {Numeric} from "pimath/esm/maths/numeric";
 import {Bezier} from "./figures/Bezier";
 import {Path} from "./figures/Path";
+import {Polygon} from "./figures/Polygon";
 
 export class Graph {
     /**
@@ -405,6 +406,29 @@ export class Graph {
             name,
             center,
             radius)
+
+        this._validateFigure(figure)
+        return figure
+    }
+
+    polygon(points: Point[] | IPoint[] | string[], name?: string): Polygon {
+        // Case the point is given as xy coordinate instead of an existing point.
+        let polyPoints = points.map(pt=>{
+            if(typeof pt === 'string'){
+                return this.getPoint(pt)
+            }else if(!(pt instanceof Point)){
+                return this.point(pt.x, pt.y)
+            }else if(pt instanceof Point){
+                return pt
+            }else{
+                return null
+            }
+        });
+
+        let figure = new Polygon(
+            this,
+            name,
+            polyPoints)
 
         this._validateFigure(figure)
         return figure

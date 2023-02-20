@@ -207,6 +207,9 @@ class Parser {
                 case 'circ':
                     builded.figures = this._generateCircle(label, code);
                     break;
+                case 'poly':
+                    builded.figures = this._generatePolygon(label, code);
+                    break;
                 case 'arc':
                     builded.figures = this._generateArc(label, code);
                     break;
@@ -632,6 +635,14 @@ class Parser {
         if (match.length > 0) {
             let A = this._graph.getPoint(match[0][1]), radius = +match[0][2];
             figures = [this._graph.circle(A, radius, name)];
+        }
+        return figures;
+    }
+    _generatePolygon(name, step) {
+        let pts = step.split(','), figures;
+        if (pts.length > 2) {
+            let polyPoints = pts.map(pt => this._graph.getPoint(pt)).filter(x => x !== null);
+            figures = [this._graph.polygon(pts)];
         }
         return figures;
     }

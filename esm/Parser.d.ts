@@ -38,6 +38,7 @@ export declare class Parser {
     private _generatePerpendicular;
     private _generateParallel;
     private _generateCircle;
+    private _generatePolygon;
     private _generateArc;
     private _updatePlot;
     private _generatePlot;
