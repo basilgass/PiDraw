@@ -264,8 +264,8 @@ class Graph {
             y: axisY
         };
     }
-    point(x, y, name) {
-        const pixels = this.unitsToPixels({ x, y });
+    point(x, y, name, asPixel) {
+        const pixels = asPixel ? { x, y } : this.unitsToPixels({ x, y });
         const figure = new Point_1.Point(this, name, pixels);
         this._validateFigure(figure, enums_1.LAYER.POINTS);
         return figure;

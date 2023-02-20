@@ -135,7 +135,7 @@ export declare class Graph {
         x: Axis;
         y: Axis;
     };
-    point(x: number, y: number, name?: string): Point;
+    point(x: number, y: number, name?: string, asPixel?: boolean): Point;
     segment(A: Point | string, B: Point | string, name?: string): Line;
     vector(A: Point | string, B: Point | string, name?: string): Line;
     line(A: Point | string, B: Point | string, construction?: LineConfig, name?: string): Line;

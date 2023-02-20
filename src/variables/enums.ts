@@ -48,7 +48,8 @@ export enum POINTCONSTRAIN {
     MIDDLE,
     FIXED,
     PROJECTION,
-    VECTOR
+    VECTOR,
+    INTERSECTION_LINES
 }
 
 /**

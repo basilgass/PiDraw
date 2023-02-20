@@ -3,6 +3,7 @@ import {Line, LINECONSTRUCTION} from "./figures/Line";
 import {Figure} from "./figures/Figure";
 import {Plot} from "./figures/Plot";
 import {Line as mathLine} from "pimath/esm/maths/geometry/line"
+import {Point as mathPoint} from "pimath/esm/maths/geometry/point"
 import {Line as svgLine, Path} from "@svgdotjs/svg.js";
 import {Point} from "./figures/Point";
 import {Axis} from "./figures/Axis";
@@ -211,6 +212,9 @@ export class Parser {
                     break
                 case 'mid':
                     builded.figures = this._generateMidPoint(label, code)
+                    break
+                case 'inter':
+                    builded.figures = this._generateIntersectionPoint(label, code)
                     break
                 case 'vpt':
                     builded.figures = this._generatePointFromVector(label, code)
@@ -666,6 +670,31 @@ export class Parser {
             // pt.label.displayName = name
             figures = [pt]
         }
+
+        return figures
+    }
+
+    private _generateIntersectionPoint(name: string, step: string): Figure[] {
+        console.log(step)
+        let match = [...step.matchAll(/^([a-z]_?[0-9]?),([a-z]_?[0-9]?)/g)],
+            figures: Figure[],
+            mathPt: { point: mathPoint; hasIntersection: boolean; isParallel: boolean; isSame: boolean }
+
+        if(match.length > 0){
+            let d1 = this._graph.getFigure(match[0][1]),
+                d2 = this._graph.getFigure(match[0][2])
+
+            if(d1 instanceof Line && d2 instanceof Line){
+                mathPt = d1.math.intersection(d2.math)
+
+                if(mathPt.hasIntersection){
+                    let pt = this._graph.point(0,0, name).intersectionOf(d1, d2)
+                    pt.asCircle().svg.fill('black')
+                    figures = [pt]
+                }
+            }
+        }
+
 
         return figures
     }

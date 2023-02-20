@@ -187,6 +187,14 @@ export class Point extends Figure {
         return this
     }
 
+    intersectionOf(a: Line, b: Line): Point {
+        this._constrain = {
+            type: POINTCONSTRAIN.INTERSECTION_LINES,
+            data: [a, b]
+        }
+
+        return this
+    }
     fromVector(A: Point, B: Point, scale: number): Point {
         this._constrain = {
             type: POINTCONSTRAIN.VECTOR,
@@ -334,6 +342,20 @@ export class Point extends Figure {
 
             this._x = (A.x + B.x) / 2
             this._y = (A.y + B.y) / 2
+        }
+
+        if (this._constrain.type === POINTCONSTRAIN.INTERSECTION_LINES) {
+            let a:Line = this._constrain.data[0],
+                b: Line = this._constrain.data[1],
+                intersection = a.math.intersection(b.math)
+
+            if(intersection.hasIntersection){
+                this._x = intersection.point.x.value
+                this._y = intersection.point.y.value
+            }else{
+                // TODO: must mark an invalid point
+                this.hide()
+            }
         }
 
         if (this._constrain.type === POINTCONSTRAIN.PROJECTION) {

@@ -34,6 +34,7 @@ export declare class Parser {
     private _generateProjectionPoint;
     private _generatePointFromVector;
     private _generateMidPoint;
+    private _generateIntersectionPoint;
     private _generatePerpendicular;
     private _generateParallel;
     private _generateCircle;

@@ -148,6 +148,13 @@ class Point extends Figure_1.Figure {
         this.update();
         return this;
     }
+    intersectionOf(a, b) {
+        this._constrain = {
+            type: enums_1.POINTCONSTRAIN.INTERSECTION_LINES,
+            data: [a, b]
+        };
+        return this;
+    }
     fromVector(A, B, scale) {
         this._constrain = {
             type: enums_1.POINTCONSTRAIN.VECTOR,
@@ -268,6 +275,17 @@ class Point extends Figure_1.Figure {
             const A = this._constrain.data[0], B = this._constrain.data[1];
             this._x = (A.x + B.x) / 2;
             this._y = (A.y + B.y) / 2;
+        }
+        if (this._constrain.type === enums_1.POINTCONSTRAIN.INTERSECTION_LINES) {
+            let a = this._constrain.data[0], b = this._constrain.data[1], intersection = a.math.intersection(b.math);
+            if (intersection.hasIntersection) {
+                this._x = intersection.point.x.value;
+                this._y = intersection.point.y.value;
+            }
+            else {
+                // TODO: must mark an invalid point
+                this.hide();
+            }
         }
         if (this._constrain.type === enums_1.POINTCONSTRAIN.PROJECTION) {
             const M = this._constrain.data[0], to = this._constrain.data[1];

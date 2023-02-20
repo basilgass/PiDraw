@@ -183,6 +183,9 @@ class Parser {
                 case 'mid':
                     builded.figures = this._generateMidPoint(label, code);
                     break;
+                case 'inter':
+                    builded.figures = this._generateIntersectionPoint(label, code);
+                    break;
                 case 'vpt':
                     builded.figures = this._generatePointFromVector(label, code);
                     break;
@@ -582,6 +585,22 @@ class Parser {
             pt.asCircle().svg.fill('black');
             // pt.label.displayName = name
             figures = [pt];
+        }
+        return figures;
+    }
+    _generateIntersectionPoint(name, step) {
+        console.log(step);
+        let match = [...step.matchAll(/^([a-z]_?[0-9]?),([a-z]_?[0-9]?)/g)], figures, mathPt;
+        if (match.length > 0) {
+            let d1 = this._graph.getFigure(match[0][1]), d2 = this._graph.getFigure(match[0][2]);
+            if (d1 instanceof Line_1.Line && d2 instanceof Line_1.Line) {
+                mathPt = d1.math.intersection(d2.math);
+                if (mathPt.hasIntersection) {
+                    let pt = this._graph.point(0, 0, name).intersectionOf(d1, d2);
+                    pt.asCircle().svg.fill('black');
+                    figures = [pt];
+                }
+            }
         }
         return figures;
     }

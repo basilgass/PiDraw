@@ -320,8 +320,9 @@ export class Graph {
         }
     }
 
-    point(x: number, y: number, name?: string): Point {
-        const pixels = this.unitsToPixels({x, y})
+    point(x: number, y: number, name?: string, asPixel?: boolean): Point {
+        const pixels = asPixel?{x,y}:this.unitsToPixels({x, y})
+
         const figure = new Point(
             this,
             name,
