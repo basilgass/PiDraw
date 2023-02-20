@@ -450,7 +450,8 @@ class Parser {
         if (!(match.length >= 3 && match[3] === '*')) {
             pt.asCircle();
         }
-        if (match.length >= 4 && !isNaN(+match[4].substring(1))) {
+        let size = +match[4].substring(1);
+        if (match.length >= 4 && !isNaN(+match[4].substring(1)) && size > 0) {
             pt.setSize(+match[4].substring(1));
         }
         if (showCoords) {
