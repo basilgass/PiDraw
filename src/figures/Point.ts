@@ -394,7 +394,7 @@ export class Point extends Figure {
             } else if (to instanceof Line) {
                 // Get the projection to a line.
                 let u = to.math.director,
-                    A = {x: 0, y: to.math.getValueAtX(0).value},  // Point on the line
+                    A = to.getPointOnLine(),  // Point on the line
                     AP = new Vector(A, M),
                     k = Vector.scalarProduct(AP, u) / u.normSquare.value
 

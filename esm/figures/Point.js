@@ -315,7 +315,7 @@ class Point extends Figure_1.Figure {
             }
             else if (to instanceof Line_1.Line) {
                 // Get the projection to a line.
-                let u = to.math.director, A = { x: 0, y: to.math.getValueAtX(0).value }, // Point on the line
+                let u = to.math.director, A = to.getPointOnLine(), // Point on the line
                 AP = new vector_1.Vector(A, M), k = vector_1.Vector.scalarProduct(AP, u) / u.normSquare.value;
                 this._x = A.x + k * u.x.value;
                 this._y = A.y + k * u.y.value;
