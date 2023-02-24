@@ -163,6 +163,14 @@ class Point extends Figure_1.Figure {
         this.update();
         return this;
     }
+    fromDirection(A, d, size, perpendicular) {
+        this._constrain = {
+            type: enums_1.POINTCONSTRAIN.DIRECTION,
+            data: [A, d, size, perpendicular]
+        };
+        this.update();
+        return this;
+    }
     /**
      * Constrain the point to be bound to an axis or projection
      * @param A: Point
@@ -345,6 +353,11 @@ class Point extends Figure_1.Figure {
             const A = this._constrain.data[0], B = this._constrain.data[1], scale = this._constrain.data[2];
             this._x = A.x + (B.x - A.x) * scale;
             this._y = A.y + (B.y - A.y) * scale;
+        }
+        if (this._constrain.type === enums_1.POINTCONSTRAIN.DIRECTION) {
+            const A = this._constrain.data[0], d = this._constrain.data[1], distance = this.graph.distanceToPixels(this._constrain.data[2]), perp = this._constrain.data[3], v = perp ? d.math.normal : d.math.director, norm = v.norm;
+            this._x = A.x + v.x.value * distance / norm;
+            this._y = A.y + v.y.value * distance / norm;
         }
     }
 }

@@ -5,10 +5,10 @@ type BuildStep = {
     figures: Figure[];
 };
 export declare class Parser {
-    private _buildedSteps;
     private _construction;
     private _graph;
     constructor(graph: Graph, construction: string);
+    private _buildedSteps;
     get buildedSteps(): BuildStep[];
     /**
      * Update the graph using a new construction string.
@@ -34,6 +34,7 @@ export declare class Parser {
     private _generateProjectionPoint;
     private _generateSymmetricPoint;
     private _generatePointFromVector;
+    private _generatePointFromDirection;
     private _generateMidPoint;
     private _generateIntersectionPoint;
     private _generatePerpendicular;

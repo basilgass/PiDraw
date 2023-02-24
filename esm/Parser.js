@@ -8,13 +8,13 @@ const svg_js_1 = require("@svgdotjs/svg.js");
 const Point_1 = require("./figures/Point");
 const Axis_1 = require("./figures/Axis");
 class Parser {
-    _buildedSteps; // {'A(4,6)': ['A']} {step: [list of object names]}
     _construction;
     _graph;
     constructor(graph, construction) {
         this._graph = graph;
         this.update(construction);
     }
+    _buildedSteps; // {'A(4,6)': ['A']} {step: [list of object names]}
     get buildedSteps() {
         return this._buildedSteps;
     }
@@ -188,6 +188,9 @@ class Parser {
                     break;
                 case 'vpt':
                     builded.figures = this._generatePointFromVector(label, code);
+                    break;
+                case 'dpt':
+                    builded.figures = this._generatePointFromDirection(label, code);
                     break;
                 case 'proj':
                     builded.figures = this._generateProjectionPoint(label, code);
@@ -601,6 +604,28 @@ class Parser {
             figures = [pt];
         }
         return figures;
+    }
+    _generatePointFromDirection(name, step) {
+        let values = step.split(','), // pt, droite, distance, [p],
+        A, d, distance, perp = values[3] === 'p', figures;
+        if (values.length >= 3) {
+            A = this._graph.getPoint(values[0]);
+            d = this._graph.getFigure(values[1]);
+            if (isNaN(+values[2])) {
+                // TODO: must handle distance between two points
+                distance = 2;
+            }
+            else {
+                distance = +values[2];
+            }
+            if (d instanceof Line_1.Line) {
+                let pt = this._graph.point(0, 0, name).fromDirection(A, d, distance, perp);
+                pt.asCircle().svg.fill('black');
+                figures = [pt];
+            }
+            return figures;
+        }
+        return [];
     }
     _generateMidPoint(name, step) {
         let match = [...step.matchAll(/^([A-Z]_?[0-9]?)([A-Z]_?[0-9]?)/g)], figures;

@@ -11,7 +11,6 @@ import {Axis} from "./figures/Axis";
 type BuildStep = { step: string, figures: Figure[] }
 
 export class Parser {
-    private _buildedSteps: BuildStep[] // {'A(4,6)': ['A']} {step: [list of object names]}
     private _construction: string
     private _graph: Graph
 
@@ -19,6 +18,8 @@ export class Parser {
         this._graph = graph
         this.update(construction)
     }
+
+    private _buildedSteps: BuildStep[] // {'A(4,6)': ['A']} {step: [list of object names]}
 
     get buildedSteps(): BuildStep[] {
         return this._buildedSteps;
@@ -218,6 +219,9 @@ export class Parser {
                     break
                 case 'vpt':
                     builded.figures = this._generatePointFromVector(label, code)
+                    break
+                case 'dpt':
+                    builded.figures = this._generatePointFromDirection(label, code)
                     break
                 case 'proj':
                     builded.figures = this._generateProjectionPoint(label, code)
@@ -496,7 +500,7 @@ export class Parser {
         }
 
         let size = +match[4].substring(1)
-        if (match.length >= 4 && !isNaN(+match[4].substring(1)) && size>0) {
+        if (match.length >= 4 && !isNaN(+match[4].substring(1)) && size > 0) {
             pt.setSize(+match[4].substring(1))
         }
 
@@ -668,6 +672,7 @@ export class Parser {
         }
         return figures
     }
+
     private _generatePointFromVector(name: string, step: string): Figure[] {
         let match = [...step.matchAll(/^([0-9.]+)\*?([A-Z]_?[0-9]?)([A-Z]_?[0-9]?)/g)],
             figures: Figure[]
@@ -683,6 +688,38 @@ export class Parser {
         }
 
         return figures
+    }
+
+    private _generatePointFromDirection(name: string, step: string): Figure[] {
+        let values = step.split(','), // pt, droite, distance, [p],
+            A: Point,
+            d: Figure,
+            distance: number,
+            perp = values[3] === 'p',
+            figures: Figure[]
+
+        if(values.length>=3){
+            A = this._graph.getPoint(values[0])
+            d = this._graph.getFigure(values[1])
+            if(isNaN(+values[2])){
+                // TODO: must handle distance between two points
+                distance = 2
+            }else{
+                distance = +values[2]
+            }
+
+
+            if(d instanceof Line) {
+                let pt = this._graph.point(0, 0, name).fromDirection(A, d, distance, perp)
+                pt.asCircle().svg.fill('black')
+
+                figures = [pt]
+            }
+
+            return figures
+        }
+
+        return []
     }
 
     private _generateMidPoint(name: string, step: string): Figure[] {
@@ -708,15 +745,15 @@ export class Parser {
             figures: Figure[],
             mathPt: { point: mathPoint; hasIntersection: boolean; isParallel: boolean; isSame: boolean }
 
-        if(match.length > 0){
+        if (match.length > 0) {
             let d1 = this._graph.getFigure(match[0][1]),
                 d2 = this._graph.getFigure(match[0][2])
 
-            if(d1 instanceof Line && d2 instanceof Line){
+            if (d1 instanceof Line && d2 instanceof Line) {
                 mathPt = d1.math.intersection(d2.math)
 
-                if(mathPt.hasIntersection){
-                    let pt = this._graph.point(0,0, name).intersectionOf(d1, d2)
+                if (mathPt.hasIntersection) {
+                    let pt = this._graph.point(0, 0, name).intersectionOf(d1, d2)
                     pt.asCircle().svg.fill('black')
                     figures = [pt]
                 }
@@ -783,8 +820,8 @@ export class Parser {
         let pts = step.split(','),
             figures: Figure[]
 
-        if(pts.length>2){
-            let polyPoints = pts.map(pt => this._graph.getPoint(pt)).filter(x=>x!==null)
+        if (pts.length > 2) {
+            let polyPoints = pts.map(pt => this._graph.getPoint(pt)).filter(x => x !== null)
             figures = [this._graph.polygon(pts)]
         }
 

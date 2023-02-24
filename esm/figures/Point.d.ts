@@ -44,6 +44,7 @@ export declare class Point extends Figure {
     middleOf(A: Point, B: Point): Point;
     intersectionOf(a: Line, b: Line): Point;
     fromVector(A: Point, B: Point, scale: number): Point;
+    fromDirection(A: Point, d: Line, size: number, perpendicular: boolean): Point;
     /**
      * Constrain the point to be bound to an axis or projection
      * @param A: Point

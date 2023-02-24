@@ -54,8 +54,12 @@
                     <td class="font-thin">milieu de A et B</td>
                 </tr>
                 <tr>
-                    <td class="font-mono">P=vpt k*AB</td>
-                    <td class="font-thin">point construit par un vecteur de A et B, multiplié par k</td>
+                    <td class="font-mono">P=vpt k*AB[,X]</td>
+                    <td class="font-thin">point construit par un vecteur de A et B, multiplié par k. Par défaut part de A, mais accepte un paramètre supplémentaire, pour définir le point de départ.</td>
+                </tr>
+                <tr>
+                    <td class="font-mono">P=dpt Point,droite,distance[,p]</td>
+                    <td class="font-thin">point construit par un vecteur directeur de la droite d, en partant du point. La longueur du vecteur est défini par distance. Le parmètre *p* indique de prendre le vecteur normal au lieu du directeur.</td>
                 </tr>
                 <tr>
                     <td class="font-mono">P=proj A,d|Ox|Oy</td>
