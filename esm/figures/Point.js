@@ -340,7 +340,7 @@ class Point extends Figure_1.Figure {
             else if (symmetry_reference instanceof Line_1.Line) {
                 // Get the projection to a line.
                 // TODO: duplicate code : projection and symmetry.
-                let u = symmetry_reference.math.director, A = { x: 0, y: symmetry_reference.math.getValueAtX(0).value }, // Point on the line
+                let u = symmetry_reference.math.director, A = symmetry_reference.getPointOnLine(), // Point on the line
                 AP = new vector_1.Vector(A, pt), k = vector_1.Vector.scalarProduct(AP, u) / u.normSquare.value, proj = {
                     x: A.x + k * u.x.value,
                     y: A.y + k * u.y.value

@@ -422,7 +422,7 @@ export class Point extends Figure {
                 // Get the projection to a line.
                 // TODO: duplicate code : projection and symmetry.
                 let u = symmetry_reference.math.director,
-                    A = {x: 0, y: symmetry_reference.math.getValueAtX(0).value},  // Point on the line
+                    A = symmetry_reference.getPointOnLine(),  // Point on the line
                     AP = new Vector(A, pt),
                     k = Vector.scalarProduct(AP, u) / u.normSquare.value,
                     proj = {

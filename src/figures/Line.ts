@@ -7,6 +7,7 @@ import {Point as mathPoint} from "pimath/esm/maths/geometry/point"
 import {Fraction} from "pimath/esm/maths/coefficients/fraction";
 import {Vector} from "pimath/esm/maths/geometry/vector";
 import {Label} from "./Label";
+import {IPoint} from "../variables/interfaces";
 
 export interface LineConfig {
     k?: number
@@ -22,15 +23,6 @@ export enum LINECONSTRUCTION {
 }
 
 export class Line extends Figure {
-    private _A: Point
-    private _B: Point
-    private _construction: LineConfig
-    private _math: mathLine
-    private _scale: number
-    private _segment: boolean
-    private _segmentEnd: boolean
-    private _segmentStart: boolean
-
     constructor(graph: Graph, name: string, A: Point, B: Point, construction?: LineConfig) {
         super(graph, name)
 
@@ -54,6 +46,80 @@ export class Line extends Figure {
         // Add the label
         this.label = new Label(this.graph, name, {el: this})
         this.label.hide()
+    }
+
+    private _A: Point
+
+    get A(): Point {
+        return this._A;
+    }
+
+    private _B: Point
+
+    get B(): Point {
+        return this._B;
+    }
+
+    private _construction: LineConfig
+
+    get construction(): LineConfig {
+        return this._construction;
+    }
+
+    private _math: mathLine
+
+    get math(): mathLine {
+        return this._math;
+    }
+
+    private _scale: number
+
+    get scale(): number {
+        return this._scale;
+    }
+
+    set scale(value: number) {
+        this._scale = value;
+    }
+
+    private _segment: boolean
+
+    get segment(): boolean {
+        return this._segment;
+    }
+
+    set segment(value: boolean) {
+        this._segmentStart = value
+        this._segmentEnd = value
+        this._segment = value
+
+        this.update()
+    }
+
+    private _segmentEnd: boolean
+
+    get segmentEnd(): boolean {
+        return this._segmentEnd;
+    }
+
+    set segmentEnd(value: boolean) {
+        this._segmentEnd = value;
+        this._segment = this._segmentStart && this._segmentEnd;
+
+        this.update()
+    }
+
+    private _segmentStart: boolean
+
+    get segmentStart(): boolean {
+        return this._segmentStart;
+    }
+
+    set segmentStart(value: boolean) {
+        this._segmentStart = value;
+        this._segment = this._segmentStart && this._segmentEnd;
+
+        this.update()
     }
 
     get tex(): string {
@@ -108,64 +174,6 @@ export class Line extends Figure {
         return new Vector()
     }
 
-    get A(): Point {
-        return this._A;
-    }
-
-    get B(): Point {
-        return this._B;
-    }
-
-    get construction(): LineConfig {
-        return this._construction;
-    }
-
-    get math(): mathLine {
-        return this._math;
-    }
-
-    get segment(): boolean {
-        return this._segment;
-    }
-
-    set segment(value: boolean) {
-        this._segmentStart = value
-        this._segmentEnd = value
-        this._segment = value
-
-        this.update()
-    }
-
-    get segmentStart(): boolean {
-        return this._segmentStart;
-    }
-
-    set segmentStart(value: boolean) {
-        this._segmentStart = value;
-        this._segment = this._segmentStart && this._segmentEnd;
-
-        this.update()
-    }
-
-    get segmentEnd(): boolean {
-        return this._segmentEnd;
-    }
-
-    set segmentEnd(value: boolean) {
-        this._segmentEnd = value;
-        this._segment = this._segmentStart && this._segmentEnd;
-
-        this.update()
-    }
-
-    get scale(): number {
-        return this._scale;
-    }
-
-    set scale(value: number) {
-        this._scale = value;
-    }
-
     asSegment(value?: boolean, scale?: number): Line {
         if (scale !== undefined) {
             this.scale = scale
@@ -189,17 +197,6 @@ export class Line extends Figure {
         return this
     }
 
-    private _addMarker(enable: Boolean): Line {
-        if (this.svg instanceof svgLine) {
-            if(enable) {
-                this.svg.marker('end', this.graph.markers.end)
-            }else{
-                this.svg.marker('end', null)
-            }
-        }
-        return this
-    }
-
     generateName(): string {
         if (this.name === undefined) {
 
@@ -218,6 +215,32 @@ export class Line extends Figure {
             this._updateLineThroughAandB()
         } else {
             this._updateLineFromConstruction()
+        }
+        return this
+    }
+
+    getPointOnLine(): IPoint {
+        let x = 0,
+            y: number
+
+        try {
+            y = this.math.getValueAtX(0).value
+        } catch {
+            y = 0
+            x = this.math.getValueAtY(0).value
+        }
+
+
+        return {x, y}
+    }
+
+    private _addMarker(enable: Boolean): Line {
+        if (this.svg instanceof svgLine) {
+            if (enable) {
+                this.svg.marker('end', this.graph.markers.end)
+            } else {
+                this.svg.marker('end', null)
+            }
         }
         return this
     }

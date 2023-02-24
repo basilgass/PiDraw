@@ -16,14 +16,6 @@ var LINECONSTRUCTION;
     LINECONSTRUCTION["SLOPE"] = "slope";
 })(LINECONSTRUCTION = exports.LINECONSTRUCTION || (exports.LINECONSTRUCTION = {}));
 class Line extends Figure_1.Figure {
-    _A;
-    _B;
-    _construction;
-    _math;
-    _scale;
-    _segment;
-    _segmentEnd;
-    _segmentStart;
     constructor(graph, name, A, B, construction) {
         super(graph, name);
         this._A = A;
@@ -39,6 +31,57 @@ class Line extends Figure_1.Figure {
         // Add the label
         this.label = new Label_1.Label(this.graph, name, { el: this });
         this.label.hide();
+    }
+    _A;
+    get A() {
+        return this._A;
+    }
+    _B;
+    get B() {
+        return this._B;
+    }
+    _construction;
+    get construction() {
+        return this._construction;
+    }
+    _math;
+    get math() {
+        return this._math;
+    }
+    _scale;
+    get scale() {
+        return this._scale;
+    }
+    set scale(value) {
+        this._scale = value;
+    }
+    _segment;
+    get segment() {
+        return this._segment;
+    }
+    set segment(value) {
+        this._segmentStart = value;
+        this._segmentEnd = value;
+        this._segment = value;
+        this.update();
+    }
+    _segmentEnd;
+    get segmentEnd() {
+        return this._segmentEnd;
+    }
+    set segmentEnd(value) {
+        this._segmentEnd = value;
+        this._segment = this._segmentStart && this._segmentEnd;
+        this.update();
+    }
+    _segmentStart;
+    get segmentStart() {
+        return this._segmentStart;
+    }
+    set segmentStart(value) {
+        this._segmentStart = value;
+        this._segment = this._segmentStart && this._segmentEnd;
+        this.update();
     }
     get tex() {
         return `${this.name}: ${this.texMath.canonical}`;
@@ -83,49 +126,6 @@ class Line extends Figure_1.Figure {
         }
         return new vector_1.Vector();
     }
-    get A() {
-        return this._A;
-    }
-    get B() {
-        return this._B;
-    }
-    get construction() {
-        return this._construction;
-    }
-    get math() {
-        return this._math;
-    }
-    get segment() {
-        return this._segment;
-    }
-    set segment(value) {
-        this._segmentStart = value;
-        this._segmentEnd = value;
-        this._segment = value;
-        this.update();
-    }
-    get segmentStart() {
-        return this._segmentStart;
-    }
-    set segmentStart(value) {
-        this._segmentStart = value;
-        this._segment = this._segmentStart && this._segmentEnd;
-        this.update();
-    }
-    get segmentEnd() {
-        return this._segmentEnd;
-    }
-    set segmentEnd(value) {
-        this._segmentEnd = value;
-        this._segment = this._segmentStart && this._segmentEnd;
-        this.update();
-    }
-    get scale() {
-        return this._scale;
-    }
-    set scale(value) {
-        this._scale = value;
-    }
     asSegment(value, scale) {
         if (scale !== undefined) {
             this.scale = scale;
@@ -141,17 +141,6 @@ class Line extends Figure_1.Figure {
         }
         this._addMarker(true);
         this.update();
-        return this;
-    }
-    _addMarker(enable) {
-        if (this.svg instanceof svg_js_1.Line) {
-            if (enable) {
-                this.svg.marker('end', this.graph.markers.end);
-            }
-            else {
-                this.svg.marker('end', null);
-            }
-        }
         return this;
     }
     generateName() {
@@ -171,6 +160,28 @@ class Line extends Figure_1.Figure {
         }
         else {
             this._updateLineFromConstruction();
+        }
+        return this;
+    }
+    getPointOnLine() {
+        let x = 0, y;
+        try {
+            y = this.math.getValueAtX(0).value;
+        }
+        catch {
+            y = 0;
+            x = this.math.getValueAtY(0).value;
+        }
+        return { x, y };
+    }
+    _addMarker(enable) {
+        if (this.svg instanceof svg_js_1.Line) {
+            if (enable) {
+                this.svg.marker('end', this.graph.markers.end);
+            }
+            else {
+                this.svg.marker('end', null);
+            }
         }
         return this;
     }

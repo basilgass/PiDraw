@@ -3,6 +3,7 @@ import { Graph } from "../Graph";
 import { Point } from "./Point";
 import { Line as mathLine } from "pimath/esm/maths/geometry/line";
 import { Vector } from "pimath/esm/maths/geometry/vector";
+import { IPoint } from "../variables/interfaces";
 export interface LineConfig {
     k?: number;
     rule: string;
@@ -15,15 +16,27 @@ export declare enum LINECONSTRUCTION {
     SLOPE = "slope"
 }
 export declare class Line extends Figure {
-    private _A;
-    private _B;
-    private _construction;
-    private _math;
-    private _scale;
-    private _segment;
-    private _segmentEnd;
-    private _segmentStart;
     constructor(graph: Graph, name: string, A: Point, B: Point, construction?: LineConfig);
+    private _A;
+    get A(): Point;
+    private _B;
+    get B(): Point;
+    private _construction;
+    get construction(): LineConfig;
+    private _math;
+    get math(): mathLine;
+    private _scale;
+    get scale(): number;
+    set scale(value: number);
+    private _segment;
+    get segment(): boolean;
+    set segment(value: boolean);
+    private _segmentEnd;
+    get segmentEnd(): boolean;
+    set segmentEnd(value: boolean);
+    private _segmentStart;
+    get segmentStart(): boolean;
+    set segmentStart(value: boolean);
     get tex(): string;
     get display(): {
         canonical: string;
@@ -36,23 +49,12 @@ export declare class Line extends Figure {
         parametric: string;
     };
     get d(): Vector;
-    get A(): Point;
-    get B(): Point;
-    get construction(): LineConfig;
-    get math(): mathLine;
-    get segment(): boolean;
-    set segment(value: boolean);
-    get segmentStart(): boolean;
-    set segmentStart(value: boolean);
-    get segmentEnd(): boolean;
-    set segmentEnd(value: boolean);
-    get scale(): number;
-    set scale(value: number);
     asSegment(value?: boolean, scale?: number): Line;
     asVector(value?: boolean, scale?: number): Line;
-    private _addMarker;
     generateName(): string;
     updateFigure(): Line;
+    getPointOnLine(): IPoint;
+    private _addMarker;
     private _updateLineThroughAandB;
     private _updateLineFromConstruction;
 }
