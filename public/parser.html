@@ -39,7 +39,7 @@
 
             <textarea
                     x-model="construct"
-                    rows="10"
+                    rows="20"
                     class="border mx-3 md:mx-0 py-2 px-3 rounded"
                     @input="build"
             ></textarea></div>
@@ -151,8 +151,28 @@ B(3,2)->drag:grid
 C=mid AB
 D=vpt 3*AB`
 
+        construct = `O(0,0)
+c=circ O,10
+P(5,8.6)->drag:c
+R=sym P,Ox
+C1=proj P,Ox->?
+S1=proj P,Oy->?
+cos=[OC1]->ultrathick,green
+sin=[OS1]->ultrathick,red
+v=[OP]
+u=[OR]
+cs=[PC1]->dash
+sn=[PS1]->dash
+X(10,0)->hide
+a=arc X,O,P->mark:end
+t=line x=10->ultrathin
+T=inter v,t->?
+tan=[XT]->ultrathick,orange
+r=[OT[->ultrathin,dot`
+
+
         let parser = graph.parse(construct),
-            parameters = 'grid,axis,x=-3:15,y=-4:17'
+            parameters = 'grid,axis,x=-3:12,y=-15:15'
 
         parser.updateLayout(parameters)
 

@@ -13,20 +13,20 @@ export declare class Point extends Figure {
     private _constrain;
     private _scale;
     private _shape;
-    private _x;
-    private _y;
     constructor(graph: Graph, name: string, pixels: IPoint);
+    private _x;
     get x(): number;
     set x(value: number);
+    private _y;
     get y(): number;
     set y(value: number);
     get coord(): IPoint;
     set coord(value: IPoint);
     set coordX(value: number);
     set coordY(value: number);
-    addUnit(value: number, axis?: AXIS): Point;
     get tex(): string;
     get coordAsTex(): string;
+    addUnit(value: number, axis?: AXIS): Point;
     generateName(): string;
     asCross(): Point;
     asCircle(size?: number): Point;
@@ -50,6 +50,7 @@ export declare class Point extends Figure {
      * @param to: Line | string
      */
     projection(A: Point, to: Line | string): Point;
+    symmetry(A: Point, of: Line | Point | string): Point;
     draggable(options: {
         grid?: Grid;
         constrain?: (string | Figure)[];

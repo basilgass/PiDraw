@@ -192,6 +192,9 @@ class Parser {
                 case 'proj':
                     builded.figures = this._generateProjectionPoint(label, code);
                     break;
+                case 'sym':
+                    builded.figures = this._generateSymmetricPoint(label, code);
+                    break;
                 case 'v':
                     builded.figures = this._generateVector(label, code);
                     break;
@@ -563,6 +566,23 @@ class Parser {
             let A = this._graph.getPoint(match[1]), to = ['Ox', 'Oy'].indexOf(match[2]) === -1 ? this._graph.getFigure(match[2]) : match[2], pt;
             if (to instanceof Line_1.Line || typeof to === 'string') {
                 pt = this._graph.point(0, 0, name).projection(A, to);
+            }
+            else {
+                return [];
+            }
+            // pt.label.displayName = name
+            figures = [pt];
+        }
+        return figures;
+    }
+    _generateSymmetricPoint(name, step) {
+        let figures;
+        // let match = [...step.matchAll(/^([A-Z]_?[0-9]?),(([A-Za-z]_?[0-9]?)|(Ox)|(Oy))/g)]
+        let match = [...step.matchAll(/^([A-Z]_?[0-9]?),([A-Za-z_0-9]+)/g)].shift();
+        if (match) {
+            let A = this._graph.getPoint(match[1]), to = ['Ox', 'Oy'].indexOf(match[2]) === -1 ? this._graph.getFigure(match[2]) : match[2], pt;
+            if (to instanceof Line_1.Line || to instanceof Point_1.Point || typeof to === 'string') {
+                pt = this._graph.point(0, 0, name).symmetry(A, to);
             }
             else {
                 return [];

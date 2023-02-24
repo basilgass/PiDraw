@@ -18,8 +18,6 @@ export class Point extends Figure {
     private _constrain: PointConfig
     private _scale: number
     private _shape: POINTSHAPE
-    private _x: number
-    private _y: number
 
     constructor(graph: Graph, name: string, pixels: IPoint) {
         super(graph, name);
@@ -40,6 +38,8 @@ export class Point extends Figure {
         this.label = new Label(this.graph, name, {el: this})
     }
 
+    private _x: number
+
     get x(): number {
         return this._x;
     }
@@ -48,6 +48,8 @@ export class Point extends Figure {
         this._x = value;
         this.update()
     }
+
+    private _y: number
 
     get y(): number {
         return this._y;
@@ -81,15 +83,6 @@ export class Point extends Figure {
         }).y
     }
 
-    addUnit(value:number, axis?: AXIS): Point {
-        if(axis===undefined || axis===AXIS.HORIZONTAL){
-            this.coordX = this.coord.x + value
-        }else{
-            this.coordY = this.coord.y + value
-        }
-        return this
-    }
-
     get tex(): string {
         let P = this.graph.pixelsToUnits(this)
         return `${this.name}${this.coordAsTex}`
@@ -98,6 +91,15 @@ export class Point extends Figure {
     get coordAsTex(): string {
         let P = this.graph.pixelsToUnits(this)
         return `\\left( ${P.x} ; ${P.y} \\right)`
+    }
+
+    addUnit(value: number, axis?: AXIS): Point {
+        if (axis === undefined || axis === AXIS.HORIZONTAL) {
+            this.coordX = this.coord.x + value
+        } else {
+            this.coordY = this.coord.y + value
+        }
+        return this
     }
 
     generateName(): string {
@@ -124,11 +126,11 @@ export class Point extends Figure {
         return this
     }
 
-    asSquare(size?: number, orientation?:Vector): Point {
+    asSquare(size?: number, orientation?: Vector): Point {
         if (size !== undefined && size > 0) {
             this._scale = size
         }
-        if(orientation !== undefined ){
+        if (orientation !== undefined) {
             // TODO: add the orientation to the square - really useful ?
             console.log(orientation.tex)
         }
@@ -195,14 +197,16 @@ export class Point extends Figure {
 
         return this
     }
+
     fromVector(A: Point, B: Point, scale: number): Point {
         this._constrain = {
             type: POINTCONSTRAIN.VECTOR,
-            data: [A,B, scale]
+            data: [A, B, scale]
         }
         this.update()
         return this
     }
+
     /**
      * Constrain the point to be bound to an axis or projection
      * @param A: Point
@@ -217,6 +221,16 @@ export class Point extends Figure {
         return this
     }
 
+    symmetry(A: Point, of: Line | Point | string): Point {
+        this._constrain = {
+            type: POINTCONSTRAIN.SYMMETRY,
+            data: [A, of]
+        }
+
+        this.update()
+        return this
+    }
+
     draggable(options: {
         grid?: Grid,
         constrain?: (string | Figure)[],
@@ -225,7 +239,7 @@ export class Point extends Figure {
         this._shape = POINTSHAPE.HANDLE
         this.updateFigure()
 
-        if(options===undefined)options = {}
+        if (options === undefined) options = {}
 
         let point = this
 
@@ -324,7 +338,7 @@ export class Point extends Figure {
             this.svg = this.graph.svg.path(
                 `M${-this._scale},${-this._scale} L${+this._scale},${+this._scale} M${+this._scale},${-this._scale} L${-this._scale},${+this._scale}`
             ).stroke('black').center(0, 0).data('shape', POINTSHAPE.CROSS);
-        } else if(this._shape === POINTSHAPE.SQUARE) {
+        } else if (this._shape === POINTSHAPE.SQUARE) {
             this.svg = this.graph.svg.path(
                 `M${-this._scale},${-this._scale} L${+this._scale},${-this._scale} L${+this._scale},${+this._scale} L${-this._scale},${+this._scale} Z`
             ).stroke('black').center(0, 0).data('shape', POINTSHAPE.SQUARE);
@@ -345,14 +359,14 @@ export class Point extends Figure {
         }
 
         if (this._constrain.type === POINTCONSTRAIN.INTERSECTION_LINES) {
-            let a:Line = this._constrain.data[0],
+            let a: Line = this._constrain.data[0],
                 b: Line = this._constrain.data[1],
                 intersection = a.math.intersection(b.math)
 
-            if(intersection.hasIntersection){
+            if (intersection.hasIntersection) {
                 this._x = intersection.point.x.value
                 this._y = intersection.point.y.value
-            }else{
+            } else {
                 // TODO: must mark an invalid point
                 this.hide()
             }
@@ -380,13 +394,45 @@ export class Point extends Figure {
             }
         }
 
-        if(this._constrain.type === POINTCONSTRAIN.VECTOR) {
+        if (this._constrain.type === POINTCONSTRAIN.SYMMETRY) {
+            const symmetry_reference = this._constrain.data[1],
+                pt = this._constrain.data[0]
+
+            if (pt instanceof Point && symmetry_reference instanceof Point) {
+                this._x = pt.x + 2 * (symmetry_reference.x - pt.x)
+                this._y = pt.y + 2 * (symmetry_reference.y - pt.y)
+            } else if (typeof symmetry_reference === "string") {
+                if (symmetry_reference === 'Ox') {
+                    this._x = pt.x
+                    this._y = this.graph.origin.y - (pt.y - this.graph.origin.y)
+                } else if (symmetry_reference === 'Oy') {
+                    this._x = this.graph.origin.x - (pt.x - this.graph.origin.x)
+                    this._y = pt.y
+                }
+            } else if (symmetry_reference instanceof Line) {
+                // Get the projection to a line.
+                // TODO: duplicate code : projection and symmetry.
+                let u = symmetry_reference.math.director,
+                    A = {x: 0, y: symmetry_reference.math.getValueAtX(0).value},  // Point on the line
+                    AP = new Vector(A, pt),
+                    k = Vector.scalarProduct(AP, u) / u.normSquare.value,
+                    proj = {
+                        x: A.x + k * u.x.value,
+                        y: A.y + k * u.y.value
+                    }
+
+                this._x = pt.x + 2 * (proj.x - pt.x)
+                this._y = pt.y + 2 * (proj.y - pt.y)
+
+            }
+        }
+        if (this._constrain.type === POINTCONSTRAIN.VECTOR) {
             const A: Point = this._constrain.data[0],
                 B: Point = this._constrain.data[1],
                 scale: number = this._constrain.data[2]
 
-            this._x = A.x + (B.x-A.x)*scale
-            this._y = A.y + (B.y-A.y)*scale
+            this._x = A.x + (B.x - A.x) * scale
+            this._y = A.y + (B.y - A.y) * scale
         }
     }
 }

@@ -13,8 +13,6 @@ class Point extends Figure_1.Figure {
     _constrain;
     _scale;
     _shape;
-    _x;
-    _y;
     constructor(graph, name, pixels) {
         super(graph, name);
         this._x = pixels.x;
@@ -27,6 +25,7 @@ class Point extends Figure_1.Figure {
         // Add the label
         this.label = new Label_1.Label(this.graph, name, { el: this });
     }
+    _x;
     get x() {
         return this._x;
     }
@@ -34,6 +33,7 @@ class Point extends Figure_1.Figure {
         this._x = value;
         this.update();
     }
+    _y;
     get y() {
         return this._y;
     }
@@ -60,6 +60,14 @@ class Point extends Figure_1.Figure {
             y: value
         }).y;
     }
+    get tex() {
+        let P = this.graph.pixelsToUnits(this);
+        return `${this.name}${this.coordAsTex}`;
+    }
+    get coordAsTex() {
+        let P = this.graph.pixelsToUnits(this);
+        return `\\left( ${P.x} ; ${P.y} \\right)`;
+    }
     addUnit(value, axis) {
         if (axis === undefined || axis === enums_1.AXIS.HORIZONTAL) {
             this.coordX = this.coord.x + value;
@@ -68,14 +76,6 @@ class Point extends Figure_1.Figure {
             this.coordY = this.coord.y + value;
         }
         return this;
-    }
-    get tex() {
-        let P = this.graph.pixelsToUnits(this);
-        return `${this.name}${this.coordAsTex}`;
-    }
-    get coordAsTex() {
-        let P = this.graph.pixelsToUnits(this);
-        return `\\left( ${P.x} ; ${P.y} \\right)`;
     }
     generateName() {
         if (this.name === undefined) {
@@ -172,6 +172,14 @@ class Point extends Figure_1.Figure {
         this._constrain = {
             type: enums_1.POINTCONSTRAIN.PROJECTION,
             data: [A, to]
+        };
+        this.update();
+        return this;
+    }
+    symmetry(A, of) {
+        this._constrain = {
+            type: enums_1.POINTCONSTRAIN.SYMMETRY,
+            data: [A, of]
         };
         this.update();
         return this;
@@ -303,6 +311,34 @@ class Point extends Figure_1.Figure {
                 AP = new vector_1.Vector(A, M), k = vector_1.Vector.scalarProduct(AP, u) / u.normSquare.value;
                 this._x = A.x + k * u.x.value;
                 this._y = A.y + k * u.y.value;
+            }
+        }
+        if (this._constrain.type === enums_1.POINTCONSTRAIN.SYMMETRY) {
+            const symmetry_reference = this._constrain.data[1], pt = this._constrain.data[0];
+            if (pt instanceof Point && symmetry_reference instanceof Point) {
+                this._x = pt.x + 2 * (symmetry_reference.x - pt.x);
+                this._y = pt.y + 2 * (symmetry_reference.y - pt.y);
+            }
+            else if (typeof symmetry_reference === "string") {
+                if (symmetry_reference === 'Ox') {
+                    this._x = pt.x;
+                    this._y = this.graph.origin.y - (pt.y - this.graph.origin.y);
+                }
+                else if (symmetry_reference === 'Oy') {
+                    this._x = this.graph.origin.x - (pt.x - this.graph.origin.x);
+                    this._y = pt.y;
+                }
+            }
+            else if (symmetry_reference instanceof Line_1.Line) {
+                // Get the projection to a line.
+                // TODO: duplicate code : projection and symmetry.
+                let u = symmetry_reference.math.director, A = { x: 0, y: symmetry_reference.math.getValueAtX(0).value }, // Point on the line
+                AP = new vector_1.Vector(A, pt), k = vector_1.Vector.scalarProduct(AP, u) / u.normSquare.value, proj = {
+                    x: A.x + k * u.x.value,
+                    y: A.y + k * u.y.value
+                };
+                this._x = pt.x + 2 * (proj.x - pt.x);
+                this._y = pt.y + 2 * (proj.y - pt.y);
             }
         }
         if (this._constrain.type === enums_1.POINTCONSTRAIN.VECTOR) {
