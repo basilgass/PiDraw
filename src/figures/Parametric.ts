@@ -2,8 +2,9 @@ import {Figure} from "./Figure";
 import {Graph} from "../Graph";
 import {IPoint} from "../variables/interfaces";
 import {G, Path, Rect} from "@svgdotjs/svg.js";
-import {NumExp} from "pimath/esm/maths/expressions/numexp";
+// import {NumExp} from "pimath/esm/maths/expressions/numexp";
 import {PlotConfig} from "./Plot";
+import {NumExp} from "../Calculus";
 
 
 export class Parametric extends Figure {

@@ -4,8 +4,8 @@ exports.Circle = void 0;
 const Figure_1 = require("./Figure");
 const Point_1 = require("./Point");
 const svg_js_1 = require("@svgdotjs/svg.js");
-const circle_1 = require("pimath/esm/maths/geometry/circle");
-const point_1 = require("pimath/esm/maths/geometry/point");
+// import {Circle as mathCircle} from "pimath/esm/maths/geometry/circle"
+// import {Point as mathPoint} from "pimath/esm/maths/geometry/point"
 class Circle extends Figure_1.Figure {
     _center;
     _radius;
@@ -19,10 +19,12 @@ class Circle extends Figure_1.Figure {
         return this;
     }
     get tex() {
-        let PTO = this.graph.pixelsToUnits(this.center);
-        let P = new point_1.Point(PTO.x, PTO.y);
-        let c = new circle_1.Circle(P, this.radius);
-        return `(${this.name}): ${c.tex}`;
+        // let PTO = this.graph.pixelsToUnits(this.center)
+        // let P = new mathPoint(PTO.x, PTO.y)
+        // let c = new mathCircle(P, this.radius)
+        // TODO : remove display from PiMath
+        // return `(${this.name}): ${c.tex}`
+        return "";
     }
     get center() {
         return this._center;

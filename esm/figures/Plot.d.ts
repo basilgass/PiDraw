@@ -4,7 +4,7 @@ import { IPoint } from "../variables/interfaces";
 import { Riemann } from "./PlotPlugins/Riemann";
 import { Follow } from "./PlotPlugins/Follow";
 import { FillBetween } from "./PlotPlugins/FillBetween";
-import { NumExp } from "pimath/esm/maths/expressions/numexp";
+import { NumExp } from "../Calculus";
 export interface PlotConfig {
     domain: {
         min: number;

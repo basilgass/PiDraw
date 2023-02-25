@@ -5,7 +5,8 @@ import {G, Path, Rect} from "@svgdotjs/svg.js";
 import {Riemann} from "./PlotPlugins/Riemann";
 import {Follow} from "./PlotPlugins/Follow";
 import {FillBetween} from "./PlotPlugins/FillBetween";
-import {NumExp} from "pimath/esm/maths/expressions/numexp";
+import {NumExp} from "../Calculus";
+// import {NumExp} from "pimath/esm/maths/expressions/numexp";
 
 export interface PlotConfig {
     domain: { min: number, max: number },

@@ -4,7 +4,7 @@ import { IPoint } from "../variables/interfaces";
 import { Grid } from "./Grid";
 import { AXIS, POINTCONSTRAIN } from "../variables/enums";
 import { Line } from "./Line";
-import { Vector } from "pimath/esm/maths/geometry/vector";
+import { mathVector } from "../Calculus";
 export interface PointConfig {
     data?: any;
     type: POINTCONSTRAIN;
@@ -30,7 +30,7 @@ export declare class Point extends Figure {
     generateName(): string;
     asCross(): Point;
     asCircle(size?: number): Point;
-    asSquare(size?: number, orientation?: Vector): Point;
+    asSquare(size?: number, orientation?: mathVector): Point;
     setSize(value: number): Point;
     getDistanceTo(value: Figure): number;
     updateFigure(): Point;

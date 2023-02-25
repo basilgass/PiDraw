@@ -8,7 +8,7 @@ const Label_1 = require("./Label");
 const Circle_1 = require("./Circle");
 const Line_1 = require("./Line");
 const Plot_1 = require("./Plot");
-const vector_1 = require("pimath/esm/maths/geometry/vector");
+const Calculus_1 = require("../Calculus");
 class Point extends Figure_1.Figure {
     _constrain;
     _scale;
@@ -102,7 +102,7 @@ class Point extends Figure_1.Figure {
         }
         if (orientation !== undefined) {
             // TODO: add the orientation to the square - really useful ?
-            console.log(orientation.tex);
+            console.log(orientation);
         }
         this._shape = enums_1.POINTSHAPE.SQUARE;
         this.update();
@@ -232,12 +232,12 @@ class Point extends Figure_1.Figure {
                 else {
                     for (let c of options.constrain) {
                         if (c instanceof Circle_1.Circle) {
-                            let v = new vector_1.Vector(c.center, { x, y }), r = c.getRadiusAsPixels();
-                            x = c.center.x + v.x.value / v.norm * r;
-                            y = c.center.y + v.y.value / v.norm * r;
+                            let v = new Calculus_1.mathVector(c.center, { x, y }), r = c.getRadiusAsPixels();
+                            x = c.center.x + v.x / v.norm * r;
+                            y = c.center.y + v.y / v.norm * r;
                         }
                         else if (c instanceof Line_1.Line) {
-                            y = c.math.getValueAtX(x).value;
+                            y = c.math.getValueAtX(x);
                         }
                         else if (c instanceof Plot_1.Plot) {
                             const pt = point.graph.pixelsToUnits({ x, y });
@@ -260,7 +260,8 @@ class Point extends Figure_1.Figure {
             }
         }
         this.svg.draggable()
-            .on('dragmove', dragmove);
+            .on('dragmove', dragmove)
+            .on('dragend', dragmove);
         return this;
     }
     _updateShape() {
@@ -290,13 +291,14 @@ class Point extends Figure_1.Figure {
         if (this._constrain.type === enums_1.POINTCONSTRAIN.MIDDLE) {
             const A = this._constrain.data[0], B = this._constrain.data[1];
             this._x = (A.x + B.x) / 2;
+            this._x = (A.x + B.x) / 2;
             this._y = (A.y + B.y) / 2;
         }
         if (this._constrain.type === enums_1.POINTCONSTRAIN.INTERSECTION_LINES) {
-            let a = this._constrain.data[0], b = this._constrain.data[1], intersection = a.math.intersection(b.math);
-            if (intersection.hasIntersection) {
-                this._x = intersection.point.x.value;
-                this._y = intersection.point.y.value;
+            let a = this._constrain.data[0].math, b = this._constrain.data[1].math, intersection = a.intersection(b);
+            if (intersection !== null) {
+                this._x = intersection.x;
+                this._y = intersection.y;
             }
             else {
                 // TODO: must mark an invalid point
@@ -316,9 +318,9 @@ class Point extends Figure_1.Figure {
             else if (to instanceof Line_1.Line) {
                 // Get the projection to a line.
                 let u = to.math.director, A = to.getPointOnLine(), // Point on the line
-                AP = new vector_1.Vector(A, M), k = vector_1.Vector.scalarProduct(AP, u) / u.normSquare.value;
-                this._x = A.x + k * u.x.value;
-                this._y = A.y + k * u.y.value;
+                AP = new Calculus_1.mathVector(A, M), k = Calculus_1.mathVector.scalarProduct(AP, u) / (u.norm ** 2);
+                this._x = A.x + k * u.x;
+                this._y = A.y + k * u.y;
             }
         }
         if (this._constrain.type === enums_1.POINTCONSTRAIN.SYMMETRY) {
@@ -341,9 +343,9 @@ class Point extends Figure_1.Figure {
                 // Get the projection to a line.
                 // TODO: duplicate code : projection and symmetry.
                 let u = symmetry_reference.math.director, A = symmetry_reference.getPointOnLine(), // Point on the line
-                AP = new vector_1.Vector(A, pt), k = vector_1.Vector.scalarProduct(AP, u) / u.normSquare.value, proj = {
-                    x: A.x + k * u.x.value,
-                    y: A.y + k * u.y.value
+                AP = new Calculus_1.mathVector(A, pt), k = Calculus_1.mathVector.scalarProduct(AP, u) / (u.norm ** 2), proj = {
+                    x: A.x + k * u.x,
+                    y: A.y + k * u.y
                 };
                 this._x = pt.x + 2 * (proj.x - pt.x);
                 this._y = pt.y + 2 * (proj.y - pt.y);
@@ -356,8 +358,8 @@ class Point extends Figure_1.Figure {
         }
         if (this._constrain.type === enums_1.POINTCONSTRAIN.DIRECTION) {
             const A = this._constrain.data[0], d = this._constrain.data[1], distance = this.graph.distanceToPixels(this._constrain.data[2]), perp = this._constrain.data[3], v = perp ? d.math.normal : d.math.director, norm = v.norm;
-            this._x = A.x + v.x.value * distance / norm;
-            this._y = A.y + v.y.value * distance / norm;
+            this._x = A.x + v.x * distance / norm;
+            this._y = A.y + v.y * distance / norm;
         }
     }
 }

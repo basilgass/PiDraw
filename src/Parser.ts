@@ -2,11 +2,14 @@ import {Graph} from "./Graph";
 import {Line, LINECONSTRUCTION} from "./figures/Line";
 import {Figure} from "./figures/Figure";
 import {Plot} from "./figures/Plot";
-import {Line as mathLine} from "pimath/esm/maths/geometry/line"
-import {Point as mathPoint} from "pimath/esm/maths/geometry/point"
-import {Line as svgLine, Path} from "@svgdotjs/svg.js";
+// import {Line as mathLine} from "pimath/esm/maths/geometry/line"
+// import {Point as mathPoint} from "pimath/esm/maths/geometry/point"
+import {Line as svgLine, Path, regex} from "@svgdotjs/svg.js";
 import {Point} from "./figures/Point";
 import {Axis} from "./figures/Axis";
+import {IPoint} from "./variables/interfaces";
+import {isInfinity, NumExp} from "./Calculus";
+import {match} from "assert";
 
 type BuildStep = { step: string, figures: Figure[] }
 
@@ -578,35 +581,92 @@ export class Parser {
             }, name)]
         } else if (step.includes('=')) {
             // type is      d = line 3x-2y=0    From equation
-            let equ = new mathLine(step)
+            if(step.includes('x') && step.includes('y')){
+                function parseLine(equ: string): { [key: string]: number }{
+                    const x = equ.match(/([-0-9/.]+)x/g),
+                        y = equ.match(/([-0-9/.]+)y/g)
 
-            if (equ.equation.variables.includes('y') && equ.equation.variables.includes('x')) {
+                    let dx, dy, dc
+                    if(x && x[0].endsWith('x')){
+                        equ = equ.replace(x[0], "")
+                        dx = x[0].substring(0, x[0].length-1)
+
+                        if(dx.includes('/')){
+                            let [n, d] = dx.split('/')
+                            dx = (+n)/(+d)
+                        }
+                    }else{
+                        dx = equ.includes('x') ? 1 : 0;
+                    }
+
+                    if(y && y[0].endsWith('y')){
+                        equ = equ.replace(y[0], "")
+                        dy = y[0].substring(0, x[0].length-1)
+
+                        if(dy.includes('/')){
+                            let [n, d] = dy.split('/')
+                            dy = (+n)/(+d)
+                        }
+                    }else{
+                        dy = equ.includes('y') ? 1 : 0;
+                    }
+
+                    let c = equ.match(/([-0-9./]+)(?![xy])/)
+                    if(c){
+                        if( c[0].includes('/')) {
+                            let [n, d] = c[0].split('/')
+                            dc = (+n) / (+d)
+                        }else{
+                            dc = +c[0]
+                        }
+                    }else{
+                        dc = 0
+                    }
+
+                    if(isInfinity(+dx))dx = 0
+                    if(isInfinity(+dy))dy = 0
+                    if(isInfinity(+dc))dc = 0
+
+                    return {a: +dx, b: +dy, c: +dc}
+                }
                 // Get the point
-                let A = this._graph.point(0, equ.getValueAtX(0).value)
+                let left = parseLine(step.split('=')[0]),
+                    right = parseLine(step.split('=')[1])
+
+                // Get the cartesian ax+by+c=0
+                let a = left.a-right.a,
+                    b = left.b-right.b,
+                    c = left.c-right.c
+
+                // ax + by + c = 0
+                // director = (-b, a)
+                // A = (0, -c/b)
+                const A = this._graph.point(0, -c/b)
                 A.hide().label.hide()
                 figures = [
                     A,
                     this._graph.line(A, null, {
                             rule: LINECONSTRUCTION.SLOPE,
-                            value: equ.slope.display
+                            value: -a/b
                         },
                         name)
                 ]
-            } else if (equ.equation.variables.includes('y')) {
-                // HORIZONTAL LINE
-                let A = this._graph.point(0, equ.getValueAtX(0).value)
-                A.hide().label.hide()
-                figures = [
-                    A,
-                    this._graph.line(A, null, {
-                            rule: LINECONSTRUCTION.SLOPE,
-                            value: equ.slope.display
-                        },
-                        name)
-                ]
-            } else {
-                // It's a vertical line.
-                let x = equ.getValueAtY(0).value
+
+
+                // let A = this._graph.point(0, equ.getValueAtX(0).value)
+                // A.hide().label.hide()
+                // figures = [
+                //     A,
+                //     this._graph.line(A, null, {
+                //             rule: LINECONSTRUCTION.SLOPE,
+                //             value: equ.slope.display
+                //         },
+                //         name)
+                // ]
+
+            }else if(step.includes('x')){
+                // VERTICAL LINE
+                let x = +step.split('=')[1]
 
                 let A = this._graph.point(x, 0),
                     B = this._graph.point(x, 1)
@@ -615,6 +675,20 @@ export class Parser {
                 figures = [
                     A, B,
                     this._graph.line(A, B, null, name)
+                ]
+            }else if(step.includes('y')){
+                // HORIZONTAL LINE
+                let y = +step.split('=')[1]
+
+                let A = this._graph.point(0, y)
+                A.hide().label.hide()
+                figures = [
+                    A,
+                    this._graph.line(A, null, {
+                            rule: LINECONSTRUCTION.SLOPE,
+                            value: 0
+                        },
+                        name)
                 ]
             }
 
@@ -698,18 +772,18 @@ export class Parser {
             perp = values[3] === 'p',
             figures: Figure[]
 
-        if(values.length>=3){
+        if (values.length >= 3) {
             A = this._graph.getPoint(values[0])
             d = this._graph.getFigure(values[1])
-            if(isNaN(+values[2])){
+            if (isNaN(+values[2])) {
                 // TODO: must handle distance between two points
                 distance = 2
-            }else{
+            } else {
                 distance = +values[2]
             }
 
 
-            if(d instanceof Line) {
+            if (d instanceof Line) {
                 let pt = this._graph.point(0, 0, name).fromDirection(A, d, distance, perp)
                 pt.asCircle().svg.fill('black')
 
@@ -740,23 +814,18 @@ export class Parser {
     }
 
     private _generateIntersectionPoint(name: string, step: string): Figure[] {
-        console.log(step)
         let match = [...step.matchAll(/^([a-z]_?[0-9]?),([a-z]_?[0-9]?)/g)],
-            figures: Figure[],
-            mathPt: { point: mathPoint; hasIntersection: boolean; isParallel: boolean; isSame: boolean }
+            figures: Figure[]
 
         if (match.length > 0) {
             let d1 = this._graph.getFigure(match[0][1]),
                 d2 = this._graph.getFigure(match[0][2])
 
             if (d1 instanceof Line && d2 instanceof Line) {
-                mathPt = d1.math.intersection(d2.math)
-
-                if (mathPt.hasIntersection) {
-                    let pt = this._graph.point(0, 0, name).intersectionOf(d1, d2)
-                    pt.asCircle().svg.fill('black')
-                    figures = [pt]
-                }
+                let pt = this._graph.point(0, 0, name).intersectionOf(d1, d2)
+                // TODO: how to handle if the intersection is not valid?
+                pt.asCircle().svg.fill('black')
+                figures = [pt]
             }
         }
 

@@ -1,9 +1,8 @@
 import { Figure } from "./Figure";
 import { Graph } from "../Graph";
 import { Point } from "./Point";
-import { Line as mathLine } from "pimath/esm/maths/geometry/line";
-import { Vector } from "pimath/esm/maths/geometry/vector";
 import { IPoint } from "../variables/interfaces";
+import { mathLine, mathVector } from "../Calculus";
 export interface LineConfig {
     k?: number;
     rule: string;
@@ -43,12 +42,8 @@ export declare class Line extends Figure {
         mxh: string;
         parametric: string;
     };
-    get texMath(): {
-        canonical: string;
-        mxh: string;
-        parametric: string;
-    };
-    get d(): Vector;
+    get texMath(): string;
+    get d(): mathVector;
     asSegment(value?: boolean, scale?: number): Line;
     asVector(value?: boolean, scale?: number): Line;
     generateName(): string;

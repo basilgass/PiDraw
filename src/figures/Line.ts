@@ -2,12 +2,13 @@ import {Figure} from "./Figure";
 import {Graph} from "../Graph";
 import {Point} from "./Point";
 import {Line as svgLine} from "@svgdotjs/svg.js";
-import {Line as mathLine} from "pimath/esm/maths/geometry/line"
-import {Point as mathPoint} from "pimath/esm/maths/geometry/point"
-import {Fraction} from "pimath/esm/maths/coefficients/fraction";
-import {Vector} from "pimath/esm/maths/geometry/vector";
+// import {Line as mathLine} from "pimath/esm/maths/geometry/line"
+// import {Point as mathPoint} from "pimath/esm/maths/geometry/point"
+// import {Fraction} from "pimath/esm/maths/coefficients/fraction";
+// import {mathVector} from "pimath/esm/maths/geometry/vector";
 import {Label} from "./Label";
 import {IPoint} from "../variables/interfaces";
+import {mathLine, mathVector} from "../Calculus";
 
 export interface LineConfig {
     k?: number
@@ -123,7 +124,9 @@ export class Line extends Figure {
     }
 
     get tex(): string {
-        return `${this.name}: ${this.texMath.canonical}`
+        // TODO : remove tex and display
+        // return `${this.name}: ${this.texMath.canonical}`
+        return ""
     }
 
     get display(): { canonical: string; mxh: string; parametric: string } {
@@ -131,9 +134,10 @@ export class Line extends Figure {
         let m: mathLine
 
         A = this.graph.pixelsToUnits(this.A)
-        m = new mathLine(new mathPoint(A.x, A.y), this.d)
+        m = new mathLine(A, this.d)
 
-        return m.display
+        // TODO : output a display method or disable the output
+        return {canonical: "", mxh: "", parametric: ""}
     }
 
     get texMath() {
@@ -141,22 +145,22 @@ export class Line extends Figure {
         let m: mathLine
 
         A = this.graph.pixelsToUnits(this.A)
-        m = new mathLine(new mathPoint(A.x, A.y), this.d)
+        m = new mathLine(A, this.d)
 
-        return m.tex
+        // TODO : output a display method
+        return ""
     }
 
-    get d(): Vector {
+    get d(): mathVector {
 
         if (this.B) {
             let A = this.graph.pixelsToUnits(this.A),
                 B = this.graph.pixelsToUnits(this.B)
-            return new Vector(B.x - A.x, B.y - A.y)
+            return new mathVector(B.x - A.x, B.y - A.y)
         } else {
             switch (this._construction.rule) {
                 case LINECONSTRUCTION.SLOPE:
-                    let slope = new Fraction(this._construction.value)
-                    return new Vector(slope.denominator, slope.numerator)
+                    return new mathVector(1, +this._construction.value)
                 case LINECONSTRUCTION.PARALLEL:
                     if (this._construction.value instanceof Line) {
                         return this._construction.value.d
@@ -164,14 +168,14 @@ export class Line extends Figure {
                     break
                 case LINECONSTRUCTION.PERPENDICULAR:
                     if (this._construction.value instanceof Line) {
-                        return this._construction.value.d.clone().normal()
+                        return this._construction.value.d.normal
                     }
                     break
                 case LINECONSTRUCTION.TANGENT:
-                    return new Vector()
+                    return new mathVector(null, null)
             }
         }
-        return new Vector()
+        return new mathVector(null, null)
     }
 
     asSegment(value?: boolean, scale?: number): Line {
@@ -220,16 +224,19 @@ export class Line extends Figure {
     }
 
     getPointOnLine(): IPoint {
-        let x = 0,
+        let x:number,
             y: number
 
-        try {
-            y = this.math.getValueAtX(0).value
-        } catch {
-            y = 0
-            x = this.math.getValueAtY(0).value
-        }
+        const slope = this.math.slope
 
+        if(slope === Number.POSITIVE_INFINITY || slope === Number.NEGATIVE_INFINITY){
+            // it's a vertical line
+            y = 0
+            x = this.math.getValueAtY(0)
+        }else{
+            x = 0
+            y = this.math.getValueAtX(0)
+        }
 
         return {x, y}
     }
@@ -246,12 +253,10 @@ export class Line extends Figure {
     }
 
     private _updateLineThroughAandB() {
-        this._math = new mathLine(
-            new mathPoint(this._A.x, this._A.y),
-            new mathPoint(this._B.x, this._B.y)
-        )
+        this._math = new mathLine(this._A,this._B)
+        const slope = this._math.slope
 
-        if (this._math.slope.isInfinity()) {
+        if (slope === Number.POSITIVE_INFINITY || slope === Number.NEGATIVE_INFINITY) {
             if (this.svg instanceof svgLine) {
                 if (this._segmentStart === this._segmentEnd) {
                     this.svg.plot(
@@ -286,17 +291,13 @@ export class Line extends Figure {
                     x2 = this.A.x > this.B.x ? this.graph.width : this.B.x
                 }
             }
-            // [AB]=[BA] OK
-            // ]AB[=]BA[ OK
-            // the problem comes for half rules - the order is then important depending of the relative position of each reference point
-
 
             if (this.svg instanceof svgLine) {
                 this.svg.plot(
                     x1,
-                    this._math.getValueAtX(x1).value,
+                    this._math.getValueAtX(x1),
                     x2,
-                    this._math.getValueAtX(x2).value
+                    this._math.getValueAtX(x2)
                 )
             }
         }
@@ -309,9 +310,8 @@ export class Line extends Figure {
             if ((this._construction.rule === LINECONSTRUCTION.PARALLEL)) {
                 if (this._construction.value instanceof Line) {
                     this._math = new mathLine(
-                        new mathPoint(this._A.x, this._A.y),
-                        this._construction.value.math.director,
-                        LINECONSTRUCTION.PARALLEL
+                        this._A,
+                        this._construction.value.math.director
                     )
                 }
             }
@@ -319,32 +319,30 @@ export class Line extends Figure {
             if ((this._construction.rule === LINECONSTRUCTION.PERPENDICULAR)) {
                 if (this._construction.value instanceof Line) {
                     this._math = new mathLine(
-                        new mathPoint(this._A.x, this._A.y),
-                        this._construction.value.math.director,
-                        LINECONSTRUCTION.PERPENDICULAR
+                        this._A,
+                        this._construction.value.math.normal
                     )
                 }
             }
 
             if ((this._construction.rule === LINECONSTRUCTION.SLOPE)) {
                 if (!(this._construction.value instanceof Figure)) {
-                    let value = new Fraction(this._construction.value).value
-
                     this._math = new mathLine(
-                        new mathPoint(this._A.x, this._A.y),
-                        new mathPoint(this._A.x + 1, this._A.y - value)
+                        this._A,
+                        new mathVector(1, +this._construction.value)
                     )
                 }
             }
 
-            if (this._math.slope.isInfinity()) {
+            // Draw the line
+            if (this._math.slope === Number.POSITIVE_INFINITY || this._math.slope === Number.NEGATIVE_INFINITY) {
                 x1 = this._A.x
                 x2 = this._A.x
                 y1 = 0
                 y2 = this.graph.height
             } else {
-                y1 = this._math.getValueAtX(0).value
-                y2 = this._math.getValueAtX(this.graph.width).value
+                y1 = this._math.getValueAtX(0)
+                y2 = this._math.getValueAtX(this.graph.width)
             }
 
             if (this.svg instanceof svgLine) {

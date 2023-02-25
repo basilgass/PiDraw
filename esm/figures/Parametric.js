@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.Parametric = void 0;
 const Figure_1 = require("./Figure");
 const svg_js_1 = require("@svgdotjs/svg.js");
-const numexp_1 = require("pimath/esm/maths/expressions/numexp");
+const Calculus_1 = require("../Calculus");
 class Parametric extends Figure_1.Figure {
     _config;
     _fx;
@@ -84,7 +84,7 @@ class Parametric extends Figure_1.Figure {
     }
     evaluate(t) {
         let x, y;
-        if (this._fx instanceof numexp_1.NumExp) { //&& this._fx.isValid
+        if (this._fx instanceof Calculus_1.NumExp) { //&& this._fx.isValid
             x = this._fx.evaluate({ t: +t });
         }
         else if (typeof this._fx === 'function') {
@@ -93,7 +93,7 @@ class Parametric extends Figure_1.Figure {
         else {
             x = NaN;
         }
-        if (this._fy instanceof numexp_1.NumExp) { // && this._fy.isValid
+        if (this._fy instanceof Calculus_1.NumExp) { // && this._fy.isValid
             y = this._fy.evaluate({ t: +t });
         }
         else if (typeof this._fy === 'function') {
@@ -113,7 +113,7 @@ class Parametric extends Figure_1.Figure {
     }
     _parse(fn) {
         if (typeof fn === 'string') {
-            return new numexp_1.NumExp(fn);
+            return new Calculus_1.NumExp(fn);
         }
         return fn;
     }

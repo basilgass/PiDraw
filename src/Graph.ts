@@ -19,81 +19,13 @@ import {GraphConfig} from "./variables/types";
 import {Arc} from "./figures/Arc";
 import {Parser} from "./Parser";
 import {Parametric} from "./figures/Parametric";
-import {Numeric} from "pimath/esm/maths/numeric";
+// import {Numeric} from "pimath/esm/maths/numeric";
 import {Bezier} from "./figures/Bezier";
 import {Path} from "./figures/Path";
 import {Polygon} from "./figures/Polygon";
+import {numberCorrection} from "./Calculus";
 
 export class Graph {
-    /**
-     * HTML container
-     * @type {HTMLElement}
-     * @private
-     */
-    private _container: HTMLElement;
-    /**
-     * List of all figures drawn in the graph.
-     * @type {Figure[]}
-     * @private
-     */
-    private _figures: Figure[]
-    /**
-     * Determine if all the graph must be drawn or not.
-     * @type {boolean}
-     * @private
-     */
-    private _freeze: boolean
-    /**
-     * Number of pixels in the graph
-     * @type {number}
-     * @private
-     */
-    private _height: number;
-    /**
-     * Layers of the graph
-     * @type {ILayers}
-     * @private
-     */
-    private _layers: ILayers
-    /**
-     * Default markers for start and end
-     * @type {{start: Marker, end: Marker}}
-     * @private
-     */
-    private _markers: { start: Marker, end: Marker }
-    /**
-     * Origin position in unit coordinate
-     * @type {IPoint}
-     * @private
-     */
-    private _origin: IPoint
-    /**
-     * Number of pixels per unit.
-     * @type {IPoint}
-     * @private
-     */
-    private _pixelsPerUnit: IPoint
-    /**
-     * List of all points by name. Used to quickly get a point.
-     * @type {{[p: string]: Point}}
-     * @private
-     */
-    private _points: { [key: string]: Point }
-    /**
-     * SVG.js main element
-     * @type {Svg}
-     * @private
-     */
-    private _svg: Svg;
-    /**
-     * Number of pixels on the graph
-     * @type {number}
-     * @private
-     */
-    private _width: number;
-
-    private _texConverter: {toTex: Function, options: {}};
-
     /**
      * Create the main graph canvas element
      * config: {origin: {x: number, y: number}, grid: {x: number, y: number, type: GRIDTYPE}}
@@ -173,45 +105,34 @@ export class Graph {
         }
     }
 
+    /**
+     * HTML container
+     * @type {HTMLElement}
+     * @private
+     */
+    private _container: HTMLElement;
+
     get container(): HTMLElement {
         return this._container;
     }
 
-    get svg(): Svg {
-        return this._svg;
-    }
-
-    get width(): number {
-        return this._width;
-    }
-
-    get height(): number {
-        return this._height;
-    }
-
-    get origin(): IPoint {
-        return this._origin;
-    }
-
-    set origin(value: IPoint) {
-        this._origin = value;
-    }
-
-    get pixelsPerUnit(): IPoint {
-        return this._pixelsPerUnit;
-    }
-
-    set pixelsPerUnit(value:IPoint ) {
-        this._pixelsPerUnit = value
-    }
+    /**
+     * List of all figures drawn in the graph.
+     * @type {Figure[]}
+     * @private
+     */
+    private _figures: Figure[]
 
     get figures(): Figure[] {
         return this._figures;
     }
 
-    get points(): { [p: string]: Point } {
-        return this._points;
-    }
+    /**
+     * Determine if all the graph must be drawn or not.
+     * @type {boolean}
+     * @private
+     */
+    private _freeze: boolean
 
     get freeze(): boolean {
         return this._freeze;
@@ -221,12 +142,106 @@ export class Graph {
         this._freeze = value;
     }
 
+    /**
+     * Number of pixels in the graph
+     * @type {number}
+     * @private
+     */
+    private _height: number;
+
+    get height(): number {
+        return this._height;
+    }
+
+    /**
+     * Layers of the graph
+     * @type {ILayers}
+     * @private
+     */
+    private _layers: ILayers
+
     get layers(): ILayers {
         return this._layers;
     }
 
+    /**
+     * Default markers for start and end
+     * @type {{start: Marker, end: Marker}}
+     * @private
+     */
+    private _markers: { start: Marker, end: Marker }
+
     get markers(): { start: Marker; end: Marker } {
         return this._markers;
+    }
+
+    /**
+     * Origin position in unit coordinate
+     * @type {IPoint}
+     * @private
+     */
+    private _origin: IPoint
+
+    get origin(): IPoint {
+        return this._origin;
+    }
+
+    set origin(value: IPoint) {
+        this._origin = value;
+    }
+
+    /**
+     * Number of pixels per unit.
+     * @type {IPoint}
+     * @private
+     */
+    private _pixelsPerUnit: IPoint
+
+    get pixelsPerUnit(): IPoint {
+        return this._pixelsPerUnit;
+    }
+
+    set pixelsPerUnit(value: IPoint) {
+        this._pixelsPerUnit = value
+    }
+
+    /**
+     * List of all points by name. Used to quickly get a point.
+     * @type {{[p: string]: Point}}
+     * @private
+     */
+    private _points: { [key: string]: Point }
+
+    get points(): { [p: string]: Point } {
+        return this._points;
+    }
+
+    /**
+     * SVG.js main element
+     * @type {Svg}
+     * @private
+     */
+    private _svg: Svg;
+
+    get svg(): Svg {
+        return this._svg;
+    }
+
+    /**
+     * Number of pixels on the graph
+     * @type {number}
+     * @private
+     */
+    private _width: number;
+
+    get width(): number {
+        return this._width;
+    }
+
+    private _texConverter: { toTex: Function, options: {} };
+
+    set texConverter(value: { toTex: Function; options: {} }) {
+        this._texConverter = value;
     }
 
     get unitXDomain(): { min: number, max: number } {
@@ -241,11 +256,6 @@ export class Graph {
             min: Math.round(-(this._height - this._origin.y) / this._pixelsPerUnit.y),
             max: Math.round(this._origin.y / this._pixelsPerUnit.y)
         }
-    }
-
-
-    set texConverter(value: { toTex: Function; options: {} }) {
-        this._texConverter = value;
     }
 
     toTex(value: string): string {
@@ -271,14 +281,10 @@ export class Graph {
         // TODO: handle other grid types.
 
         // Handle "rounding" issue.
-        let x =(point.x - this.origin.x) / this._pixelsPerUnit.x,
-        y =    -(point.y - this.origin.y) / this._pixelsPerUnit.y
+        let x = (point.x - this.origin.x) / this._pixelsPerUnit.x,
+            y = -(point.y - this.origin.y) / this._pixelsPerUnit.y
 
-        // TODO: should handle "rounding" problems externally (from PiMath ?)
-        
-
-
-        return {x: Numeric.numberCorrection(x), y: Numeric.numberCorrection(y) }
+        return {x: numberCorrection(x), y: numberCorrection(y)}
     }
 
     getFigure(name: string): Figure {
@@ -322,7 +328,7 @@ export class Graph {
     }
 
     point(x: number, y: number, name?: string, asPixel?: boolean): Point {
-        const pixels = asPixel?{x,y}:this.unitsToPixels({x, y})
+        const pixels = asPixel ? {x, y} : this.unitsToPixels({x, y})
 
         const figure = new Point(
             this,
@@ -413,14 +419,14 @@ export class Graph {
 
     polygon(points: Point[] | IPoint[] | string[], name?: string): Polygon {
         // Case the point is given as xy coordinate instead of an existing point.
-        let polyPoints = points.map(pt=>{
-            if(typeof pt === 'string'){
+        let polyPoints = points.map(pt => {
+            if (typeof pt === 'string') {
                 return this.getPoint(pt)
-            }else if(!(pt instanceof Point)){
+            } else if (!(pt instanceof Point)) {
                 return this.point(pt.x, pt.y)
-            }else if(pt instanceof Point){
+            } else if (pt instanceof Point) {
                 return pt
-            }else{
+            } else {
                 return null
             }
         });
@@ -481,7 +487,7 @@ export class Graph {
         return figure
     }
 
-    bezier(values: (Point|string)[], name?: string): Bezier {
+    bezier(values: (Point | string)[], name?: string): Bezier {
         const figure = new Bezier(this, name, values)
 
         this._validateFigure(figure)

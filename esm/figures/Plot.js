@@ -6,7 +6,7 @@ const svg_js_1 = require("@svgdotjs/svg.js");
 const Riemann_1 = require("./PlotPlugins/Riemann");
 const Follow_1 = require("./PlotPlugins/Follow");
 const FillBetween_1 = require("./PlotPlugins/FillBetween");
-const numexp_1 = require("pimath/esm/maths/expressions/numexp");
+const Calculus_1 = require("../Calculus");
 class Plot extends Figure_1.Figure {
     _config;
     _precision;
@@ -33,7 +33,7 @@ class Plot extends Figure_1.Figure {
         this._plugins = [];
     }
     get tex() {
-        if (this._fx instanceof numexp_1.NumExp) {
+        if (this._fx instanceof Calculus_1.NumExp) {
             return this._rawFx.replaceAll('*', '\\cdot ');
         }
         else {
@@ -120,7 +120,7 @@ class Plot extends Figure_1.Figure {
     }
     evaluate(x) {
         let y;
-        if (this._fx instanceof numexp_1.NumExp && this._fx.isValid) {
+        if (this._fx instanceof Calculus_1.NumExp && this._fx.isValid) {
             y = this._fx.evaluate({ x: +x });
         }
         else if (typeof this._fx === 'function') {
@@ -136,9 +136,9 @@ class Plot extends Figure_1.Figure {
         if (typeof fn === 'string') {
             this._rawFx = fn;
             // must accept more complex fn, with auto normalize.
-            const expr = new numexp_1.NumExp(fn, true);
+            const expr = new Calculus_1.NumExp(fn, true);
             if (expr.isValid) {
-                return new numexp_1.NumExp(fn, true);
+                return new Calculus_1.NumExp(fn, true);
             }
             else {
                 // The expression is not valid.

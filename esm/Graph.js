@@ -14,78 +14,12 @@ const enums_1 = require("./variables/enums");
 const Arc_1 = require("./figures/Arc");
 const Parser_1 = require("./Parser");
 const Parametric_1 = require("./figures/Parametric");
-const numeric_1 = require("pimath/esm/maths/numeric");
+// import {Numeric} from "pimath/esm/maths/numeric";
 const Bezier_1 = require("./figures/Bezier");
 const Path_1 = require("./figures/Path");
 const Polygon_1 = require("./figures/Polygon");
+const Calculus_1 = require("./Calculus");
 class Graph {
-    /**
-     * HTML container
-     * @type {HTMLElement}
-     * @private
-     */
-    _container;
-    /**
-     * List of all figures drawn in the graph.
-     * @type {Figure[]}
-     * @private
-     */
-    _figures;
-    /**
-     * Determine if all the graph must be drawn or not.
-     * @type {boolean}
-     * @private
-     */
-    _freeze;
-    /**
-     * Number of pixels in the graph
-     * @type {number}
-     * @private
-     */
-    _height;
-    /**
-     * Layers of the graph
-     * @type {ILayers}
-     * @private
-     */
-    _layers;
-    /**
-     * Default markers for start and end
-     * @type {{start: Marker, end: Marker}}
-     * @private
-     */
-    _markers;
-    /**
-     * Origin position in unit coordinate
-     * @type {IPoint}
-     * @private
-     */
-    _origin;
-    /**
-     * Number of pixels per unit.
-     * @type {IPoint}
-     * @private
-     */
-    _pixelsPerUnit;
-    /**
-     * List of all points by name. Used to quickly get a point.
-     * @type {{[p: string]: Point}}
-     * @private
-     */
-    _points;
-    /**
-     * SVG.js main element
-     * @type {Svg}
-     * @private
-     */
-    _svg;
-    /**
-     * Number of pixels on the graph
-     * @type {number}
-     * @private
-     */
-    _width;
-    _texConverter;
     /**
      * Create the main graph canvas element
      * config: {origin: {x: number, y: number}, grid: {x: number, y: number, type: GRIDTYPE}}
@@ -151,47 +85,117 @@ class Graph {
             options: {}
         };
     }
+    /**
+     * HTML container
+     * @type {HTMLElement}
+     * @private
+     */
+    _container;
     get container() {
         return this._container;
     }
-    get svg() {
-        return this._svg;
-    }
-    get width() {
-        return this._width;
-    }
-    get height() {
-        return this._height;
-    }
-    get origin() {
-        return this._origin;
-    }
-    set origin(value) {
-        this._origin = value;
-    }
-    get pixelsPerUnit() {
-        return this._pixelsPerUnit;
-    }
-    set pixelsPerUnit(value) {
-        this._pixelsPerUnit = value;
-    }
+    /**
+     * List of all figures drawn in the graph.
+     * @type {Figure[]}
+     * @private
+     */
+    _figures;
     get figures() {
         return this._figures;
     }
-    get points() {
-        return this._points;
-    }
+    /**
+     * Determine if all the graph must be drawn or not.
+     * @type {boolean}
+     * @private
+     */
+    _freeze;
     get freeze() {
         return this._freeze;
     }
     set freeze(value) {
         this._freeze = value;
     }
+    /**
+     * Number of pixels in the graph
+     * @type {number}
+     * @private
+     */
+    _height;
+    get height() {
+        return this._height;
+    }
+    /**
+     * Layers of the graph
+     * @type {ILayers}
+     * @private
+     */
+    _layers;
     get layers() {
         return this._layers;
     }
+    /**
+     * Default markers for start and end
+     * @type {{start: Marker, end: Marker}}
+     * @private
+     */
+    _markers;
     get markers() {
         return this._markers;
+    }
+    /**
+     * Origin position in unit coordinate
+     * @type {IPoint}
+     * @private
+     */
+    _origin;
+    get origin() {
+        return this._origin;
+    }
+    set origin(value) {
+        this._origin = value;
+    }
+    /**
+     * Number of pixels per unit.
+     * @type {IPoint}
+     * @private
+     */
+    _pixelsPerUnit;
+    get pixelsPerUnit() {
+        return this._pixelsPerUnit;
+    }
+    set pixelsPerUnit(value) {
+        this._pixelsPerUnit = value;
+    }
+    /**
+     * List of all points by name. Used to quickly get a point.
+     * @type {{[p: string]: Point}}
+     * @private
+     */
+    _points;
+    get points() {
+        return this._points;
+    }
+    /**
+     * SVG.js main element
+     * @type {Svg}
+     * @private
+     */
+    _svg;
+    get svg() {
+        return this._svg;
+    }
+    /**
+     * Number of pixels on the graph
+     * @type {number}
+     * @private
+     */
+    _width;
+    get width() {
+        return this._width;
+    }
+    _texConverter;
+    set texConverter(value) {
+        this._texConverter = value;
     }
     get unitXDomain() {
         return {
@@ -204,9 +208,6 @@ class Graph {
             min: Math.round(-(this._height - this._origin.y) / this._pixelsPerUnit.y),
             max: Math.round(this._origin.y / this._pixelsPerUnit.y)
         };
-    }
-    set texConverter(value) {
-        this._texConverter = value;
     }
     toTex(value) {
         return this._texConverter.toTex(value, this._texConverter.options);
@@ -229,8 +230,7 @@ class Graph {
         // TODO: handle other grid types.
         // Handle "rounding" issue.
         let x = (point.x - this.origin.x) / this._pixelsPerUnit.x, y = -(point.y - this.origin.y) / this._pixelsPerUnit.y;
-        // TODO: should handle "rounding" problems externally (from PiMath ?)
-        return { x: numeric_1.Numeric.numberCorrection(x), y: numeric_1.Numeric.numberCorrection(y) };
+        return { x: (0, Calculus_1.numberCorrection)(x), y: (0, Calculus_1.numberCorrection)(y) };
     }
     getFigure(name) {
         for (let figure of this._figures) {

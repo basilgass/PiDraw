@@ -7,7 +7,8 @@ import {Label} from "./Label";
 import {Circle} from "./Circle";
 import {Line} from "./Line";
 import {Plot} from "./Plot";
-import {Vector} from "pimath/esm/maths/geometry/vector"
+import {mathLine, mathVector} from "../Calculus";
+// import {mathVector} from "pimath/esm/maths/geometry/vector"
 
 export interface PointConfig {
     data?: any
@@ -126,13 +127,13 @@ export class Point extends Figure {
         return this
     }
 
-    asSquare(size?: number, orientation?: Vector): Point {
+    asSquare(size?: number, orientation?: mathVector): Point {
         if (size !== undefined && size > 0) {
             this._scale = size
         }
         if (orientation !== undefined) {
             // TODO: add the orientation to the square - really useful ?
-            console.log(orientation.tex)
+            console.log(orientation)
         }
 
         this._shape = POINTSHAPE.SQUARE
@@ -289,13 +290,13 @@ export class Point extends Figure {
                 } else {
                     for (let c of options.constrain) {
                         if (c instanceof Circle) {
-                            let v = new Vector(c.center, {x, y}),
+                            let v = new mathVector(c.center, {x, y}),
                                 r = c.getRadiusAsPixels()
 
-                            x = c.center.x + v.x.value / v.norm * r
-                            y = c.center.y + v.y.value / v.norm * r
+                            x = c.center.x + v.x / v.norm * r
+                            y = c.center.y + v.y / v.norm * r
                         } else if (c instanceof Line) {
-                            y = c.math.getValueAtX(x).value
+                            y = c.math.getValueAtX(x)
                         } else if (c instanceof Plot) {
                             const pt = point.graph.pixelsToUnits({x, y})
                             y = point.graph.unitsToPixels(c.evaluate(pt.x)).y
@@ -324,6 +325,7 @@ export class Point extends Figure {
 
         this.svg.draggable()
             .on('dragmove', dragmove)
+            .on('dragend', dragmove)
         return this
     }
 
@@ -364,17 +366,18 @@ export class Point extends Figure {
                 B: Point = this._constrain.data[1]
 
             this._x = (A.x + B.x) / 2
+            this._x = (A.x + B.x) / 2
             this._y = (A.y + B.y) / 2
         }
 
         if (this._constrain.type === POINTCONSTRAIN.INTERSECTION_LINES) {
-            let a: Line = this._constrain.data[0],
-                b: Line = this._constrain.data[1],
-                intersection = a.math.intersection(b.math)
+            let a: mathLine = this._constrain.data[0].math,
+                b: mathLine = this._constrain.data[1].math,
+                intersection = a.intersection(b)
 
-            if (intersection.hasIntersection) {
-                this._x = intersection.point.x.value
-                this._y = intersection.point.y.value
+            if (intersection !== null) {
+                this._x = intersection.x
+                this._y = intersection.y
             } else {
                 // TODO: must mark an invalid point
                 this.hide()
@@ -395,11 +398,11 @@ export class Point extends Figure {
                 // Get the projection to a line.
                 let u = to.math.director,
                     A = to.getPointOnLine(),  // Point on the line
-                    AP = new Vector(A, M),
-                    k = Vector.scalarProduct(AP, u) / u.normSquare.value
+                    AP = new mathVector(A, M),
+                    k = mathVector.scalarProduct(AP, u) / (u.norm**2)
 
-                this._x = A.x + k * u.x.value
-                this._y = A.y + k * u.y.value
+                this._x = A.x + k * u.x
+                this._y = A.y + k * u.y
             }
         }
 
@@ -423,11 +426,11 @@ export class Point extends Figure {
                 // TODO: duplicate code : projection and symmetry.
                 let u = symmetry_reference.math.director,
                     A = symmetry_reference.getPointOnLine(),  // Point on the line
-                    AP = new Vector(A, pt),
-                    k = Vector.scalarProduct(AP, u) / u.normSquare.value,
+                    AP = new mathVector(A, pt),
+                    k = mathVector.scalarProduct(AP, u) / (u.norm**2),
                     proj = {
-                        x: A.x + k * u.x.value,
-                        y: A.y + k * u.y.value
+                        x: A.x + k * u.x,
+                        y: A.y + k * u.y
                     }
 
                 this._x = pt.x + 2 * (proj.x - pt.x)
@@ -452,8 +455,8 @@ export class Point extends Figure {
                 v = perp?d.math.normal:d.math.director,
                 norm = v.norm
 
-            this._x = A.x + v.x.value*distance/norm
-            this._y = A.y + v.y.value*distance/norm
+            this._x = A.x + v.x*distance/norm
+            this._y = A.y + v.y*distance/norm
         }
     }
 }

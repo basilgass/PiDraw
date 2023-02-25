@@ -13,7 +13,8 @@
 
     <!-- KaTex -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.0/dist/katex.min.css"
-          integrity="sha384-Xi8rHCmBmhbuyyhbI88391ZKP2dmfnOl4rT9ZfRI7mLTdk1wblIUnrIq35nqwEvC" crossorigin="anonymous">
+          integrity="sha384-Xi8rHCmBmhbuyyhbI88391ZKP2dmfnOl4rT9ZfRI7mLTdk1wblIUnrIq35nqwEvC"
+          crossorigin="anonymous">
 
     <!-- The loading of KaTeX is deferred to speed up page rendering -->
     <script src="https://cdn.jsdelivr.net/npm/katex@0.16.0/dist/katex.min.js"
@@ -29,102 +30,101 @@
 <body class="min-h-screen">
 <div x-data="autoParse()">
     <h1 class="text-center text-2xl font-semibold my-10">Graph builder</h1>
-    <div id="root" class=" max-w-xl mx-auto" @mouseup="updateTex"></div>
+    <div class="grid grid-cols-1">
+        <div id="root" class="w-full max-w-3xl mx-auto"></div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 my-5 max-w-3xl mx-auto">
+            <div class="flex flex-col">
+                <div class="font-thin">Paramètres (xMin,xMax,yMin,yMax)</div>
+                <input x-model="parameters" @input="modify" class=" px-2 py-3 mb-5 border rounded">
 
-
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 my-5 max-w-3xl mx-auto">
-        <div class="flex flex-col">
-            <div class="font-thin">Paramètres (xMin,xMax,yMin,yMax)</div>
-            <input x-model="parameters" @input="modify" class=" px-2 py-3 mb-5 border rounded">
-
-            <textarea
-                    x-model="construct"
-                    rows="20"
-                    class="border mx-3 md:mx-0 py-2 px-3 rounded"
-                    @input="build"
-            ></textarea></div>
-        <div class="px-3 md:px-0">
-            <table class="w-full">
-                <tr>
-                    <td class="font-mono">A(4,6)</td>
-                    <td class="font-thin">point</td>
-                </tr>
-                <tr>
-                    <td class="font-mono">M=mid AB</td>
-                    <td class="font-thin">milieu de A et B</td>
-                </tr>
-                <tr>
-                    <td class="font-mono">P=vpt k*AB[,X]</td>
-                    <td class="font-thin">point construit par un vecteur de A et B, multiplié par k. Par défaut part de A, mais accepte un paramètre supplémentaire, pour définir le point de départ.</td>
-                </tr>
-                <tr>
-                    <td class="font-mono">P=dpt Point,droite,distance[,p]</td>
-                    <td class="font-thin">point construit par un vecteur directeur de la droite d, en partant du point. La longueur du vecteur est défini par distance. Le parmètre *p* indique de prendre le vecteur normal au lieu du directeur.</td>
-                </tr>
-                <tr>
-                    <td class="font-mono">P=proj A,d|Ox|Oy</td>
-                    <td class="font-thin">projection de A sur la droite d ou sur l'axe Ox ou Oy</td>
-                </tr>
-                <tr>
-                    <td class="font-mono">P=inter a,b</td>
-                    <td class="font-thin">point d'intersection des droites a et b</td>
-                </tr>
-                <tr>
-                    <td class="font-mono">d=AB</td>
-                    <td class="font-thin">droite passant par A et B</td>
-                </tr>
-                <tr>
-                    <td class="font-mono">d=line A,3/4</td>
-                    <td class="font-thin">droite passant par A et de pente 3/4</td>
-                </tr>
-                <tr>
-                    <td class="font-mono">d=line 3x-4y+5=0</td>
-                    <td class="font-thin">droite d'équation</td>
-                </tr>
-                <tr>
-                    <td class="font-mono">a=[AB]</td>
-                    <td class="font-thin">segment AB</td>
-                </tr>
-                <tr>
-                    <td class="font-mono">a=[AB[</td>
-                    <td class="font-thin">demi droite AB, ouverte en B</td>
-                </tr>
-                <tr>
-                    <td class="font-mono">a=vAB,*k</td>
-                    <td class="font-thin">vecteur AB, multiplié par k</td>
-                </tr>
-                <tr>
-                    <td class="font-mono">p=perp d,A</td>
-                    <td class="font-thin">perpendiculaire à d par A</td>
-                </tr>
-                <tr>
-                    <td class="font-mono">p=para d,A</td>
-                    <td class="font-thin">parallèle à d par A</td>
-                </tr>
-                <tr>
-                    <td class="font-mono">p=circ A,2</td>
-                    <td class="font-thin">cercle de centre A et de rayon 2</td>
-                </tr>
-                <tr>
-                    <td class="font-mono">f(x)=3*x-5</td>
-                    <td class="font-thin">Tracer une fonction y=f(x)</td>
-                </tr>
-                <tr>
-                    <td class="font-mono">f(t)=sin(t),cos(t),a,b</td>
-                    <td class="font-thin">Tracer une fonction paramétrique, en utilisant a et b comme borne.</td>
-                </tr>
-                <tr>
-                    <td class="font-mono">zone=fill f,g? a,b</td>
-                    <td class="font-thin">Remplir l'espace entre deux fonctions, borné par a et b</td>
-                </tr>
-            </table>
+                <textarea
+                        x-model="construct"
+                        rows="20"
+                        class="border mx-3 md:mx-0 py-2 px-3 rounded"
+                        @input="build"
+                ></textarea></div>
+            <div class="px-3 md:px-0">
+                <table class="w-full">
+                    <tr>
+                        <td class="font-mono">A(4,6)</td>
+                        <td class="font-thin">point</td>
+                    </tr>
+                    <tr>
+                        <td class="font-mono">M=mid AB</td>
+                        <td class="font-thin">milieu de A et B</td>
+                    </tr>
+                    <tr>
+                        <td class="font-mono">P=vpt k*AB[,X]</td>
+                        <td class="font-thin">point construit par un vecteur de A et B, multiplié par k. Par défaut part
+                            de A, mais accepte un paramètre supplémentaire, pour définir le point de départ.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="font-mono">P=dpt Point,droite,distance[,p]</td>
+                        <td class="font-thin">point construit par un vecteur directeur de la droite d, en partant du
+                            point. La longueur du vecteur est défini par distance. Le parmètre *p* indique de prendre le
+                            vecteur normal au lieu du directeur.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="font-mono">P=proj A,d|Ox|Oy</td>
+                        <td class="font-thin">projection de A sur la droite d ou sur l'axe Ox ou Oy</td>
+                    </tr>
+                    <tr>
+                        <td class="font-mono">P=inter a,b</td>
+                        <td class="font-thin">point d'intersection des droites a et b</td>
+                    </tr>
+                    <tr>
+                        <td class="font-mono">d=AB</td>
+                        <td class="font-thin">droite passant par A et B</td>
+                    </tr>
+                    <tr>
+                        <td class="font-mono">d=line A,3/4</td>
+                        <td class="font-thin">droite passant par A et de pente 3/4</td>
+                    </tr>
+                    <tr>
+                        <td class="font-mono">d=line 3x-4y+5=0</td>
+                        <td class="font-thin">droite d'équation</td>
+                    </tr>
+                    <tr>
+                        <td class="font-mono">a=[AB]</td>
+                        <td class="font-thin">segment AB</td>
+                    </tr>
+                    <tr>
+                        <td class="font-mono">a=[AB[</td>
+                        <td class="font-thin">demi droite AB, ouverte en B</td>
+                    </tr>
+                    <tr>
+                        <td class="font-mono">a=vAB,*k</td>
+                        <td class="font-thin">vecteur AB, multiplié par k</td>
+                    </tr>
+                    <tr>
+                        <td class="font-mono">p=perp d,A</td>
+                        <td class="font-thin">perpendiculaire à d par A</td>
+                    </tr>
+                    <tr>
+                        <td class="font-mono">p=para d,A</td>
+                        <td class="font-thin">parallèle à d par A</td>
+                    </tr>
+                    <tr>
+                        <td class="font-mono">p=circ A,2</td>
+                        <td class="font-thin">cercle de centre A et de rayon 2</td>
+                    </tr>
+                    <tr>
+                        <td class="font-mono">f(x)=3*x-5</td>
+                        <td class="font-thin">Tracer une fonction y=f(x)</td>
+                    </tr>
+                    <tr>
+                        <td class="font-mono">f(t)=sin(t),cos(t),a,b</td>
+                        <td class="font-thin">Tracer une fonction paramétrique, en utilisant a et b comme borne.</td>
+                    </tr>
+                    <tr>
+                        <td class="font-mono">zone=fill f,g? a,b</td>
+                        <td class="font-thin">Remplir l'espace entre deux fonctions, borné par a et b</td>
+                    </tr>
+                </table>
+            </div>
         </div>
-    </div>
-
-    <div class="max-w-3xl mx-auto">
-        <template x-for="tex of figures">
-            <div x-html="tex"></div>
-        </template>
     </div>
 
     <div class="text-center font-xs text-gray-300 mt-20 mb-5">Made with love (and some coffee) by B. Gass</div>
@@ -133,53 +133,53 @@
     function autoParse() {
         let graph = new PiDraw('root'),
             axis = graph.axis(),
-            construct2 = `A(4,6)->drag
-B(10,8)->drag
-C(8,1)->drag
-v=vAC
-bc=[BC]
-M=mid AB
-d=AB->red,dash
-d1=line A,2->blue,dot
-d2=line 3x+4y-9=0
-p1=perp d,B
-p2=para d,C
-c=circ B,2
-f(x)=sin(x)`,
-            construct3 = `A(8,3)->drag
-B=proj A,Ox
-d=line 3x-4y+5=0
-C=proj A,d`,
-            construct = `A(0,0)
-B(3,2)->drag:grid
-C=mid AB
-D=vpt 3*AB`
+            construct
 
-        construct = `O(0,0)
+
+        construct = `x1=line y=0.1->hide
+y1=line x=0.1->hide
+x2=line y=-0.1->hide
+y2=line x=-0.1->hide
+O(0,0)->$O
+O1(0,0.1)->hide
+O2(0,-0.1)->hide
+O3(0.1,0)->hide
+O4(-0.1,0)->hide
 c=circ O,10
-P(5,8.6)->drag:c
-R=sym P,Ox
-C1=proj P,Ox->?
-S1=proj P,Oy->?
-cos=[OC1]->ultrathick,green
-sin=[OS1]->ultrathick,red
+P(5,8.6)->drag:c,?
 v=[OP]
-u=[OR]
-cs=[PC1]->dash
-sn=[PS1]->dash
+P3=dpt O,v,10,p->hide
+P2=sym P3,y2
+C1=proj P,x1->?
+C2=proj P2,x2->?
+S1=proj P,y1->?
+S2=proj P2,y2->?
+cos=[O1C1]->ultrathick,green
+cos2=[O2C2]->ultrathick,green,dash
+sin=[O3S1]->ultrathick,red
+sin2=[O4S2]->ultrathick,red,dash
+v2=[OP2]
+cs=[PC1]->dot,ultrathin
+sn=[PS1]->dot,ultrathin
+cs2=[P2C2]->dot,ultrathin
+sn2=[P2S2]->dot,ultrathin
 X(10,0)->hide
-a=arc X,O,P->mark:end
+a=arc X,O,P,2->mark:end,$\\alpha
+a2=arc X,O,P2,5->mark:end,$\\frac{\\pi}{2}-\\alpha/r
 t=line x=10->ultrathin
 T=inter v,t->?
+T2=inter v2,t->?
 tan=[XT]->ultrathick,orange
-r=[OT[->ultrathin,dot`
+tan2=[XT2]->ultrathick,orange,dash
+r=[OT[->ultrathin,dot
+r2=[OT2[->ultrathin,dot`
 
+        construct = "y=line 2x+5y=5\ny=line y=-2/5x+3"
 
         let parser = graph.parse(construct),
             parameters = 'grid,axis,x=-3:12,y=-15:15'
 
         parser.updateLayout(parameters)
-
         graph.texConverter = {
             toTex: katex.renderToString,
             options: {
@@ -189,15 +189,10 @@ r=[OT[->ultrathin,dot`
         }
 
         return {
-            figures: graph.figures.map(x => katex.renderToString(x.tex)),
-            updateTex() {
-                this.figures = graph.figures.map(x => katex.renderToString(x.tex))
-            },
             construct,
             parameters,
             build() {
                 parser.update(this.construct)
-                this.figures = graph.figures.map(x => katex.renderToString(x.tex))
             },
             modify() {
                 // Get the parameters.
