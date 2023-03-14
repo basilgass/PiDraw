@@ -22,12 +22,13 @@ export function generatePlot(parser: Parser, name: string, code: string[], optio
         samples: number = 100
 
     // Get the samples
-    for(let check in code){
+    for(let check of code){
         if(check.startsWith("@")){
             samples = +check.substring(1)
         }
 
         if(check.includes(":")){
+
             [domain.min, domain.max] = check.split(":").map(x=>+x)
         }
     }

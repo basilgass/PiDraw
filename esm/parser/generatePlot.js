@@ -20,7 +20,7 @@ function generatePlot(parser, name, code, options) {
     // fx = step.split(',')[0],//.split('@')[0],
     samples = 100;
     // Get the samples
-    for (let check in code) {
+    for (let check of code) {
         if (check.startsWith("@")) {
             samples = +check.substring(1);
         }
