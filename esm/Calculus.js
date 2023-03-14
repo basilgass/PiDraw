@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.NumExp = exports.mathLine = exports.mathVector = exports.isInfinity = exports.numberCorrection = void 0;
+exports.NumExp = exports.mathLine = exports.mathVector = exports.distanceAB = exports.isInfinity = exports.numberCorrection = void 0;
 const interfaces_1 = require("./variables/interfaces");
 function numberCorrection(value, epsilonDigit = 1, epsilonNumberOfDigits = 10, number_of_digits = 6) {
     // Must modify the number if it's like:
@@ -46,6 +46,10 @@ function isInfinity(value) {
     return value === Number.NEGATIVE_INFINITY || value === Number.POSITIVE_INFINITY;
 }
 exports.isInfinity = isInfinity;
+function distanceAB(A, B) {
+    return Math.sqrt((B.x - A.x) ** 2 + (B.y - A.y) ** 2);
+}
+exports.distanceAB = distanceAB;
 class mathVector {
     constructor(x, y) {
         // Does not exist.
@@ -124,8 +128,8 @@ class mathLine {
         // A = (a,b)
         // d = (dx,dy)
         // x = a + k.dx => x = 0 => k = -a/dx
-        // y = b + k.dy => y = b - a.dy/dx
-        return this._A.y - this._A.x * this._director.y / this._director.x;
+        // y = b + k.dy => y = b - a.dy/dx => h = y - mx
+        return this._A.y - this._A.x * this.slope;
     }
     getValueAtX(x) {
         // y = mx + h
@@ -134,7 +138,7 @@ class mathLine {
     getValueAtY(y) {
         // x = (y-h)/m
         let slope = this.slope;
-        if (slope === Number.NEGATIVE_INFINITY || slope === Number.POSITIVE_INFINITY) {
+        if (isInfinity(slope)) {
             return this._A.x;
         }
         return (y - this.ordinate) / this.slope;

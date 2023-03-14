@@ -1,13 +1,22 @@
 import { Graph } from "./Graph";
 import { Figure } from "./figures/Figure";
-type BuildStep = {
+export declare const parserKeys: {
+    [Key: string]: {
+        generate: Function;
+        parameters: string;
+        description: string;
+        options: string;
+    };
+};
+export type BuildStep = {
     step: string;
     figures: Figure[];
 };
 export declare class Parser {
     private _construction;
-    private _graph;
     constructor(graph: Graph, construction: string);
+    private _graph;
+    get graph(): Graph;
     private _buildedSteps;
     get buildedSteps(): BuildStep[];
     /**
@@ -18,6 +27,15 @@ export declare class Parser {
     update(construction: string, refresh?: boolean): void;
     updateLayout(parameters: string): Parser;
     generate(steps: string[]): void;
+    /**
+     * Convert a construct string to the label, key, code and options)
+     * A step string can be as following:
+     * A(3,4)
+     * d=[AB]
+     * c=<key> <params sep. by ,>->option
+     * @param step
+     * @private
+     */
     private _preprocess;
     private _postprocess;
     /**
@@ -27,25 +45,4 @@ export declare class Parser {
      * @private
      */
     private _processConstruction;
-    private _generatePoint;
-    private _generateVector;
-    private _generateLineThroughTwoPoints;
-    private _generateLine;
-    private _generateProjectionPoint;
-    private _generateSymmetricPoint;
-    private _generatePointFromVector;
-    private _generatePointFromDirection;
-    private _generateMidPoint;
-    private _generateIntersectionPoint;
-    private _generatePerpendicular;
-    private _generateParallel;
-    private _generateCircle;
-    private _generatePolygon;
-    private _generateArc;
-    private _updatePlot;
-    private _generatePlot;
-    private _generateParametricPlot;
-    private _generateFillBetween;
-    private _generateBezier;
 }
-export {};

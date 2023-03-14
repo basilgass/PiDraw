@@ -5,6 +5,7 @@ import { Point } from "./figures/Point";
 import { IPoint } from "./variables/interfaces";
 export declare function numberCorrection(value: number, epsilonDigit?: number, epsilonNumberOfDigits?: number, number_of_digits?: number): number;
 export declare function isInfinity(value: number): boolean;
+export declare function distanceAB(A: IPoint, B: IPoint): number;
 export declare class mathVector {
     constructor(x: number | Point | IPoint, y: number | Point | IPoint);
     private _x;

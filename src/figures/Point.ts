@@ -7,7 +7,8 @@ import {Label} from "./Label";
 import {Circle} from "./Circle";
 import {Line} from "./Line";
 import {Plot} from "./Plot";
-import {mathLine, mathVector} from "../Calculus";
+import {distanceAB, mathLine, mathVector} from "../Calculus";
+
 // import {mathVector} from "pimath/esm/maths/geometry/vector"
 
 export interface PointConfig {
@@ -23,13 +24,15 @@ export class Point extends Figure {
     constructor(graph: Graph, name: string, pixels: IPoint) {
         super(graph, name);
 
+        this._defaultScale = 6
+
         this._x = pixels.x
         this._y = pixels.y
 
         this.generateName()
 
-        this._shape = POINTSHAPE.CROSS
-        this._scale = 6
+        this._shape = POINTSHAPE.CIRCLE
+        this._scale = +this._defaultScale
 
         this._constrain = {type: POINTCONSTRAIN.FIXED}
 
@@ -37,6 +40,12 @@ export class Point extends Figure {
 
         // Add the label
         this.label = new Label(this.graph, name, {el: this})
+    }
+
+    private _defaultScale: number
+
+    get defaultScale(): number {
+        return this._defaultScale;
     }
 
     private _x: number
@@ -113,13 +122,13 @@ export class Point extends Figure {
 
     asCross(): Point {
         this._shape = POINTSHAPE.CROSS
-        this._updateShape()
+        this.update()
         return this
     }
 
     asCircle(size?: number): Point {
         if (size !== undefined && size > 0) {
-            this._scale = size
+            this.setSize(size)
         }
 
         this._shape = POINTSHAPE.CIRCLE
@@ -129,7 +138,7 @@ export class Point extends Figure {
 
     asSquare(size?: number, orientation?: mathVector): Point {
         if (size !== undefined && size > 0) {
-            this._scale = size
+            this.setSize(size)
         }
         if (orientation !== undefined) {
             // TODO: add the orientation to the square - really useful ?
@@ -143,18 +152,19 @@ export class Point extends Figure {
 
     setSize(value: number): Point {
         this._scale = value
+
         // Force update
         this.svg.data('shape', null)
         this.update()
         return this
     }
 
-    getDistanceTo(value: Figure): number {
+    getDistanceTo(value: Figure, byDefault: number = 40): number {
         if (value instanceof Point) {
             return Math.sqrt((this.x - value.x) ** 2 + (this.y - value.y) ** 2)
         }
 
-        return 40
+        return byDefault
     }
 
     updateFigure(): Point {
@@ -190,10 +200,17 @@ export class Point extends Figure {
         return this
     }
 
-    intersectionOf(a: Line, b: Line): Point {
-        this._constrain = {
-            type: POINTCONSTRAIN.INTERSECTION_LINES,
-            data: [a, b]
+    intersectionOf(a: Line, b: Line | Circle, k?: number): Point {
+        if (b instanceof Line) {
+            this._constrain = {
+                type: POINTCONSTRAIN.INTERSECTION_LINES,
+                data: [a, b]
+            }
+        } else if (b instanceof Circle) {
+            this._constrain = {
+                type: POINTCONSTRAIN.INTERSECTION_CIRCLE_LINE,
+                data: [b, a, k === undefined ? 1 : k]
+            }
         }
 
         return this
@@ -325,7 +342,6 @@ export class Point extends Figure {
 
         this.svg.draggable()
             .on('dragmove', dragmove)
-            .on('dragend', dragmove)
         return this
     }
 
@@ -378,9 +394,51 @@ export class Point extends Figure {
             if (intersection !== null) {
                 this._x = intersection.x
                 this._y = intersection.y
+                this.show()
             } else {
                 // TODO: must mark an invalid point
                 this.hide()
+            }
+        }
+
+        if (this._constrain.type === POINTCONSTRAIN.INTERSECTION_CIRCLE_LINE) {
+            let circle: Circle = this._constrain.data[0],
+                d: Line = this._constrain.data[1],
+                k: number = this._constrain.data[2] || 1
+
+            // Get the intersection of the circle with the line.
+            const m: number = d.math.slope,
+                h: number = d.math.ordinate,
+                r: number = circle.getRadiusAsPixels(),
+                c1: number = circle.center.x,
+                c2: number = circle.center.y,
+                a: number = m ** 2 + 1,
+                b: number = -2 * c1 + 2 * m * (h - c2),
+                c: number = c1 ** 2 + (h - c2) ** 2 - r ** 2,
+                delta = b ** 2 - 4 * a * c
+
+            if (delta < 0) {
+                this.hide()
+                return
+            }
+
+            this.show()
+            if (delta === 0) {
+                this._x = -b / (2 * a)
+                this._y = m * (-b / (2 * a)) + h
+            } else {
+                const x1 = (-b + Math.sqrt(delta)) / (2 * a),
+                    y1 = m * x1 + h,
+                    x2 = (-b - Math.sqrt(delta)) / (2 * a),
+                    y2 = m * x2 + h
+
+                if (x1 <= x2 ) {
+                    this._x = k === 1 ? x1 : x2
+                    this._y = k === 1 ? y1 : y2
+                } else {
+                    this._x = k === 1 ? x2 : x1
+                    this._y = k === 1 ? y2 : y1
+                }
             }
         }
 
@@ -399,7 +457,7 @@ export class Point extends Figure {
                 let u = to.math.director,
                     A = to.getPointOnLine(),  // Point on the line
                     AP = new mathVector(A, M),
-                    k = mathVector.scalarProduct(AP, u) / (u.norm**2)
+                    k = mathVector.scalarProduct(AP, u) / (u.norm ** 2)
 
                 this._x = A.x + k * u.x
                 this._y = A.y + k * u.y
@@ -423,11 +481,11 @@ export class Point extends Figure {
                 }
             } else if (symmetry_reference instanceof Line) {
                 // Get the projection to a line.
-                // TODO: duplicate code : projection and symmetry.
-                let u = symmetry_reference.math.director,
-                    A = symmetry_reference.getPointOnLine(),  // Point on the line
+                let u = symmetry_reference.math.director
+
+                let A = symmetry_reference.getPointOnLine(),  // Point on the line
                     AP = new mathVector(A, pt),
-                    k = mathVector.scalarProduct(AP, u) / (u.norm**2),
+                    k = mathVector.scalarProduct(AP, u) / (u.norm ** 2),
                     proj = {
                         x: A.x + k * u.x,
                         y: A.y + k * u.y
@@ -438,6 +496,7 @@ export class Point extends Figure {
 
             }
         }
+
         if (this._constrain.type === POINTCONSTRAIN.VECTOR) {
             const A: Point = this._constrain.data[0],
                 B: Point = this._constrain.data[1],
@@ -452,11 +511,13 @@ export class Point extends Figure {
                 d: Line = this._constrain.data[1],
                 distance: number = this.graph.distanceToPixels(this._constrain.data[2]),
                 perp: boolean = this._constrain.data[3],
-                v = perp?d.math.normal:d.math.director,
+                v = perp ? d.math.normal : d.math.director,
                 norm = v.norm
 
-            this._x = A.x + v.x*distance/norm
-            this._y = A.y + v.y*distance/norm
+            this._x = A.x + v.x * distance / norm
+            this._y = A.y + v.y * distance / norm
         }
+
+
     }
 }

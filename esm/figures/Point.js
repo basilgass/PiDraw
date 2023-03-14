@@ -15,15 +15,20 @@ class Point extends Figure_1.Figure {
     _shape;
     constructor(graph, name, pixels) {
         super(graph, name);
+        this._defaultScale = 6;
         this._x = pixels.x;
         this._y = pixels.y;
         this.generateName();
-        this._shape = enums_1.POINTSHAPE.CROSS;
-        this._scale = 6;
+        this._shape = enums_1.POINTSHAPE.CIRCLE;
+        this._scale = +this._defaultScale;
         this._constrain = { type: enums_1.POINTCONSTRAIN.FIXED };
         this._updateShape();
         // Add the label
         this.label = new Label_1.Label(this.graph, name, { el: this });
+    }
+    _defaultScale;
+    get defaultScale() {
+        return this._defaultScale;
     }
     _x;
     get x() {
@@ -85,12 +90,12 @@ class Point extends Figure_1.Figure {
     }
     asCross() {
         this._shape = enums_1.POINTSHAPE.CROSS;
-        this._updateShape();
+        this.update();
         return this;
     }
     asCircle(size) {
         if (size !== undefined && size > 0) {
-            this._scale = size;
+            this.setSize(size);
         }
         this._shape = enums_1.POINTSHAPE.CIRCLE;
         this.update();
@@ -98,7 +103,7 @@ class Point extends Figure_1.Figure {
     }
     asSquare(size, orientation) {
         if (size !== undefined && size > 0) {
-            this._scale = size;
+            this.setSize(size);
         }
         if (orientation !== undefined) {
             // TODO: add the orientation to the square - really useful ?
@@ -115,11 +120,11 @@ class Point extends Figure_1.Figure {
         this.update();
         return this;
     }
-    getDistanceTo(value) {
+    getDistanceTo(value, byDefault = 40) {
         if (value instanceof Point) {
             return Math.sqrt((this.x - value.x) ** 2 + (this.y - value.y) ** 2);
         }
-        return 40;
+        return byDefault;
     }
     updateFigure() {
         // The update mechanism is frozen.
@@ -148,11 +153,19 @@ class Point extends Figure_1.Figure {
         this.update();
         return this;
     }
-    intersectionOf(a, b) {
-        this._constrain = {
-            type: enums_1.POINTCONSTRAIN.INTERSECTION_LINES,
-            data: [a, b]
-        };
+    intersectionOf(a, b, k) {
+        if (b instanceof Line_1.Line) {
+            this._constrain = {
+                type: enums_1.POINTCONSTRAIN.INTERSECTION_LINES,
+                data: [a, b]
+            };
+        }
+        else if (b instanceof Circle_1.Circle) {
+            this._constrain = {
+                type: enums_1.POINTCONSTRAIN.INTERSECTION_CIRCLE_LINE,
+                data: [b, a, k === undefined ? 1 : k]
+            };
+        }
         return this;
     }
     fromVector(A, B, scale) {
@@ -260,8 +273,7 @@ class Point extends Figure_1.Figure {
             }
         }
         this.svg.draggable()
-            .on('dragmove', dragmove)
-            .on('dragend', dragmove);
+            .on('dragmove', dragmove);
         return this;
     }
     _updateShape() {
@@ -299,10 +311,36 @@ class Point extends Figure_1.Figure {
             if (intersection !== null) {
                 this._x = intersection.x;
                 this._y = intersection.y;
+                this.show();
             }
             else {
                 // TODO: must mark an invalid point
                 this.hide();
+            }
+        }
+        if (this._constrain.type === enums_1.POINTCONSTRAIN.INTERSECTION_CIRCLE_LINE) {
+            let circle = this._constrain.data[0], d = this._constrain.data[1], k = this._constrain.data[2] || 1;
+            // Get the intersection of the circle with the line.
+            const m = d.math.slope, h = d.math.ordinate, r = circle.getRadiusAsPixels(), c1 = circle.center.x, c2 = circle.center.y, a = m ** 2 + 1, b = -2 * c1 + 2 * m * (h - c2), c = c1 ** 2 + (h - c2) ** 2 - r ** 2, delta = b ** 2 - 4 * a * c;
+            if (delta < 0) {
+                this.hide();
+                return;
+            }
+            this.show();
+            if (delta === 0) {
+                this._x = -b / (2 * a);
+                this._y = m * (-b / (2 * a)) + h;
+            }
+            else {
+                const x1 = (-b + Math.sqrt(delta)) / (2 * a), y1 = m * x1 + h, x2 = (-b - Math.sqrt(delta)) / (2 * a), y2 = m * x2 + h;
+                if (x1 <= x2) {
+                    this._x = k === 1 ? x1 : x2;
+                    this._y = k === 1 ? y1 : y2;
+                }
+                else {
+                    this._x = k === 1 ? x2 : x1;
+                    this._y = k === 1 ? y2 : y1;
+                }
             }
         }
         if (this._constrain.type === enums_1.POINTCONSTRAIN.PROJECTION) {
@@ -341,8 +379,8 @@ class Point extends Figure_1.Figure {
             }
             else if (symmetry_reference instanceof Line_1.Line) {
                 // Get the projection to a line.
-                // TODO: duplicate code : projection and symmetry.
-                let u = symmetry_reference.math.director, A = symmetry_reference.getPointOnLine(), // Point on the line
+                let u = symmetry_reference.math.director;
+                let A = symmetry_reference.getPointOnLine(), // Point on the line
                 AP = new Calculus_1.mathVector(A, pt), k = Calculus_1.mathVector.scalarProduct(AP, u) / (u.norm ** 2), proj = {
                     x: A.x + k * u.x,
                     y: A.y + k * u.y

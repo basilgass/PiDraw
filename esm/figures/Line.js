@@ -9,6 +9,7 @@ const svg_js_1 = require("@svgdotjs/svg.js");
 // import {mathVector} from "pimath/esm/maths/geometry/vector";
 const Label_1 = require("./Label");
 const Calculus_1 = require("../Calculus");
+const Circle_1 = require("./Circle");
 var LINECONSTRUCTION;
 (function (LINECONSTRUCTION) {
     LINECONSTRUCTION["PARALLEL"] = "parallel";
@@ -246,11 +247,49 @@ class Line extends Figure_1.Figure {
             }
             if ((this._construction.rule === LINECONSTRUCTION.SLOPE)) {
                 if (!(this._construction.value instanceof Figure_1.Figure)) {
-                    this._math = new Calculus_1.mathLine(this._A, new Calculus_1.mathVector(1, +this._construction.value));
+                    this._math = new Calculus_1.mathLine(this._A, (0, Calculus_1.isInfinity)(+this._construction.value) ?
+                        new Calculus_1.mathVector(0, 1) :
+                        new Calculus_1.mathVector(1, -this._construction.value));
+                }
+            }
+            if (this._construction.rule === LINECONSTRUCTION.TANGENT) {
+                // Construction value is [circle, point]
+                if (this._construction.value instanceof Circle_1.Circle) {
+                    const circle = this._construction.value, point = this._A;
+                    const radius = circle.getRadiusAsPixels(), distance = circle.center.getDistanceTo(point);
+                    // Point is inside => do nothing
+                    if (distance < radius) {
+                        // TODO: how to handle invalid values ?
+                        return;
+                    }
+                    // Point is on the circle => perpendicular
+                    if (distance === radius) {
+                        this._math = new Calculus_1.mathLine(this._A, new Calculus_1.mathVector(circle.center, point).normal);
+                    }
+                    // Point is outside the circle => tangent
+                    if (distance > radius) {
+                        let c1 = circle.center.x, c2 = circle.center.y, p1 = point.x, p2 = point.y, r = circle.getRadiusAsPixels(), a = ((c1 - p1) ** 2) - (r ** 2), b = 2 * (c1 - p1) * (c2 - p2), c = ((c2 - p2) ** 2) - (r ** 2), delta = b ** 2 - 4 * a * c, m;
+                        if (delta < 0) {
+                            // TODO: how to handle invalid values ?
+                            return;
+                        }
+                        // There are two tangents.
+                        if (this._construction.k === undefined || this._construction.k === 1) {
+                            // return the first tangent.
+                            m = (-b + Math.sqrt(delta)) / (2 * a);
+                        }
+                        else {
+                            // return the second tangent.
+                            m = (-b - Math.sqrt(delta)) / (2 * a);
+                        }
+                        this._math = new Calculus_1.mathLine(this._A, (0, Calculus_1.isInfinity)(+m) ?
+                            new Calculus_1.mathVector(0, 1) :
+                            new Calculus_1.mathVector(1, -m));
+                    }
                 }
             }
             // Draw the line
-            if (this._math.slope === Number.POSITIVE_INFINITY || this._math.slope === Number.NEGATIVE_INFINITY) {
+            if ((0, Calculus_1.isInfinity)(this._math.slope)) {
                 x1 = this._A.x;
                 x2 = this._A.x;
                 y1 = 0;

@@ -17,7 +17,7 @@ import {Axis} from "./figures/Axis";
 import {AXIS, GRIDTYPE, LAYER} from "./variables/enums";
 import {GraphConfig} from "./variables/types";
 import {Arc} from "./figures/Arc";
-import {Parser} from "./Parser";
+import {Parser, parserKeys} from "./Parser";
 import {Parametric} from "./figures/Parametric";
 // import {Numeric} from "pimath/esm/maths/numeric";
 import {Bezier} from "./figures/Bezier";
@@ -259,7 +259,11 @@ export class Graph {
     }
 
     toTex(value: string): string {
-        return this._texConverter.toTex(value, this._texConverter.options)
+        if (this._texConverter && this._texConverter.toTex) {
+            return this._texConverter.toTex(value, this._texConverter.options)
+        } else {
+            return value
+        }
     }
 
     distanceToPixels(distance: number, direction?: AXIS): number {
@@ -267,6 +271,14 @@ export class Graph {
             return distance * this._pixelsPerUnit.x
         } else {
             return distance * this._pixelsPerUnit.y
+        }
+    }
+
+    distanceToUnit(pixelDistance: number, direction?: AXIS): number {
+        if (direction === undefined || direction === AXIS.HORIZONTAL) {
+            return numberCorrection(pixelDistance / this._pixelsPerUnit.x)
+        } else {
+            return numberCorrection(pixelDistance / this._pixelsPerUnit.y)
         }
     }
 
@@ -548,6 +560,17 @@ export class Graph {
     parse(construction: string): Parser {
         let parser = new Parser(this, construction)
         return parser
+    }
+    get parseHelper():{[Key: string]: {description: string, parameters: string}} {
+        let values:{[Key: string]: {description: string, parameters: string}} = {}
+        for(let key in parserKeys){
+            values[key] = {
+                description: parserKeys[key].description,
+                parameters: parserKeys[key].parameters
+            }
+        }
+
+        return values
     }
 
     private _initSetWidthAndHeight(config: GraphConfig) {

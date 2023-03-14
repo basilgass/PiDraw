@@ -210,7 +210,12 @@ class Graph {
         };
     }
     toTex(value) {
-        return this._texConverter.toTex(value, this._texConverter.options);
+        if (this._texConverter && this._texConverter.toTex) {
+            return this._texConverter.toTex(value, this._texConverter.options);
+        }
+        else {
+            return value;
+        }
     }
     distanceToPixels(distance, direction) {
         if (direction === undefined || direction === enums_1.AXIS.HORIZONTAL) {
@@ -218,6 +223,14 @@ class Graph {
         }
         else {
             return distance * this._pixelsPerUnit.y;
+        }
+    }
+    distanceToUnit(pixelDistance, direction) {
+        if (direction === undefined || direction === enums_1.AXIS.HORIZONTAL) {
+            return (0, Calculus_1.numberCorrection)(pixelDistance / this._pixelsPerUnit.x);
+        }
+        else {
+            return (0, Calculus_1.numberCorrection)(pixelDistance / this._pixelsPerUnit.y);
         }
     }
     unitsToPixels(point) {
@@ -405,6 +418,16 @@ class Graph {
     parse(construction) {
         let parser = new Parser_1.Parser(this, construction);
         return parser;
+    }
+    get parseHelper() {
+        let values = {};
+        for (let key in Parser_1.parserKeys) {
+            values[key] = {
+                description: Parser_1.parserKeys[key].description,
+                parameters: Parser_1.parserKeys[key].parameters
+            };
+        }
+        return values;
     }
     _initSetWidthAndHeight(config) {
         if ((0, interfaces_1.isDrawConfigWidthHeight)(config)) {

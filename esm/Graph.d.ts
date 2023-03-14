@@ -127,6 +127,7 @@ export declare class Graph {
     };
     toTex(value: string): string;
     distanceToPixels(distance: number, direction?: AXIS): number;
+    distanceToUnit(pixelDistance: number, direction?: AXIS): number;
     unitsToPixels(point: IPoint): IPoint;
     pixelsToUnits(point: IPoint): IPoint;
     getFigure(name: string): Figure;
@@ -156,6 +157,12 @@ export declare class Graph {
         end: Marker;
     };
     parse(construction: string): Parser;
+    get parseHelper(): {
+        [Key: string]: {
+            description: string;
+            parameters: string;
+        };
+    };
     private _initSetWidthAndHeight;
     private _initGetContainerId;
     private _initCreateSVG;

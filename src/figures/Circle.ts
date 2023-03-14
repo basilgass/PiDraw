@@ -2,13 +2,11 @@ import {Graph} from "../Graph";
 import {Figure} from "./Figure";
 import {Point} from "./Point";
 import {Circle as svgCircle} from "@svgdotjs/svg.js";
+import {Line} from "./Line";
 // import {Circle as mathCircle} from "pimath/esm/maths/geometry/circle"
 // import {Point as mathPoint} from "pimath/esm/maths/geometry/point"
 
 export class Circle extends Figure {
-    _center: Point;
-    _radius: number | Point;
-
     constructor(graph: Graph, name: string, center: Point, radius: number | Point) {
         super(graph, name);
 
@@ -28,15 +26,7 @@ export class Circle extends Figure {
         return this
     }
 
-    get tex(): string {
-        // let PTO = this.graph.pixelsToUnits(this.center)
-        // let P = new mathPoint(PTO.x, PTO.y)
-        // let c = new mathCircle(P, this.radius)
-
-        // TODO : remove display from PiMath
-        // return `(${this.name}): ${c.tex}`
-        return ""
-    }
+    _center: Point;
 
     get center(): Point {
         return this._center;
@@ -47,12 +37,24 @@ export class Circle extends Figure {
         this._center.y = value.y
     }
 
+    _radius: number | Point;
+
     get radius(): number | Point {
         return this._radius;
     }
 
     set radius(value: number | Point) {
         this._radius = value;
+    }
+
+    get tex(): string {
+        // let PTO = this.graph.pixelsToUnits(this.center)
+        // let P = new mathPoint(PTO.x, PTO.y)
+        // let c = new mathCircle(P, this.radius)
+
+        // TODO : remove display from PiMath
+        // return `(${this.name}): ${c.tex}`
+        return ""
     }
 
     getRadiusAsPixels(): number {
@@ -101,4 +103,51 @@ export class Circle extends Figure {
 
         return this
     }
+
+    // interectionWith(d: Line, name?: string): Point[] {
+    //     if (name === undefined) name = "I"
+    //
+    //     // Get the intersection of the circle with the line.
+    //     const m: number = d.math.slope,
+    //         h: number = d.math.ordinate,
+    //         r: number = this.getRadiusAsPixels(),
+    //         c1: number = this.center.x,
+    //         c2: number = this.center.y,
+    //         a: number = m ** 2 + 1,
+    //         b: number = -2 * c1 + 2 * m * (h - c2),
+    //         c: number = c1 ** 2 + (h - c2) ** 2 - r ** 2,
+    //         delta = b ** 2 - 4 * a * c
+    //
+    //     if (delta < 0) {
+    //         return []
+    //     } else if (delta === 0) {
+    //
+    //         const pt = this.graph.point(
+    //             -b / (2 * a),
+    //             m * (-b / (2 * a)) + h,
+    //             name + '1')
+    //         pt.asCircle().svg.fill('black')
+    //         return [pt]
+    //     } else {
+    //         const x1 = (-b + Math.sqrt(delta)) / (2 * a),
+    //             x2 = (-b - Math.sqrt(delta)) / (2 * a),
+    //             p1 = this.graph.point(
+    //                 x1,
+    //                 m * x1 + h,
+    //                 name + '1',
+    //                 true
+    //             ),
+    //             p2 = this.graph.point(
+    //                 x2,
+    //                 m * x2 + h,
+    //                 name + '2',
+    //                 true
+    //             )
+    //
+    //         p1.svg.fill('black')
+    //         p2.svg.fill('black')
+    //         return [p1, p2,]
+    //
+    //     }
+    // }
 }

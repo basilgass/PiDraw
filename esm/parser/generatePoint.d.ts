@@ -1,0 +1,11 @@
+import { Figure } from "../figures/Figure";
+import { Point } from "../figures/Point";
+import { Parser } from "../Parser";
+export declare function setPointStyle(pt: Point, style: string, size?: number): void;
+export declare function generatePoint(parser: Parser, name: string, code: string[], options: string[]): Figure[];
+export declare function generateProjectionPoint(parser: Parser, name: string, code: string[], options: string[]): Figure[];
+export declare function generateSymmetricPoint(parser: Parser, name: string, code: string[], options: string[]): Figure[];
+export declare function generatePointFromVector(parser: Parser, name: string, code: string[], options: string[]): Figure[];
+export declare function generatePointFromDirection(parser: Parser, name: string, code: string[], options: string[]): Figure[];
+export declare function generateMidPoint(parser: Parser, name: string, code: string[], options: string[]): Figure[];
+export declare function generateIntersectionPoint(parser: Parser, name: string, code: string[], options: string[]): Figure[];

@@ -7,8 +7,6 @@ const svg_js_1 = require("@svgdotjs/svg.js");
 // import {Circle as mathCircle} from "pimath/esm/maths/geometry/circle"
 // import {Point as mathPoint} from "pimath/esm/maths/geometry/point"
 class Circle extends Figure_1.Figure {
-    _center;
-    _radius;
     constructor(graph, name, center, radius) {
         super(graph, name);
         this._center = center;
@@ -18,14 +16,7 @@ class Circle extends Figure_1.Figure {
         this.svg = graph.svg.circle(this.getRadiusAsPixels() * 2).stroke('black').fill('none');
         return this;
     }
-    get tex() {
-        // let PTO = this.graph.pixelsToUnits(this.center)
-        // let P = new mathPoint(PTO.x, PTO.y)
-        // let c = new mathCircle(P, this.radius)
-        // TODO : remove display from PiMath
-        // return `(${this.name}): ${c.tex}`
-        return "";
-    }
+    _center;
     get center() {
         return this._center;
     }
@@ -33,11 +24,20 @@ class Circle extends Figure_1.Figure {
         this._center.x = value.x;
         this._center.y = value.y;
     }
+    _radius;
     get radius() {
         return this._radius;
     }
     set radius(value) {
         this._radius = value;
+    }
+    get tex() {
+        // let PTO = this.graph.pixelsToUnits(this.center)
+        // let P = new mathPoint(PTO.x, PTO.y)
+        // let c = new mathCircle(P, this.radius)
+        // TODO : remove display from PiMath
+        // return `(${this.name}): ${c.tex}`
+        return "";
     }
     getRadiusAsPixels() {
         let radius = 100;

@@ -60,6 +60,10 @@ export function numberCorrection(value: number, epsilonDigit: number = 1, epsilo
 export function isInfinity(value: number):boolean {
     return value===Number.NEGATIVE_INFINITY || value === Number.POSITIVE_INFINITY
 }
+
+export function distanceAB(A: IPoint, B: IPoint):number {
+    return Math.sqrt((B.x-A.x)**2 + (B.y-A.y)**2)
+}
 export class mathVector {
     constructor(x: number | Point | IPoint, y: number | Point | IPoint) {
         // Does not exist.
@@ -157,8 +161,8 @@ export class mathLine {
         // A = (a,b)
         // d = (dx,dy)
         // x = a + k.dx => x = 0 => k = -a/dx
-        // y = b + k.dy => y = b - a.dy/dx
-        return this._A.y - this._A.x * this._director.y / this._director.x
+        // y = b + k.dy => y = b - a.dy/dx => h = y - mx
+        return this._A.y - this._A.x * this.slope
     }
 
     getValueAtX(x: number): number {
@@ -170,7 +174,7 @@ export class mathLine {
         // x = (y-h)/m
         let slope = this.slope
 
-        if (slope === Number.NEGATIVE_INFINITY || slope === Number.POSITIVE_INFINITY) {
+        if (isInfinity(slope)) {
             return this._A.x
         }
         return (y - this.ordinate) / this.slope

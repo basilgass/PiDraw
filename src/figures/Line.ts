@@ -8,7 +8,8 @@ import {Line as svgLine} from "@svgdotjs/svg.js";
 // import {mathVector} from "pimath/esm/maths/geometry/vector";
 import {Label} from "./Label";
 import {IPoint} from "../variables/interfaces";
-import {mathLine, mathVector} from "../Calculus";
+import {isInfinity, mathLine, mathVector} from "../Calculus";
+import {Circle} from "./Circle";
 
 export interface LineConfig {
     k?: number
@@ -224,16 +225,16 @@ export class Line extends Figure {
     }
 
     getPointOnLine(): IPoint {
-        let x:number,
+        let x: number,
             y: number
 
         const slope = this.math.slope
 
-        if(slope === Number.POSITIVE_INFINITY || slope === Number.NEGATIVE_INFINITY){
+        if (slope === Number.POSITIVE_INFINITY || slope === Number.NEGATIVE_INFINITY) {
             // it's a vertical line
             y = 0
             x = this.math.getValueAtY(0)
-        }else{
+        } else {
             x = 0
             y = this.math.getValueAtX(0)
         }
@@ -253,7 +254,7 @@ export class Line extends Figure {
     }
 
     private _updateLineThroughAandB() {
-        this._math = new mathLine(this._A,this._B)
+        this._math = new mathLine(this._A, this._B)
         const slope = this._math.slope
 
         if (slope === Number.POSITIVE_INFINITY || slope === Number.NEGATIVE_INFINITY) {
@@ -304,7 +305,10 @@ export class Line extends Figure {
     }
 
     private _updateLineFromConstruction() {
-        let x1 = 0, y1 = 0, x2 = this.graph.width, y2 = this.graph.height
+        let x1 = 0,
+            y1 = 0,
+            x2 = this.graph.width,
+            y2 = this.graph.height
 
         if (this._construction) {
             if ((this._construction.rule === LINECONSTRUCTION.PARALLEL)) {
@@ -329,13 +333,79 @@ export class Line extends Figure {
                 if (!(this._construction.value instanceof Figure)) {
                     this._math = new mathLine(
                         this._A,
-                        new mathVector(1, +this._construction.value)
+                        isInfinity(+this._construction.value) ?
+                            new mathVector(0, 1) :
+                            new mathVector(1, -this._construction.value)
                     )
                 }
             }
 
+            if (this._construction.rule === LINECONSTRUCTION.TANGENT) {
+                // Construction value is [circle, point]
+                if (this._construction.value instanceof Circle) {
+                    const circle = this._construction.value,
+                        point = this._A
+
+                    const radius = circle.getRadiusAsPixels(),
+                        distance = circle.center.getDistanceTo(point)
+
+                    // Point is inside => do nothing
+                    if (distance < radius) {
+                        // TODO: how to handle invalid values ?
+                        return
+                    }
+
+                    // Point is on the circle => perpendicular
+                    if (distance === radius) {
+                        this._math = new mathLine(
+                            this._A,
+                            new mathVector(circle.center, point).normal
+                        )
+                    }
+
+                    // Point is outside the circle => tangent
+                    if (distance > radius) {
+                        let c1: number = circle.center.x,
+                            c2: number = circle.center.y,
+                            p1: number = point.x,
+                            p2: number = point.y,
+                            r: number = circle.getRadiusAsPixels(),
+                            a: number = ((c1 - p1) ** 2) - (r ** 2),
+                            b: number = 2 * (c1 - p1) * (c2 - p2),
+                            c: number = ((c2 - p2) ** 2) - (r ** 2),
+                            delta: number = b ** 2 - 4 * a * c,
+                            m: number
+
+                        if (delta < 0) {
+                            // TODO: how to handle invalid values ?
+                            return
+                        }
+
+                        // There are two tangents.
+                        if (this._construction.k === undefined || this._construction.k === 1) {
+                            // return the first tangent.
+                            m = (-b + Math.sqrt(delta)) / (2 * a)
+                        } else {
+                            // return the second tangent.
+                            m = (-b - Math.sqrt(delta)) / (2 * a)
+                        }
+
+                        this._math = new mathLine(
+                            this._A,
+                            isInfinity(+m) ?
+                                new mathVector(0, 1) :
+                                new mathVector(1, -m)
+                        )
+
+                    }
+
+                }
+
+
+            }
+
             // Draw the line
-            if (this._math.slope === Number.POSITIVE_INFINITY || this._math.slope === Number.NEGATIVE_INFINITY) {
+            if (isInfinity(this._math.slope)) {
                 x1 = this._A.x
                 x2 = this._A.x
                 y1 = 0
