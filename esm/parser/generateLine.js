@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.generateVector = exports.generateTangent = exports.generateParallel = exports.generatePerpendicular = exports.generateLine = void 0;
+exports.generateVector = exports.generateTangent = exports.generateBissector = exports.generateParallel = exports.generatePerpendicular = exports.generateLine = void 0;
 const Line_1 = require("../figures/Line");
 const Calculus_1 = require("../Calculus");
 function generateLine(parser, name, code, options) {
@@ -84,6 +84,18 @@ function generateParallel(parser, name, code, options) {
     return [];
 }
 exports.generateParallel = generateParallel;
+function generateBissector(parser, name, code, options) {
+    if (code.length >= 3) {
+        let A = parser.graph.getPoint(code.shift()), B = parser.graph.getPoint(code.shift()), C = parser.graph.getPoint(code.shift());
+        return [parser.graph.line(B, null, {
+                rule: Line_1.LINECONSTRUCTION.BISSECTOR,
+                value: B,
+                options: [A, C]
+            }, name)];
+    }
+    return [];
+}
+exports.generateBissector = generateBissector;
 function generateTangent(parser, name, code, options) {
     if (code.length >= 2) {
         let c = parser.graph.getFigure(code.shift()), P = parser.graph.getPoint(code.shift()), k = code[0] === undefined ? 1 : +code[0];

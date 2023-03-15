@@ -80,6 +80,12 @@ exports.parserKeys = {
         description: "parallèle à d par A, 1ère ou 2ème tangente.",
         options: lineOption
     },
+    biss: {
+        generate: generateLine_1.generateBissector,
+        parameters: "B,A,C",
+        description: "bissectrice de l'angle BAC",
+        options: lineOption
+    },
     tan: {
         generate: generateLine_1.generateTangent,
         parameters: "circle,point",

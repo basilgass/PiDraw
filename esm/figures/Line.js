@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Line = exports.LINECONSTRUCTION = void 0;
 const Figure_1 = require("./Figure");
+const Point_1 = require("./Point");
 const svg_js_1 = require("@svgdotjs/svg.js");
 // import {Line as mathLine} from "pimath/esm/maths/geometry/line"
 // import {Point as mathPoint} from "pimath/esm/maths/geometry/point"
@@ -16,6 +17,7 @@ var LINECONSTRUCTION;
     LINECONSTRUCTION["PERPENDICULAR"] = "perpendicular";
     LINECONSTRUCTION["TANGENT"] = "tangent";
     LINECONSTRUCTION["SLOPE"] = "slope";
+    LINECONSTRUCTION["BISSECTOR"] = "bissector";
 })(LINECONSTRUCTION = exports.LINECONSTRUCTION || (exports.LINECONSTRUCTION = {}));
 class Line extends Figure_1.Figure {
     constructor(graph, name, A, B, construction) {
@@ -243,6 +245,15 @@ class Line extends Figure_1.Figure {
             if ((this._construction.rule === LINECONSTRUCTION.PERPENDICULAR)) {
                 if (this._construction.value instanceof Line) {
                     this._math = new Calculus_1.mathLine(this._A, this._construction.value.math.normal);
+                }
+            }
+            if (this._construction.rule === LINECONSTRUCTION.BISSECTOR) {
+                if (this._construction.options.length === 2) {
+                    let A = this._construction.value, B = this._construction.options[0], C = this._construction.options[1];
+                    if (A instanceof Point_1.Point && B instanceof Point_1.Point && C instanceof Point_1.Point) {
+                        const AB = new Calculus_1.mathVector(A, B), normAB = AB.norm, AC = new Calculus_1.mathVector(A, C), normAC = AC.norm;
+                        this._math = new Calculus_1.mathLine(A, new Calculus_1.mathVector(AB.x / normAB + AC.x / normAC, AB.y / normAB + AC.y / normAC));
+                    }
                 }
             }
             if ((this._construction.rule === LINECONSTRUCTION.SLOPE)) {

@@ -7,12 +7,14 @@ export interface LineConfig {
     k?: number;
     rule: string;
     value?: Figure | number | string;
+    options?: Figure[];
 }
 export declare enum LINECONSTRUCTION {
     PARALLEL = "parallel",
     PERPENDICULAR = "perpendicular",
     TANGENT = "tangent",
-    SLOPE = "slope"
+    SLOPE = "slope",
+    BISSECTOR = "bissector"
 }
 export declare class Line extends Figure {
     constructor(graph: Graph, name: string, A: Point, B: Point, construction?: LineConfig);

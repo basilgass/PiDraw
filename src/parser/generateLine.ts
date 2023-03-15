@@ -115,6 +115,24 @@ export function generateParallel(parser: Parser, name: string, code: string[], o
     return []
 }
 
+export function generateBissector(parser: Parser, name: string, code: string[], options: string[]): Figure[] {
+    if (code.length >= 3) {
+        let A = parser.graph.getPoint(code.shift()),
+            B = parser.graph.getPoint(code.shift()),
+            C = parser.graph.getPoint(code.shift())
+
+        return [parser.graph.line(
+            B, null,
+            {
+                rule: LINECONSTRUCTION.BISSECTOR,
+                value: B,
+                options: [A,C]
+            }, name)]
+    }
+
+    return []
+}
+
 export function generateTangent(parser: Parser, name: string, code: string[], options: string[]): Figure[] {
     if (code.length >= 2) {
         let c = parser.graph.getFigure(code.shift()),

@@ -4,6 +4,7 @@ import {Line as svgLine, Path} from "@svgdotjs/svg.js";
 import {Point} from "./figures/Point";
 import {Axis} from "./figures/Axis";
 import {
+    generateBissector,
     generateLine,
     generateParallel,
     generatePerpendicular,
@@ -102,6 +103,12 @@ export const parserKeys: {
         generate: generateParallel,
         parameters: "d,A[,1 ou 2]",
         description: "parallèle à d par A, 1ère ou 2ème tangente.",
+        options: lineOption
+    },
+    biss: {
+        generate: generateBissector,
+        parameters: "B,A,C",
+        description: "bissectrice de l'angle BAC",
         options: lineOption
     },
     tan: {

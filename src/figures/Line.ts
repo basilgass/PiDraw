@@ -15,13 +15,15 @@ export interface LineConfig {
     k?: number
     rule: string,
     value?: Figure | number | string,
+    options?: Figure[]
 }
 
 export enum LINECONSTRUCTION {
     PARALLEL = 'parallel',
     PERPENDICULAR = 'perpendicular',
     TANGENT = 'tangent',
-    SLOPE = 'slope'
+    SLOPE = 'slope',
+    BISSECTOR = "bissector"
 }
 
 export class Line extends Figure {
@@ -326,6 +328,29 @@ export class Line extends Figure {
                         this._A,
                         this._construction.value.math.normal
                     )
+                }
+            }
+
+            if (this._construction.rule === LINECONSTRUCTION.BISSECTOR) {
+                if (this._construction.options.length === 2) {
+                    let A = this._construction.value,
+                        B: Figure = this._construction.options[0],
+                        C: Figure = this._construction.options[1]
+
+                    if (A instanceof Point && B instanceof Point && C instanceof Point) {
+                        const AB = new mathVector(A, B),
+                            normAB = AB.norm,
+                            AC = new mathVector(A, C),
+                            normAC = AC.norm
+
+                        this._math = new mathLine(
+                            A,
+                            new mathVector(
+                                AB.x / normAB + AC.x / normAC,
+                                AB.y / normAB + AC.y / normAC
+                            ),
+                        )
+                    }
                 }
             }
 
