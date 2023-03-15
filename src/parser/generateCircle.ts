@@ -4,11 +4,11 @@ import {Parser} from "../Parser";
 export function generateCircle(parser: Parser, name: string, code: string[], options: string[]): Figure[] {
     let figures: Figure[]
 
-    if (code.length > 0) {
-        let A = parser.graph.getPoint(code[0]),
-            radius = +code[1]
+    if (code.length >= 2) {
+        let A = parser.graph.getPoint(code.shift()),
+            radius = code.shift()
 
-        figures = [parser.graph.circle(A, radius, name)]
+        figures = [parser.graph.circle(A, isNaN(+radius)?parser.graph.getPoint(radius):+radius, name)]
     }
     return figures
 }

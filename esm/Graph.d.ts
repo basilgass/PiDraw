@@ -143,7 +143,7 @@ export declare class Graph {
     line(A: Point | string, B: Point | string, construction?: LineConfig, name?: string): Line;
     parallel(line: Line, P: Point | string, name?: string): Line;
     perpendicular(line: Line, P: Point | string, name?: string): Line;
-    circle(center: Point | IPoint | string, radius: number, name?: string): Circle;
+    circle(center: Point | IPoint | string, radius: number | Point, name?: string): Circle;
     polygon(points: Point[] | IPoint[] | string[], name?: string): Polygon;
     plot(fn: Function | string, config?: PlotConfig, name?: string): Plot;
     path(d: string, name?: string): Path;

@@ -411,7 +411,7 @@ export class Graph {
         return figure
     }
 
-    circle(center: Point | IPoint | string, radius: number, name?: string): Circle {
+    circle(center: Point | IPoint | string, radius: number|Point, name?: string): Circle {
         // Case the point is given as xy coordinate instead of an existing point.
         if (typeof center === 'string') {
             return this.circle(this.getPoint(center), radius, name)
