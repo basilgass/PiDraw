@@ -12,6 +12,7 @@ exports.generateIntersectionPoint = exports.generateMidPoint = exports.generateP
 const Line_1 = require("../figures/Line");
 const Point_1 = require("../figures/Point");
 const Circle_1 = require("../figures/Circle");
+const parseStep_1 = require("./parseStep");
 function setPointStyle(pt, style, size) {
     if (size === undefined || size === null) {
         size = +pt.defaultScale;
@@ -44,18 +45,24 @@ function generatePoint(parser, name, code, options) {
     // analyse the step/code value and extract the data
     if (code.length < 2)
         return [];
-    let x = +code[0], y = +code[1];
-    // The coordinates aren't a number
-    // TODO: allow not number coordinates, like "A.x" or "A:B" => both are constrains
-    if (isNaN(x) || isNaN(y))
-        return [];
     // Create the point
-    const pt = parser.graph.point(x, y, name);
+    const pt = parser.graph.point(-100, -100, name, true);
+    // pt.hide().hideLabel()
+    // Move the point
+    let stepX = (0, parseStep_1.getStepType)(parser, code.shift()), stepY = (0, parseStep_1.getStepType)(parser, code.shift()), x, y;
+    if (stepX.kind === parseStep_1.STEP_KIND.static && stepY.kind === parseStep_1.STEP_KIND.static) {
+        let pixels = pt.graph.unitsToPixels({ x: +stepX.item, y: +stepY.item });
+        pt.x = pixels.x;
+        pt.y = pixels.y;
+    }
+    else {
+        pt.fromCoord(stepX, stepY);
+    }
     // By default, use a circle as point
     pt.asCircle();
     if (showCoords) {
         pt.label.isTex = true;
-        pt.displayName = `${name} = \( ${x} ; ${y} \)`;
+        pt.displayName = `${name} = ${pt.coordAsTex}`;
     }
     return [pt];
 }

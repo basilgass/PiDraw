@@ -7,7 +7,8 @@ import {Label} from "./Label";
 import {Circle} from "./Circle";
 import {Line} from "./Line";
 import {Plot} from "./Plot";
-import {distanceAB, mathLine, mathVector} from "../Calculus";
+import {mathLine, mathVector} from "../Calculus";
+import {StepValueType} from "../parser/parseStep";
 
 // import {mathVector} from "pimath/esm/maths/geometry/vector"
 
@@ -229,6 +230,18 @@ export class Point extends Figure {
         this._constrain = {
             type: POINTCONSTRAIN.DIRECTION,
             data: [A, d, size, perpendicular]
+        }
+        this.update()
+        return this
+    }
+
+    fromCoord(
+        ptX: StepValueType,
+        ptY: StepValueType
+    ): Point {
+        this._constrain = {
+            type: POINTCONSTRAIN.COORDINATES,
+            data: [ptX, ptY]
         }
         this.update()
         return this
@@ -516,6 +529,38 @@ export class Point extends Figure {
 
             this._x = A.x + v.x * distance / norm
             this._y = A.y + v.y * distance / norm
+        }
+
+        if (this._constrain.type === POINTCONSTRAIN.COORDINATES ) {
+            // TODO: constrain with coordinates: must handle the distance between two points as position.
+            let ptX: StepValueType, ptY: StepValueType
+            [ptX, ptY] = this._constrain.data
+
+            if(!isNaN(+ptX.item)){
+                this._x = this.graph.unitsToPixels({x: +ptX.item, y: 0}).x
+            }else{
+                if(ptX.option==='x' && ptX.item instanceof Point){
+                    this._x = ptX.item.x
+                }else if(ptX.option==='y' && ptX.item instanceof Point){
+                    this._x = ptX.item.y
+                }else if(ptX.option==='distance') {
+                    // TODO: calculate the distance between two points.
+                } else {
+                    console.warn("Point constrain is not supported for ", ptX)
+                }
+            }
+
+            if(!isNaN(+ptY.item)){
+                this._y = this.graph.unitsToPixels({y: +ptY.item, x: 0}).y
+            }else{
+                if(ptY.option==='x' && ptY.item instanceof Point){
+                    this._y = ptY.item.x
+                }else if(ptY.option==='y' && ptY.item instanceof Point){
+                    this._y = ptY.item.y
+                } else {
+                    console.warn("Point constrain is not supported for ", ptY)
+                }
+            }
         }
 
 

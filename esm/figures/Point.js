@@ -184,6 +184,14 @@ class Point extends Figure_1.Figure {
         this.update();
         return this;
     }
+    fromCoord(ptX, ptY) {
+        this._constrain = {
+            type: enums_1.POINTCONSTRAIN.COORDINATES,
+            data: [ptX, ptY]
+        };
+        this.update();
+        return this;
+    }
     /**
      * Constrain the point to be bound to an axis or projection
      * @param A: Point
@@ -398,6 +406,42 @@ class Point extends Figure_1.Figure {
             const A = this._constrain.data[0], d = this._constrain.data[1], distance = this.graph.distanceToPixels(this._constrain.data[2]), perp = this._constrain.data[3], v = perp ? d.math.normal : d.math.director, norm = v.norm;
             this._x = A.x + v.x * distance / norm;
             this._y = A.y + v.y * distance / norm;
+        }
+        if (this._constrain.type === enums_1.POINTCONSTRAIN.COORDINATES) {
+            // TODO: constrain with coordinates: must handle the distance between two points as position.
+            let ptX, ptY;
+            [ptX, ptY] = this._constrain.data;
+            if (!isNaN(+ptX.item)) {
+                this._x = this.graph.unitsToPixels({ x: +ptX.item, y: 0 }).x;
+            }
+            else {
+                if (ptX.option === 'x' && ptX.item instanceof Point) {
+                    this._x = ptX.item.x;
+                }
+                else if (ptX.option === 'y' && ptX.item instanceof Point) {
+                    this._x = ptX.item.y;
+                }
+                else if (ptX.option === 'distance') {
+                    // TODO: calculate the distance between two points.
+                }
+                else {
+                    console.warn("Point constrain is not supported for ", ptX);
+                }
+            }
+            if (!isNaN(+ptY.item)) {
+                this._y = this.graph.unitsToPixels({ y: +ptY.item, x: 0 }).y;
+            }
+            else {
+                if (ptY.option === 'x' && ptY.item instanceof Point) {
+                    this._y = ptY.item.x;
+                }
+                else if (ptY.option === 'y' && ptY.item instanceof Point) {
+                    this._y = ptY.item.y;
+                }
+                else {
+                    console.warn("Point constrain is not supported for ", ptY);
+                }
+            }
         }
     }
 }

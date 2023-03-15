@@ -119,9 +119,9 @@ r=[OT[->ultrathin,dot
 r2=[OT2[->ultrathin,dot`
 
         // construct = "A(3,2)\nc=circ A,4\nP(7,5)\nt=tan c,P"
-        construct = "f=plot (x-1)/(sqrtx-1),0:0.999\n" +
-            "g=plot (x-1)/(sqrtx-1),1.001:10\n" +
-            "A(1,2)"
+        construct = "A(2,3)\n" +
+            "B(5,6)->drag\n" +
+            "C(A.x,7)"
 
         let parser = graph.parse(construct),
             parameters = 'grid,axis,x=-12:12,y=-15:15'

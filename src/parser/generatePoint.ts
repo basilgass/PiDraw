@@ -12,6 +12,7 @@ import {Line} from "../figures/Line";
 import {Point} from "../figures/Point";
 import {Parser} from "../Parser";
 import {Circle} from "../figures/Circle";
+import {getStepType, STEP_KIND} from "./parseStep";
 
 export function setPointStyle(pt: Point, style: string, size?: number) {
     if (size === undefined || size === null) {
@@ -44,22 +45,29 @@ export function generatePoint(parser: Parser, name: string, code: string[], opti
     // analyse the step/code value and extract the data
     if (code.length < 2) return []
 
-    let x = +code[0],
-        y = +code[1]
-
-    // The coordinates aren't a number
-    // TODO: allow not number coordinates, like "A.x" or "A:B" => both are constrains
-    if (isNaN(x) || isNaN(y)) return []
-
     // Create the point
-    const pt = parser.graph.point(x, y, name)
+    const pt = parser.graph.point(-100, -100, name, true)
+    // pt.hide().hideLabel()
+
+    // Move the point
+    let stepX = getStepType(parser, code.shift()),
+        stepY = getStepType(parser, code.shift()),
+        x, y
+
+    if(stepX.kind===STEP_KIND.static && stepY.kind===STEP_KIND.static) {
+        let pixels = pt.graph.unitsToPixels({x: +stepX.item, y: +stepY.item})
+        pt.x = pixels.x
+        pt.y = pixels.y
+    }else{
+        pt.fromCoord(stepX, stepY)
+    }
 
     // By default, use a circle as point
     pt.asCircle()
 
     if (showCoords) {
         pt.label.isTex = true
-        pt.displayName = `${name} = \( ${x} ; ${y} \)`
+        pt.displayName = `${name} = ${pt.coordAsTex}`
     }
 
     return [pt]

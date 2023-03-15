@@ -6,6 +6,7 @@ import { AXIS, POINTCONSTRAIN } from "../variables/enums";
 import { Circle } from "./Circle";
 import { Line } from "./Line";
 import { mathVector } from "../Calculus";
+import { StepValueType } from "../parser/parseStep";
 export interface PointConfig {
     data?: any;
     type: POINTCONSTRAIN;
@@ -48,6 +49,7 @@ export declare class Point extends Figure {
     intersectionOf(a: Line, b: Line | Circle, k?: number): Point;
     fromVector(A: Point, B: Point, scale: number): Point;
     fromDirection(A: Point, d: Line, size: number, perpendicular: boolean): Point;
+    fromCoord(ptX: StepValueType, ptY: StepValueType): Point;
     /**
      * Constrain the point to be bound to an axis or projection
      * @param A: Point
