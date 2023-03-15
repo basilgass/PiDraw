@@ -508,9 +508,9 @@ class Parser {
                                 fig.svg.translate(+options[0], +options[1]);
                             }
                         }
-                        else if (el === 'fill') {
+                        else if (el === 'fill' && options.length > 0) {
                             // fill color
-                            let [color, opacity] = el.substring(1).split('/');
+                            let [color, opacity] = options[0].split('/');
                             if (CSS.supports('color', color)) {
                                 fig.fill({ color, opacity: opacity === undefined ? 1 : +opacity });
                             }
