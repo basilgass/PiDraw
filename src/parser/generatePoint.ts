@@ -37,7 +37,9 @@ export function generatePoint(parser: Parser, name: string, code: string[], opti
 
     // The label for the point can be:
     // letters with or without @
-    let showCoords = options.includes('@') || options.includes('coords')  || options.includes('coord')
+    let showCoords = options.includes('@') ||
+        options.includes('coords')  ||
+        options.includes('coord')
 
     // If the figure exist, no need to continue
     if (parser.graph.getPoint(name)) return []
