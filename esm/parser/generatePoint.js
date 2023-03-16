@@ -38,7 +38,7 @@ function generatePoint(parser, name, code, options) {
     // A=(3,5)->[@,*o,x]
     // The label for the point can be:
     // letters with or without @
-    let showCoords = options.includes('@');
+    let showCoords = options.includes('@') || options.includes('coords') || options.includes('coord');
     // If the figure exist, no need to continue
     if (parser.graph.getPoint(name))
         return [];
@@ -62,7 +62,7 @@ function generatePoint(parser, name, code, options) {
     pt.asCircle();
     if (showCoords) {
         pt.label.isTex = true;
-        pt.displayName = `${name} = ${pt.coordAsTex}`;
+        pt.displayName = `${name} = @`;
     }
     return [pt];
 }

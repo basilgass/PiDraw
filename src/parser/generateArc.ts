@@ -4,9 +4,8 @@ import {Parser} from "../Parser";
 
 export function generateArc(parser: Parser, name: string, code: string[], options: string[]): Figure[] {
     let figures: Figure[],
-        showAngle = options.includes("coord")
+        showAngle = options.includes("coord") || options.includes("@")
 
-    name = name.split('@')[0]
     if (code.length > 0) {
         let A = parser.graph.getPoint(code[0]),
             O = parser.graph.getPoint(code[1]),
@@ -21,6 +20,10 @@ export function generateArc(parser: Parser, name: string, code: string[], option
         }
 
         const arc = parser.graph.arc(A, O, B, radius, name)
+
+        if(options.includes('square')){
+            arc.square = true
+        }
 
         if (showAngle) {
             arc.label.isTex = true

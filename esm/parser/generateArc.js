@@ -2,8 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.generateArc = void 0;
 function generateArc(parser, name, code, options) {
-    let figures, showAngle = options.includes("coord");
-    name = name.split('@')[0];
+    let figures, showAngle = options.includes("coord") || options.includes("@");
     if (code.length > 0) {
         let A = parser.graph.getPoint(code[0]), O = parser.graph.getPoint(code[1]), B = parser.graph.getPoint(code[2]), radiusValue = code[3] === undefined ? undefined : code[3], radius;
         if (isNaN(+radiusValue)) {
@@ -13,6 +12,9 @@ function generateArc(parser, name, code, options) {
             radius = parser.graph.distanceToPixels(+radiusValue);
         }
         const arc = parser.graph.arc(A, O, B, radius, name);
+        if (options.includes('square')) {
+            arc.square = true;
+        }
         if (showAngle) {
             arc.label.isTex = true;
             arc.displayName = `${name} = @°`;

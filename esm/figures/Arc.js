@@ -5,6 +5,7 @@ const Figure_1 = require("./Figure");
 const Point_1 = require("./Point");
 const svg_js_1 = require("@svgdotjs/svg.js");
 const Label_1 = require("./Label");
+const Calculus_1 = require("../Calculus");
 class Arc extends Figure_1.Figure {
     _angle;
     _center;
@@ -38,9 +39,9 @@ class Arc extends Figure_1.Figure {
         else {
             this._radius = radius;
         }
-        this.generateName();
         this.svg = this.graph.svg.path(this.getPath()).stroke('black').fill('none');
         // Add the label
+        this.generateName();
         this.label = new Label_1.Label(this.graph, name, { el: this });
         this.label.center().middle();
     }
@@ -92,7 +93,7 @@ class Arc extends Figure_1.Figure {
         return 40;
     }
     get isSquare() {
-        return (this._start.x - this._center.x) * (this._end.x - this._center.x) + (this._start.y - this._center.y) * (this._end.y - this._center.y) === 0;
+        return (0, Calculus_1.numberCorrection)((this._start.x - this._center.x) * (this._end.x - this._center.x) + (this._start.y - this._center.y) * (this._end.y - this._center.y)) === 0;
     }
     generateName() {
         if (this.name === undefined) {
@@ -104,7 +105,7 @@ class Arc extends Figure_1.Figure {
         if (this.displayName) {
             this.label.displayName = this.displayName
                 .replace('?', this.name)
-                .replace('@', this.angle.toFixed(2));
+                .replace('@', (+this.angle.toFixed(2)).toString());
         }
         else {
             this.label.displayName = this.name;
@@ -180,8 +181,8 @@ class Arc extends Figure_1.Figure {
     getAngles() {
         // Get the angles defined be the three points
         return {
-            start: this.cartesianToAngle(this._center, this._start),
-            end: this.cartesianToAngle(this._center, this._end)
+            start: +this.cartesianToAngle(this._center, this._start).toFixed(10),
+            end: +this.cartesianToAngle(this._center, this._end).toFixed(10)
         };
     }
     getPath() {

@@ -30,8 +30,6 @@ export class Point extends Figure {
         this._x = pixels.x
         this._y = pixels.y
 
-        this.generateName()
-
         this._shape = POINTSHAPE.CIRCLE
         this._scale = +this._defaultScale
 
@@ -40,6 +38,7 @@ export class Point extends Figure {
         this._updateShape()
 
         // Add the label
+        this.generateName()
         this.label = new Label(this.graph, name, {el: this})
     }
 
@@ -117,8 +116,23 @@ export class Point extends Figure {
         if (this.name === undefined) {
             this.name = `P${Object.keys(this.graph.points).length}`
         }
+        return super.generateName()
+    }
 
-        return this.name
+    generateDisplayName(): Point {
+        if (this.displayName) {
+            this.label.displayName = this.displayName
+                .replace('?', this.name)
+                .replace('@', this.coordAsTex)
+        } else {
+            this.label.displayName = this.name
+        }
+
+        if(this.label.isHtml){
+            this.label.updateFigure()
+        }
+
+        return this
     }
 
     asCross(): Point {
@@ -178,6 +192,8 @@ export class Point extends Figure {
         this._updateCoordinate()
 
         this.svg.center(this._x, this._y)
+
+        this.generateDisplayName()
 
         return this
     }

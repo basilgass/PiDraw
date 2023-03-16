@@ -32,6 +32,7 @@ export declare class Point extends Figure {
     get coordAsTex(): string;
     addUnit(value: number, axis?: AXIS): Point;
     generateName(): string;
+    generateDisplayName(): Point;
     asCross(): Point;
     asCircle(size?: number): Point;
     asSquare(size?: number, orientation?: mathVector): Point;

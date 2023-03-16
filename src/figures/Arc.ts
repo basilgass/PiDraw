@@ -4,6 +4,7 @@ import {Point} from "./Point";
 import {IPoint} from "../variables/interfaces";
 import {Path} from "@svgdotjs/svg.js";
 import {Label} from "./Label";
+import {numberCorrection} from "../Calculus";
 
 export class Arc extends Figure {
     private _angle: number
@@ -42,10 +43,10 @@ export class Arc extends Figure {
             this._radius = radius
         }
 
-        this.generateName()
         this.svg = this.graph.svg.path(this.getPath()).stroke('black').fill('none')
 
         // Add the label
+        this.generateName()
         this.label = new Label(this.graph, name, {el: this})
         this.label.center().middle()
     }
@@ -108,7 +109,7 @@ export class Arc extends Figure {
     }
 
     get isSquare(): boolean {
-        return (this._start.x - this._center.x) * (this._end.x - this._center.x) + (this._start.y - this._center.y) * (this._end.y - this._center.y) === 0
+        return numberCorrection((this._start.x - this._center.x) * (this._end.x - this._center.x) + (this._start.y - this._center.y) * (this._end.y - this._center.y)) === 0
     }
 
 
@@ -124,7 +125,7 @@ export class Arc extends Figure {
         if (this.displayName) {
             this.label.displayName = this.displayName
                 .replace('?', this.name)
-                .replace('@', this.angle.toFixed(2))
+                .replace('@', (+this.angle.toFixed(2)).toString())
         } else {
             this.label.displayName = this.name
         }
@@ -212,13 +213,12 @@ export class Arc extends Figure {
     getAngles(): { start: number, end: number } {
         // Get the angles defined be the three points
         return {
-            start: this.cartesianToAngle(this._center, this._start),
-            end: this.cartesianToAngle(this._center, this._end)
+            start: +this.cartesianToAngle(this._center, this._start).toFixed(10),
+            end: +this.cartesianToAngle(this._center, this._end).toFixed(10)
         }
     }
 
     getPath(): string {
-
         // Get the angles
         let {start, end} = this.getAngles(),
             radius = (this.isSquare && this._square) ? this.getRadius / 2 : this.getRadius,

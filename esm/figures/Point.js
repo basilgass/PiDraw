@@ -18,12 +18,12 @@ class Point extends Figure_1.Figure {
         this._defaultScale = 6;
         this._x = pixels.x;
         this._y = pixels.y;
-        this.generateName();
         this._shape = enums_1.POINTSHAPE.CIRCLE;
         this._scale = +this._defaultScale;
         this._constrain = { type: enums_1.POINTCONSTRAIN.FIXED };
         this._updateShape();
         // Add the label
+        this.generateName();
         this.label = new Label_1.Label(this.graph, name, { el: this });
     }
     _defaultScale;
@@ -86,7 +86,21 @@ class Point extends Figure_1.Figure {
         if (this.name === undefined) {
             this.name = `P${Object.keys(this.graph.points).length}`;
         }
-        return this.name;
+        return super.generateName();
+    }
+    generateDisplayName() {
+        if (this.displayName) {
+            this.label.displayName = this.displayName
+                .replace('?', this.name)
+                .replace('@', this.coordAsTex);
+        }
+        else {
+            this.label.displayName = this.name;
+        }
+        if (this.label.isHtml) {
+            this.label.updateFigure();
+        }
+        return this;
     }
     asCross() {
         this._shape = enums_1.POINTSHAPE.CROSS;
@@ -134,6 +148,7 @@ class Point extends Figure_1.Figure {
         this._updateShape();
         this._updateCoordinate();
         this.svg.center(this._x, this._y);
+        this.generateDisplayName();
         return this;
     }
     updateLabel() {
