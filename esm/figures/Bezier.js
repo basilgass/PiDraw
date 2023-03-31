@@ -10,7 +10,6 @@ class Bezier extends Figure_1.Figure {
     _ratio;
     _showControlPoints;
     constructor(graph, name, values) {
-        // TODO : build the path class
         super(graph, name);
         this.generateName();
         this.definePoints(values);
@@ -100,7 +99,6 @@ class Bezier extends Figure_1.Figure {
             return;
         if (this._points.length === 2) {
             // Special case
-            // TODO: generate for two points
             return "";
         }
         let pts = this._points, path = `M${pts[0].point.x},${pts[0].point.y}`, n = 0;

@@ -105,6 +105,17 @@ class mathVector {
         let x, y;
         return new mathVector(x, y);
     }
+    rotate(angle) {
+        // Rotate the vector by <angle> degrees.
+        // (cos  -sin ) ( x )
+        // (sin  cos  ) ( y )
+        // => x: cos * x - sin * y
+        // => y: sin * x + cos * y
+        const rads = +angle * Math.PI / 180, x = +this._x, y = +this._y;
+        this._x = Math.cos(rads) * x - Math.sin(rads) * y;
+        this._y = Math.sin(rads) * x + Math.cos(rads) * y;
+        return this;
+    }
 }
 exports.mathVector = mathVector;
 class mathLine {
@@ -300,7 +311,6 @@ class NumExp {
                     this._addToStack(stack, Math.sqrt(a));
                 }
                 else if (element.token === 'nthrt') {
-                    // TODO: support nthrt in num. exp.
                     let b = stack.pop();
                     if (a % 2 === 0 && b < 0) {
                         this._addToStack(stack, NaN);
@@ -633,7 +643,6 @@ class Shutingyard {
                     opStack.push({ token, tokenType });
                     break;
                 case 'function-argument':
-                    // TODO: check if the opStack exist.
                     securityLoopLvl2 = +securityLoopLvl2_default;
                     while (opStack[opStack.length - 1].token !== '(' && opStack.length > 0) {
                         securityLoopLvl2--;

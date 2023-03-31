@@ -65,10 +65,6 @@ class Point extends Figure_1.Figure {
             y: value
         }).y;
     }
-    get tex() {
-        let P = this.graph.pixelsToUnits(this);
-        return `${this.name}${this.coordAsTex}`;
-    }
     get coordAsTex() {
         let P = this.graph.pixelsToUnits(this);
         return `\\left( ${P.x} ; ${P.y} \\right)`;
@@ -115,13 +111,9 @@ class Point extends Figure_1.Figure {
         this.update();
         return this;
     }
-    asSquare(size, orientation) {
+    asSquare(size) {
         if (size !== undefined && size > 0) {
             this.setSize(size);
-        }
-        if (orientation !== undefined) {
-            // TODO: add the orientation to the square - really useful ?
-            console.log(orientation);
         }
         this._shape = enums_1.POINTSHAPE.SQUARE;
         this.update();
@@ -423,7 +415,6 @@ class Point extends Figure_1.Figure {
             this._y = A.y + v.y * distance / norm;
         }
         if (this._constrain.type === enums_1.POINTCONSTRAIN.COORDINATES) {
-            // TODO: constrain with coordinates: must handle the distance between two points as position.
             let ptX, ptY;
             [ptX, ptY] = this._constrain.data;
             if (!isNaN(+ptX.item)) {
@@ -437,7 +428,7 @@ class Point extends Figure_1.Figure {
                     this._x = ptX.item.y;
                 }
                 else if (ptX.option === 'distance') {
-                    // TODO: calculate the distance between two points.
+                    // TODO: constrain with coordinates: must handle the distance between two points as position.
                 }
                 else {
                     console.warn("Point constrain is not supported for ", ptX);

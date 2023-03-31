@@ -16,7 +16,7 @@ const ptOption = "*,o,s,@", lineOption = "", plotOption = "";
 exports.parserKeys = {
     pt: {
         generate: generatePoint_1.generatePoint,
-        parameters: "(a,b)",
+        parameters: "a,b | A(a,b)",
         description: "créer un point par coordonnées (x,y)",
         options: ptOption
     },
@@ -94,7 +94,7 @@ exports.parserKeys = {
     },
     poly: {
         generate: generatePolygon_1.generatePolygon,
-        parameters: "A,B,C,...",
+        parameters: "A,B,C,... | <sides:number>,<center:Point>,<radius:number|Point>",
         description: "tracer un polygone passant par les points A,B,C, ...",
         options: lineOption
     },
@@ -119,8 +119,8 @@ exports.parserKeys = {
     fill: {
         generate: generatePlot_1.generateFillBetween,
         parameters: "f[,g],a:b",
-        description: "Tracer une fonction y=f(x)",
-        options: "Remplir l'espace entre deux fonctions, borné par a et b"
+        description: "Remplir l'espace entre une fonction et l'axe Ox ou entre deux fonctions, borné par a et b",
+        options: ""
     },
     parametric: {
         generate: generatePlot_1.generateParametricPlot,
@@ -383,7 +383,6 @@ class Parser {
         }
         // Any other case
         // A=<key> <code>-><options>
-        // TODO: Better space handling.
         let code_with_sep = key_code.split(" ");
         key = code_with_sep.shift();
         code = code_with_sep.join(",").split(',');

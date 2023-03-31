@@ -9,7 +9,6 @@ export declare class Circle extends Figure {
     _radius: number | Point;
     get radius(): number | Point;
     set radius(value: number | Point);
-    get tex(): string;
     getRadiusAsPixels(): number;
     generateName(): string;
     updateFigure(): Circle;

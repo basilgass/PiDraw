@@ -38,13 +38,6 @@ export declare class Line extends Figure {
     private _segmentStart;
     get segmentStart(): boolean;
     set segmentStart(value: boolean);
-    get tex(): string;
-    get display(): {
-        canonical: string;
-        mxh: string;
-        parametric: string;
-    };
-    get texMath(): string;
     get d(): mathVector;
     asSegment(value?: boolean, scale?: number): Line;
     asVector(value?: boolean, scale?: number): Line;

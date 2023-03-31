@@ -154,7 +154,6 @@ function generateIntersectionPoint(parser, name, code, options) {
         let d1 = parser.graph.getFigure(code[0]), d2 = parser.graph.getFigure(code[1]);
         if (d1 instanceof Line_1.Line && d2 instanceof Line_1.Line) {
             let pt = parser.graph.point(0, 0, name).intersectionOf(d1, d2);
-            // TODO: how to handle if the intersection is not valid?
             if (pt !== null) {
                 pt.asCircle().svg.fill('black');
                 return [pt];

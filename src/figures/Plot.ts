@@ -46,14 +46,6 @@ export class Plot extends Figure {
         this._plugins = []
     }
 
-    get tex(): string {
-        if(this._fx instanceof NumExp){
-            return this._rawFx.replaceAll('*', '\\cdot ')
-        }else{
-            return '?'
-        }
-    }
-
     get fx(): Function | NumExp {
         return this._fx;
     }

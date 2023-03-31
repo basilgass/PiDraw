@@ -72,9 +72,6 @@ class Figure {
     set label(value) {
         this._label = value;
     }
-    get tex() {
-        return ' - ';
-    }
     draw() {
         this._freeze = false;
         this.update();

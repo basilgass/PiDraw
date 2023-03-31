@@ -142,7 +142,6 @@ export function generateTangent(parser: Parser, name: string, code: string[], op
         // there are potentially TWO tangents.
         // The point name is generated:
         // name = t => t1 and t2
-        // TODO: tangent : get the two lines in one round.
         return [
             parser.graph.line(
             P, null,

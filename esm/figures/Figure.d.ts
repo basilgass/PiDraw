@@ -45,7 +45,6 @@ export declare class Figure {
     set svg(value: Shape);
     get label(): Label;
     set label(value: Label);
-    get tex(): string;
     draw(): void;
     update(): Figure;
     updateFigure(): Figure;

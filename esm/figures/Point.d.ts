@@ -5,7 +5,6 @@ import { Grid } from "./Grid";
 import { AXIS, POINTCONSTRAIN } from "../variables/enums";
 import { Circle } from "./Circle";
 import { Line } from "./Line";
-import { mathVector } from "../Calculus";
 import { StepValueType } from "../parser/parseStep";
 export interface PointConfig {
     data?: any;
@@ -28,14 +27,13 @@ export declare class Point extends Figure {
     set coord(value: IPoint);
     set coordX(value: number);
     set coordY(value: number);
-    get tex(): string;
     get coordAsTex(): string;
     addUnit(value: number, axis?: AXIS): Point;
     generateName(): string;
     generateDisplayName(): Point;
     asCross(): Point;
     asCircle(size?: number): Point;
-    asSquare(size?: number, orientation?: mathVector): Point;
+    asSquare(size?: number): Point;
     setSize(value: number): Point;
     getDistanceTo(value: Figure, byDefault?: number): number;
     updateFigure(): Point;

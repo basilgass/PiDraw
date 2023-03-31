@@ -93,11 +93,6 @@ export class Point extends Figure {
         }).y
     }
 
-    get tex(): string {
-        let P = this.graph.pixelsToUnits(this)
-        return `${this.name}${this.coordAsTex}`
-    }
-
     get coordAsTex(): string {
         let P = this.graph.pixelsToUnits(this)
         return `\\left( ${P.x} ; ${P.y} \\right)`
@@ -151,13 +146,9 @@ export class Point extends Figure {
         return this
     }
 
-    asSquare(size?: number, orientation?: mathVector): Point {
+    asSquare(size?: number): Point {
         if (size !== undefined && size > 0) {
             this.setSize(size)
-        }
-        if (orientation !== undefined) {
-            // TODO: add the orientation to the square - really useful ?
-            console.log(orientation)
         }
 
         this._shape = POINTSHAPE.SQUARE
@@ -548,7 +539,6 @@ export class Point extends Figure {
         }
 
         if (this._constrain.type === POINTCONSTRAIN.COORDINATES ) {
-            // TODO: constrain with coordinates: must handle the distance between two points as position.
             let ptX: StepValueType, ptY: StepValueType
             [ptX, ptY] = this._constrain.data
 
@@ -560,7 +550,7 @@ export class Point extends Figure {
                 }else if(ptX.option==='y' && ptX.item instanceof Point){
                     this._x = ptX.item.y
                 }else if(ptX.option==='distance') {
-                    // TODO: calculate the distance between two points.
+                    // TODO: constrain with coordinates: must handle the distance between two points as position.
                 } else {
                     console.warn("Point constrain is not supported for ", ptX)
                 }

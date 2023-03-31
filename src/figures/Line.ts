@@ -126,34 +126,6 @@ export class Line extends Figure {
         this.update()
     }
 
-    get tex(): string {
-        // TODO : remove tex and display
-        // return `${this.name}: ${this.texMath.canonical}`
-        return ""
-    }
-
-    get display(): { canonical: string; mxh: string; parametric: string } {
-        let A: { x: number, y: number }, B: { x: number, y: number }
-        let m: mathLine
-
-        A = this.graph.pixelsToUnits(this.A)
-        m = new mathLine(A, this.d)
-
-        // TODO : output a display method or disable the output
-        return {canonical: "", mxh: "", parametric: ""}
-    }
-
-    get texMath() {
-        let A: { x: number, y: number }, B: { x: number, y: number }
-        let m: mathLine
-
-        A = this.graph.pixelsToUnits(this.A)
-        m = new mathLine(A, this.d)
-
-        // TODO : output a display method
-        return ""
-    }
-
     get d(): mathVector {
 
         if (this.B) {
@@ -376,7 +348,6 @@ export class Line extends Figure {
 
                     // Point is inside => do nothing
                     if (distance < radius) {
-                        // TODO: how to handle invalid values ?
                         return
                     }
 
@@ -402,7 +373,6 @@ export class Line extends Figure {
                             m: number
 
                         if (delta < 0) {
-                            // TODO: how to handle invalid values ?
                             return
                         }
 

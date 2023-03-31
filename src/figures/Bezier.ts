@@ -19,7 +19,6 @@ export class Bezier extends Figure {
     private _showControlPoints: boolean
 
     constructor(graph: Graph, name: string, values: (string | Point | { point: string | Point, control: string, ratio?: number })[]) {
-        // TODO : build the path class
         super(graph, name);
 
         this.generateName()
@@ -128,7 +127,6 @@ export class Bezier extends Figure {
 
         if (this._points.length === 2) {
             // Special case
-            // TODO: generate for two points
             return ""
         }
 

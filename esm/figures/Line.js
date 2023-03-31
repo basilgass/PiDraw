@@ -87,27 +87,6 @@ class Line extends Figure_1.Figure {
         this._segment = this._segmentStart && this._segmentEnd;
         this.update();
     }
-    get tex() {
-        // TODO : remove tex and display
-        // return `${this.name}: ${this.texMath.canonical}`
-        return "";
-    }
-    get display() {
-        let A, B;
-        let m;
-        A = this.graph.pixelsToUnits(this.A);
-        m = new Calculus_1.mathLine(A, this.d);
-        // TODO : output a display method or disable the output
-        return { canonical: "", mxh: "", parametric: "" };
-    }
-    get texMath() {
-        let A, B;
-        let m;
-        A = this.graph.pixelsToUnits(this.A);
-        m = new Calculus_1.mathLine(A, this.d);
-        // TODO : output a display method
-        return "";
-    }
     get d() {
         if (this.B) {
             let A = this.graph.pixelsToUnits(this.A), B = this.graph.pixelsToUnits(this.B);
@@ -270,7 +249,6 @@ class Line extends Figure_1.Figure {
                     const radius = circle.getRadiusAsPixels(), distance = circle.center.getDistanceTo(point);
                     // Point is inside => do nothing
                     if (distance < radius) {
-                        // TODO: how to handle invalid values ?
                         return;
                     }
                     // Point is on the circle => perpendicular
@@ -281,7 +259,6 @@ class Line extends Figure_1.Figure {
                     if (distance > radius) {
                         let c1 = circle.center.x, c2 = circle.center.y, p1 = point.x, p2 = point.y, r = circle.getRadiusAsPixels(), a = ((c1 - p1) ** 2) - (r ** 2), b = 2 * (c1 - p1) * (c2 - p2), c = ((c2 - p2) ** 2) - (r ** 2), delta = b ** 2 - 4 * a * c, m;
                         if (delta < 0) {
-                            // TODO: how to handle invalid values ?
                             return;
                         }
                         // There are two tangents.

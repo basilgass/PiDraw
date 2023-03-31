@@ -31,14 +31,6 @@ class Circle extends Figure_1.Figure {
     set radius(value) {
         this._radius = value;
     }
-    get tex() {
-        // let PTO = this.graph.pixelsToUnits(this.center)
-        // let P = new mathPoint(PTO.x, PTO.y)
-        // let c = new mathCircle(P, this.radius)
-        // TODO : remove display from PiMath
-        // return `(${this.name}): ${c.tex}`
-        return "";
-    }
     getRadiusAsPixels() {
         let radius = 100;
         if (this._radius instanceof Point_1.Point) {

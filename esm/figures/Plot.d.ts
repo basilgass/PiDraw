@@ -20,7 +20,6 @@ export declare class Plot extends Figure {
     private _rawFx;
     private _plugins;
     constructor(graph: Graph, name: string, fn: Function | string, config?: PlotConfig);
-    get tex(): string;
     get fx(): Function | NumExp;
     generateName(): string;
     updatePlugins(): Plot;

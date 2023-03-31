@@ -443,10 +443,7 @@ export class Graph {
             }
         });
 
-        let figure = new Polygon(
-            this,
-            name,
-            polyPoints)
+        let figure = new Polygon(this, name, polyPoints)
 
         this._validateFigure(figure)
         return figure

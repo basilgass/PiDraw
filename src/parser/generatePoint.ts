@@ -184,7 +184,6 @@ export function generateIntersectionPoint(parser: Parser, name: string, code: st
 
         if (d1 instanceof Line && d2 instanceof Line) {
             let pt = parser.graph.point(0, 0, name).intersectionOf(d1, d2)
-            // TODO: how to handle if the intersection is not valid?
             if (pt !== null) {
                 pt.asCircle().svg.fill('black')
                 return [pt]

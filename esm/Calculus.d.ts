@@ -18,6 +18,7 @@ export declare class mathVector {
     get normal(): mathVector;
     static scalarProduct(u: mathVector, v: mathVector): number;
     projection(on: mathVector): mathVector;
+    rotate(angle: number): mathVector;
 }
 export declare class mathLine {
     constructor(A: IPoint, B: IPoint | mathVector);

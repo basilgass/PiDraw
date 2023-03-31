@@ -32,14 +32,6 @@ class Plot extends Figure_1.Figure {
         this.plot(fn);
         this._plugins = [];
     }
-    get tex() {
-        if (this._fx instanceof Calculus_1.NumExp) {
-            return this._rawFx.replaceAll('*', '\\cdot ');
-        }
-        else {
-            return '?';
-        }
-    }
     get fx() {
         return this._fx;
     }

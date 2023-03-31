@@ -111,7 +111,7 @@ export class Label extends Figure {
         this.html.children().forEach(child => child.remove())
 
         // @ts-ignore
-        this.html.add(SVG(`<div style="display: inline-block">${this.isTex?this._graph.toTex(value):value}</div>`, true))
+        this.html.add(SVG(`<div style="display: inline-block; position: fixed">${this.isTex?this._graph.toTex(value):value}</div>`, true))
 
         this.isHtml = true
         return this
