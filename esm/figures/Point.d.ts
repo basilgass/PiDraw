@@ -46,7 +46,7 @@ export declare class Point extends Figure {
      */
     middleOf(A: Point, B: Point): Point;
     intersectionOf(a: Line, b: Line | Circle, k?: number): Point;
-    fromVector(A: Point, B: Point, scale: number): Point;
+    fromVector(A: Point, B: Point, scale: number, X?: Point): Point;
     fromDirection(A: Point, d: Line, size: number, perpendicular: boolean): Point;
     fromCoord(ptX: StepValueType, ptY: StepValueType): Point;
     /**

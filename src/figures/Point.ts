@@ -123,7 +123,7 @@ export class Point extends Figure {
             this.label.displayName = this.name
         }
 
-        if(this.label.isHtml){
+        if (this.label.isHtml) {
             this.label.updateFigure()
         }
 
@@ -224,11 +224,12 @@ export class Point extends Figure {
         return this
     }
 
-    fromVector(A: Point, B: Point, scale: number): Point {
+    fromVector(A: Point, B: Point, scale: number, X?: Point): Point {
         this._constrain = {
             type: POINTCONSTRAIN.VECTOR,
-            data: [A, B, scale]
+            data: [A, B, scale, X]
         }
+
         this.update()
         return this
     }
@@ -452,7 +453,7 @@ export class Point extends Figure {
                     x2 = (-b - Math.sqrt(delta)) / (2 * a),
                     y2 = m * x2 + h
 
-                if (x1 <= x2 ) {
+                if (x1 <= x2) {
                     this._x = k === 1 ? x1 : x2
                     this._y = k === 1 ? y1 : y2
                 } else {
@@ -520,10 +521,16 @@ export class Point extends Figure {
         if (this._constrain.type === POINTCONSTRAIN.VECTOR) {
             const A: Point = this._constrain.data[0],
                 B: Point = this._constrain.data[1],
-                scale: number = this._constrain.data[2]
+                scale: number = this._constrain.data[2],
+                X = this._constrain.data[3]
 
-            this._x = A.x + (B.x - A.x) * scale
-            this._y = A.y + (B.y - A.y) * scale
+            if(X){
+                this._x = X.x + (B.x - A.x) * scale
+                this._y = X.y + (B.y - A.y) * scale
+            }else {
+                this._x = A.x + (B.x - A.x) * scale
+                this._y = A.y + (B.y - A.y) * scale
+            }
         }
 
         if (this._constrain.type === POINTCONSTRAIN.DIRECTION) {
@@ -538,30 +545,30 @@ export class Point extends Figure {
             this._y = A.y + v.y * distance / norm
         }
 
-        if (this._constrain.type === POINTCONSTRAIN.COORDINATES ) {
+        if (this._constrain.type === POINTCONSTRAIN.COORDINATES) {
             let ptX: StepValueType, ptY: StepValueType
             [ptX, ptY] = this._constrain.data
 
-            if(!isNaN(+ptX.item)){
+            if (!isNaN(+ptX.item)) {
                 this._x = this.graph.unitsToPixels({x: +ptX.item, y: 0}).x
-            }else{
-                if(ptX.option==='x' && ptX.item instanceof Point){
+            } else {
+                if (ptX.option === 'x' && ptX.item instanceof Point) {
                     this._x = ptX.item.x
-                }else if(ptX.option==='y' && ptX.item instanceof Point){
+                } else if (ptX.option === 'y' && ptX.item instanceof Point) {
                     this._x = ptX.item.y
-                }else if(ptX.option==='distance') {
+                } else if (ptX.option === 'distance') {
                     // TODO: constrain with coordinates: must handle the distance between two points as position.
                 } else {
                     console.warn("Point constrain is not supported for ", ptX)
                 }
             }
 
-            if(!isNaN(+ptY.item)){
+            if (!isNaN(+ptY.item)) {
                 this._y = this.graph.unitsToPixels({y: +ptY.item, x: 0}).y
-            }else{
-                if(ptY.option==='x' && ptY.item instanceof Point){
+            } else {
+                if (ptY.option === 'x' && ptY.item instanceof Point) {
                     this._y = ptY.item.x
-                }else if(ptY.option==='y' && ptY.item instanceof Point){
+                } else if (ptY.option === 'y' && ptY.item instanceof Point) {
                     this._y = ptY.item.y
                 } else {
                     console.warn("Point constrain is not supported for ", ptY)

@@ -111,22 +111,25 @@ export function generateSymmetricPoint(parser: Parser, name: string, code: strin
 
 export function generatePointFromVector(parser: Parser, name: string, code: string[], options: string[]): Figure[] {
     if (code.length > 0) {
-        let kA: string = code[0], AName, k
+        let kA: string = code[0], AName = code[0], k
 
+        // Get the scale
         if (kA.includes("*")) {
             [k, AName] = kA.split("*")
         } else {
             k = 1
         }
 
+        // Get the points.
         let A = parser.graph.getPoint(AName),
             B = parser.graph.getPoint(code[1]),
+            X = parser.graph.getPoint(code[2]),
             pt: Point
 
         if (A !== null && B !== null) {
             pt = parser.graph
                 .point(0, 0, name)
-                .fromVector(A, B, +k)
+                .fromVector(A, B, +k, X)
             pt.asCircle().svg.fill('black')
             // pt.label.displayName = name
             return [pt]

@@ -65,7 +65,7 @@ export const parserKeys: {
     },
     proj: {
         generate: generateProjectionPoint,
-        parameters: "A, d|Ox|Oy",
+        parameters: "A,d|Ox|Oy",
         description: "projection de A sur la droite d ou sur l'axe Ox ou Oy",
         options: ptOption
     },
@@ -448,18 +448,22 @@ export class Parser {
                 key = "line"
             }
 
+            // Cut the special values.
+            let [value, ...code_option] = key_code.split(',')
+
             // Next, we need to "cut" the value to two points.
             // AB => [A,B]
             // A1B4 => [A1,B4]
-            let match = [...key_code.matchAll(/^[\[\]]?([A-Z]_?[0-9]?)([A-Z]_?[0-9]?)[\[\]]?/g)]
+            let match = [...value.matchAll(/^[\[\]]?([A-Z]_?[0-9]?)([A-Z]_?[0-9]?)[\[\]]?/g)]
 
             if (match.length > 0) {
                 code = [match[0][1], match[0][2]]
             }
-            code.push(key_code.startsWith("[") ? "segment" : "open")
-            code.push(key_code.endsWith("]") ? "segment" : "open")
 
-            return {label, key, code, options}
+            code.push(key_code.startsWith("]") ? "open" : "segment")
+            code.push(key_code.endsWith("[") ? "open" : "segment")
+
+            return {label, key, code: [ ...code,...code_option], options}
         }
 
         // Any other case

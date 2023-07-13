@@ -168,9 +168,10 @@ export function generateVector(parser: Parser, name: string, code: string[], opt
 
     if (code.length > 0) {
         let A = parser.graph.getPoint(code.shift()),
-            B = parser.graph.getPoint(code.shift())
+            B = parser.graph.getPoint(code.shift()),
+            k = +code[code.length-1]
 
-        let k = code.length > 0 ? +code[0] : 1
+        if(isNaN(k))k=1
 
         let v = parser.graph.line(A, B, null, name).asVector(true, k)
 

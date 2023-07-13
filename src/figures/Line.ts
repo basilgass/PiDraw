@@ -166,7 +166,8 @@ export class Line extends Figure {
 
     asVector(value?: boolean, scale?: number): Line {
         this.segment = value === undefined || value
-        if (scale !== undefined) {
+
+        if (scale !== undefined || isNaN(scale)) {
             this.scale = scale
         }
 
