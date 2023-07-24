@@ -60,13 +60,17 @@ function getStepType(parser, value) {
     }
     // It's a dynamic number bases on a distance between two points (or a point and an object).
     if (value.includes(':')) {
-        const [nameA, nameB] = value.split(":");
+        let [nameA, nameB] = value.split(":"), direction = 1;
+        if (nameA[0] === '-') {
+            direction = -1;
+            nameA = nameA.substring(1);
+        }
         let A = parser.graph.getPoint(nameA), B = parser.graph.getPoint(nameB);
         if (A !== null && B !== null) {
             return {
                 type: STEP_TYPE.number,
                 kind: STEP_KIND.dynamic,
-                item: [A, B],
+                item: [A, B, direction],
                 option: 'distance'
             };
         }

@@ -121,8 +121,9 @@ exports.generateTangent = generateTangent;
 function generateVector(parser, name, code, options) {
     let figures;
     if (code.length > 0) {
-        let A = parser.graph.getPoint(code.shift()), B = parser.graph.getPoint(code.shift());
-        let k = code.length > 0 ? +code[0] : 1;
+        let A = parser.graph.getPoint(code.shift()), B = parser.graph.getPoint(code.shift()), k = +code[code.length - 1];
+        if (isNaN(k))
+            k = 1;
         let v = parser.graph.line(A, B, null, name).asVector(true, k);
         figures = [v];
     }

@@ -175,10 +175,10 @@ class Point extends Figure_1.Figure {
         }
         return this;
     }
-    fromVector(A, B, scale) {
+    fromVector(A, B, scale, X) {
         this._constrain = {
             type: enums_1.POINTCONSTRAIN.VECTOR,
-            data: [A, B, scale]
+            data: [A, B, scale, X]
         };
         this.update();
         return this;
@@ -405,12 +405,35 @@ class Point extends Figure_1.Figure {
             }
         }
         if (this._constrain.type === enums_1.POINTCONSTRAIN.VECTOR) {
-            const A = this._constrain.data[0], B = this._constrain.data[1], scale = this._constrain.data[2];
-            this._x = A.x + (B.x - A.x) * scale;
-            this._y = A.y + (B.y - A.y) * scale;
+            const A = this._constrain.data[0], B = this._constrain.data[1], scale = this._constrain.data[2], X = this._constrain.data[3];
+            if (X) {
+                this._x = X.x + (B.x - A.x) * scale;
+                this._y = X.y + (B.y - A.y) * scale;
+            }
+            else {
+                this._x = A.x + (B.x - A.x) * scale;
+                this._y = A.y + (B.y - A.y) * scale;
+            }
         }
         if (this._constrain.type === enums_1.POINTCONSTRAIN.DIRECTION) {
-            const A = this._constrain.data[0], d = this._constrain.data[1], distance = this.graph.distanceToPixels(this._constrain.data[2]), perp = this._constrain.data[3], v = perp ? d.math.normal : d.math.director, norm = v.norm;
+            const A = this._constrain.data[0], d = this._constrain.data[1], perp = this._constrain.data[3], v = perp ? d.math.normal : d.math.director, norm = v.norm;
+            let distance = 1;
+            if (!isNaN(this._constrain.data[2])) {
+                distance = this.graph.distanceToPixels(this._constrain.data[2]);
+            }
+            else {
+                // this._constrain.data[2]
+                // return {
+                //     type: STEP_TYPE.number,
+                //     kind: STEP_KIND.dynamic,
+                //     item: [A, B],
+                //     option: 'distance'
+                // }
+                const [X, Y] = this._constrain.data[2].item;
+                if (X instanceof Point && Y instanceof Point) {
+                    distance = X.getDistanceTo(Y);
+                }
+            }
             this._x = A.x + v.x * distance / norm;
             this._y = A.y + v.y * distance / norm;
         }
@@ -428,7 +451,12 @@ class Point extends Figure_1.Figure {
                     this._x = ptX.item.y;
                 }
                 else if (ptX.option === 'distance') {
-                    // TODO: constrain with coordinates: must handle the distance between two points as position.
+                    // @ts-ignore
+                    const [X, Y, direction] = ptX.item;
+                    if (X instanceof Point && Y instanceof Point) {
+                        // Must handle working from ORIGIN
+                        this._x = this.graph.origin.x + direction * X.getDistanceTo(Y);
+                    }
                 }
                 else {
                     console.warn("Point constrain is not supported for ", ptX);
@@ -443,6 +471,13 @@ class Point extends Figure_1.Figure {
                 }
                 else if (ptY.option === 'y' && ptY.item instanceof Point) {
                     this._y = ptY.item.y;
+                }
+                else if (ptY.option === 'distance') {
+                    const [X, Y, direction] = ptY.item;
+                    if (X instanceof Point && Y instanceof Point) {
+                        // Must handle working from ORIGIN
+                        this._y = this.graph.origin.y - direction * X.getDistanceTo(Y);
+                    }
                 }
                 else {
                     console.warn("Point constrain is not supported for ", ptY);

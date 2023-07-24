@@ -98,18 +98,20 @@ function generateSymmetricPoint(parser, name, code, options) {
 exports.generateSymmetricPoint = generateSymmetricPoint;
 function generatePointFromVector(parser, name, code, options) {
     if (code.length > 0) {
-        let kA = code[0], AName, k;
+        let kA = code[0], AName = code[0], k;
+        // Get the scale
         if (kA.includes("*")) {
             [k, AName] = kA.split("*");
         }
         else {
             k = 1;
         }
-        let A = parser.graph.getPoint(AName), B = parser.graph.getPoint(code[1]), pt;
+        // Get the points.
+        let A = parser.graph.getPoint(AName), B = parser.graph.getPoint(code[1]), X = parser.graph.getPoint(code[2]), pt;
         if (A !== null && B !== null) {
             pt = parser.graph
                 .point(0, 0, name)
-                .fromVector(A, B, +k);
+                .fromVector(A, B, +k, X);
             pt.asCircle().svg.fill('black');
             // pt.label.displayName = name
             return [pt];
@@ -124,8 +126,7 @@ function generatePointFromDirection(parser, name, code, options) {
         A = parser.graph.getPoint(code[0]);
         d = parser.graph.getFigure(code[1]);
         if (isNaN(+code[2])) {
-            // TODO: must handle distance between two points
-            distance = 2;
+            distance = (0, parseStep_1.getStepType)(parser, code[2]);
         }
         else {
             distance = +code[2];

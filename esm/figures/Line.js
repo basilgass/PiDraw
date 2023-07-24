@@ -122,7 +122,7 @@ class Line extends Figure_1.Figure {
     }
     asVector(value, scale) {
         this.segment = value === undefined || value;
-        if (scale !== undefined) {
+        if (scale !== undefined || isNaN(scale)) {
             this.scale = scale;
         }
         this._addMarker(true);
