@@ -12,7 +12,7 @@ const generatePolygon_1 = require("./parser/generatePolygon");
 const generatePoint_1 = require("./parser/generatePoint");
 const generateCircle_1 = require("./parser/generateCircle");
 const Line_1 = require("./figures/Line");
-const ptOption = "*,o,s,@", lineOption = "", plotOption = "";
+const ptOption = "*,o,sq,@", lineOption = "", plotOption = "";
 exports.parserKeys = {
     pt: {
         generate: generatePoint_1.generatePoint,
@@ -40,7 +40,7 @@ exports.parserKeys = {
     },
     proj: {
         generate: generatePoint_1.generateProjectionPoint,
-        parameters: "A, d|Ox|Oy",
+        parameters: "A,d|Ox|Oy",
         description: "projection de A sur la droite d ou sur l'axe Ox ou Oy",
         options: ptOption
     },
@@ -59,7 +59,7 @@ exports.parserKeys = {
     line: {
         generate: generateLine_1.generateLine,
         parameters: "[AB] | A,3/4 | 3x+4x=-5",
-        description: "droite passant par A et B (les accolades ouvrent ou ferment la droite) ou par un point et une pente ou par son équation",
+        description: "droite passant par A et B (sans crochet = segment, les crochets ouvrent ou ferment la droite) ou par un point et une pente ou par son équation",
         options: lineOption
     },
     v: {
@@ -289,7 +289,7 @@ class Parser {
     }
     generate(steps) {
         // get all current figures.
-        let builded;
+        let builded, errors = [];
         for (let construct of steps) {
             // The step command is empty or too small - do not continue to parse it.
             if (construct.length < 3) {
@@ -305,19 +305,27 @@ class Parser {
                 figures: []
             };
             // Preprocess the step
-            let { label, key, code, options } = this._preprocess(construct);
-            // console.log(construct, label, key, code, options)
-            // continue;
-            if (exports.parserKeys[key]) {
-                builded.figures = exports.parserKeys[key].generate(this, label, code, options);
+            try {
+                let { label, key, code, options } = this._preprocess(construct);
+                // console.log(construct, label, key, code, options)
+                // continue;
+                if (exports.parserKeys[key]) {
+                    builded.figures = exports.parserKeys[key].generate(this, label, code, options);
+                }
+                else {
+                    console.log('No key found for ' + construct);
+                }
+                // apply options
+                this._postprocess(builded, options);
+                // Do whatever check
+                this._buildedSteps.push(builded);
             }
-            else {
-                console.log('No key found for ' + construct);
+            catch (error) {
+                console.warn({
+                    step: construct,
+                    error
+                });
             }
-            // apply options
-            this._postprocess(builded, options);
-            // Do whatever check
-            this._buildedSteps.push(builded);
         }
     }
     /**
@@ -370,16 +378,18 @@ class Parser {
             else {
                 key = "line";
             }
+            // Cut the special values.
+            let [value, ...code_option] = key_code.split(',');
             // Next, we need to "cut" the value to two points.
             // AB => [A,B]
             // A1B4 => [A1,B4]
-            let match = [...key_code.matchAll(/^[\[\]]?([A-Z]_?[0-9]?)([A-Z]_?[0-9]?)[\[\]]?/g)];
+            let match = [...value.matchAll(/^[\[\]]?([A-Z]_?[0-9]?)([A-Z]_?[0-9]?)[\[\]]?/g)];
             if (match.length > 0) {
                 code = [match[0][1], match[0][2]];
             }
-            code.push(key_code.startsWith("[") ? "segment" : "open");
-            code.push(key_code.endsWith("]") ? "segment" : "open");
-            return { label, key, code, options };
+            code.push(key_code.startsWith("]") ? "open" : "segment");
+            code.push(key_code.endsWith("[") ? "open" : "segment");
+            return { label, key, code: [...code, ...code_option], options };
         }
         // Any other case
         // A=<key> <code>-><options>

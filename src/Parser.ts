@@ -28,9 +28,10 @@ import {
 import {generateCircle} from "./parser/generateCircle";
 import {Line} from "./figures/Line";
 
-const ptOption: string = "*,o,s,@",
+const ptOption: string = "*,o,sq,@",
     lineOption: string = "",
     plotOption: string = ""
+
 export const parserKeys: {
     [Key: string]: {
         generate: Function,
@@ -84,7 +85,7 @@ export const parserKeys: {
     line: {
         generate: generateLine,
         parameters: "[AB] | A,3/4 | 3x+4x=-5",
-        description: "droite passant par A et B (les accolades ouvrent ou ferment la droite) ou par un point et une pente ou par son équation",
+        description: "droite passant par A et B (sans crochet = segment, les crochets ouvrent ou ferment la droite) ou par un point et une pente ou par son équation",
         options: lineOption
     },
     v: {
@@ -159,8 +160,6 @@ export const parserKeys: {
         description: "Tracer une courbe de bezier passant par plusieurs points A, B, C, ...",
         options: ""
     }
-
-
 }
 
 export type BuildStep = { step: string, figures: Figure[] }
@@ -237,6 +236,8 @@ export class Parser {
                 }
 
             }
+
+
         }
 
         // Build the new steps from the current point
@@ -344,7 +345,8 @@ export class Parser {
 
     generate(steps: string[]) {
         // get all current figures.
-        let builded: { step: string, figures: Figure[] }
+        let builded: { step: string, figures: Figure[] },
+            errors: string[] = []
 
         for (let construct of steps) {
             // The step command is empty or too small - do not continue to parse it.
@@ -364,21 +366,28 @@ export class Parser {
             }
 
             // Preprocess the step
-            let {label, key, code, options} = this._preprocess(construct)
-            // console.log(construct, label, key, code, options)
+            try {
+                let {label, key, code, options} = this._preprocess(construct)
+                // console.log(construct, label, key, code, options)
 
-            // continue;
-            if (parserKeys[key]) {
-                builded.figures = parserKeys[key].generate(this, label, code, options)
-            } else {
-                console.log('No key found for ' + construct)
+                // continue;
+                if (parserKeys[key]) {
+                    builded.figures = parserKeys[key].generate(this, label, code, options)
+                } else {
+                    console.log('No key found for ' + construct)
+                }
+
+                // apply options
+                this._postprocess(builded, options)
+
+                // Do whatever check
+                this._buildedSteps.push(builded)
+            }catch(error){
+                console.warn({
+                    step: construct,
+                    error
+                })
             }
-
-            // apply options
-            this._postprocess(builded, options)
-
-            // Do whatever check
-            this._buildedSteps.push(builded)
         }
     }
 
@@ -463,7 +472,7 @@ export class Parser {
             code.push(key_code.startsWith("]") ? "open" : "segment")
             code.push(key_code.endsWith("[") ? "open" : "segment")
 
-            return {label, key, code: [ ...code,...code_option], options}
+            return {label, key, code: [...code, ...code_option], options}
         }
 
         // Any other case
@@ -537,7 +546,6 @@ export class Parser {
                             if (options.length === 0) {
                                 options = ["start", "mid", "end"]
                             }
-
                             if ((fig.svg instanceof Path) || (fig.svg instanceof svgLine)) {
                                 for (let pos of options) {
                                     switch (pos) {
@@ -594,7 +602,7 @@ export class Parser {
                             } else if (options.length === 2) {
                                 fig.svg.translate(+options[0], +options[1])
                             }
-                        } else if (el === 'fill' && options.length>0) {
+                        } else if (el === 'fill' && options.length > 0) {
                             // fill color
                             let [color, opacity] = options[0].split('/')
                             if (CSS.supports('color', color)) {

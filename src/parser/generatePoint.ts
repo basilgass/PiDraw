@@ -12,7 +12,7 @@ import {Line} from "../figures/Line";
 import {Point} from "../figures/Point";
 import {Parser} from "../Parser";
 import {Circle} from "../figures/Circle";
-import {getStepType, STEP_KIND} from "./parseStep";
+import {getStepType, parseStep, STEP_KIND, StepValueType} from "./parseStep";
 
 export function setPointStyle(pt: Point, style: string, size?: number) {
     if (size === undefined || size === null) {
@@ -142,15 +142,14 @@ export function generatePointFromVector(parser: Parser, name: string, code: stri
 export function generatePointFromDirection(parser: Parser, name: string, code: string[], options: string[]): Figure[] {
     let A: Point,
         d: Figure,
-        distance: number,
+        distance: number|StepValueType,
         perp = code[3] === 'p'
 
     if (code.length >= 3) {
         A = parser.graph.getPoint(code[0])
         d = parser.graph.getFigure(code[1])
         if (isNaN(+code[2])) {
-            // TODO: must handle distance between two points
-            distance = 2
+            distance = getStepType(parser, code[2])
         } else {
             distance = +code[2]
         }

@@ -17,7 +17,7 @@ export enum STEP_KIND {
 export type StepValueType = {
     type: STEP_TYPE,
     kind: STEP_KIND,
-    item: Point | Figure | string | number | Point[] | Figure[],
+    item: Point | Figure | string | number | (Point|Figure|number)[],
     option?: string
 }
 
@@ -74,7 +74,13 @@ export function getStepType(parser: Parser, value: string): StepValueType {
 
     // It's a dynamic number bases on a distance between two points (or a point and an object).
     if(value.includes(':')){
-        const [nameA, nameB] = value.split(":")
+        let [nameA, nameB] = value.split(":"),
+            direction = 1
+
+        if(nameA[0]==='-'){
+            direction = -1
+            nameA = nameA.substring(1)
+        }
         let A = parser.graph.getPoint(nameA),
             B = parser.graph.getPoint(nameB)
 
@@ -82,7 +88,7 @@ export function getStepType(parser: Parser, value: string): StepValueType {
             return {
                 type: STEP_TYPE.number,
                 kind: STEP_KIND.dynamic,
-                item: [A, B],
+                item: [A, B, direction],
                 option: 'distance'
             }
         }

@@ -8,7 +8,7 @@ import {Circle} from "./Circle";
 import {Line} from "./Line";
 import {Plot} from "./Plot";
 import {mathLine, mathVector} from "../Calculus";
-import {StepValueType} from "../parser/parseStep";
+import {STEP_KIND, STEP_TYPE, StepValueType} from "../parser/parseStep";
 
 // import {mathVector} from "pimath/esm/maths/geometry/vector"
 
@@ -234,7 +234,7 @@ export class Point extends Figure {
         return this
     }
 
-    fromDirection(A: Point, d: Line, size: number, perpendicular: boolean): Point {
+    fromDirection(A: Point, d: Line, size: number|StepValueType, perpendicular: boolean): Point {
         this._constrain = {
             type: POINTCONSTRAIN.DIRECTION,
             data: [A, d, size, perpendicular]
@@ -536,10 +536,26 @@ export class Point extends Figure {
         if (this._constrain.type === POINTCONSTRAIN.DIRECTION) {
             const A: Point = this._constrain.data[0],
                 d: Line = this._constrain.data[1],
-                distance: number = this.graph.distanceToPixels(this._constrain.data[2]),
                 perp: boolean = this._constrain.data[3],
                 v = perp ? d.math.normal : d.math.director,
                 norm = v.norm
+
+            let distance: number = 1
+            if(!isNaN(this._constrain.data[2])){
+                distance = this.graph.distanceToPixels(this._constrain.data[2])
+            }else{
+                // this._constrain.data[2]
+                // return {
+                //     type: STEP_TYPE.number,
+                //     kind: STEP_KIND.dynamic,
+                //     item: [A, B],
+                //     option: 'distance'
+                // }
+                const [X,Y] = this._constrain.data[2].item
+                if(X instanceof Point && Y instanceof Point){
+                    distance = X.getDistanceTo(Y)
+                }
+            }
 
             this._x = A.x + v.x * distance / norm
             this._y = A.y + v.y * distance / norm
@@ -557,7 +573,12 @@ export class Point extends Figure {
                 } else if (ptX.option === 'y' && ptX.item instanceof Point) {
                     this._x = ptX.item.y
                 } else if (ptX.option === 'distance') {
-                    // TODO: constrain with coordinates: must handle the distance between two points as position.
+                    // @ts-ignore
+                    const [X,Y,direction] = ptX.item
+                    if(X instanceof Point && Y instanceof Point){
+                        // Must handle working from ORIGIN
+                        this._x = this.graph.origin.x + direction*X.getDistanceTo(Y)
+                    }
                 } else {
                     console.warn("Point constrain is not supported for ", ptX)
                 }
@@ -570,6 +591,12 @@ export class Point extends Figure {
                     this._y = ptY.item.x
                 } else if (ptY.option === 'y' && ptY.item instanceof Point) {
                     this._y = ptY.item.y
+                }else if(ptY.option ==='distance') {
+                    const [X,Y, direction] = ptY.item
+                    if(X instanceof Point && Y instanceof Point){
+                        // Must handle working from ORIGIN
+                       this._y = this.graph.origin.y - direction*X.getDistanceTo(Y)
+                    }
                 } else {
                     console.warn("Point constrain is not supported for ", ptY)
                 }
