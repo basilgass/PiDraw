@@ -420,17 +420,47 @@ class Parser {
                             (0, generatePoint_1.setPointStyle)(fig, el, options.length > 0 ? +options[0] : null);
                         }
                         else if (el === 'drag' && fig instanceof Point_1.Point) {
+                            // Get the figure to follow
+                            let followString = options.shift(), follow;
+                            if (followString === 'grid') {
+                                follow = this._graph.getGrid();
+                            }
+                            else if (followString !== 'x' && followString != 'y') {
+                                follow = this._graph.getFigure(followString);
+                            }
+                            let bounds = {};
+                            if (options[0] !== undefined) {
+                                const bndX = options[0].split(";").map(x => +x);
+                                if (bndX.length === 2) {
+                                    bounds['x'] = [bndX[0], bndX[1]];
+                                }
+                            }
+                            if (options[1] !== undefined) {
+                                const bndY = options[1].split(";").map(x => +x);
+                                if (bndY.length === 2) {
+                                    bounds['y'] = [bndY[0], bndY[1]];
+                                }
+                            }
                             fig.draggable({
-                                grid: options.includes('grid') ? this._graph.getGrid() : null,
-                                constrain: options.map(opt => {
-                                    if (['x', 'y', 'grid'].indexOf(opt) === -1) {
-                                        return this._graph.getFigure(opt);
-                                    }
-                                    else {
-                                        return opt;
-                                    }
-                                })
+                                constrain: follow,
+                                bounds
                             });
+                            // fig.draggable({
+                            //     // Constrain to the grid ?
+                            //     grid: follow==="grid" ? this._graph.getGrid() : null,
+                            //     // Constrain to other things ?
+                            //     constrain: options.map(opt => {
+                            //         if (['x', 'y', 'grid'].indexOf(opt) === -1) {
+                            //             // Constrain to a particular figure.
+                            //             return this._graph.getFigure(opt)
+                            //         } else {
+                            //             // Constrain to the xAxis, yAxis or Grid.
+                            //             return opt
+                            //         }
+                            //     }),
+                            //     // Add Bounds
+                            //     bounds
+                            // })
                         }
                         else if (el === 'dash') {
                             fig.dash(this._graph.pixelsPerUnit.x / 4);

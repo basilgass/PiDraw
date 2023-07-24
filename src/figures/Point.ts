@@ -8,7 +8,7 @@ import {Circle} from "./Circle";
 import {Line} from "./Line";
 import {Plot} from "./Plot";
 import {mathLine, mathVector} from "../Calculus";
-import {STEP_KIND, STEP_TYPE, StepValueType} from "../parser/parseStep";
+import {StepValueType} from "../parser/parseStep";
 
 // import {mathVector} from "pimath/esm/maths/geometry/vector"
 
@@ -234,7 +234,7 @@ export class Point extends Figure {
         return this
     }
 
-    fromDirection(A: Point, d: Line, size: number|StepValueType, perpendicular: boolean): Point {
+    fromDirection(A: Point, d: Line, size: number | StepValueType, perpendicular: boolean): Point {
         this._constrain = {
             type: POINTCONSTRAIN.DIRECTION,
             data: [A, d, size, perpendicular]
@@ -280,8 +280,9 @@ export class Point extends Figure {
     }
 
     draggable(options: {
-        grid?: Grid,
-        constrain?: (string | Figure)[],
+        // grid?: Grid,
+        constrain?: string | Figure,
+        bounds?: { x?: [number, number], y?: [number, number] }
         callback?: Function
     }): Point {
         this._shape = POINTSHAPE.HANDLE
@@ -310,35 +311,47 @@ export class Point extends Figure {
                 return
             }
 
-            // Update the value to match the grid
-            if (options.grid) {
-                if (options.grid instanceof Grid) {
-                    const intersection = options.grid.nearestPoint({x, y})
-                    x = intersection.x
-                    y = intersection.y
+            // Do not allow to go outside the bounds.
+            if (options.bounds?.x) {
+                if (x < point.graph.unitsToPixels({x: options.bounds.x[0], y: 0}).x ||
+                    x > point.graph.unitsToPixels({x: options.bounds.x[1], y: 0}).x
+                ) {
+                    return
+                }
+            }
+            if (options.bounds?.y) {
+                if (y < point.graph.unitsToPixels({y: options.bounds.y[0], x: 0}).y ||
+                    y > point.graph.unitsToPixels({y: options.bounds.y[1], x: 0}).y
+                ) {
+                    return
                 }
             }
 
+
             // Constrain
             if (options.constrain) {
-                if (options.constrain.includes('x')) {
+                // Update the value to match the grid
+                if (options.constrain instanceof Grid) {
+                    const intersection = options.constrain.nearestPoint({x, y})
+                    x = intersection.x
+                    y = intersection.y
+                } else if (options.constrain === 'x') {
                     y = point.y
-                } else if (options.constrain.includes('y')) {
+                } else if (options.constrain === 'y') {
                     x = point.x
                 } else {
-                    for (let c of options.constrain) {
-                        if (c instanceof Circle) {
-                            let v = new mathVector(c.center, {x, y}),
-                                r = c.getRadiusAsPixels()
+                    if (options.constrain instanceof Circle) {
+                        let v = new mathVector(options.constrain.center, {x, y}),
+                            r = options.constrain.getRadiusAsPixels()
 
-                            x = c.center.x + v.x / v.norm * r
-                            y = c.center.y + v.y / v.norm * r
-                        } else if (c instanceof Line) {
-                            y = c.math.getValueAtX(x)
-                        } else if (c instanceof Plot) {
-                            const pt = point.graph.pixelsToUnits({x, y})
-                            y = point.graph.unitsToPixels(c.evaluate(pt.x)).y
-                        }
+                        x = options.constrain.center.x + v.x / v.norm * r
+                        y = options.constrain.center.y + v.y / v.norm * r
+                    } else if (options.constrain instanceof Line) {
+                        //TODO: must constrain to the segment
+                        y = options.constrain.math.getValueAtX(x)
+                    } else if (options.constrain instanceof Plot) {
+                        const pt = point.graph.pixelsToUnits({x, y})
+                        y = point.graph.unitsToPixels(options.constrain.evaluate(pt.x)).y
                     }
 
                 }
@@ -524,10 +537,10 @@ export class Point extends Figure {
                 scale: number = this._constrain.data[2],
                 X = this._constrain.data[3]
 
-            if(X){
+            if (X) {
                 this._x = X.x + (B.x - A.x) * scale
                 this._y = X.y + (B.y - A.y) * scale
-            }else {
+            } else {
                 this._x = A.x + (B.x - A.x) * scale
                 this._y = A.y + (B.y - A.y) * scale
             }
@@ -541,9 +554,9 @@ export class Point extends Figure {
                 norm = v.norm
 
             let distance: number = 1
-            if(!isNaN(this._constrain.data[2])){
+            if (!isNaN(this._constrain.data[2])) {
                 distance = this.graph.distanceToPixels(this._constrain.data[2])
-            }else{
+            } else {
                 // this._constrain.data[2]
                 // return {
                 //     type: STEP_TYPE.number,
@@ -551,8 +564,8 @@ export class Point extends Figure {
                 //     item: [A, B],
                 //     option: 'distance'
                 // }
-                const [X,Y] = this._constrain.data[2].item
-                if(X instanceof Point && Y instanceof Point){
+                const [X, Y] = this._constrain.data[2].item
+                if (X instanceof Point && Y instanceof Point) {
                     distance = X.getDistanceTo(Y)
                 }
             }
@@ -574,10 +587,10 @@ export class Point extends Figure {
                     this._x = ptX.item.y
                 } else if (ptX.option === 'distance') {
                     // @ts-ignore
-                    const [X,Y,direction] = ptX.item
-                    if(X instanceof Point && Y instanceof Point){
+                    const [X, Y, direction] = ptX.item
+                    if (X instanceof Point && Y instanceof Point) {
                         // Must handle working from ORIGIN
-                        this._x = this.graph.origin.x + direction*X.getDistanceTo(Y)
+                        this._x = this.graph.origin.x + direction * X.getDistanceTo(Y)
                     }
                 } else {
                     console.warn("Point constrain is not supported for ", ptX)
@@ -591,11 +604,11 @@ export class Point extends Figure {
                     this._y = ptY.item.x
                 } else if (ptY.option === 'y' && ptY.item instanceof Point) {
                     this._y = ptY.item.y
-                }else if(ptY.option ==='distance') {
-                    const [X,Y, direction] = ptY.item
-                    if(X instanceof Point && Y instanceof Point){
+                } else if (ptY.option === 'distance') {
+                    const [X, Y, direction] = ptY.item
+                    if (X instanceof Point && Y instanceof Point) {
                         // Must handle working from ORIGIN
-                       this._y = this.graph.origin.y - direction*X.getDistanceTo(Y)
+                        this._y = this.graph.origin.y - direction * X.getDistanceTo(Y)
                     }
                 } else {
                     console.warn("Point constrain is not supported for ", ptY)

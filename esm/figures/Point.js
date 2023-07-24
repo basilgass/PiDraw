@@ -241,36 +241,46 @@ class Point extends Figure_1.Figure {
             if (y < 0 || y > point.graph.height - box.height / 2) {
                 return;
             }
-            // Update the value to match the grid
-            if (options.grid) {
-                if (options.grid instanceof Grid_1.Grid) {
-                    const intersection = options.grid.nearestPoint({ x, y });
-                    x = intersection.x;
-                    y = intersection.y;
+            // Do not allow to go outside the bounds.
+            if (options.bounds?.x) {
+                if (x < point.graph.unitsToPixels({ x: options.bounds.x[0], y: 0 }).x ||
+                    x > point.graph.unitsToPixels({ x: options.bounds.x[1], y: 0 }).x) {
+                    return;
+                }
+            }
+            if (options.bounds?.y) {
+                if (y < point.graph.unitsToPixels({ y: options.bounds.y[0], x: 0 }).y ||
+                    y > point.graph.unitsToPixels({ y: options.bounds.y[1], x: 0 }).y) {
+                    return;
                 }
             }
             // Constrain
             if (options.constrain) {
-                if (options.constrain.includes('x')) {
+                // Update the value to match the grid
+                if (options.constrain instanceof Grid_1.Grid) {
+                    const intersection = options.constrain.nearestPoint({ x, y });
+                    x = intersection.x;
+                    y = intersection.y;
+                }
+                else if (options.constrain === 'x') {
                     y = point.y;
                 }
-                else if (options.constrain.includes('y')) {
+                else if (options.constrain === 'y') {
                     x = point.x;
                 }
                 else {
-                    for (let c of options.constrain) {
-                        if (c instanceof Circle_1.Circle) {
-                            let v = new Calculus_1.mathVector(c.center, { x, y }), r = c.getRadiusAsPixels();
-                            x = c.center.x + v.x / v.norm * r;
-                            y = c.center.y + v.y / v.norm * r;
-                        }
-                        else if (c instanceof Line_1.Line) {
-                            y = c.math.getValueAtX(x);
-                        }
-                        else if (c instanceof Plot_1.Plot) {
-                            const pt = point.graph.pixelsToUnits({ x, y });
-                            y = point.graph.unitsToPixels(c.evaluate(pt.x)).y;
-                        }
+                    if (options.constrain instanceof Circle_1.Circle) {
+                        let v = new Calculus_1.mathVector(options.constrain.center, { x, y }), r = options.constrain.getRadiusAsPixels();
+                        x = options.constrain.center.x + v.x / v.norm * r;
+                        y = options.constrain.center.y + v.y / v.norm * r;
+                    }
+                    else if (options.constrain instanceof Line_1.Line) {
+                        //TODO: must constrain to the segment
+                        y = options.constrain.math.getValueAtX(x);
+                    }
+                    else if (options.constrain instanceof Plot_1.Plot) {
+                        const pt = point.graph.pixelsToUnits({ x, y });
+                        y = point.graph.unitsToPixels(options.constrain.evaluate(pt.x)).y;
                     }
                 }
             }

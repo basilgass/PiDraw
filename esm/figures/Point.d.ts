@@ -1,7 +1,6 @@
 import { Graph } from "../Graph";
 import { Figure } from "./Figure";
 import { IPoint } from "../variables/interfaces";
-import { Grid } from "./Grid";
 import { AXIS, POINTCONSTRAIN } from "../variables/enums";
 import { Circle } from "./Circle";
 import { Line } from "./Line";
@@ -57,8 +56,11 @@ export declare class Point extends Figure {
     projection(A: Point, to: Line | string): Point;
     symmetry(A: Point, of: Line | Point | string): Point;
     draggable(options: {
-        grid?: Grid;
-        constrain?: (string | Figure)[];
+        constrain?: string | Figure;
+        bounds?: {
+            x?: [number, number];
+            y?: [number, number];
+        };
         callback?: Function;
     }): Point;
     private _updateShape;
