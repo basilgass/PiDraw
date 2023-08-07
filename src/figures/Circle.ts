@@ -81,7 +81,7 @@ export class Circle extends Figure {
             return this
         }
         // No radius is given
-        if (this._radius <= 0) {
+        if(!(this._radius instanceof Point) && this._radius<=0){
             return this
         }
 

@@ -14,7 +14,8 @@ export type BuildStep = {
 };
 export declare class Parser {
     private _construction;
-    constructor(graph: Graph, construction: string);
+    private _config;
+    constructor(graph: Graph, construction: string, parameters?: string);
     private _graph;
     get graph(): Graph;
     private _buildedSteps;
@@ -25,7 +26,7 @@ export declare class Parser {
      * @param refresh
      */
     update(construction: string, refresh?: boolean): void;
-    updateLayout(parameters: string): Parser;
+    updateLayout(parameters: string, constructUpdate?: boolean): Parser;
     generate(steps: string[]): void;
     /**
      * Convert a construct string to the label, key, code and options)

@@ -18,7 +18,7 @@ var LINECONSTRUCTION;
     LINECONSTRUCTION["TANGENT"] = "tangent";
     LINECONSTRUCTION["SLOPE"] = "slope";
     LINECONSTRUCTION["BISSECTOR"] = "bissector";
-})(LINECONSTRUCTION = exports.LINECONSTRUCTION || (exports.LINECONSTRUCTION = {}));
+})(LINECONSTRUCTION || (exports.LINECONSTRUCTION = LINECONSTRUCTION = {}));
 class Line extends Figure_1.Figure {
     constructor(graph, name, A, B, construction) {
         super(graph, name);

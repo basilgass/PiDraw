@@ -156,7 +156,7 @@ export declare class Graph {
         start: Marker;
         end: Marker;
     };
-    parse(construction: string): Parser;
+    parse(construction: string, parameters?: string): Parser;
     get parseHelper(): {
         [Key: string]: {
             description: string;

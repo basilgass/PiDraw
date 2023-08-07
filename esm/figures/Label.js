@@ -14,7 +14,7 @@ var LABELPOS;
     LABELPOS["TOP"] = "top";
     LABELPOS["BOTTOM"] = "bottom";
     LABELPOS["MIDDLE"] = "middle";
-})(LABELPOS = exports.LABELPOS || (exports.LABELPOS = {}));
+})(LABELPOS || (exports.LABELPOS = LABELPOS = {}));
 class Label extends Figure_1.Figure {
     _config;
     _html;

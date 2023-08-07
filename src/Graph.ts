@@ -554,8 +554,8 @@ export class Graph {
         };
     }
 
-    parse(construction: string): Parser {
-        let parser = new Parser(this, construction)
+    parse(construction: string, parameters?:string): Parser {
+        let parser = new Parser(this, construction, parameters)
         return parser
     }
     get parseHelper():{[Key: string]: {description: string, parameters: string}} {

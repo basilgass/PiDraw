@@ -28,7 +28,6 @@ export function generatePlot(parser: Parser, name: string, code: string[], optio
         }
 
         if(check.includes(":")){
-
             [domain.min, domain.max] = check.split(":").map(x=>+x)
         }
     }

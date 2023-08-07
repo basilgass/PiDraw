@@ -130,12 +130,11 @@ r2=[OT2[->ultrathin,dot`
             "d=AB\n" +
             "X(18,0)->drag:d\n" +
             "e=AX\n" +
-            "C=dpt X,e,A:X,p"
+            "C=dpt X,e,A:X,p\n" +
+            "e=AX->move/3,label:une ligne bien jolie"
 
-        let parser = graph.parse(construct),
-            parameters = 'grid,axis,x=-1:20,y=-1:20'
-
-        parser.updateLayout(parameters)
+        let parameters = 'grid,axis,x=-1:20,y=-1:20',
+            parser = graph.parse(construct, parameters)
 
         return {
             construct,

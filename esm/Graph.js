@@ -415,8 +415,8 @@ class Graph {
             }).ref(scale, scale / 2)
         };
     }
-    parse(construction) {
-        let parser = new Parser_1.Parser(this, construction);
+    parse(construction, parameters) {
+        let parser = new Parser_1.Parser(this, construction, parameters);
         return parser;
     }
     get parseHelper() {

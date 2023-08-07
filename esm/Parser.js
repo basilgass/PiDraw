@@ -12,6 +12,7 @@ const generatePolygon_1 = require("./parser/generatePolygon");
 const generatePoint_1 = require("./parser/generatePoint");
 const generateCircle_1 = require("./parser/generateCircle");
 const Line_1 = require("./figures/Line");
+const enums_1 = require("./variables/enums");
 const ptOption = "*,o,sq,@", lineOption = "", plotOption = "";
 exports.parserKeys = {
     pt: {
@@ -137,9 +138,23 @@ exports.parserKeys = {
 };
 class Parser {
     _construction;
-    constructor(graph, construction) {
+    _config;
+    constructor(graph, construction, parameters) {
         this._graph = graph;
-        this.update(construction);
+        // Store the construction value.
+        this._construction = construction;
+        // Configuration
+        this._config = {
+            nolabel: false,
+            format: "tex"
+        };
+        // Update the parameters
+        if (parameters !== undefined) {
+            this.updateLayout(parameters);
+        }
+        else {
+            this.update(construction);
+        }
     }
     _graph;
     get graph() {
@@ -195,7 +210,7 @@ class Parser {
         // Build the new steps from the current point
         this.generate(steps.slice(i));
     }
-    updateLayout(parameters) {
+    updateLayout(parameters, constructUpdate) {
         // x=3:-5,y=-5:2                            min/max
         // ppu=50                                   pixels per unit
         // grid/nogrid                              show / hide grid
@@ -205,29 +220,35 @@ class Parser {
         let xMin = -1, xMax = 10, yMin = -1, yMax = 10, ppu = null, xUnit = 1, yUnit = 1;
         for (let param of values) {
             if (param.includes('=')) {
-                let keyValue = param.split('=');
-                if (keyValue[0] === 'x') {
-                    if (keyValue[1].includes(':')) {
-                        xMin = +keyValue[1].split(':')[0];
-                        xMax = +keyValue[1].split(':')[1];
+                let [key, value] = param.split("=");
+                // let keyValue = param.split('=')
+                if (key === 'x') {
+                    if (value.includes(':')) {
+                        let [a, b] = value.split(":").map(x => +x);
+                        if (!isNaN(a) && !isNaN(b)) {
+                            xMin = Math.min(a, b);
+                            xMax = Math.max(a, b, a + 1);
+                        }
                     }
                 }
-                else if (keyValue[0] === 'y') {
-                    if (keyValue[1].includes(':')) {
-                        yMin = +keyValue[1].split(':')[0];
-                        yMax = +keyValue[1].split(':')[1];
+                else if (key === 'y') {
+                    if (value.includes(':')) {
+                        let [a, b] = value.split(":").map(x => +x);
+                        if (!isNaN(a) && !isNaN(b)) {
+                            yMin = Math.min(a, b);
+                            yMax = Math.max(a, b, a + 1);
+                        }
                     }
                 }
-                else if (keyValue[0] === 'ppu') {
-                    let value = +keyValue[1];
-                    if (!isNaN(value) && value > 0) {
-                        ppu = +keyValue[1];
+                else if (key === 'ppu') {
+                    if (!isNaN(+value) && +value > 0) {
+                        ppu = +value;
                     }
                 }
-                else if (keyValue[0] === "unit") {
-                    if (keyValue[1].includes(':')) {
-                        xUnit = +keyValue[1].split(':')[0];
-                        yUnit = +keyValue[1].split(':')[1];
+                else if (key === "unit") {
+                    if (value.includes(':')) {
+                        xUnit = +value.split(':')[0];
+                        yUnit = +value.split(':')[1];
                     }
                     if (xUnit <= 0) {
                         xUnit = 1;
@@ -253,13 +274,14 @@ class Parser {
                 y: this._graph.pixelsPerUnit.y / yUnit
             };
         }
-        // Update the visibility.
+        // Update the grid
         if (values.includes('grid')) {
             this._graph.getFigure('MAINGRID').update().show();
         }
         else {
             this._graph.getFigure('MAINGRID').hide();
         }
+        // update the axis
         if (values.includes('axis')) {
             let axis = this._graph.getFigure('Ox');
             if (axis instanceof Axis_1.Axis) {
@@ -284,6 +306,8 @@ class Parser {
             this._graph.getFigure('Ox').hide();
             this._graph.getFigure('Oy').hide();
         }
+        // Other options
+        this._config.nolabel = values.includes('nolabel');
         this.update(this._construction, true);
         return this;
     }
@@ -398,45 +422,73 @@ class Parser {
         code = code_with_sep.join(",").split(',');
         return { label, key, code, options };
     }
-    _postprocess(builded, options) {
-        if (options.length > 0) {
-            // Reset the colors
-            builded.figures
-                .forEach(fig => {
-                fig.stroke('black');
+    _postprocess(builded, codeOptions) {
+        /**
+         * builded: contains the figures for the current code
+         * options: is the list of options to be applied.
+         *          [optionA,optionB:param,optionC:param/other/some:thing]
+         */
+        // Reset the colors and labels
+        builded.figures
+            .forEach(fig => {
+            // Set stroke to black
+            fig.stroke('black');
+            // Change the fill value
+            if (fig instanceof Point_1.Point) {
+                fig.fill("white");
+            }
+            else {
+                fig.fill('transparent');
+            }
+            // Hide or show the label
+            if (this._config.nolabel) {
+                fig.hideLabel();
+            }
+            else {
                 if (fig instanceof Point_1.Point) {
-                    fig.fill("white");
+                    fig.showLabel();
                 }
-                else {
-                    fig.fill('transparent');
-                }
-            });
-            options.forEach(elWithOptions => {
-                let options = elWithOptions.split(':'), el = options.shift();
-                if (el !== '') {
+            }
+        });
+        if (codeOptions.length > 0) {
+            codeOptions.forEach(elWithCodeOptions => {
+                // let options = elWithCodeOptions.split(':'),
+                //     key = options.shift(),
+                //     keyParameter = ""
+                let options = elWithCodeOptions.split('/'), key_param = options.shift(), [key, param] = key_param.split(':');
+                // Build the options:
+                // each options can be of the type
+                //      key
+                //      key:param
+                //      key/optA/optB/optX:optY
+                //      key:param/optA/optB/x:y
+                if (key !== '') {
                     // reserved keys
                     builded.figures.forEach(fig => {
-                        if (fig instanceof Point_1.Point && ["*", "o", "sq"].indexOf(el) !== -1) {
-                            (0, generatePoint_1.setPointStyle)(fig, el, options.length > 0 ? +options[0] : null);
+                        // Special case for points
+                        if (fig instanceof Point_1.Point && ["*", "o", "sq"].indexOf(key) !== -1) {
+                            (0, generatePoint_1.setPointStyle)(fig, key, options.length > 0 ? +options[0] : null);
+                            // Drag options
                         }
-                        else if (el === 'drag' && fig instanceof Point_1.Point) {
+                        else if (key === 'drag' && fig instanceof Point_1.Point) {
                             // Get the figure to follow
-                            let followString = options.shift(), follow;
-                            if (followString === 'grid') {
+                            let follow;
+                            if (param === 'grid') {
                                 follow = this._graph.getGrid();
                             }
-                            else if (followString !== 'x' && followString != 'y') {
-                                follow = this._graph.getFigure(followString);
+                            else if (param !== 'x' && param != 'y') {
+                                follow = this._graph.getFigure(param);
                             }
+                            // Determine the bounds
                             let bounds = {};
                             if (options[0] !== undefined) {
-                                const bndX = options[0].split(";").map(x => +x);
+                                const bndX = options[0].split(":").map(x => +x);
                                 if (bndX.length === 2) {
                                     bounds['x'] = [bndX[0], bndX[1]];
                                 }
                             }
                             if (options[1] !== undefined) {
-                                const bndY = options[1].split(";").map(x => +x);
+                                const bndY = options[1].split(":").map(x => +x);
                                 if (bndY.length === 2) {
                                     bounds['y'] = [bndY[0], bndY[1]];
                                 }
@@ -445,58 +497,56 @@ class Parser {
                                 constrain: follow,
                                 bounds
                             });
-                            // fig.draggable({
-                            //     // Constrain to the grid ?
-                            //     grid: follow==="grid" ? this._graph.getGrid() : null,
-                            //     // Constrain to other things ?
-                            //     constrain: options.map(opt => {
-                            //         if (['x', 'y', 'grid'].indexOf(opt) === -1) {
-                            //             // Constrain to a particular figure.
-                            //             return this._graph.getFigure(opt)
-                            //         } else {
-                            //             // Constrain to the xAxis, yAxis or Grid.
-                            //             return opt
-                            //         }
-                            //     }),
-                            //     // Add Bounds
-                            //     bounds
-                            // })
                         }
-                        else if (el === 'dash') {
-                            fig.dash(this._graph.pixelsPerUnit.x / 4);
+                        // Everything with DASH and DOTS
+                        else if (key === 'dash' || key === 'dot') {
+                            const scale = this._graph.pixelsPerUnit.x / 10;
+                            if (param === undefined || !isNaN(+param)) {
+                                const size = param === undefined ? 5 : +param;
+                                fig.dash(key === 'dash' ? size * scale : `${scale / 2} ${size}`);
+                            }
+                            else {
+                                // Convert the values to the units.
+                                const values = param.split(" ")
+                                    .map(v => +v * scale);
+                                fig.dash(values.join(" "));
+                            }
                         }
-                        else if (el === 'dot') {
-                            fig.dash(`2 ${this._graph.pixelsPerUnit.x / 4}`);
+                        // Everything for the line WIDTH
+                        else if (key === 'w') {
+                            fig.width(+param);
                         }
-                        else if (!isNaN(+el)) {
-                            fig.width(+el);
-                        }
-                        else if (el === 'thick') {
+                        else if (key === 'thick') {
                             fig.thick();
                         }
-                        else if (el === 'thin') {
+                        else if (key === 'thin') {
                             fig.thin();
                         }
-                        else if (el === 'ultrathick') {
+                        else if (key === 'ultrathick') {
                             fig.ultrathick();
                         }
-                        else if (el === 'ultrathin') {
+                        else if (key === 'ultrathin') {
                             fig.ultrathin();
                         }
-                        else if (el === 'label') {
-                            fig.label.show();
-                        }
-                        else if (el === '?') {
+                        // Everything concerning the hide / show of items
+                        // label / ? : show or hide the label
+                        // ! : hide the figure
+                        // hide: hide label and figure.
+                        // else if (key === 'label') {
+                        //     fig.label.show()
+                        // }
+                        else if (key === '?') {
                             fig.label.hide();
                         }
-                        else if (el === '!') {
+                        else if (key === '!') {
                             fig.hide();
                         }
-                        else if (el === 'hide') {
+                        else if (key === 'hide') {
                             fig.label.hide();
                             fig.hide();
                         }
-                        else if (el.startsWith('mark')) {
+                        // Everything concerning the end of line marks
+                        else if (key.startsWith('mark')) {
                             if (options.length === 0) {
                                 options = ["start", "mid", "end"];
                             }
@@ -517,37 +567,64 @@ class Parser {
                                 }
                             }
                         }
-                        else if (el.startsWith('#') || el.startsWith('$')) {
+                        // Everything concerning the label text: either plain text, either TeX
+                        else if (key === 'tex' || key === 'label') {
                             // Label configuration
-                            // #name/position/x:y
-                            let [label, position, offset] = el.substring(1).split("/");
-                            // Setting display name
-                            if (el.startsWith('$')) {
+                            // <tex or text>:name/position/x:y
+                            // let [label, position, offset] = key.substring(1).split("/")
+                            // Set it as TeX
+                            if (key === 'tex')
                                 fig.label.isTex = true;
-                            }
-                            fig.displayName = label;
+                            // Setting display name
+                            fig.displayName = param;
                             // Changing the default position
+                            let position = options.filter(opt => opt.match(/[tmblcr]{1,2}/))[0];
                             if (position !== undefined && position !== "") {
                                 fig.label.position(position);
                             }
                             // Adding offsets
+                            let offset = options.filter(opt => opt.includes(':'))[0];
                             if (offset !== undefined) {
-                                let x = +offset, y = options.length === 1 ? +options[0] : 0;
+                                let [x, y] = offset.split(':').map(v => +v);
                                 if (!isNaN(x) && !isNaN(y)) {
-                                    fig.label.offset({ x, y });
+                                    // Convert the distances to pixels.
+                                    fig.label.offset({
+                                        x: this._graph.distanceToPixels(x),
+                                        y: this._graph.distanceToPixels(y === undefined ? 0 : y, enums_1.AXIS.VERTICAL)
+                                    });
+                                }
+                            }
+                            // Make sure the label is visible
+                            fig.showLabel().updateLabel();
+                        }
+                        // Move the figure
+                        // TODO: must change the value to UNIT and also move the label the same way.
+                        else if (key.startsWith('move')) {
+                            // move/4
+                            // move/4:6
+                            if (options.length > 0) {
+                                let [x, y] = options[0].split(':');
+                                // Convert the distances to pixels.
+                                let dx = this._graph.distanceToPixels(+x), dy = this._graph.distanceToPixels(y === undefined ? 0 : +y, enums_1.AXIS.VERTICAL);
+                                if (y === undefined && fig instanceof Line_1.Line) {
+                                    const n = fig.math.normal, norm = n.norm;
+                                    fig.svg.translate(n.x / norm * (dx), n.y / norm * (dx));
+                                    // Move the label
+                                    fig.label.offset({
+                                        x: n.x / norm * (dx),
+                                        y: n.y / norm * (-dx)
+                                    });
+                                }
+                                else {
+                                    fig.svg.translate(dx, -dy);
+                                    fig.label.offset({ x: dx, y: dy });
                                 }
                             }
                         }
-                        else if (el.startsWith('move')) {
-                            if (options.length === 1 && fig instanceof Line_1.Line) {
-                                const n = fig.math.normal, norm = n.norm;
-                                fig.svg.translate(n.x / norm * (+options[0]), n.y / norm * (+options[0]));
-                            }
-                            else if (options.length === 2) {
-                                fig.svg.translate(+options[0], +options[1]);
-                            }
-                        }
-                        else if (el === 'fill' && options.length > 0) {
+                        // Everything concerning the color
+                        // fill:color   to fill the figure
+                        // color        to stroke the figure
+                        else if (key === 'fill' && options.length > 0) {
                             // fill color
                             let [color, opacity] = options[0].split('/');
                             if (CSS.supports('color', color)) {
@@ -555,7 +632,7 @@ class Parser {
                             }
                         }
                         else {
-                            let [color, opacity] = el.split('/');
+                            let [color, opacity] = key.split('/');
                             // stroke
                             if (CSS.supports('color', color)) {
                                 fig.stroke({ color, opacity: opacity === undefined ? 1 : +opacity });

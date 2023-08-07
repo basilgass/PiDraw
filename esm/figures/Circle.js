@@ -59,7 +59,7 @@ class Circle extends Figure_1.Figure {
             return this;
         }
         // No radius is given
-        if (this._radius <= 0) {
+        if (!(this._radius instanceof Point_1.Point) && this._radius <= 0) {
             return this;
         }
         this.svg.center(this._center.x, this._center.y);

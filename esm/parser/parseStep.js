@@ -8,12 +8,12 @@ var STEP_TYPE;
     STEP_TYPE["point"] = "point";
     STEP_TYPE["figure"] = "figure";
     STEP_TYPE["option"] = "option";
-})(STEP_TYPE = exports.STEP_TYPE || (exports.STEP_TYPE = {}));
+})(STEP_TYPE || (exports.STEP_TYPE = STEP_TYPE = {}));
 var STEP_KIND;
 (function (STEP_KIND) {
     STEP_KIND[STEP_KIND["static"] = 0] = "static";
     STEP_KIND[STEP_KIND["dynamic"] = 1] = "dynamic";
-})(STEP_KIND = exports.STEP_KIND || (exports.STEP_KIND = {}));
+})(STEP_KIND || (exports.STEP_KIND = STEP_KIND = {}));
 /**
  * getStepType extract the value type.
  * It can be the following values:

@@ -15,7 +15,7 @@ var LAYER;
     LAYER["PLOTSFG"] = "plotsFG";
     LAYER["FOREGROUND"] = "foreground";
     LAYER["POINTS"] = "points";
-})(LAYER = exports.LAYER || (exports.LAYER = {}));
+})(LAYER || (exports.LAYER = LAYER = {}));
 /**
  * Axis values
  */
@@ -23,7 +23,7 @@ var AXIS;
 (function (AXIS) {
     AXIS["HORIZONTAL"] = "x";
     AXIS["VERTICAL"] = "y";
-})(AXIS = exports.AXIS || (exports.AXIS = {}));
+})(AXIS || (exports.AXIS = AXIS = {}));
 /**
  * Grid values
  */
@@ -32,7 +32,7 @@ var GRIDTYPE;
     GRIDTYPE[GRIDTYPE["ORTHOGONAL"] = 4] = "ORTHOGONAL";
     GRIDTYPE[GRIDTYPE["TRIANGLE"] = 3] = "TRIANGLE";
     GRIDTYPE[GRIDTYPE["HEXAGONAL"] = 6] = "HEXAGONAL";
-})(GRIDTYPE = exports.GRIDTYPE || (exports.GRIDTYPE = {}));
+})(GRIDTYPE || (exports.GRIDTYPE = GRIDTYPE = {}));
 /**
  * Point shape
  */
@@ -42,7 +42,7 @@ var POINTSHAPE;
     POINTSHAPE[POINTSHAPE["CROSS"] = 1] = "CROSS";
     POINTSHAPE[POINTSHAPE["HANDLE"] = 2] = "HANDLE";
     POINTSHAPE[POINTSHAPE["SQUARE"] = 3] = "SQUARE";
-})(POINTSHAPE = exports.POINTSHAPE || (exports.POINTSHAPE = {}));
+})(POINTSHAPE || (exports.POINTSHAPE = POINTSHAPE = {}));
 /**
  * Point constrain
  */
@@ -59,7 +59,7 @@ var POINTCONSTRAIN;
     POINTCONSTRAIN[POINTCONSTRAIN["INTERSECTION_CIRCLES"] = 8] = "INTERSECTION_CIRCLES";
     POINTCONSTRAIN[POINTCONSTRAIN["SYMMETRY"] = 9] = "SYMMETRY";
     POINTCONSTRAIN[POINTCONSTRAIN["COORDINATES"] = 10] = "COORDINATES";
-})(POINTCONSTRAIN = exports.POINTCONSTRAIN || (exports.POINTCONSTRAIN = {}));
+})(POINTCONSTRAIN || (exports.POINTCONSTRAIN = POINTCONSTRAIN = {}));
 /**
  * Line constrain
  */
@@ -69,5 +69,5 @@ var LINERULE;
     LINERULE[LINERULE["PARALLEL"] = 1] = "PARALLEL";
     LINERULE[LINERULE["PERPENDICULAR"] = 2] = "PERPENDICULAR";
     LINERULE[LINERULE["TANGENT"] = 3] = "TANGENT";
-})(LINERULE = exports.LINERULE || (exports.LINERULE = {}));
+})(LINERULE || (exports.LINERULE = LINERULE = {}));
 //# sourceMappingURL=enums.js.map
