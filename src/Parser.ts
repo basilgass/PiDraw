@@ -343,7 +343,6 @@ export class Parser {
             }
         }
 
-
         // Update the grid
         if (values.includes('grid')) {
             this._graph.getFigure('MAINGRID').update().show()
@@ -551,7 +550,7 @@ export class Parser {
                 if(this._config.nolabel){
                     fig.hideLabel()
                 }else{
-                    if(fig instanceof Point){
+                    if(fig instanceof Point && !fig.label.isHtml){
                         fig.showLabel()
                     }
                 }
@@ -709,7 +708,9 @@ export class Parser {
                             }
 
                             // Make sure the label is visible
-                            fig.showLabel().updateLabel()
+                            if(!fig.label.isTex) {
+                                fig.showLabel().updateLabel()
+                            }
                         }
                             // Move the figure
                         // TODO: must change the value to UNIT and also move the label the same way.

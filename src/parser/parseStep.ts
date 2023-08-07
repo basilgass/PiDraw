@@ -119,7 +119,7 @@ export function parseStep(parser: Parser, step: string, template: string[]): (Fi
 
     if (data.length === 1) {
         // Handle special cases
-        console.log(data)
+        // TODO: parseStep: handel special case when data is of length 1.
     }
 
     for (let i = 0; i < template.length; i++) {

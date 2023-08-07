@@ -445,7 +445,7 @@ class Parser {
                 fig.hideLabel();
             }
             else {
-                if (fig instanceof Point_1.Point) {
+                if (fig instanceof Point_1.Point && !fig.label.isHtml) {
                     fig.showLabel();
                 }
             }
@@ -595,7 +595,9 @@ class Parser {
                                 }
                             }
                             // Make sure the label is visible
-                            fig.showLabel().updateLabel();
+                            if (!fig.label.isTex) {
+                                fig.showLabel().updateLabel();
+                            }
                         }
                         // Move the figure
                         // TODO: must change the value to UNIT and also move the label the same way.
