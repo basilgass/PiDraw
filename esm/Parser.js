@@ -450,20 +450,23 @@ class Parser {
             else {
                 fig.fill('transparent');
             }
-            // Hide or show the label
-            if (this._config.nolabel) {
-                fig.hideLabel();
-            }
-            else {
-                if (fig instanceof Point_1.Point) {
-                    fig.showLabel();
-                }
-            }
             // If the label is shown, maybe force it to be as TeX.
-            if (fig.label.isTex !== this._config.labelAsTex &&
-                codeOptions.filter(x => x.startsWith('label') || x.startsWith('tex')).length === 0) {
-                codeOptions.push(this._config.labelAsTex ? 'tex' : 'label');
-                fig.label.isTex = this._config.labelAsTex;
+            if (fig instanceof Point_1.Point) {
+                // Hide or show the label
+                if (this._config.nolabel) {
+                    fig.hideLabel();
+                }
+                else {
+                    if (fig instanceof Point_1.Point) {
+                        fig.showLabel();
+                    }
+                }
+                if (fig.label.isTex !== this._config.labelAsTex &&
+                    codeOptions.filter(x => x.startsWith('label') || x.startsWith('tex')).length === 0 &&
+                    !codeOptions.includes('hide') && !codeOptions.includes('?')) {
+                    codeOptions.push(this._config.labelAsTex ? 'tex' : 'label');
+                    fig.label.isTex = this._config.labelAsTex;
+                }
             }
             // Hide or show the points
             if (this._config.nopoint && fig instanceof Point_1.Point) {
