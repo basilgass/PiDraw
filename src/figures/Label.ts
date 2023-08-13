@@ -61,7 +61,8 @@ export class Label extends Figure {
         this._html.attr('style', "overflow:visible")
         this.graph.layers.foreground.add(this._html)
 
-        this.isHtml = false
+        this.isTex = false
+        // this.isHtml = false // Automatically set with isTex
 
         // Update the label text and position
         this.updateFigure()
@@ -74,13 +75,7 @@ export class Label extends Figure {
     set isHtml(value: Boolean) {
         this._isHtml = value;
 
-        if (this._isHtml) {
-            this.svg.hide()
-            this.html.show()
-        } else {
-            this.svg.show()
-            this.html.hide()
-        }
+        this.show()
     }
 
 
@@ -89,8 +84,8 @@ export class Label extends Figure {
     }
 
     set isTex(value: Boolean) {
-        this._isHtml = value || this._isHtml
         this._isTex = value;
+        this.isHtml = value
     }
 
     get html(): ForeignObject {
@@ -104,6 +99,24 @@ export class Label extends Figure {
     set displayName(value: string) {
         this._config.name = value
         this.updateFigure()
+    }
+
+    hide(): Figure {
+        this.svg.hide()
+        this.html.hide()
+
+        return this
+    }
+
+    show(): Figure {
+        if (this._isHtml) {
+            this.svg.hide()
+            this.html.show()
+        } else {
+            this.svg.show()
+            this.html.hide()
+        }
+        return this
     }
 
     addHtml(value: string): Label {
@@ -224,8 +237,6 @@ export class Label extends Figure {
 
             this.html.width(w)
             this.html.height(h)
-            //
-            // this._HtmlLabelRefresh()
         } else {
             if (this.svg instanceof Text) {
                 w = this.svg.length()

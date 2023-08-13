@@ -6,7 +6,8 @@ const Calculus_1 = require("../Calculus");
 function generateLine(parser, name, code, options) {
     // d=line A,3/4     code: [A,3/4]
     // d=2x-3y=5        code: [2x-3y=5]
-    // d=AB             code: [A,B]
+    // d=AB             code: ]A,B[
+    // d=AB.             code: [A,B]
     if (code.length === 1) {
         // Get the point
         let left = parseLine(code[0].split('=')[0]), right = parseLine(code[0].split('=')[1]);

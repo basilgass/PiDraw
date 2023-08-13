@@ -59,8 +59,8 @@ exports.parserKeys = {
     },
     line: {
         generate: generateLine_1.generateLine,
-        parameters: "[AB] | A,3/4 | 3x+4x=-5",
-        description: "droite passant par A et B (sans crochet = segment, les crochets ouvrent ou ferment la droite) ou par un point et une pente ou par son équation",
+        parameters: "[AB] | AB. | A,3/4 | 3x+4x=-5",
+        description: "droite passant par A et B (sans crochet = droite, avec un point à la fin = segment, les crochets ouvrent ou ferment la droite) ou par un point et une pente ou par son équation",
         options: lineOption
     },
     v: {
@@ -146,7 +146,8 @@ class Parser {
         // Configuration
         this._config = {
             nolabel: false,
-            format: "tex"
+            nopoint: false,
+            labelAsTex: false
         };
         // Update the parameters
         if (parameters !== undefined) {
@@ -308,6 +309,8 @@ class Parser {
         }
         // Other options
         this._config.nolabel = values.includes('nolabel');
+        this._config.nopoint = values.includes('nopoint');
+        this._config.labelAsTex = values.includes('tex');
         this.update(this._construction, true);
         return this;
     }
@@ -407,12 +410,19 @@ class Parser {
             // Next, we need to "cut" the value to two points.
             // AB => [A,B]
             // A1B4 => [A1,B4]
-            let match = [...value.matchAll(/^[\[\]]?([A-Z]_?[0-9]?)([A-Z]_?[0-9]?)[\[\]]?/g)];
+            let match = [...value.matchAll(/^[\[\]]?([A-Z]_?[0-9]?)([A-Z]_?[0-9]?)[\[\].]?/g)];
+            // Get the two points.
             if (match.length > 0) {
                 code = [match[0][1], match[0][2]];
             }
-            code.push(key_code.startsWith("]") ? "open" : "segment");
-            code.push(key_code.endsWith("[") ? "open" : "segment");
+            if (!value.endsWith('.')) {
+                code.push(key_code.startsWith("[") ? "segment" : "open");
+                code.push(key_code.endsWith("]") ? "segment" : "open");
+            }
+            else {
+                code.push('segment');
+                code.push('segment');
+            }
             return { label, key, code: [...code, ...code_option], options };
         }
         // Any other case
@@ -445,9 +455,19 @@ class Parser {
                 fig.hideLabel();
             }
             else {
-                if (fig instanceof Point_1.Point && !fig.label.isHtml) {
+                if (fig instanceof Point_1.Point) {
                     fig.showLabel();
                 }
+            }
+            // If the label is shown, maybe force it to be as TeX.
+            if (fig.label.isTex !== this._config.labelAsTex &&
+                codeOptions.filter(x => x.startsWith('label') || x.startsWith('tex')).length === 0) {
+                codeOptions.push(this._config.labelAsTex ? 'tex' : 'label');
+                fig.label.isTex = this._config.labelAsTex;
+            }
+            // Hide or show the points
+            if (this._config.nopoint && fig instanceof Point_1.Point) {
+                fig.hide();
             }
         });
         if (codeOptions.length > 0) {
@@ -472,12 +492,16 @@ class Parser {
                         }
                         else if (key === 'drag' && fig instanceof Point_1.Point) {
                             // Get the figure to follow
+                            // Might be the horizontal axes
                             let follow;
                             if (param === 'grid') {
                                 follow = this._graph.getGrid();
                             }
                             else if (param !== 'x' && param != 'y') {
                                 follow = this._graph.getFigure(param);
+                            }
+                            else {
+                                follow = param;
                             }
                             // Determine the bounds
                             let bounds = {};
@@ -573,8 +597,7 @@ class Parser {
                             // <tex or text>:name/position/x:y
                             // let [label, position, offset] = key.substring(1).split("/")
                             // Set it as TeX
-                            if (key === 'tex')
-                                fig.label.isTex = true;
+                            fig.label.isTex = key === 'tex';
                             // Setting display name
                             fig.displayName = param;
                             // Changing the default position
@@ -595,9 +618,7 @@ class Parser {
                                 }
                             }
                             // Make sure the label is visible
-                            if (!fig.label.isTex) {
-                                fig.showLabel().updateLabel();
-                            }
+                            fig.showLabel().updateLabel();
                         }
                         // Move the figure
                         // TODO: must change the value to UNIT and also move the label the same way.
@@ -626,19 +647,18 @@ class Parser {
                         // Everything concerning the color
                         // fill:color   to fill the figure
                         // color        to stroke the figure
-                        else if (key === 'fill' && options.length > 0) {
+                        else if (key === 'fill') {
                             // fill color
-                            let [color, opacity] = options[0].split('/');
-                            if (CSS.supports('color', color)) {
-                                fig.fill({ color, opacity: opacity === undefined ? 1 : +opacity });
+                            // let [color, opacity] = options[0].split('/')
+                            if (CSS.supports('color', param)) {
+                                const opacity = isNaN(+options[0]) ? 1 : +options[0];
+                                fig.fill({ color: param, opacity });
                             }
                         }
-                        else {
-                            let [color, opacity] = key.split('/');
+                        else if (CSS.supports('color', key)) {
+                            const opacity = isNaN(+options[0]) ? 1 : +options[0];
                             // stroke
-                            if (CSS.supports('color', color)) {
-                                fig.stroke({ color, opacity: opacity === undefined ? 1 : +opacity });
-                            }
+                            fig.stroke({ color: key, opacity });
                         }
                     });
                 }

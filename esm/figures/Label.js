@@ -40,7 +40,8 @@ class Label extends Figure_1.Figure {
         this._html = this.graph.svg.foreignObject(1, 1);
         this._html.attr('style', "overflow:visible");
         this.graph.layers.foreground.add(this._html);
-        this.isHtml = false;
+        this.isTex = false;
+        // this.isHtml = false // Automatically set with isTex
         // Update the label text and position
         this.updateFigure();
     }
@@ -49,21 +50,14 @@ class Label extends Figure_1.Figure {
     }
     set isHtml(value) {
         this._isHtml = value;
-        if (this._isHtml) {
-            this.svg.hide();
-            this.html.show();
-        }
-        else {
-            this.svg.show();
-            this.html.hide();
-        }
+        this.show();
     }
     get isTex() {
         return this._isTex;
     }
     set isTex(value) {
-        this._isHtml = value || this._isHtml;
         this._isTex = value;
+        this.isHtml = value;
     }
     get html() {
         return this._html;
@@ -74,6 +68,22 @@ class Label extends Figure_1.Figure {
     set displayName(value) {
         this._config.name = value;
         this.updateFigure();
+    }
+    hide() {
+        this.svg.hide();
+        this.html.hide();
+        return this;
+    }
+    show() {
+        if (this._isHtml) {
+            this.svg.hide();
+            this.html.show();
+        }
+        else {
+            this.svg.show();
+            this.html.hide();
+        }
+        return this;
     }
     addHtml(value) {
         // Remove existing values.
@@ -171,8 +181,6 @@ class Label extends Figure_1.Figure {
             h = this._html.node.children[0].clientHeight;
             this.html.width(w);
             this.html.height(h);
-            //
-            // this._HtmlLabelRefresh()
         }
         else {
             if (this.svg instanceof svg_js_1.Text) {

@@ -7,7 +7,8 @@ import {Point} from "../figures/Point";
 export function generateLine(parser: Parser, name: string, code: string[], options: string[]): Figure[] {
     // d=line A,3/4     code: [A,3/4]
     // d=2x-3y=5        code: [2x-3y=5]
-    // d=AB             code: [A,B]
+    // d=AB             code: ]A,B[
+    // d=AB.             code: [A,B]
 
     if (code.length === 1) {
 // Get the point
@@ -61,7 +62,6 @@ export function generateLine(parser: Parser, name: string, code: string[], optio
         }
 
         code.shift()
-
 
         // Must check if it's a segment or not.
         let segmentStart = code[0] === 'segment',
@@ -126,7 +126,7 @@ export function generateBissector(parser: Parser, name: string, code: string[], 
             {
                 rule: LINECONSTRUCTION.BISSECTOR,
                 value: B,
-                options: [A,C]
+                options: [A, C]
             }, name)]
     }
 
@@ -144,12 +144,12 @@ export function generateTangent(parser: Parser, name: string, code: string[], op
         // name = t => t1 and t2
         return [
             parser.graph.line(
-            P, null,
-            {
-                rule: LINECONSTRUCTION.TANGENT,
-                value: c,
-                k: 1
-            }, name + '1'),
+                P, null,
+                {
+                    rule: LINECONSTRUCTION.TANGENT,
+                    value: c,
+                    k: 1
+                }, name + '1'),
             parser.graph.line(
                 P, null,
                 {
@@ -169,9 +169,9 @@ export function generateVector(parser: Parser, name: string, code: string[], opt
     if (code.length > 0) {
         let A = parser.graph.getPoint(code.shift()),
             B = parser.graph.getPoint(code.shift()),
-            k = +code[code.length-1]
+            k = +code[code.length - 1]
 
-        if(isNaN(k))k=1
+        if (isNaN(k)) k = 1
 
         let v = parser.graph.line(A, B, null, name).asVector(true, k)
 

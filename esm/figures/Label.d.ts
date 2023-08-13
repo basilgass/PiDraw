@@ -35,6 +35,8 @@ export declare class Label extends Figure {
     get html(): ForeignObject;
     get displayName(): string;
     set displayName(value: string);
+    hide(): Figure;
+    show(): Figure;
     addHtml(value: string): Label;
     offset(value: IPoint): Label;
     position(value: string): Label;
