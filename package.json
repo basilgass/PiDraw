@@ -1,6 +1,6 @@
 {
   "name": "pidraw",
-  "version": "0.0.80",
+  "version": "0.0.81",
   "description": "A drawing library using PiMath",
   "main": "index.ts",
   "scripts": {
