@@ -163,6 +163,110 @@ export const parserKeys: {
     }
 }
 
+function parserPreprocess(step: string): {label: string, key:string, code:string[], options:string[]}
+{
+    let label = "",
+        key = "",
+        code: string[] = [],
+        options: string[] = [],
+        value = step + '',
+        key_code: string = ""
+
+
+    // Remove the options.
+    let [label_key_code, step_options] = value.split("->")
+
+    if (step_options !== undefined) {
+        options = step_options.split(',')
+    }
+
+    // Special case of point
+    if (!label_key_code.includes("=")) {
+        // It's a point: A(3,2)
+        key = "pt"
+        label = label_key_code.split('(')[0]
+        code = label_key_code
+            .substring(label.length + 1, label_key_code.length - 1
+            ).split(/[;,]/)
+
+        return {label, key, code, options}
+    }
+
+    let key_code_as_array = label_key_code.split("=")
+    label = key_code_as_array.shift()
+    key_code = key_code_as_array.join("=")
+
+    // special case of plot or parametric   f(x)=3x or f(t)=...
+    if (label.includes("(")) {
+        let plotType: string
+
+        [label, plotType] = label.substring(0, label.length - 1).split('(')
+
+        if (plotType === "x") {
+            key = "plot"
+        } else if (plotType === "t") {
+            key = "param"
+        }
+
+        code = key_code.split(',')
+        return {label, key, code, options}
+    }
+
+    // special case of vector or segment:   d=AB or d=vAB
+    if (!key_code.includes(" ")) {
+        if (key_code[0] === 'v') {
+            key = 'v'
+            key_code = key_code.substring(1)
+        } else {
+            key = "line"
+        }
+
+        // Cut the special values.
+        let [value, ...code_option] = key_code.split(',')
+
+        // Next, we need to "cut" the value to two points.
+        // AB => [A,B]
+        // A1B4 => [A1,B4]
+        let match = [...value.matchAll(/^[\[\]]?([A-Z]_?[0-9]?)([A-Z]_?[0-9]?)[\[\].]?/g)]
+
+        // Get the two points.
+        if (match.length > 0) {
+            code = [match[0][1], match[0][2]]
+        }
+
+        if (!value.endsWith('.')) {
+            code.push(key_code.startsWith("[") ? "segment" : "open")
+            code.push(key_code.endsWith("]") ? "segment" : "open")
+        } else {
+            code.push('segment')
+            code.push('segment')
+        }
+
+        return {label, key, code: [...code, ...code_option], options}
+    }
+
+    // Any other case
+    // A=<key> <code>-><options>
+    let code_with_sep = key_code.split(" ")
+    key = code_with_sep.shift()
+    code = code_with_sep.join(",").split(',')
+
+    return {label, key, code, options}
+}
+
+export function parserHelperText(step: string): {
+    parameters: string,
+    description: string,
+    options: string
+}{
+    let {label, key, code, options} = parserPreprocess(step)
+
+    if(key===""){return null}
+    if(!parserKeys.hasOwnProperty(key)){return null}
+
+    return parserKeys[key]
+}
+
 export type BuildStep = { step: string, figures: Figure[] }
 
 type parserConfig = {
@@ -385,10 +489,19 @@ export class Parser {
         return this
     }
 
-    generate(steps: string[]) {
+    getParserKeys(construction: string): string[] {
+        return this.generate(this._processConstruction(construction), true)
+    }
+
+    preprocess(step: string): { label: string, key: string, code: string[], options: string[] } {
+        return this._preprocess(step)
+    }
+
+    generate(steps: string[], getKeysOnly: boolean = false): string[] {
         // get all current figures.
         let builded: { step: string, figures: Figure[] },
-            errors: string[] = []
+            errors: string[] = [],
+            buildedKeys: string[] = []
 
         for (let construct of steps) {
             // The step command is empty or too small - do not continue to parse it.
@@ -412,18 +525,23 @@ export class Parser {
                 let {label, key, code, options} = this._preprocess(construct)
                 // console.log(construct, label, key, code, options)
 
+                buildedKeys.push(key)
+
                 // continue;
-                if (parserKeys[key]) {
-                    builded.figures = parserKeys[key].generate(this, label, code, options)
-                } else {
-                    console.log('No key found for ' + construct)
+                if (!getKeysOnly) {
+                    if (parserKeys[key]) {
+                        builded.figures = parserKeys[key].generate(this, label, code, options)
+                    } else {
+                        console.log('No key found for ' + construct)
+                    }
+
+                    // apply options
+                    this._postprocess(builded, options)
+
+                    // Do whatever check
+                    this._buildedSteps.push(builded)
                 }
 
-                // apply options
-                this._postprocess(builded, options)
-
-                // Do whatever check
-                this._buildedSteps.push(builded)
             } catch (error) {
                 console.warn({
                     step: construct,
@@ -431,6 +549,8 @@ export class Parser {
                 })
             }
         }
+
+        return buildedKeys
     }
 
     /**
@@ -443,93 +563,94 @@ export class Parser {
      * @private
      */
     private _preprocess(step: string): { label: string, key: string, code: string[], options: string[] } {
-        let label = "",
-            key = "",
-            code: string[] = [],
-            options: string[] = [],
-            value = step + '',
-            key_code: string = ""
-
-
-        // Remove the options.
-        let [label_key_code, step_options] = value.split("->")
-
-        if (step_options !== undefined) {
-            options = step_options.split(',')
-        }
-
-        // Special case of point
-        if (!label_key_code.includes("=")) {
-            // It's a point: A(3,2)
-            key = "pt"
-            label = label_key_code.split('(')[0]
-            code = label_key_code
-                .substring(label.length + 1, label_key_code.length - 1
-                ).split(/[;,]/)
-
-            return {label, key, code, options}
-        }
-
-        let key_code_as_array = label_key_code.split("=")
-        label = key_code_as_array.shift()
-        key_code = key_code_as_array.join("=")
-
-        // special case of plot or parametric   f(x)=3x or f(t)=...
-        if (label.includes("(")) {
-            let plotType: string
-
-            [label, plotType] = label.substring(0, label.length - 1).split('(')
-
-            if (plotType === "x") {
-                key = "plot"
-            } else if (plotType === "t") {
-                key = "param"
-            }
-
-            code = key_code.split(',')
-            return {label, key, code, options}
-        }
-
-        // special case of vector or segment:   d=AB or d=vAB
-        if (!key_code.includes(" ")) {
-            if (key_code[0] === 'v') {
-                key = 'v'
-                key_code = key_code.substring(1)
-            } else {
-                key = "line"
-            }
-
-            // Cut the special values.
-            let [value, ...code_option] = key_code.split(',')
-
-            // Next, we need to "cut" the value to two points.
-            // AB => [A,B]
-            // A1B4 => [A1,B4]
-            let match = [...value.matchAll(/^[\[\]]?([A-Z]_?[0-9]?)([A-Z]_?[0-9]?)[\[\].]?/g)]
-
-            // Get the two points.
-            if (match.length > 0) {
-                code = [match[0][1], match[0][2]]
-            }
-
-            if(!value.endsWith('.')) {
-                code.push(key_code.startsWith("[") ? "segment" : "open")
-                code.push(key_code.endsWith("]") ? "segment" : "open")
-            }else{
-                code.push('segment')
-                code.push('segment')
-            }
-
-            return {label, key, code: [...code, ...code_option], options}
-        }
-
-        // Any other case
-        // A=<key> <code>-><options>
-        let code_with_sep = key_code.split(" ")
-        key = code_with_sep.shift()
-        code = code_with_sep.join(",").split(',')
-
-        return {label, key, code, options}
+        return parserPreprocess(step)
+        // let label = "",
+        //     key = "",
+        //     code: string[] = [],
+        //     options: string[] = [],
+        //     value = step + '',
+        //     key_code: string = ""
+        //
+        //
+        // // Remove the options.
+        // let [label_key_code, step_options] = value.split("->")
+        //
+        // if (step_options !== undefined) {
+        //     options = step_options.split(',')
+        // }
+        //
+        // // Special case of point
+        // if (!label_key_code.includes("=")) {
+        //     // It's a point: A(3,2)
+        //     key = "pt"
+        //     label = label_key_code.split('(')[0]
+        //     code = label_key_code
+        //         .substring(label.length + 1, label_key_code.length - 1
+        //         ).split(/[;,]/)
+        //
+        //     return {label, key, code, options}
+        // }
+        //
+        // let key_code_as_array = label_key_code.split("=")
+        // label = key_code_as_array.shift()
+        // key_code = key_code_as_array.join("=")
+        //
+        // // special case of plot or parametric   f(x)=3x or f(t)=...
+        // if (label.includes("(")) {
+        //     let plotType: string
+        //
+        //     [label, plotType] = label.substring(0, label.length - 1).split('(')
+        //
+        //     if (plotType === "x") {
+        //         key = "plot"
+        //     } else if (plotType === "t") {
+        //         key = "param"
+        //     }
+        //
+        //     code = key_code.split(',')
+        //     return {label, key, code, options}
+        // }
+        //
+        // // special case of vector or segment:   d=AB or d=vAB
+        // if (!key_code.includes(" ")) {
+        //     if (key_code[0] === 'v') {
+        //         key = 'v'
+        //         key_code = key_code.substring(1)
+        //     } else {
+        //         key = "line"
+        //     }
+        //
+        //     // Cut the special values.
+        //     let [value, ...code_option] = key_code.split(',')
+        //
+        //     // Next, we need to "cut" the value to two points.
+        //     // AB => [A,B]
+        //     // A1B4 => [A1,B4]
+        //     let match = [...value.matchAll(/^[\[\]]?([A-Z]_?[0-9]?)([A-Z]_?[0-9]?)[\[\].]?/g)]
+        //
+        //     // Get the two points.
+        //     if (match.length > 0) {
+        //         code = [match[0][1], match[0][2]]
+        //     }
+        //
+        //     if (!value.endsWith('.')) {
+        //         code.push(key_code.startsWith("[") ? "segment" : "open")
+        //         code.push(key_code.endsWith("]") ? "segment" : "open")
+        //     } else {
+        //         code.push('segment')
+        //         code.push('segment')
+        //     }
+        //
+        //     return {label, key, code: [...code, ...code_option], options}
+        // }
+        //
+        // // Any other case
+        // // A=<key> <code>-><options>
+        // let code_with_sep = key_code.split(" ")
+        // key = code_with_sep.shift()
+        // code = code_with_sep.join(",").split(',')
+        //
+        // return {label, key, code, options}
     }
 
     private _postprocess(builded: BuildStep, codeOptions: string[]) {
@@ -553,7 +674,7 @@ export class Parser {
                 }
 
                 // If the label is shown, maybe force it to be as TeX.
-                if(fig instanceof Point) {
+                if (fig instanceof Point && !fig.isInvisible()) {
                     // Hide or show the label
                     if (this._config.nolabel) {
                         fig.hideLabel()
@@ -613,7 +734,7 @@ export class Parser {
                                 follow = this._graph.getGrid()
                             } else if (param !== 'x' && param != 'y') {
                                 follow = this._graph.getFigure(param)
-                            }else {
+                            } else {
                                 follow = param
                             }
 
@@ -709,7 +830,7 @@ export class Parser {
                             // let [label, position, offset] = key.substring(1).split("/")
 
                             // Set it as TeX
-                            fig.label.isTex = key==='tex'
+                            fig.label.isTex = key === 'tex'
 
                             // Setting display name
                             fig.displayName = param
@@ -806,6 +927,14 @@ export class Parser {
             .map(x => x.trim())                         // remove white spaces
             .filter(x => x !== '')                      // remove empty lines
             .filter(x => x[0] !== "$" && x[0] !== "%")  // remove commented lines
+    }
+
+    getHelperText(step: string): {
+        parameters: string,
+        description: string,
+        options: string
+    }{
+        return parserHelperText(step)
     }
 
 }

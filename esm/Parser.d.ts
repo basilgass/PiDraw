@@ -8,6 +8,11 @@ export declare const parserKeys: {
         options: string;
     };
 };
+export declare function parserHelperText(step: string): {
+    parameters: string;
+    description: string;
+    options: string;
+};
 export type BuildStep = {
     step: string;
     figures: Figure[];
@@ -27,7 +32,14 @@ export declare class Parser {
      */
     update(construction: string, refresh?: boolean): void;
     updateLayout(parameters: string, constructUpdate?: boolean): Parser;
-    generate(steps: string[]): void;
+    getParserKeys(construction: string): string[];
+    preprocess(step: string): {
+        label: string;
+        key: string;
+        code: string[];
+        options: string[];
+    };
+    generate(steps: string[], getKeysOnly?: boolean): string[];
     /**
      * Convert a construct string to the label, key, code and options)
      * A step string can be as following:
@@ -46,4 +58,9 @@ export declare class Parser {
      * @private
      */
     private _processConstruction;
+    getHelperText(step: string): {
+        parameters: string;
+        description: string;
+        options: string;
+    };
 }

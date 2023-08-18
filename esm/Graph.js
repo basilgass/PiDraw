@@ -419,6 +419,7 @@ class Graph {
         let parser = new Parser_1.Parser(this, construction, parameters);
         return parser;
     }
+    /** get all parser helper keys */
     get parseHelper() {
         let values = {};
         for (let key in Parser_1.parserKeys) {

@@ -14,6 +14,9 @@ export declare class Point extends Figure {
     private _scale;
     private _shape;
     constructor(graph: Graph, name: string, pixels: IPoint);
+    private _hiddenPoint;
+    get hiddenPoint(): boolean;
+    set hiddenPoint(value: boolean);
     private _defaultScale;
     get defaultScale(): number;
     private _x;
@@ -65,4 +68,6 @@ export declare class Point extends Figure {
     }): Point;
     private _updateShape;
     private _updateCoordinate;
+    makeInvisible(value?: boolean): Point;
+    isInvisible(): Boolean;
 }

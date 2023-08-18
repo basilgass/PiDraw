@@ -558,6 +558,8 @@ export class Graph {
         let parser = new Parser(this, construction, parameters)
         return parser
     }
+
+    /** get all parser helper keys */
     get parseHelper():{[Key: string]: {description: string, parameters: string}} {
         let values:{[Key: string]: {description: string, parameters: string}} = {}
         for(let key in parserKeys){

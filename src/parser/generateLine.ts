@@ -33,7 +33,8 @@ export function generateLine(parser: Parser, name: string, code: string[], optio
             return null
         }
 
-        A.hide().label.hide()
+        A.makeInvisible().label.hide()
+
         return [
             A,
             parser.graph.line(A, null, {

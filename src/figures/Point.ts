@@ -33,6 +33,8 @@ export class Point extends Figure {
         this._shape = POINTSHAPE.CIRCLE
         this._scale = +this._defaultScale
 
+        this._hiddenPoint = false
+
         this._constrain = {type: POINTCONSTRAIN.FIXED}
 
         this._updateShape()
@@ -40,6 +42,16 @@ export class Point extends Figure {
         // Add the label
         this.generateName()
         this.label = new Label(this.graph, name, {el: this})
+    }
+
+    private _hiddenPoint: boolean
+
+    get hiddenPoint(): boolean {
+        return this._hiddenPoint;
+    }
+
+    set hiddenPoint(value: boolean) {
+        this._hiddenPoint = value;
     }
 
     private _defaultScale: number
@@ -618,4 +630,11 @@ export class Point extends Figure {
 
 
     }
+
+    makeInvisible(value?: boolean):Point{
+        this._hiddenPoint = value!==false
+        this.hide()
+        return this
+    }
+    isInvisible():Boolean{return this._hiddenPoint}
 }

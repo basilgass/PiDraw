@@ -26,7 +26,7 @@ function generateLine(parser, name, code, options) {
         else {
             return null;
         }
-        A.hide().label.hide();
+        A.makeInvisible().label.hide();
         return [
             A,
             parser.graph.line(A, null, {

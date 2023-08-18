@@ -20,11 +20,19 @@ class Point extends Figure_1.Figure {
         this._y = pixels.y;
         this._shape = enums_1.POINTSHAPE.CIRCLE;
         this._scale = +this._defaultScale;
+        this._hiddenPoint = false;
         this._constrain = { type: enums_1.POINTCONSTRAIN.FIXED };
         this._updateShape();
         // Add the label
         this.generateName();
         this.label = new Label_1.Label(this.graph, name, { el: this });
+    }
+    _hiddenPoint;
+    get hiddenPoint() {
+        return this._hiddenPoint;
+    }
+    set hiddenPoint(value) {
+        this._hiddenPoint = value;
     }
     _defaultScale;
     get defaultScale() {
@@ -495,6 +503,12 @@ class Point extends Figure_1.Figure {
             }
         }
     }
+    makeInvisible(value) {
+        this._hiddenPoint = value !== false;
+        this.hide();
+        return this;
+    }
+    isInvisible() { return this._hiddenPoint; }
 }
 exports.Point = Point;
 //# sourceMappingURL=Point.js.map

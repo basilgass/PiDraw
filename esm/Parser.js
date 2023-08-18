@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Parser = exports.parserKeys = void 0;
+exports.Parser = exports.parserHelperText = exports.parserKeys = void 0;
 const svg_js_1 = require("@svgdotjs/svg.js");
 const Point_1 = require("./figures/Point");
 const Axis_1 = require("./figures/Axis");
@@ -136,6 +136,85 @@ exports.parserKeys = {
         options: ""
     }
 };
+function parserPreprocess(step) {
+    let label = "", key = "", code = [], options = [], value = step + '', key_code = "";
+    // Remove the options.
+    let [label_key_code, step_options] = value.split("->");
+    if (step_options !== undefined) {
+        options = step_options.split(',');
+    }
+    // Special case of point
+    if (!label_key_code.includes("=")) {
+        // It's a point: A(3,2)
+        key = "pt";
+        label = label_key_code.split('(')[0];
+        code = label_key_code
+            .substring(label.length + 1, label_key_code.length - 1).split(/[;,]/);
+        return { label, key, code, options };
+    }
+    let key_code_as_array = label_key_code.split("=");
+    label = key_code_as_array.shift();
+    key_code = key_code_as_array.join("=");
+    // special case of plot or parametric   f(x)=3x or f(t)=...
+    if (label.includes("(")) {
+        let plotType;
+        [label, plotType] = label.substring(0, label.length - 1).split('(');
+        if (plotType === "x") {
+            key = "plot";
+        }
+        else if (plotType === "t") {
+            key = "param";
+        }
+        code = key_code.split(',');
+        return { label, key, code, options };
+    }
+    // special case of vector or segment:   d=AB or d=vAB
+    if (!key_code.includes(" ")) {
+        if (key_code[0] === 'v') {
+            key = 'v';
+            key_code = key_code.substring(1);
+        }
+        else {
+            key = "line";
+        }
+        // Cut the special values.
+        let [value, ...code_option] = key_code.split(',');
+        // Next, we need to "cut" the value to two points.
+        // AB => [A,B]
+        // A1B4 => [A1,B4]
+        let match = [...value.matchAll(/^[\[\]]?([A-Z]_?[0-9]?)([A-Z]_?[0-9]?)[\[\].]?/g)];
+        // Get the two points.
+        if (match.length > 0) {
+            code = [match[0][1], match[0][2]];
+        }
+        if (!value.endsWith('.')) {
+            code.push(key_code.startsWith("[") ? "segment" : "open");
+            code.push(key_code.endsWith("]") ? "segment" : "open");
+        }
+        else {
+            code.push('segment');
+            code.push('segment');
+        }
+        return { label, key, code: [...code, ...code_option], options };
+    }
+    // Any other case
+    // A=<key> <code>-><options>
+    let code_with_sep = key_code.split(" ");
+    key = code_with_sep.shift();
+    code = code_with_sep.join(",").split(',');
+    return { label, key, code, options };
+}
+function parserHelperText(step) {
+    let { label, key, code, options } = parserPreprocess(step);
+    if (key === "") {
+        return null;
+    }
+    if (!exports.parserKeys.hasOwnProperty(key)) {
+        return null;
+    }
+    return exports.parserKeys[key];
+}
+exports.parserHelperText = parserHelperText;
 class Parser {
     _construction;
     _config;
@@ -314,9 +393,15 @@ class Parser {
         this.update(this._construction, true);
         return this;
     }
-    generate(steps) {
+    getParserKeys(construction) {
+        return this.generate(this._processConstruction(construction), true);
+    }
+    preprocess(step) {
+        return this._preprocess(step);
+    }
+    generate(steps, getKeysOnly = false) {
         // get all current figures.
-        let builded, errors = [];
+        let builded, errors = [], buildedKeys = [];
         for (let construct of steps) {
             // The step command is empty or too small - do not continue to parse it.
             if (construct.length < 3) {
@@ -335,17 +420,20 @@ class Parser {
             try {
                 let { label, key, code, options } = this._preprocess(construct);
                 // console.log(construct, label, key, code, options)
+                buildedKeys.push(key);
                 // continue;
-                if (exports.parserKeys[key]) {
-                    builded.figures = exports.parserKeys[key].generate(this, label, code, options);
+                if (!getKeysOnly) {
+                    if (exports.parserKeys[key]) {
+                        builded.figures = exports.parserKeys[key].generate(this, label, code, options);
+                    }
+                    else {
+                        console.log('No key found for ' + construct);
+                    }
+                    // apply options
+                    this._postprocess(builded, options);
+                    // Do whatever check
+                    this._buildedSteps.push(builded);
                 }
-                else {
-                    console.log('No key found for ' + construct);
-                }
-                // apply options
-                this._postprocess(builded, options);
-                // Do whatever check
-                this._buildedSteps.push(builded);
             }
             catch (error) {
                 console.warn({
@@ -354,6 +442,7 @@ class Parser {
                 });
             }
         }
+        return buildedKeys;
     }
     /**
      * Convert a construct string to the label, key, code and options)
@@ -365,72 +454,94 @@ class Parser {
      * @private
      */
     _preprocess(step) {
-        let label = "", key = "", code = [], options = [], value = step + '', key_code = "";
-        // Remove the options.
-        let [label_key_code, step_options] = value.split("->");
-        if (step_options !== undefined) {
-            options = step_options.split(',');
-        }
-        // Special case of point
-        if (!label_key_code.includes("=")) {
-            // It's a point: A(3,2)
-            key = "pt";
-            label = label_key_code.split('(')[0];
-            code = label_key_code
-                .substring(label.length + 1, label_key_code.length - 1).split(/[;,]/);
-            return { label, key, code, options };
-        }
-        let key_code_as_array = label_key_code.split("=");
-        label = key_code_as_array.shift();
-        key_code = key_code_as_array.join("=");
-        // special case of plot or parametric   f(x)=3x or f(t)=...
-        if (label.includes("(")) {
-            let plotType;
-            [label, plotType] = label.substring(0, label.length - 1).split('(');
-            if (plotType === "x") {
-                key = "plot";
-            }
-            else if (plotType === "t") {
-                key = "param";
-            }
-            code = key_code.split(',');
-            return { label, key, code, options };
-        }
-        // special case of vector or segment:   d=AB or d=vAB
-        if (!key_code.includes(" ")) {
-            if (key_code[0] === 'v') {
-                key = 'v';
-                key_code = key_code.substring(1);
-            }
-            else {
-                key = "line";
-            }
-            // Cut the special values.
-            let [value, ...code_option] = key_code.split(',');
-            // Next, we need to "cut" the value to two points.
-            // AB => [A,B]
-            // A1B4 => [A1,B4]
-            let match = [...value.matchAll(/^[\[\]]?([A-Z]_?[0-9]?)([A-Z]_?[0-9]?)[\[\].]?/g)];
-            // Get the two points.
-            if (match.length > 0) {
-                code = [match[0][1], match[0][2]];
-            }
-            if (!value.endsWith('.')) {
-                code.push(key_code.startsWith("[") ? "segment" : "open");
-                code.push(key_code.endsWith("]") ? "segment" : "open");
-            }
-            else {
-                code.push('segment');
-                code.push('segment');
-            }
-            return { label, key, code: [...code, ...code_option], options };
-        }
-        // Any other case
-        // A=<key> <code>-><options>
-        let code_with_sep = key_code.split(" ");
-        key = code_with_sep.shift();
-        code = code_with_sep.join(",").split(',');
-        return { label, key, code, options };
+        return parserPreprocess(step);
+        // let label = "",
+        //     key = "",
+        //     code: string[] = [],
+        //     options: string[] = [],
+        //     value = step + '',
+        //     key_code: string = ""
+        //
+        //
+        // // Remove the options.
+        // let [label_key_code, step_options] = value.split("->")
+        //
+        // if (step_options !== undefined) {
+        //     options = step_options.split(',')
+        // }
+        //
+        // // Special case of point
+        // if (!label_key_code.includes("=")) {
+        //     // It's a point: A(3,2)
+        //     key = "pt"
+        //     label = label_key_code.split('(')[0]
+        //     code = label_key_code
+        //         .substring(label.length + 1, label_key_code.length - 1
+        //         ).split(/[;,]/)
+        //
+        //     return {label, key, code, options}
+        // }
+        //
+        // let key_code_as_array = label_key_code.split("=")
+        // label = key_code_as_array.shift()
+        // key_code = key_code_as_array.join("=")
+        //
+        // // special case of plot or parametric   f(x)=3x or f(t)=...
+        // if (label.includes("(")) {
+        //     let plotType: string
+        //
+        //     [label, plotType] = label.substring(0, label.length - 1).split('(')
+        //
+        //     if (plotType === "x") {
+        //         key = "plot"
+        //     } else if (plotType === "t") {
+        //         key = "param"
+        //     }
+        //
+        //     code = key_code.split(',')
+        //     return {label, key, code, options}
+        // }
+        //
+        // // special case of vector or segment:   d=AB or d=vAB
+        // if (!key_code.includes(" ")) {
+        //     if (key_code[0] === 'v') {
+        //         key = 'v'
+        //         key_code = key_code.substring(1)
+        //     } else {
+        //         key = "line"
+        //     }
+        //
+        //     // Cut the special values.
+        //     let [value, ...code_option] = key_code.split(',')
+        //
+        //     // Next, we need to "cut" the value to two points.
+        //     // AB => [A,B]
+        //     // A1B4 => [A1,B4]
+        //     let match = [...value.matchAll(/^[\[\]]?([A-Z]_?[0-9]?)([A-Z]_?[0-9]?)[\[\].]?/g)]
+        //
+        //     // Get the two points.
+        //     if (match.length > 0) {
+        //         code = [match[0][1], match[0][2]]
+        //     }
+        //
+        //     if (!value.endsWith('.')) {
+        //         code.push(key_code.startsWith("[") ? "segment" : "open")
+        //         code.push(key_code.endsWith("]") ? "segment" : "open")
+        //     } else {
+        //         code.push('segment')
+        //         code.push('segment')
+        //     }
+        //
+        //     return {label, key, code: [...code, ...code_option], options}
+        // }
+        //
+        // // Any other case
+        // // A=<key> <code>-><options>
+        // let code_with_sep = key_code.split(" ")
+        // key = code_with_sep.shift()
+        // code = code_with_sep.join(",").split(',')
+        //
+        // return {label, key, code, options}
     }
     _postprocess(builded, codeOptions) {
         /**
@@ -451,7 +562,7 @@ class Parser {
                 fig.fill('transparent');
             }
             // If the label is shown, maybe force it to be as TeX.
-            if (fig instanceof Point_1.Point) {
+            if (fig instanceof Point_1.Point && !fig.isInvisible()) {
                 // Hide or show the label
                 if (this._config.nolabel) {
                     fig.hideLabel();
@@ -680,6 +791,9 @@ class Parser {
             .map(x => x.trim()) // remove white spaces
             .filter(x => x !== '') // remove empty lines
             .filter(x => x[0] !== "$" && x[0] !== "%"); // remove commented lines
+    }
+    getHelperText(step) {
+        return parserHelperText(step);
     }
 }
 exports.Parser = Parser;
