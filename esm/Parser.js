@@ -713,6 +713,9 @@ class Parser {
                             // Set it as TeX
                             fig.label.isTex = key === 'tex';
                             // Setting display name
+                            if (param.includes('@')) {
+                                fig.label.template = param;
+                            }
                             fig.displayName = param;
                             // Changing the default position
                             let position = options.filter(opt => opt.match(/[tmblcr]{1,2}/))[0];

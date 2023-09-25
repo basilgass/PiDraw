@@ -21,20 +21,23 @@ export interface LabelConfig {
         horizontal: string;
         vertical: string;
     };
+    template?: string;
 }
 export declare class Label extends Figure {
     private _config;
-    private _html;
-    private _isHtml;
-    private _isTex;
     constructor(graph: Graph, name: string, config?: LabelConfig);
+    private _html;
+    get html(): ForeignObject;
+    private _isHtml;
     get isHtml(): Boolean;
     set isHtml(value: Boolean);
+    private _isTex;
     get isTex(): Boolean;
     set isTex(value: Boolean);
-    get html(): ForeignObject;
     get displayName(): string;
     set displayName(value: string);
+    get template(): string;
+    set template(value: string);
     hide(): Figure;
     show(): Figure;
     addHtml(value: string): Label;

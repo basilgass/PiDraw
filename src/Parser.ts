@@ -833,6 +833,9 @@ export class Parser {
                             fig.label.isTex = key === 'tex'
 
                             // Setting display name
+                            if(param.includes('@')){
+                                fig.label.template = param
+                            }
                             fig.displayName = param
 
                             // Changing the default position

@@ -27,13 +27,11 @@ export interface LabelConfig {
         horizontal: string,
         vertical: string
     },
+    template?: string
 }
 
 export class Label extends Figure {
     private _config: LabelConfig
-    private _html: ForeignObject
-    private _isHtml: Boolean
-    private _isTex: Boolean
 
     constructor(graph: Graph, name: string, config?: LabelConfig) {
         super(graph, name);
@@ -45,7 +43,8 @@ export class Label extends Figure {
                 horizontal: LABELPOS.RIGHT,
                 vertical: LABELPOS.BOTTOM
             },
-            offset: {x: 0, y: 0}
+            offset: {x: 0, y: 0},
+            template: null
         }
 
         this._config = Object.assign({}, this._config, config)
@@ -68,6 +67,14 @@ export class Label extends Figure {
         this.updateFigure()
     }
 
+    private _html: ForeignObject
+
+    get html(): ForeignObject {
+        return this._html;
+    }
+
+    private _isHtml: Boolean
+
     get isHtml(): Boolean {
         return this._isHtml;
     }
@@ -78,6 +85,7 @@ export class Label extends Figure {
         this.show()
     }
 
+    private _isTex: Boolean
 
     get isTex(): Boolean {
         return this._isTex;
@@ -88,17 +96,49 @@ export class Label extends Figure {
         this.isHtml = value
     }
 
-    get html(): ForeignObject {
-        return this._html;
-    }
-
     get displayName(): string {
-        return this._config.name === undefined ? this.name : this._config.name
+        if (this.template === null) {
+            return this._config.name === undefined ? this.name : this._config.name
+        }
+
+        // Build the name based on a template.
+        let name = this._config.template
+
+        if (name.includes('@')) {
+            name = name
+                .replaceAll(/@[A-Z0-9]+\.[xy]/g,
+                    (match: string): string => {
+                        let [ptName, direction] = match.substring(1).split(".")
+
+                        let pt = this.graph.getPoint(ptName)
+                        if (pt === null) {
+                            return match.substring(1)
+                        }
+
+                        return direction === 'x' ? pt.coord.x.toString() : pt.coord.y.toString()
+                    })
+
+            name = name.replaceAll('+-', "-")
+                .replaceAll('++', '+')
+                .replaceAll('--', '+')
+                .replaceAll('-+', '+')
+        }
+
+        return name
+
     }
 
     set displayName(value: string) {
         this._config.name = value
         this.updateFigure()
+    }
+
+    get template(): string {
+        return this._config.template
+    }
+
+    set template(value: string) {
+        this._config.template = value
     }
 
     hide(): Figure {
@@ -124,7 +164,7 @@ export class Label extends Figure {
         this.html.children().forEach(child => child.remove())
 
         // @ts-ignore
-        this.html.add(SVG(`<div style="display: inline-block; position: fixed">${this.isTex?this._graph.toTex(value):value}</div>`, true))
+        this.html.add(SVG(`<div style="display: inline-block; position: fixed">${this.isTex ? this._graph.toTex(value) : value}</div>`, true))
 
         this.isHtml = true
         return this
@@ -193,7 +233,7 @@ export class Label extends Figure {
         // Update the name
         if (!this.isHtml && this.svg instanceof Text) {
             this.svg.text(this.displayName)
-        }else {
+        } else {
             this.addHtml(this.displayName)
         }
 
@@ -219,13 +259,13 @@ export class Label extends Figure {
                 v1 = {x: arc.start.x - arc.center.x, y: arc.start.y - arc.center.y},
                 v2 = {x: arc.end.x - arc.center.x, y: arc.end.y - arc.center.y},
                 vr = {x: v1.x + v2.x, y: v1.y + v2.y},
-                norm = Math.sqrt(vr.x**2+vr.y**2),
+                norm = Math.sqrt(vr.x ** 2 + vr.y ** 2),
                 r = arc.getRadius,
-                d = arc.angle<180?1:-1,
-                vn = {x: vr.x/norm*(r+20), y: vr.y/norm*(r+20)}
+                d = arc.angle < 180 ? 1 : -1,
+                vn = {x: vr.x / norm * (r + 20), y: vr.y / norm * (r + 20)}
 
-            x = arc.center.x + d*vn.x
-            y = arc.center.y + d*vn.y
+            x = arc.center.x + d * vn.x
+            y = arc.center.y + d * vn.y
         }
 
 

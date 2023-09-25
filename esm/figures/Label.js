@@ -17,9 +17,6 @@ var LABELPOS;
 })(LABELPOS || (exports.LABELPOS = LABELPOS = {}));
 class Label extends Figure_1.Figure {
     _config;
-    _html;
-    _isHtml;
-    _isTex;
     constructor(graph, name, config) {
         super(graph, name);
         // default configuration
@@ -29,7 +26,8 @@ class Label extends Figure_1.Figure {
                 horizontal: LABELPOS.RIGHT,
                 vertical: LABELPOS.BOTTOM
             },
-            offset: { x: 0, y: 0 }
+            offset: { x: 0, y: 0 },
+            template: null
         };
         this._config = Object.assign({}, this._config, config);
         this.generateName();
@@ -45,6 +43,11 @@ class Label extends Figure_1.Figure {
         // Update the label text and position
         this.updateFigure();
     }
+    _html;
+    get html() {
+        return this._html;
+    }
+    _isHtml;
     get isHtml() {
         return this._isHtml;
     }
@@ -52,6 +55,7 @@ class Label extends Figure_1.Figure {
         this._isHtml = value;
         this.show();
     }
+    _isTex;
     get isTex() {
         return this._isTex;
     }
@@ -59,15 +63,38 @@ class Label extends Figure_1.Figure {
         this._isTex = value;
         this.isHtml = value;
     }
-    get html() {
-        return this._html;
-    }
     get displayName() {
-        return this._config.name === undefined ? this.name : this._config.name;
+        if (this.template === null) {
+            return this._config.name === undefined ? this.name : this._config.name;
+        }
+        // Build the name based on a template.
+        let name = this._config.template;
+        if (name.includes('@')) {
+            name = name
+                .replaceAll(/@[A-Z0-9]+\.[xy]/g, (match) => {
+                let [ptName, direction] = match.substring(1).split(".");
+                let pt = this.graph.getPoint(ptName);
+                if (pt === null) {
+                    return match.substring(1);
+                }
+                return direction === 'x' ? pt.coord.x.toString() : pt.coord.y.toString();
+            });
+            name = name.replaceAll('+-', "-")
+                .replaceAll('++', '+')
+                .replaceAll('--', '+')
+                .replaceAll('-+', '+');
+        }
+        return name;
     }
     set displayName(value) {
         this._config.name = value;
         this.updateFigure();
+    }
+    get template() {
+        return this._config.template;
+    }
+    set template(value) {
+        this._config.template = value;
     }
     hide() {
         this.svg.hide();
