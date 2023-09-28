@@ -104,9 +104,9 @@ export class Label extends Figure {
         // Build the name based on a template.
         let name = this._config.template
 
-        if (name.includes('@')) {
+        if (name.includes('~')) {
             name = name
-                .replaceAll(/@[A-Z0-9]+\.[xy]/g,
+                .replaceAll(/~[A-Z0-9]+\.[xy]/g,
                     (match: string): string => {
                         let [ptName, direction] = match.substring(1).split(".")
 

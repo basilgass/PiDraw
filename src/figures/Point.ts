@@ -138,7 +138,6 @@ export class Point extends Figure {
         if (this.label.isHtml) {
             this.label.updateFigure()
         }
-
         return this
     }
 

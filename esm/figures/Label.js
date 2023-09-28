@@ -69,9 +69,9 @@ class Label extends Figure_1.Figure {
         }
         // Build the name based on a template.
         let name = this._config.template;
-        if (name.includes('@')) {
+        if (name.includes('~')) {
             name = name
-                .replaceAll(/@[A-Z0-9]+\.[xy]/g, (match) => {
+                .replaceAll(/~[A-Z0-9]+\.[xy]/g, (match) => {
                 let [ptName, direction] = match.substring(1).split(".");
                 let pt = this.graph.getPoint(ptName);
                 if (pt === null) {

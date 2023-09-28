@@ -833,7 +833,7 @@ export class Parser {
                             fig.label.isTex = key === 'tex'
 
                             // Setting display name
-                            if(param.includes('@')){
+                            if(typeof param==="string" && param.includes('~')){
                                 fig.label.template = param
                             }
                             fig.displayName = param
