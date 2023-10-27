@@ -6,6 +6,7 @@ const Point_1 = require("./Point");
 const Line_1 = require("./Line");
 const svg_js_1 = require("@svgdotjs/svg.js");
 const Arc_1 = require("./Arc");
+const Calculus_1 = require("../Calculus");
 var LABELPOS;
 (function (LABELPOS) {
     LABELPOS["LEFT"] = "left";
@@ -197,9 +198,12 @@ class Label extends Figure_1.Figure {
              * C(10,7)->drag
              * a=arc A,B,C
              */
-            const arc = this._config.el, v1 = { x: arc.start.x - arc.center.x, y: arc.start.y - arc.center.y }, v2 = { x: arc.end.x - arc.center.x, y: arc.end.y - arc.center.y }, vr = { x: v1.x + v2.x, y: v1.y + v2.y }, norm = Math.sqrt(vr.x ** 2 + vr.y ** 2), r = arc.getRadius, d = arc.angle < 180 ? 1 : -1, vn = { x: vr.x / norm * (r + 20), y: vr.y / norm * (r + 20) };
-            x = arc.center.x + d * vn.x;
-            y = arc.center.y + d * vn.y;
+            const arc = this._config.el, r = arc.getRadius, d = arc.angle < 180 ? 1 : -1;
+            const OA = new Calculus_1.mathVector(arc.center, arc.start).unit;
+            const OB = new Calculus_1.mathVector(arc.center, arc.end).unit;
+            const v = OA.add(OB).unit;
+            x = arc.center.x + d * v.x * (r + 20);
+            y = arc.center.y + d * v.y * (r + 20);
         }
         // Label position relative to the current (x,y) coordinate
         if (this.isHtml) {

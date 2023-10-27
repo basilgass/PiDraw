@@ -16,9 +16,11 @@ export declare class mathVector {
     set y(value: number);
     get norm(): number;
     get normal(): mathVector;
+    get unit(): mathVector;
     static scalarProduct(u: mathVector, v: mathVector): number;
     projection(on: mathVector): mathVector;
     rotate(angle: number): mathVector;
+    add(v: mathVector): mathVector;
 }
 export declare class mathLine {
     constructor(A: IPoint, B: IPoint | mathVector);

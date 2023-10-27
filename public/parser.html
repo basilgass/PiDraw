@@ -150,10 +150,26 @@ r2=[OT2[->ultrathin,dot`
 		construct = "A(8,4)->drag:grid\n" +
 			"O(0,0)\n" +
 			"z=vOA->tex:z=@A.x+@A.y\\cdot i"
+		construct ="A(-8,2)->drag\n" +
+			"B(3,4)->drag\n" +
+			"O(0,0)->drag\n" +
+			"b=bezier A,B/v/0.6,O\n" +
+			"a=arc A,O,B,1->tex:\\alpha\n" +
+			"t=poly A,B,O->rotate:O/90"
+
         let parameters = 'grid,axis,x=-10:10,y=-10:10',
             parser = graph.parse(construct, parameters)
 
-        return {
+		/**
+		 * // Add a resizeObserver on the root element
+		 * 		const root = document.getElementById('root')
+		 * 		const resizeObserver = new ResizeObserver(entries => {
+		 * 			parser.updateLayout(parameters)
+		 * 			parser.update(construct, true)
+		 * 		})
+		 * 		resizeObserver.observe(root)
+		 */
+		return {
             construct,
             helper: graph.parseHelper,
             parameters,

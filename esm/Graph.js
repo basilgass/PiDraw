@@ -20,6 +20,13 @@ const Path_1 = require("./figures/Path");
 const Polygon_1 = require("./figures/Polygon");
 const Calculus_1 = require("./Calculus");
 class Graph {
+    get config() {
+        return this._config;
+    }
+    set config(value) {
+        this._config = value;
+    }
+    _config;
     /**
      * Create the main graph canvas element
      * config: {origin: {x: number, y: number}, grid: {x: number, y: number, type: GRIDTYPE}}
@@ -39,6 +46,7 @@ class Graph {
         this._pixelsPerUnit = {
             x: 50, y: 50
         };
+        this._config = config;
         // Determine the width and height of the graph.
         this._initSetWidthAndHeight(config);
         // Create the container
@@ -192,6 +200,18 @@ class Graph {
     _width;
     get width() {
         return this._width;
+    }
+    get clientDimensions() {
+        return {
+            width: this.clientWidth,
+            height: this.clientHeight
+        };
+    }
+    get clientWidth() {
+        return this._container.clientWidth;
+    }
+    get clientHeight() {
+        return this._container.clientHeight;
     }
     _texConverter;
     set texConverter(value) {
@@ -385,15 +405,12 @@ class Graph {
         return this;
     }
     updateLayout(config, updateConstructions) {
+        this._config = config;
         let grid = this.getFigure('MAINGRID');
         // This sets the origin and width
         this._initSetWidthAndHeight(config);
         this._svg.viewbox(0, 0, this._width, this._height);
         if (grid instanceof Grid_1.Grid) {
-            if ((0, interfaces_1.isDrawConfigUnitMinMax)(config)) {
-                this._pixelsPerUnit.x = config.pixelsPerUnit;
-                this._pixelsPerUnit.y = config.pixelsPerUnit;
-            }
             grid.config = {
                 axisX: this._pixelsPerUnit.x,
                 axisY: this._pixelsPerUnit.y,
@@ -431,19 +448,31 @@ class Graph {
         return values;
     }
     _initSetWidthAndHeight(config) {
+        // Default pixels per unit value
+        this.pixelsPerUnit = { x: 50, y: 50 };
         if ((0, interfaces_1.isDrawConfigWidthHeight)(config)) {
             this._width = config.width;
             this._height = config.height;
         }
         else if ((0, interfaces_1.isDrawConfigUnitWidthHeight)(config)) {
-            this._width = config.dx * config.pixelsPerUnit;
-            this._height = config.dy * config.pixelsPerUnit;
+            // Determine automatically the pixelsPerUnit
+            if (config.pixelsPerUnit === undefined || config.pixelsPerUnit === 0) {
+                const ppu = this.clientWidth / config.dx;
+                this.pixelsPerUnit = { x: ppu, y: ppu };
+            }
+            this._width = config.dx * this.pixelsPerUnit.x;
+            this._height = config.dy * this.pixelsPerUnit.y;
         }
         else if ((0, interfaces_1.isDrawConfigUnitMinMax)(config)) {
-            this._width = (config.xMax - config.xMin) * config.pixelsPerUnit;
-            this._height = (config.yMax - config.yMin) * config.pixelsPerUnit;
-            this._origin.x = -config.xMin * config.pixelsPerUnit;
-            this._origin.y = this._height + config.yMin * config.pixelsPerUnit;
+            // Determine automatically the pixelsPerUnit
+            if (config.pixelsPerUnit === undefined || config.pixelsPerUnit === 0) {
+                const ppu = this.clientWidth / (Math.max(config.xMin, config.xMax) - Math.min(config.xMin, config.xMax));
+                this.pixelsPerUnit = { x: ppu, y: ppu };
+            }
+            this._width = (config.xMax - config.xMin) * this.pixelsPerUnit.x;
+            this._height = (config.yMax - config.yMin) * this.pixelsPerUnit.y;
+            this._origin.x = -config.xMin * this.pixelsPerUnit.x;
+            this._origin.y = this._height + config.yMin * this.pixelsPerUnit.y;
         }
         else {
             // Default width and height.

@@ -18,6 +18,7 @@ var LINECONSTRUCTION;
     LINECONSTRUCTION["TANGENT"] = "tangent";
     LINECONSTRUCTION["SLOPE"] = "slope";
     LINECONSTRUCTION["BISSECTOR"] = "bissector";
+    LINECONSTRUCTION["MEDIATOR"] = "mediator";
 })(LINECONSTRUCTION || (exports.LINECONSTRUCTION = LINECONSTRUCTION = {}));
 class Line extends Figure_1.Figure {
     constructor(graph, name, A, B, construction) {
@@ -224,6 +225,16 @@ class Line extends Figure_1.Figure {
             if ((this._construction.rule === LINECONSTRUCTION.PERPENDICULAR)) {
                 if (this._construction.value instanceof Line) {
                     this._math = new Calculus_1.mathLine(this._A, this._construction.value.math.normal);
+                }
+            }
+            if (this._construction.rule === LINECONSTRUCTION.MEDIATOR) {
+                if (this._construction.options.length === 2) {
+                    let A = this._construction.options[0], B = this._construction.options[1];
+                    if (A instanceof Point_1.Point && B instanceof Point_1.Point) {
+                        this._A.middleOf(A, B);
+                        const v = new Calculus_1.mathVector(A, B);
+                        this._math = new Calculus_1.mathLine(this._A, v.normal);
+                    }
                 }
             }
             if (this._construction.rule === LINECONSTRUCTION.BISSECTOR) {

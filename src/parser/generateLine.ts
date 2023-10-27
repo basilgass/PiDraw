@@ -99,6 +99,27 @@ export function generatePerpendicular(parser: Parser, name: string, code: string
     return figures
 }
 
+export function generateMediator(parser: Parser, name: string, code: string[], options: string[]): Figure[] {
+    let figures: Figure[]
+
+    if(code.length>= 2) {
+        let P = parser.graph.getPoint(code.shift()),
+            Q = parser.graph.getPoint(code.shift())
+
+        const M = parser.graph.point((P.coord.x + Q.coord.x) / 2, (P.coord.y + Q.coord.y) / 2)
+        M.makeInvisible().label.hide()
+
+        figures = [parser.graph.line(
+            M, null,
+            {
+                rule: LINECONSTRUCTION.MEDIATOR,
+                options: [P,Q]
+            }, name)]
+    }
+
+    return figures
+}
+
 export function generateParallel(parser: Parser, name: string, code: string[], options: string[]): Figure[] {
     if (code.length >= 2) {
         let d = parser.graph.getFigure(code.shift()),

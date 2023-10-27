@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.generateVector = exports.generateTangent = exports.generateBissector = exports.generateParallel = exports.generatePerpendicular = exports.generateLine = void 0;
+exports.generateVector = exports.generateTangent = exports.generateBissector = exports.generateParallel = exports.generateMediator = exports.generatePerpendicular = exports.generateLine = void 0;
 const Line_1 = require("../figures/Line");
 const Calculus_1 = require("../Calculus");
 function generateLine(parser, name, code, options) {
@@ -74,6 +74,20 @@ function generatePerpendicular(parser, name, code, options) {
     return figures;
 }
 exports.generatePerpendicular = generatePerpendicular;
+function generateMediator(parser, name, code, options) {
+    let figures;
+    if (code.length >= 2) {
+        let P = parser.graph.getPoint(code.shift()), Q = parser.graph.getPoint(code.shift());
+        const M = parser.graph.point((P.coord.x + Q.coord.x) / 2, (P.coord.y + Q.coord.y) / 2);
+        M.makeInvisible().label.hide();
+        figures = [parser.graph.line(M, null, {
+                rule: Line_1.LINECONSTRUCTION.MEDIATOR,
+                options: [P, Q]
+            }, name)];
+    }
+    return figures;
+}
+exports.generateMediator = generateMediator;
 function generateParallel(parser, name, code, options) {
     if (code.length >= 2) {
         let d = parser.graph.getFigure(code.shift()), P = parser.graph.getPoint(code.shift()), k = code[0] !== undefined ? +code[0] : 0;

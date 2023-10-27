@@ -13,10 +13,13 @@ import { GraphConfig } from "./variables/types";
 import { Arc } from "./figures/Arc";
 import { Parser } from "./Parser";
 import { Parametric } from "./figures/Parametric";
-import { Bezier } from "./figures/Bezier";
+import { Bezier, BezierPoint } from "./figures/Bezier";
 import { Path } from "./figures/Path";
 import { Polygon } from "./figures/Polygon";
 export declare class Graph {
+    get config(): GraphConfig;
+    set config(value: GraphConfig);
+    private _config;
     /**
      * Create the main graph canvas element
      * config: {origin: {x: number, y: number}, grid: {x: number, y: number, type: GRIDTYPE}}
@@ -112,6 +115,12 @@ export declare class Graph {
      */
     private _width;
     get width(): number;
+    get clientDimensions(): {
+        width: number;
+        height: number;
+    };
+    get clientWidth(): number;
+    get clientHeight(): number;
     private _texConverter;
     set texConverter(value: {
         toTex: Function;
@@ -149,7 +158,7 @@ export declare class Graph {
     path(d: string, name?: string): Path;
     parametric(fx: Function | string, fy: Function | string, config?: PlotConfig, name?: string): Parametric;
     arc(A: Point | string, O: Point | string, B: Point | string, radius?: number | Point, name?: string): Arc;
-    bezier(values: (Point | string)[], name?: string): Bezier;
+    bezier(values: (Point | string | BezierPoint)[], name?: string): Bezier;
     update(): Graph;
     updateLayout(config: GraphConfig, updateConstructions?: boolean): Graph;
     createMarker(scale: number): {

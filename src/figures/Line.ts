@@ -23,7 +23,8 @@ export enum LINECONSTRUCTION {
     PERPENDICULAR = 'perpendicular',
     TANGENT = 'tangent',
     SLOPE = 'slope',
-    BISSECTOR = "bissector"
+    BISSECTOR = "bissector",
+    MEDIATOR = "mediator"
 }
 
 export class Line extends Figure {
@@ -301,6 +302,22 @@ export class Line extends Figure {
                         this._A,
                         this._construction.value.math.normal
                     )
+                }
+            }
+
+            if(this._construction.rule === LINECONSTRUCTION.MEDIATOR){
+                if (this._construction.options.length === 2) {
+                    let A = this._construction.options[0],
+                        B: Figure = this._construction.options[1]
+
+                    if (A instanceof Point && B instanceof Point) {
+                        this._A.middleOf(A, B)
+                        const v = new mathVector(A, B)
+                        this._math = new mathLine(
+                            this._A,
+                            v.normal,
+                        )
+                    }
                 }
             }
 

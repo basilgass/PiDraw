@@ -5,6 +5,7 @@ import {Line} from "./Line";
 import {ForeignObject, SVG, Text} from "@svgdotjs/svg.js";
 import {IPoint} from "../variables/interfaces";
 import {Arc} from "./Arc";
+import {mathVector} from "../Calculus";
 
 export enum LABELPOS {
     LEFT = 'left',
@@ -256,16 +257,17 @@ export class Label extends Figure {
              * a=arc A,B,C
              */
             const arc = this._config.el,
-                v1 = {x: arc.start.x - arc.center.x, y: arc.start.y - arc.center.y},
-                v2 = {x: arc.end.x - arc.center.x, y: arc.end.y - arc.center.y},
-                vr = {x: v1.x + v2.x, y: v1.y + v2.y},
-                norm = Math.sqrt(vr.x ** 2 + vr.y ** 2),
                 r = arc.getRadius,
-                d = arc.angle < 180 ? 1 : -1,
-                vn = {x: vr.x / norm * (r + 20), y: vr.y / norm * (r + 20)}
+                d = arc.angle < 180 ? 1 : -1
 
-            x = arc.center.x + d * vn.x
-            y = arc.center.y + d * vn.y
+            const OA = new mathVector(arc.center, arc.start).unit
+            const OB = new mathVector(arc.center, arc.end).unit
+
+
+            const v = OA.add(OB).unit
+
+            x = arc.center.x + d * v.x * (r + 20)
+            y = arc.center.y + d * v.y * (r + 20)
         }
 
 

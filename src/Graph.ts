@@ -1,4 +1,4 @@
-import {Marker, SVG, Svg} from "@svgdotjs/svg.js";
+import {A, Marker, SVG, Svg} from "@svgdotjs/svg.js";
 import '@svgdotjs/svg.draggable.js'
 import {
     ILayers,
@@ -20,12 +20,20 @@ import {Arc} from "./figures/Arc";
 import {Parser, parserKeys} from "./Parser";
 import {Parametric} from "./figures/Parametric";
 // import {Numeric} from "pimath/esm/maths/numeric";
-import {Bezier} from "./figures/Bezier";
+import {Bezier, BezierPoint} from "./figures/Bezier";
 import {Path} from "./figures/Path";
 import {Polygon} from "./figures/Polygon";
 import {numberCorrection} from "./Calculus";
 
 export class Graph {
+    get config(): GraphConfig {
+        return this._config;
+    }
+
+    set config(value: GraphConfig) {
+        this._config = value;
+    }
+    private _config: GraphConfig;
     /**
      * Create the main graph canvas element
      * config: {origin: {x: number, y: number}, grid: {x: number, y: number, type: GRIDTYPE}}
@@ -47,6 +55,8 @@ export class Graph {
             x: 50, y: 50
         }
 
+        this._config = config
+        
         // Determine the width and height of the graph.
         this._initSetWidthAndHeight(config)
 
@@ -205,6 +215,8 @@ export class Graph {
         this._pixelsPerUnit = value
     }
 
+
+
     /**
      * List of all points by name. Used to quickly get a point.
      * @type {{[p: string]: Point}}
@@ -236,6 +248,19 @@ export class Graph {
 
     get width(): number {
         return this._width;
+    }
+
+    get clientDimensions(): { width: number, height: number } {
+        return {
+            width: this.clientWidth,
+            height: this.clientHeight
+        }
+    }
+    get clientWidth(): number {
+        return this._container.clientWidth;
+    }
+    get clientHeight(): number {
+        return this._container.clientHeight;
     }
 
     private _texConverter: { toTex: Function, options: {} };
@@ -496,7 +521,7 @@ export class Graph {
         return figure
     }
 
-    bezier(values: (Point | string)[], name?: string): Bezier {
+    bezier(values: (Point | string | BezierPoint)[], name?: string): Bezier {
         const figure = new Bezier(this, name, values)
 
         this._validateFigure(figure)
@@ -511,6 +536,8 @@ export class Graph {
     }
 
     updateLayout(config: GraphConfig, updateConstructions?: boolean): Graph {
+        this._config = config
+
         let grid = this.getFigure('MAINGRID')
 
         // This sets the origin and width
@@ -518,11 +545,6 @@ export class Graph {
         this._svg.viewbox(0, 0, this._width, this._height)
 
         if (grid instanceof Grid) {
-            if (isDrawConfigUnitMinMax(config)) {
-                this._pixelsPerUnit.x = config.pixelsPerUnit
-                this._pixelsPerUnit.y = config.pixelsPerUnit
-            }
-
             grid.config = {
                 axisX: this._pixelsPerUnit.x,
                 axisY: this._pixelsPerUnit.y,
@@ -573,17 +595,33 @@ export class Graph {
     }
 
     private _initSetWidthAndHeight(config: GraphConfig) {
+        // Default pixels per unit value
+        this.pixelsPerUnit = {x: 50, y: 50}
+
         if (isDrawConfigWidthHeight(config)) {
             this._width = config.width
             this._height = config.height
         } else if (isDrawConfigUnitWidthHeight(config)) {
-            this._width = config.dx * config.pixelsPerUnit
-            this._height = config.dy * config.pixelsPerUnit
+            // Determine automatically the pixelsPerUnit
+            if(config.pixelsPerUnit === undefined || config.pixelsPerUnit===0){
+                const ppu = this.clientWidth / config.dx
+                this.pixelsPerUnit = {x: ppu, y: ppu}
+            }
+
+            this._width = config.dx * this.pixelsPerUnit.x
+            this._height = config.dy * this.pixelsPerUnit.y
         } else if (isDrawConfigUnitMinMax(config)) {
-            this._width = (config.xMax - config.xMin) * config.pixelsPerUnit
-            this._height = (config.yMax - config.yMin) * config.pixelsPerUnit
-            this._origin.x = -config.xMin * config.pixelsPerUnit
-            this._origin.y = this._height + config.yMin * config.pixelsPerUnit
+
+            // Determine automatically the pixelsPerUnit
+            if(config.pixelsPerUnit === undefined || config.pixelsPerUnit===0){
+                const ppu = this.clientWidth / (Math.max(config.xMin, config.xMax) - Math.min(config.xMin, config.xMax))
+                this.pixelsPerUnit = {x: ppu, y: ppu}
+            }
+
+            this._width = (config.xMax - config.xMin) * this.pixelsPerUnit.x
+            this._height = (config.yMax - config.yMin) * this.pixelsPerUnit.y
+            this._origin.x = -config.xMin * this.pixelsPerUnit.x
+            this._origin.y = this._height + config.yMin * this.pixelsPerUnit.y
         } else {
             // Default width and height.
             this._width = 800

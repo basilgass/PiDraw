@@ -23,7 +23,6 @@ export declare class Bezier extends Figure {
     private _path;
     private _points;
     private _ratio;
-    private _showControlPoints;
     constructor(graph: Graph, name: string, values: (string | Point | {
         point: string | Point;
         control: string;
@@ -33,21 +32,32 @@ export declare class Bezier extends Figure {
     get path(): string;
     get ratio(): number;
     set ratio(value: number);
-    get showControlPoints(): boolean;
-    set showControlPoints(value: boolean);
-    _resetControlPoints(): void;
-    _resetAllPoints(): void;
+    /**
+     * Defines the points for a graph.
+     *
+     * @param {Array.<string|Point|Object>} values - The values representing the points for the graph.
+     *     Each value can be either a string representing the name of a point,
+     *     an instance of the Point class, or an object with properties `point`, `control`, and `ratio`.
+     * @param {string|Point} values.point - The name of the point or an instance of the Point class.
+     * @param {string} values.control - The control type for the point. Possible values are 'min', 'max',
+     *     'flat', or 'smooth'.
+     * @param {number} [values.ratio] - The ratio for the point. Default value is `this.ratio`.
+     * @param {Array} values.c1 - The control point for the curve before the current point.
+     *     It is an object with properties `x` and `y`.
+     * @param {Array} values.c2 - The control point for the curve after the current point.
+     *     It is an object with properties `x` and `y`.
+     * @return {void}
+     */
     definePoints(values: (string | Point | {
         point: string | Point;
         control: string;
         ratio?: number;
     })[]): void;
-    _updateControlPoints(): string;
+    uniformizeControlType(ctrl: string): string;
     generateName(): string;
     isSmooth(control: string): boolean;
-    isFlat(control: string): boolean;
+    isHorizontal(control: string): boolean;
     isVertical(control: string): boolean;
-    getCurve(): string;
     plot(values?: (string | Point | {
         point: string | Point;
         control: string;

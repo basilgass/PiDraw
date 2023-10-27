@@ -75,6 +75,12 @@ exports.parserKeys = {
         description: "perpendiculaire à d par A",
         options: lineOption
     },
+    med: {
+        generate: generateLine_1.generateMediator,
+        parameters: "P,Q",
+        description: "médiatrice à P et Q",
+        options: lineOption
+    },
     para: {
         generate: generateLine_1.generateParallel,
         parameters: "d,A[,1 ou 2]",
@@ -131,7 +137,7 @@ exports.parserKeys = {
     },
     bezier: {
         generate: generateBezier_1.generateBezier,
-        parameters: "A,B,C...",
+        parameters: "A/<v,h>,B,C...",
         description: "Tracer une courbe de bezier passant par plusieurs points A, B, C, ...",
         options: ""
     }
@@ -345,7 +351,7 @@ class Parser {
             xMax,
             yMin,
             yMax,
-            pixelsPerUnit: pixelsPerUnitX
+            pixelsPerUnit: 0
         }, false);
         // Update the grid for different ppuX / ppuY
         if (xUnit !== yUnit) {
@@ -417,30 +423,29 @@ class Parser {
                 figures: []
             };
             // Preprocess the step
-            try {
-                let { label, key, code, options } = this._preprocess(construct);
-                // console.log(construct, label, key, code, options)
-                buildedKeys.push(key);
-                // continue;
-                if (!getKeysOnly) {
-                    if (exports.parserKeys[key]) {
-                        builded.figures = exports.parserKeys[key].generate(this, label, code, options);
-                    }
-                    else {
-                        console.log('No key found for ' + construct);
-                    }
-                    // apply options
-                    this._postprocess(builded, options);
-                    // Do whatever check
-                    this._buildedSteps.push(builded);
+            // try {
+            let { label, key, code, options } = this._preprocess(construct);
+            // console.log(construct, label, key, code, options)
+            buildedKeys.push(key);
+            // continue;
+            if (!getKeysOnly) {
+                if (exports.parserKeys[key]) {
+                    builded.figures = exports.parserKeys[key].generate(this, label, code, options);
                 }
+                else {
+                    console.log('No key found for ' + construct);
+                }
+                // apply options
+                this._postprocess(builded, options);
+                // Do whatever check
+                this._buildedSteps.push(builded);
             }
-            catch (error) {
-                console.warn({
-                    step: construct,
-                    error
-                });
-            }
+            // } catch (error) {
+            //     console.warn({
+            //         step: construct,
+            //         error
+            //     })
+            // }
         }
         return buildedKeys;
     }
@@ -759,6 +764,18 @@ class Parser {
                                     fig.svg.translate(dx, -dy);
                                     fig.label.offset({ x: dx, y: dy });
                                 }
+                            }
+                        }
+                        // Rotate the svg element
+                        else if (key === 'rotate') {
+                            // origin: x:y
+                            // angle: number
+                            const O = this._graph.getPoint(param);
+                            if (O instanceof Point_1.Point) {
+                                fig.svg.rotate(-options[0], O.x, O.y);
+                            }
+                            else {
+                                fig.svg.rotate(-options[0]);
                             }
                         }
                         // Everything concerning the color

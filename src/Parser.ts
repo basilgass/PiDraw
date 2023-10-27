@@ -5,7 +5,7 @@ import {Point} from "./figures/Point";
 import {Axis} from "./figures/Axis";
 import {
     generateBissector,
-    generateLine,
+    generateLine, generateMediator,
     generateParallel,
     generatePerpendicular,
     generateTangent,
@@ -101,6 +101,12 @@ export const parserKeys: {
         description: "perpendiculaire à d par A",
         options: lineOption
     },
+    med: {
+        generate: generateMediator,
+        parameters: "P,Q",
+        description: "médiatrice à P et Q",
+        options: lineOption
+    },
     para: {
         generate: generateParallel,
         parameters: "d,A[,1 ou 2]",
@@ -157,7 +163,7 @@ export const parserKeys: {
     },
     bezier: {
         generate: generateBezier,
-        parameters: "A,B,C...",
+        parameters: "A/<v,h>,B,C...",
         description: "Tracer une courbe de bezier passant par plusieurs points A, B, C, ...",
         options: ""
     }
@@ -436,7 +442,7 @@ export class Parser {
             xMax,
             yMin,
             yMax,
-            pixelsPerUnit: pixelsPerUnitX
+            pixelsPerUnit: 0
         }, false)
 
         // Update the grid for different ppuX / ppuY
@@ -521,7 +527,7 @@ export class Parser {
             }
 
             // Preprocess the step
-            try {
+            // try {
                 let {label, key, code, options} = this._preprocess(construct)
                 // console.log(construct, label, key, code, options)
 
@@ -542,12 +548,12 @@ export class Parser {
                     this._buildedSteps.push(builded)
                 }
 
-            } catch (error) {
-                console.warn({
-                    step: construct,
-                    error
-                })
-            }
+            // } catch (error) {
+            //     console.warn({
+            //         step: construct,
+            //         error
+            //     })
+            // }
         }
 
         return buildedKeys
@@ -894,6 +900,18 @@ export class Parser {
                             }
 
 
+                        }
+                        // Rotate the svg element
+                        else if(key==='rotate') {
+                            // origin: x:y
+                            // angle: number
+
+                            const O = this._graph.getPoint(param)
+                            if(O instanceof Point) {
+                                fig.svg.rotate(-options[0], O.x, O.y)
+                            }else{
+                                fig.svg.rotate(-options[0])
+                            }
                         }
                             // Everything concerning the color
                             // fill:color   to fill the figure

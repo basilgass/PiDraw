@@ -8,14 +8,12 @@ class Bezier extends Figure_1.Figure {
     _path;
     _points;
     _ratio;
-    _showControlPoints;
     constructor(graph, name, values) {
         super(graph, name);
         this.generateName();
         this.definePoints(values);
         this._ratio = 0.3;
         this.svg = graph.svg.path("").stroke('black').fill('none');
-        this._showControlPoints = false;
         this.updateFigure();
     }
     get points() {
@@ -31,48 +29,23 @@ class Bezier extends Figure_1.Figure {
         this._ratio = value;
         this.update();
     }
-    get showControlPoints() {
-        return this._showControlPoints;
-    }
-    set showControlPoints(value) {
-        this._showControlPoints = value;
-        if (value === false) {
-            // Remove all !
-            this._resetControlPoints();
-        }
-        this.update();
-    }
-    _resetControlPoints() {
-        if (this._points) {
-            let index = 0;
-            for (let pt of this._points) {
-                if (pt.c1.point instanceof Point_1.Point) {
-                    pt.c1.point.remove();
-                    pt.c1.segment.remove();
-                }
-                if (pt.c2.point instanceof Point_1.Point) {
-                    pt.c2.point.remove();
-                    pt.c2.segment.remove();
-                }
-                pt.c1 = index > 0 ? { x: 0, y: 0 } : null;
-                pt.c2 = index < this._points.length - 1 ? { x: 0, y: 0 } : null;
-                index++;
-            }
-        }
-    }
-    _resetAllPoints() {
-        if (this._points) {
-            for (let pt of this._points) {
-                if (pt.point instanceof Point_1.Point) {
-                    pt.point.remove();
-                }
-            }
-        }
-        this._resetControlPoints();
-    }
+    /**
+     * Defines the points for a graph.
+     *
+     * @param {Array.<string|Point|Object>} values - The values representing the points for the graph.
+     *     Each value can be either a string representing the name of a point,
+     *     an instance of the Point class, or an object with properties `point`, `control`, and `ratio`.
+     * @param {string|Point} values.point - The name of the point or an instance of the Point class.
+     * @param {string} values.control - The control type for the point. Possible values are 'min', 'max',
+     *     'flat', or 'smooth'.
+     * @param {number} [values.ratio] - The ratio for the point. Default value is `this.ratio`.
+     * @param {Array} values.c1 - The control point for the curve before the current point.
+     *     It is an object with properties `x` and `y`.
+     * @param {Array} values.c2 - The control point for the curve after the current point.
+     *     It is an object with properties `x` and `y`.
+     * @return {void}
+     */
     definePoints(values) {
-        // Reset all control points and existing points before doing anything else.
-        this._resetControlPoints();
         this._points = values.map((x, index) => {
             if (x instanceof Point_1.Point || typeof x === 'string') {
                 return {
@@ -86,7 +59,7 @@ class Bezier extends Figure_1.Figure {
             else {
                 return {
                     point: this.graph.getPoint(x.point),
-                    control: x.control,
+                    control: this.uniformizeControlType(x.control),
                     ratio: x.ratio === undefined ? this.ratio : x.ratio,
                     c1: index > 0 ? { x: 0, y: 0 } : null,
                     c2: index < values.length - 1 ? { x: 0, y: 0 } : null
@@ -94,69 +67,24 @@ class Bezier extends Figure_1.Figure {
             }
         }).filter(pt => pt.point);
     }
-    _updateControlPoints() {
-        if (this._points.length <= 1)
-            return;
-        if (this._points.length === 2) {
-            // Special case
-            return "";
-        }
-        let pts = this._points, path = `M${pts[0].point.x},${pts[0].point.y}`, n = 0;
-        while (n < pts.length) {
-            if (n === 0) {
-                // First point
-                let dx = pts[n + 1].point.x - pts[n].point.x, dy = pts[n + 1].point.y - pts[n].point.y, ratio = pts[n].ratio === undefined ? this.ratio : pts[n].ratio;
-                pts[n].c2.x = this.isVertical(pts[0].control) ? pts[0].point.x : pts[0].point.x + dx * ratio / 2;
-                pts[n].c2.y = this.isFlat(pts[0].control) ? pts[0].point.y : pts[0].point.y + dy * ratio / 2;
-            }
-            else if (n === this._points.length - 1) {
-                // Last point
-                let dx = pts[n].point.x - pts[n - 1].point.x, dy = pts[n].point.y - pts[n - 1].point.y, ratio = pts[n].ratio === undefined ? this.ratio : pts[n].ratio;
-                pts[n].c1.x = this.isVertical(pts[n].control) ? pts[n].point.x : pts[n].point.x - dx * ratio / 2;
-                pts[n].c1.y = this.isFlat(pts[n].control) ? pts[n].point.y : pts[n].point.y - dy * ratio / 2;
-            }
-            else {
-                // Other point
-                let dx = pts[n + 1].point.x - pts[n - 1].point.x, dy = pts[n + 1].point.y - pts[n - 1].point.y, norm = Math.sqrt(dx ** 2 + dy ** 2), dx1 = pts[n].point.x - pts[n - 1].point.x, dx2 = pts[n + 1].point.x - pts[n].point.x, ratio = pts[n].ratio === undefined ? this.ratio : pts[n].ratio;
-                if (norm !== 0) {
-                    dx = dx / norm;
-                    dy = dy / norm;
-                }
-                pts[n].c1.x = this.isVertical(pts[n].control) ? pts[n].point.x : pts[n].point.x - dx * dx1 * ratio;
-                pts[n].c1.y = this.isFlat(pts[n].control) ? pts[n].point.y : pts[n].point.y - dy * dx1 * ratio;
-                pts[n].c2.x = this.isVertical(pts[n].control) ? pts[n].point.x : pts[n].point.x + dx * dx2 * ratio;
-                pts[n].c2.y = this.isFlat(pts[n].control) ? pts[n].point.y : pts[n].point.y + dy * dx2 * ratio;
-            }
-            // Go to the next point
-            n++;
-        }
+    uniformizeControlType(ctrl) {
+        if (this.isVertical(ctrl))
+            return 'vertical';
+        if (this.isHorizontal(ctrl))
+            return 'horizontal';
+        return 'smooth';
     }
     generateName() {
         return super.generateName();
     }
     isSmooth(control) {
-        return !(this.isFlat(control) || this.isVertical(control));
+        return !(this.isHorizontal(control) || this.isVertical(control));
     }
-    isFlat(control) {
-        return control === 'flat' || control === 'min' || control === 'max' || control === 'ah';
+    isHorizontal(control) {
+        return control === 'flat' || control === 'min' || control === 'max' || control === 'ah' || control === "h";
     }
     isVertical(control) {
-        return control === 'vertical' || control === "av";
-    }
-    getCurve() {
-        if (this._points.length <= 1) {
-            return "";
-        }
-        // Update the control points for each point.
-        this._updateControlPoints();
-        let path = `M${this._points[0].point.x},${this._points[0].point.y} C${this._points[0].c2.x},${this._points[0].c2.y} `;
-        for (let n = 1; n < this._points.length - 1; n++) {
-            path += `${this._points[n].c1.x},${this._points[n].c1.y} ${this._points[n].point.x},${this._points[n].point.y} C ${this._points[n].c2.x},${this._points[n].c2.y} `;
-        }
-        let n = this._points.length - 1;
-        path += `${this._points[n].c1.x},${this._points[n].c1.y} ${this._points[n].point.x},${this._points[n].point.y}`;
-        // Initialize
-        return path;
+        return control === 'vertical' || control === "av" || control === "v";
     }
     plot(values, speed) {
         // The update mechanism is frozen.
@@ -165,51 +93,11 @@ class Bezier extends Figure_1.Figure {
         // Generate the new values.
         if (values !== undefined)
             this.definePoints(values);
-        this._path = this.getCurve();
+        // Build the smooth path
+        this._path = svgPath(this.points, bezierCommand);
         // Build the path.
         if (this.svg instanceof svg_js_1.Path) {
-            // @ts-ignore
             this.svg.plot(this._path);
-        }
-        // Show the control points.
-        if (this._showControlPoints) {
-            this.graph.freeze = true;
-            let segments = [];
-            for (let pt of this._points) {
-                if (pt.c1 !== null) {
-                    if (pt.c1.point === undefined) {
-                        // Create the point
-                        pt.c1.point = this.graph.point(0, 0, `${pt.point.name}_c1`).asCircle();
-                        pt.c1.point.hideLabel();
-                        pt.c1.segment = this.graph.line(pt.c1.point, pt.point).asSegment();
-                    }
-                    pt.c1.point.x = pt.c1.x;
-                    pt.c1.point.y = pt.c1.y;
-                    segments.push(pt.c1.segment);
-                }
-                if (pt.c2 !== null) {
-                    if (pt.c2.point === undefined) {
-                        // Create the point
-                        pt.c2.point = this.graph.point(0, 0, `${pt.point.name}_c2`).asCircle();
-                        pt.c2.point.hideLabel();
-                        pt.c2.segment = this.graph.line(pt.c2.point, pt.point).asSegment();
-                    }
-                    pt.c2.point.x = pt.c2.x;
-                    pt.c2.point.y = pt.c2.y;
-                    segments.push(pt.c2.segment);
-                }
-            }
-            this.graph.freeze = false;
-            this._points.forEach(pt => {
-                if (pt.c1) {
-                    pt.c1.point.update();
-                    pt.c1.segment.update();
-                }
-                if (pt.c2) {
-                    pt.c2.point.update();
-                    pt.c2.segment.update();
-                }
-            });
         }
         return this;
     }
@@ -219,4 +107,80 @@ class Bezier extends Figure_1.Figure {
     }
 }
 exports.Bezier = Bezier;
+// https://francoisromain.medium.com/smooth-a-svg-path-with-cubic-bezier-curves-e37b49d46c74
+// Render the svg <path> element
+// I:  - points (array): points coordinates
+//     - command (function)
+//       I:  - point (array) [x,y]: current point coordinates
+//           - i (integer): index of 'point' in the array 'a'
+//           - a (array): complete array of points coordinates
+//       O:  - (string) a svg path command
+// O:  - (string): a Svg <path> element
+const svgPath = (points, command) => {
+    // build the d attributes by looping over the points
+    return points.reduce((acc, point, i, a) => i === 0
+        // if first point
+        ? `M ${point.point.x},${point.point.y}`
+        // else
+        : `${acc} ${command(point, i, a)}`, '');
+};
+// Svg path line command
+// I:  - point (array) [x, y]: coordinates
+// O:  - (string) 'L x,y': svg line command
+const lineCommand = (point) => `L ${point.x} ${point.y}`;
+// Properties of a line
+// I:  - pointA (array) [x,y]: coordinates
+//     - pointB (array) [x,y]: coordinates
+// O:  - (object) { length: l, angle: a }: properties of the line
+const line = (pointA, pointB) => {
+    const lengthX = pointB.point.x - pointA.point.x;
+    const lengthY = pointB.point.y - pointA.point.y;
+    return {
+        length: Math.sqrt(Math.pow(lengthX, 2) + Math.pow(lengthY, 2)),
+        angle: Math.atan2(lengthY, lengthX)
+    };
+};
+// Position of a control point
+// I:  - current (array) [x, y]: current point coordinates
+//     - previous (array) [x, y]: previous point coordinates
+//     - next (array) [x, y]: next point coordinates
+//     - reverse (boolean, optional): sets the direction
+// O:  - (array) [x,y]: a tuple of coordinates
+const controlPoint = (current, previous, next, reverse) => {
+    // When 'current' is the first or last point of the array
+    // 'previous' or 'next' don't exist.
+    // Replace with 'current'
+    const p = previous || current;
+    const n = next || current;
+    // The smoothing ratio
+    const smoothing = current.ratio;
+    // Properties of the opposed-line
+    const o = line(p, n);
+    // If is end-control-point, add PI to the angle to go backward
+    let angle = o.angle + (reverse ? Math.PI : 0);
+    const length = o.length * smoothing;
+    // If the current control type is vertical or horizontal, adapt the angle
+    if (current.control === 'vertical') {
+        angle = Math.PI / 2 + (reverse ? Math.PI : 0);
+    }
+    else if (current.control === 'horizontal') {
+        angle = 0 + (reverse ? Math.PI : 0);
+    }
+    // The control point position is relative to the current point
+    const x = current.point.x + Math.cos(angle) * length;
+    const y = current.point.y + Math.sin(angle) * length;
+    return [x, y];
+};
+// Create the bezier curve command
+// I:  - point (array) [x,y]: current point coordinates
+//     - i (integer): index of 'point' in the array 'a'
+//     - a (array): complete array of points coordinates
+// O:  - (string) 'C x2,y2 x1,y1 x,y': SVG cubic bezier C command
+const bezierCommand = (bPoint, i, a) => {
+    // start control point
+    const [cpsX, cpsY] = controlPoint(a[i - 1], a[i - 2], bPoint);
+    // end control point
+    const [cpeX, cpeY] = controlPoint(bPoint, a[i - 1], a[i + 1], true);
+    return `C ${cpsX},${cpsY} ${cpeX},${cpeY} ${bPoint.point.x},${bPoint.point.y}`;
+};
 //# sourceMappingURL=Bezier.js.map

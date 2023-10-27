@@ -18,10 +18,10 @@ export interface IDrawConfigWidthHeight extends IDrawConfig {
 export interface IDrawConfigUnitWidthHeight extends IDrawConfig {
     dx: number;
     dy: number;
-    pixelsPerUnit: number;
+    pixelsPerUnit?: number;
 }
 export interface IDrawConfigUnitMinMax extends IDrawConfig {
-    pixelsPerUnit: number;
+    pixelsPerUnit?: number;
     xMax: number;
     xMin: number;
     yMax: number;

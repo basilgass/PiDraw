@@ -14,7 +14,8 @@ export declare enum LINECONSTRUCTION {
     PERPENDICULAR = "perpendicular",
     TANGENT = "tangent",
     SLOPE = "slope",
-    BISSECTOR = "bissector"
+    BISSECTOR = "bissector",
+    MEDIATOR = "mediator"
 }
 export declare class Line extends Figure {
     constructor(graph: Graph, name: string, A: Point, B: Point, construction?: LineConfig);

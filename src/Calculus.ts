@@ -110,6 +110,12 @@ export class mathVector {
         return new mathVector(this._y, -this._x)
     }
 
+    get unit(): mathVector {
+
+        const n = this.norm;
+        return new mathVector(this._x / n, this._y / n)
+    }
+
     static scalarProduct(u: mathVector, v: mathVector): number {
         return u.x * v.x + u.y * v.y
     }
@@ -135,6 +141,10 @@ export class mathVector {
         this._y = Math.sin(rads) * x + Math.cos(rads)*y
 
         return this
+    }
+
+    add(v: mathVector): mathVector {
+        return new mathVector(this._x + v.x, this._y + v.y)
     }
 }
 
