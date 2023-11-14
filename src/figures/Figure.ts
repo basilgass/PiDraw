@@ -47,6 +47,15 @@ export class Figure {
         return this._graph;
     }
 
+    freezeElement(): Figure {
+        this._freeze = true
+        return this
+    }
+    releaseElement(): Figure {
+        this._freeze = false
+        this.update()
+        return this
+    }
     get freeze(): boolean {
         return this._freeze;
     }
@@ -100,7 +109,8 @@ export class Figure {
         }
 
         this.updateFigure()
-        if (this._label) {
+
+        if (this._label && this._label.isShown()) {
             this._label.update()
         }
 
@@ -220,6 +230,11 @@ export class Figure {
         this._label.show()
         return this
     }
+
+    isShown(): Boolean {
+        return this._svg.visible()
+    }
+
 
     generateDisplayName() : Figure{
         if (this._displayName) {

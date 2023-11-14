@@ -260,6 +260,7 @@ class Parser {
             // Reset the construction
             this.update('');
         }
+        // TODO: système de mise à jour à revoir, pour optimiser les calculs. Essayer de mettre à jour plutôt que de tout recalculer !
         // Keep the construction value
         this._construction = construction;
         // Initialize the built steps
@@ -407,10 +408,18 @@ class Parser {
     }
     generate(steps, getKeysOnly = false) {
         // get all current figures.
-        let builded, errors = [], buildedKeys = [];
+        let builded, errors = [], buildedKeys = [], freeze = false;
         for (let construct of steps) {
             // The step command is empty or too small - do not continue to parse it.
             if (construct.length < 3) {
+                continue;
+            }
+            if (construct[0] === '@') {
+                // Special commands
+                if (construct === '@begin:static')
+                    freeze = true;
+                if (construct === '@end:static')
+                    freeze = false;
                 continue;
             }
             if (!construct.match(/^[A-Za-z0-9_]+/g)) {
@@ -436,7 +445,7 @@ class Parser {
                     console.log('No key found for ' + construct);
                 }
                 // apply options
-                this._postprocess(builded, options);
+                this._postprocess(builded, options, freeze);
                 // Do whatever check
                 this._buildedSteps.push(builded);
             }
@@ -548,7 +557,7 @@ class Parser {
         //
         // return {label, key, code, options}
     }
-    _postprocess(builded, codeOptions) {
+    _postprocess(builded, codeOptions, freeze) {
         /**
          * builded: contains the figures for the current code
          * options: is the list of options to be applied.
@@ -588,6 +597,8 @@ class Parser {
             if (this._config.nopoint && fig instanceof Point_1.Point) {
                 fig.hide();
             }
+            // Freeze or unfreeze
+            fig.freeze = freeze === true;
         });
         if (codeOptions.length > 0) {
             codeOptions.forEach(elWithCodeOptions => {
@@ -607,6 +618,9 @@ class Parser {
                         // Special case for points
                         if (fig instanceof Point_1.Point && ["*", "o", "sq"].indexOf(key) !== -1) {
                             (0, generatePoint_1.setPointStyle)(fig, key, options.length > 0 ? +options[0] : null);
+                        }
+                        else if (key === 'static') {
+                            fig.freeze = true;
                             // Drag options
                         }
                         else if (key === 'drag' && fig instanceof Point_1.Point) {

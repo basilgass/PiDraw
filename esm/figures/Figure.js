@@ -41,6 +41,15 @@ class Figure {
     get graph() {
         return this._graph;
     }
+    freezeElement() {
+        this._freeze = true;
+        return this;
+    }
+    releaseElement() {
+        this._freeze = false;
+        this.update();
+        return this;
+    }
     get freeze() {
         return this._freeze;
     }
@@ -82,7 +91,7 @@ class Figure {
             return;
         }
         this.updateFigure();
-        if (this._label) {
+        if (this._label && this._label.isShown()) {
             this._label.update();
         }
         return this;
@@ -181,6 +190,9 @@ class Figure {
     showLabel() {
         this._label.show();
         return this;
+    }
+    isShown() {
+        return this._svg.visible();
     }
     generateDisplayName() {
         if (this._displayName) {

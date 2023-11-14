@@ -35,6 +35,8 @@ export declare class Figure {
     private _svg;
     constructor(graph: Graph, name: string);
     get graph(): Graph;
+    freezeElement(): Figure;
+    releaseElement(): Figure;
     get freeze(): boolean;
     set freeze(value: boolean);
     get name(): string;
@@ -74,5 +76,6 @@ export declare class Figure {
     show(): Figure;
     hideLabel(): Figure;
     showLabel(): Figure;
+    isShown(): Boolean;
     generateDisplayName(): Figure;
 }

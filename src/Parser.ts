@@ -330,6 +330,7 @@ export class Parser {
             this.update('')
         }
 
+        // TODO: système de mise à jour à revoir, pour optimiser les calculs. Essayer de mettre à jour plutôt que de tout recalculer !
         // Keep the construction value
         this._construction = construction
 
@@ -507,13 +508,24 @@ export class Parser {
         // get all current figures.
         let builded: { step: string, figures: Figure[] },
             errors: string[] = [],
-            buildedKeys: string[] = []
+            buildedKeys: string[] = [],
+            freeze = false
 
         for (let construct of steps) {
             // The step command is empty or too small - do not continue to parse it.
             if (construct.length < 3) {
                 continue
             }
+
+            if(construct[0]==='@'){
+                // Special commands
+                if(construct==='@begin:static')freeze = true
+                if(construct==='@end:static')freeze = false
+                continue
+            }
+
+
+
 
             if (!construct.match(/^[A-Za-z0-9_]+/g)) {
                 console.warn('The current step is not a valid step: ', construct)
@@ -542,7 +554,7 @@ export class Parser {
                     }
 
                     // apply options
-                    this._postprocess(builded, options)
+                    this._postprocess(builded, options, freeze)
 
                     // Do whatever check
                     this._buildedSteps.push(builded)
@@ -659,7 +671,7 @@ export class Parser {
         // return {label, key, code, options}
     }
 
-    private _postprocess(builded: BuildStep, codeOptions: string[]) {
+    private _postprocess(builded: BuildStep, codeOptions: string[], freeze?: boolean) {
         /**
          * builded: contains the figures for the current code
          * options: is the list of options to be applied.
@@ -704,6 +716,9 @@ export class Parser {
                 if (this._config.nopoint && fig instanceof Point) {
                     fig.hide()
                 }
+
+                // Freeze or unfreeze
+                fig.freeze = freeze === true
             })
 
 
@@ -731,6 +746,8 @@ export class Parser {
                         // Special case for points
                         if (fig instanceof Point && ["*", "o", "sq"].indexOf(key) !== -1) {
                             setPointStyle(fig, key, options.length > 0 ? +options[0] : null)
+                        } else if (key==='static') {
+                            fig.freeze = true
                             // Drag options
                         } else if (key === 'drag' && fig instanceof Point) {
                             // Get the figure to follow

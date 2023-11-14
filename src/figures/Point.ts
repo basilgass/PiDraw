@@ -135,9 +135,10 @@ export class Point extends Figure {
             this.label.displayName = this.name
         }
 
-        if (this.label.isHtml) {
-            this.label.updateFigure()
-        }
+        // TODO: check if removing this extra updateFigure breaks things...
+        // if (this.label.isHtml) {
+        //     this.label.updateFigure()
+        // }
         return this
     }
 

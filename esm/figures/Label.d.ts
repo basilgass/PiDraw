@@ -25,6 +25,7 @@ export interface LabelConfig {
 }
 export declare class Label extends Figure {
     private _config;
+    private _currentDisplayName;
     constructor(graph: Graph, name: string, config?: LabelConfig);
     private _html;
     get html(): ForeignObject;
@@ -40,6 +41,7 @@ export declare class Label extends Figure {
     set template(value: string);
     hide(): Figure;
     show(): Figure;
+    isShown(): Boolean;
     addHtml(value: string): Label;
     offset(value: IPoint): Label;
     position(value: string): Label;

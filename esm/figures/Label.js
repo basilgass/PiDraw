@@ -18,6 +18,7 @@ var LABELPOS;
 })(LABELPOS || (exports.LABELPOS = LABELPOS = {}));
 class Label extends Figure_1.Figure {
     _config;
+    _currentDisplayName;
     constructor(graph, name, config) {
         super(graph, name);
         // default configuration
@@ -32,6 +33,7 @@ class Label extends Figure_1.Figure {
         };
         this._config = Object.assign({}, this._config, config);
         this.generateName();
+        this._currentDisplayName = this.displayName;
         // Create the text object.
         this.svg = this.graph.svg.text(this._config.el.name).font({ 'anchor': 'middle' });
         this.graph.layers.foreground.add(this.svg);
@@ -40,7 +42,6 @@ class Label extends Figure_1.Figure {
         this._html.attr('style', "overflow:visible");
         this.graph.layers.foreground.add(this._html);
         this.isTex = false;
-        // this.isHtml = false // Automatically set with isTex
         // Update the label text and position
         this.updateFigure();
     }
@@ -113,6 +114,9 @@ class Label extends Figure_1.Figure {
         }
         return this;
     }
+    isShown() {
+        return this.svg.visible() || this.html.visible();
+    }
     addHtml(value) {
         // Remove existing values.
         this.html.children().forEach(child => child.remove());
@@ -171,11 +175,16 @@ class Label extends Figure_1.Figure {
     updateFigure() {
         let x = 0, y = 0, w = 0, h = 0;
         // Update the name
-        if (!this.isHtml && this.svg instanceof svg_js_1.Text) {
-            this.svg.text(this.displayName);
-        }
-        else {
-            this.addHtml(this.displayName);
+        const display = this.displayName;
+        if (this._currentDisplayName !== display) {
+            if (!this.isHtml && this.svg instanceof svg_js_1.Text) {
+                // If it's the same text - no need to update it !
+                this.svg.text(display);
+            }
+            else {
+                this.addHtml(display);
+            }
+            this._currentDisplayName = display;
         }
         // Get the default position
         if (this._config.el instanceof Point_1.Point) {

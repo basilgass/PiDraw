@@ -101,9 +101,10 @@ class Point extends Figure_1.Figure {
         else {
             this.label.displayName = this.name;
         }
-        if (this.label.isHtml) {
-            this.label.updateFigure();
-        }
+        // TODO: check if removing this extra updateFigure breaks things...
+        // if (this.label.isHtml) {
+        //     this.label.updateFigure()
+        // }
         return this;
     }
     asCross() {

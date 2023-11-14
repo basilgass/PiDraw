@@ -34,6 +34,8 @@ export interface LabelConfig {
 export class Label extends Figure {
     private _config: LabelConfig
 
+    private _currentDisplayName: string
+
     constructor(graph: Graph, name: string, config?: LabelConfig) {
         super(graph, name);
 
@@ -51,6 +53,8 @@ export class Label extends Figure {
         this._config = Object.assign({}, this._config, config)
 
         this.generateName()
+        this._currentDisplayName = this.displayName
+
 
         // Create the text object.
         this.svg = this.graph.svg.text(this._config.el.name).font({'anchor': 'middle'})
@@ -62,7 +66,6 @@ export class Label extends Figure {
         this.graph.layers.foreground.add(this._html)
 
         this.isTex = false
-        // this.isHtml = false // Automatically set with isTex
 
         // Update the label text and position
         this.updateFigure()
@@ -126,7 +129,6 @@ export class Label extends Figure {
         }
 
         return name
-
     }
 
     set displayName(value: string) {
@@ -158,6 +160,10 @@ export class Label extends Figure {
             this.html.hide()
         }
         return this
+    }
+
+    isShown(): Boolean {
+        return this.svg.visible() || this.html.visible()
     }
 
     addHtml(value: string): Label {
@@ -232,10 +238,15 @@ export class Label extends Figure {
         let x = 0, y = 0, w = 0, h = 0
 
         // Update the name
-        if (!this.isHtml && this.svg instanceof Text) {
-            this.svg.text(this.displayName)
-        } else {
-            this.addHtml(this.displayName)
+        const display = this.displayName
+        if(this._currentDisplayName !== display) {
+            if (!this.isHtml && this.svg instanceof Text) {
+                // If it's the same text - no need to update it !
+                    this.svg.text(display)
+            } else {
+                this.addHtml(display)
+            }
+            this._currentDisplayName = display
         }
 
         // Get the default position
