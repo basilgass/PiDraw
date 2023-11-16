@@ -51,6 +51,7 @@ export function generatePoint(parser: Parser, name: string, code: string[], opti
     const pt = parser.graph.point(-100, -100, name, true)
     // pt.hide().hideLabel()
 
+    parser.graph.freeze = true
     // Move the point
     let stepX = getStepType(parser, code.shift()),
         stepY = getStepType(parser, code.shift()),
@@ -71,6 +72,8 @@ export function generatePoint(parser: Parser, name: string, code: string[], opti
         pt.label.isTex = true
         pt.displayName = `${name} = @`
     }
+
+    parser.graph.freeze = false
 
     return [pt]
 }

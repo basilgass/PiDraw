@@ -296,6 +296,8 @@ class Parser {
         }
         // Build the new steps from the current point
         this.generate(steps.slice(i));
+        // Update globally the graph
+        this.graph.update();
     }
     updateLayout(parameters, constructUpdate) {
         // x=3:-5,y=-5:2                            min/max

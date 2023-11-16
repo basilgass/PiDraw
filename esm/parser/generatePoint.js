@@ -50,6 +50,7 @@ function generatePoint(parser, name, code, options) {
     // Create the point
     const pt = parser.graph.point(-100, -100, name, true);
     // pt.hide().hideLabel()
+    parser.graph.freeze = true;
     // Move the point
     let stepX = (0, parseStep_1.getStepType)(parser, code.shift()), stepY = (0, parseStep_1.getStepType)(parser, code.shift()), x, y;
     if (stepX.kind === parseStep_1.STEP_KIND.static && stepY.kind === parseStep_1.STEP_KIND.static) {
@@ -66,6 +67,7 @@ function generatePoint(parser, name, code, options) {
         pt.label.isTex = true;
         pt.displayName = `${name} = @`;
     }
+    parser.graph.freeze = false;
     return [pt];
 }
 exports.generatePoint = generatePoint;

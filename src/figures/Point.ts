@@ -193,7 +193,6 @@ export class Point extends Figure {
 
         this._updateShape()
         this._updateCoordinate()
-
         this.svg.center(this._x, this._y)
 
         this.generateDisplayName()

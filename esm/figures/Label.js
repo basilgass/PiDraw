@@ -33,11 +33,11 @@ class Label extends Figure_1.Figure {
         };
         this._config = Object.assign({}, this._config, config);
         this.generateName();
-        this._currentDisplayName = this.displayName;
+        this._currentDisplayName = " ?? ";
         // Create the text object.
         this.svg = this.graph.svg.text(this._config.el.name).font({ 'anchor': 'middle' });
         this.graph.layers.foreground.add(this.svg);
-        // How to handle dimension
+        // Create the HTML object.
         this._html = this.graph.svg.foreignObject(1, 1);
         this._html.attr('style', "overflow:visible");
         this.graph.layers.foreground.add(this._html);
@@ -64,6 +64,7 @@ class Label extends Figure_1.Figure {
     set isTex(value) {
         this._isTex = value;
         this.isHtml = value;
+        this.displayName = " ?? ";
     }
     get displayName() {
         if (this.template === null) {
@@ -90,95 +91,19 @@ class Label extends Figure_1.Figure {
     }
     set displayName(value) {
         this._config.name = value;
-        this.updateFigure();
-    }
-    get template() {
-        return this._config.template;
-    }
-    set template(value) {
-        this._config.template = value;
-    }
-    hide() {
-        this.svg.hide();
-        this.html.hide();
-        return this;
-    }
-    show() {
-        if (this._isHtml) {
-            this.svg.hide();
-            this.html.show();
-        }
-        else {
-            this.svg.show();
-            this.html.hide();
-        }
-        return this;
-    }
-    isShown() {
-        return this.svg.visible() || this.html.visible();
-    }
-    addHtml(value) {
-        // Remove existing values.
-        this.html.children().forEach(child => child.remove());
-        // @ts-ignore
-        this.html.add((0, svg_js_1.SVG)(`<div style="display: inline-block; position: fixed">${this.isTex ? this._graph.toTex(value) : value}</div>`, true));
-        this.isHtml = true;
-        return this;
-    }
-    offset(value) {
-        this._config.offset = value;
-        this.updateFigure();
-        return this;
-    }
-    position(value) {
-        if (value.includes('l')) {
-            this._config.position.horizontal = LABELPOS.LEFT;
-        }
-        if (value.includes('c')) {
-            this._config.position.horizontal = LABELPOS.CENTER;
-        }
-        if (value.includes('r')) {
-            this._config.position.horizontal = LABELPOS.RIGHT;
-        }
-        if (value.includes('t')) {
-            this._config.position.vertical = LABELPOS.TOP;
-        }
-        if (value.includes('m')) {
-            this._config.position.vertical = LABELPOS.MIDDLE;
-        }
-        if (value.includes('b')) {
-            this._config.position.vertical = LABELPOS.BOTTOM;
-        }
-        this.updateFigure();
-        return this;
-    }
-    center() {
-        this._config.position.horizontal = LABELPOS.CENTER;
-        this.updateFigure();
-        return this;
-    }
-    middle() {
-        this._config.position.vertical = LABELPOS.MIDDLE;
-        this.updateFigure();
-        return this;
-    }
-    generateName() {
-        if (this.name === undefined) {
-            this.name = '?';
-            return this.name;
-        }
-        if (this.name.includes('_')) {
-            // it has subscript part.
-        }
-        return this.name;
+        this._currentDisplayName = " ?? ";
     }
     updateFigure() {
+        // The update mechanism is frozen.
+        if (this.freeze || this.graph.freeze) {
+            return this;
+        }
         let x = 0, y = 0, w = 0, h = 0;
-        // Update the name
+        // Update the name if needed.
         const display = this.displayName;
         if (this._currentDisplayName !== display) {
+            // If it's the same text - no need to update it !
             if (!this.isHtml && this.svg instanceof svg_js_1.Text) {
-                // If it's the same text - no need to update it !
                 this.svg.text(display);
             }
             else {
@@ -254,6 +179,86 @@ class Label extends Figure_1.Figure {
         else {
             this.svg.center(x + this._config.offset.x, y - this._config.offset.y);
         }
+        return this;
+    }
+    generateName() {
+        if (this.name === undefined) {
+            this.name = '?';
+            return this.name;
+        }
+        if (this.name.includes('_')) {
+            // it has subscript part.
+        }
+        return this.name;
+    }
+    hide() {
+        this.svg.hide();
+        this.html.hide();
+        return this;
+    }
+    show() {
+        if (this._isHtml) {
+            this.svg.hide();
+            this.html.show();
+        }
+        else {
+            this.svg.show();
+            this.html.hide();
+        }
+        return this;
+    }
+    isShown() {
+        return this.svg.visible() || this.html.visible();
+    }
+    get template() {
+        return this._config.template;
+    }
+    set template(value) {
+        this._config.template = value;
+    }
+    addHtml(value) {
+        // Remove existing values.
+        this.html.children().forEach(child => child.remove());
+        // @ts-ignore
+        this.html.add((0, svg_js_1.SVG)(`<div style="display: inline-block; position: fixed">${this.isTex ? this._graph.toTex(value) : value}</div>`, true));
+        this.isHtml = true;
+        return this;
+    }
+    offset(value) {
+        this._config.offset = value;
+        this.updateFigure();
+        return this;
+    }
+    position(value) {
+        if (value.includes('l')) {
+            this._config.position.horizontal = LABELPOS.LEFT;
+        }
+        if (value.includes('c')) {
+            this._config.position.horizontal = LABELPOS.CENTER;
+        }
+        if (value.includes('r')) {
+            this._config.position.horizontal = LABELPOS.RIGHT;
+        }
+        if (value.includes('t')) {
+            this._config.position.vertical = LABELPOS.TOP;
+        }
+        if (value.includes('m')) {
+            this._config.position.vertical = LABELPOS.MIDDLE;
+        }
+        if (value.includes('b')) {
+            this._config.position.vertical = LABELPOS.BOTTOM;
+        }
+        this.updateFigure();
+        return this;
+    }
+    center() {
+        this._config.position.horizontal = LABELPOS.CENTER;
+        this.updateFigure();
+        return this;
+    }
+    middle() {
+        this._config.position.vertical = LABELPOS.MIDDLE;
+        this.updateFigure();
         return this;
     }
 }

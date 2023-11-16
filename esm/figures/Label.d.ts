@@ -37,16 +37,16 @@ export declare class Label extends Figure {
     set isTex(value: Boolean);
     get displayName(): string;
     set displayName(value: string);
-    get template(): string;
-    set template(value: string);
+    updateFigure(): Label;
+    generateName(): string;
     hide(): Figure;
     show(): Figure;
     isShown(): Boolean;
+    get template(): string;
+    set template(value: string);
     addHtml(value: string): Label;
     offset(value: IPoint): Label;
     position(value: string): Label;
     center(): Label;
     middle(): Label;
-    generateName(): string;
-    updateFigure(): Label;
 }
