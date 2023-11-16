@@ -22,7 +22,7 @@ class Point extends Figure_1.Figure {
         this._scale = +this._defaultScale;
         this._hiddenPoint = false;
         this._constrain = { type: enums_1.POINTCONSTRAIN.FIXED };
-        this._updateShape();
+        // this._updateShape()
         // Add the label
         this.generateName();
         this.label = new Label_1.Label(this.graph, name, { el: this });

@@ -39,7 +39,13 @@ export declare class Parser {
         code: string[];
         options: string[];
     };
-    generate(steps: string[], getKeysOnly?: boolean): string[];
+    generate(steps: string[], parameters: {
+        refresh?: boolean;
+        keysOnly: boolean;
+    }): {
+        buildedKeys: string[];
+        freezedFigures: Figure[];
+    };
     /**
      * Convert a construct string to the label, key, code and options)
      * A step string can be as following:

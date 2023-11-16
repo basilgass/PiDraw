@@ -37,7 +37,7 @@ export class Point extends Figure {
 
         this._constrain = {type: POINTCONSTRAIN.FIXED}
 
-        this._updateShape()
+        // this._updateShape()
 
         // Add the label
         this.generateName()

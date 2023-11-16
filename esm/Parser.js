@@ -295,9 +295,15 @@ class Parser {
             }
         }
         // Build the new steps from the current point
-        this.generate(steps.slice(i));
+        const { freezedFigures } = this.generate(steps.slice(i), { refresh, keysOnly: false });
         // Update globally the graph
         this.graph.update();
+        // Freeze the static elements.
+        if (refresh) {
+            freezedFigures.forEach(fig => {
+                fig.freeze = true;
+            });
+        }
     }
     updateLayout(parameters, constructUpdate) {
         // x=3:-5,y=-5:2                            min/max
@@ -403,14 +409,14 @@ class Parser {
         return this;
     }
     getParserKeys(construction) {
-        return this.generate(this._processConstruction(construction), true);
+        return this.generate(this._processConstruction(construction), { keysOnly: true }).buildedKeys;
     }
     preprocess(step) {
         return this._preprocess(step);
     }
-    generate(steps, getKeysOnly = false) {
+    generate(steps, parameters) {
         // get all current figures.
-        let builded, errors = [], buildedKeys = [], freeze = false;
+        let builded, errors = [], buildedKeys = [], freeze = false, freezedFigures = [];
         for (let construct of steps) {
             // The step command is empty or too small - do not continue to parse it.
             if (construct.length < 3) {
@@ -436,10 +442,9 @@ class Parser {
             // Preprocess the step
             // try {
             let { label, key, code, options } = this._preprocess(construct);
-            // console.log(construct, label, key, code, options)
             buildedKeys.push(key);
             // continue;
-            if (!getKeysOnly) {
+            if (!parameters.keysOnly) {
                 if (exports.parserKeys[key]) {
                     builded.figures = exports.parserKeys[key].generate(this, label, code, options);
                 }
@@ -447,9 +452,12 @@ class Parser {
                     console.log('No key found for ' + construct);
                 }
                 // apply options
-                this._postprocess(builded, options, freeze);
+                this._postprocess(builded, options);
                 // Do whatever check
                 this._buildedSteps.push(builded);
+                if (freeze) {
+                    freezedFigures.push(...builded.figures);
+                }
             }
             // } catch (error) {
             //     console.warn({
@@ -458,7 +466,7 @@ class Parser {
             //     })
             // }
         }
-        return buildedKeys;
+        return { buildedKeys, freezedFigures };
     }
     /**
      * Convert a construct string to the label, key, code and options)
@@ -471,95 +479,8 @@ class Parser {
      */
     _preprocess(step) {
         return parserPreprocess(step);
-        // let label = "",
-        //     key = "",
-        //     code: string[] = [],
-        //     options: string[] = [],
-        //     value = step + '',
-        //     key_code: string = ""
-        //
-        //
-        // // Remove the options.
-        // let [label_key_code, step_options] = value.split("->")
-        //
-        // if (step_options !== undefined) {
-        //     options = step_options.split(',')
-        // }
-        //
-        // // Special case of point
-        // if (!label_key_code.includes("=")) {
-        //     // It's a point: A(3,2)
-        //     key = "pt"
-        //     label = label_key_code.split('(')[0]
-        //     code = label_key_code
-        //         .substring(label.length + 1, label_key_code.length - 1
-        //         ).split(/[;,]/)
-        //
-        //     return {label, key, code, options}
-        // }
-        //
-        // let key_code_as_array = label_key_code.split("=")
-        // label = key_code_as_array.shift()
-        // key_code = key_code_as_array.join("=")
-        //
-        // // special case of plot or parametric   f(x)=3x or f(t)=...
-        // if (label.includes("(")) {
-        //     let plotType: string
-        //
-        //     [label, plotType] = label.substring(0, label.length - 1).split('(')
-        //
-        //     if (plotType === "x") {
-        //         key = "plot"
-        //     } else if (plotType === "t") {
-        //         key = "param"
-        //     }
-        //
-        //     code = key_code.split(',')
-        //     return {label, key, code, options}
-        // }
-        //
-        // // special case of vector or segment:   d=AB or d=vAB
-        // if (!key_code.includes(" ")) {
-        //     if (key_code[0] === 'v') {
-        //         key = 'v'
-        //         key_code = key_code.substring(1)
-        //     } else {
-        //         key = "line"
-        //     }
-        //
-        //     // Cut the special values.
-        //     let [value, ...code_option] = key_code.split(',')
-        //
-        //     // Next, we need to "cut" the value to two points.
-        //     // AB => [A,B]
-        //     // A1B4 => [A1,B4]
-        //     let match = [...value.matchAll(/^[\[\]]?([A-Z]_?[0-9]?)([A-Z]_?[0-9]?)[\[\].]?/g)]
-        //
-        //     // Get the two points.
-        //     if (match.length > 0) {
-        //         code = [match[0][1], match[0][2]]
-        //     }
-        //
-        //     if (!value.endsWith('.')) {
-        //         code.push(key_code.startsWith("[") ? "segment" : "open")
-        //         code.push(key_code.endsWith("]") ? "segment" : "open")
-        //     } else {
-        //         code.push('segment')
-        //         code.push('segment')
-        //     }
-        //
-        //     return {label, key, code: [...code, ...code_option], options}
-        // }
-        //
-        // // Any other case
-        // // A=<key> <code>-><options>
-        // let code_with_sep = key_code.split(" ")
-        // key = code_with_sep.shift()
-        // code = code_with_sep.join(",").split(',')
-        //
-        // return {label, key, code, options}
     }
-    _postprocess(builded, codeOptions, freeze) {
+    _postprocess(builded, codeOptions) {
         /**
          * builded: contains the figures for the current code
          * options: is the list of options to be applied.
@@ -587,6 +508,10 @@ class Parser {
                     if (fig instanceof Point_1.Point) {
                         fig.showLabel();
                     }
+                    else {
+                        // Always hide by default every label other than points
+                        fig.hideLabel();
+                    }
                 }
                 if (fig.label.isTex !== this._config.labelAsTex &&
                     codeOptions.filter(x => x.startsWith('label') || x.startsWith('tex')).length === 0 &&
@@ -599,8 +524,6 @@ class Parser {
             if (this._config.nopoint && fig instanceof Point_1.Point) {
                 fig.hide();
             }
-            // Freeze or unfreeze
-            fig.freeze = freeze === true;
         });
         if (codeOptions.length > 0) {
             codeOptions.forEach(elWithCodeOptions => {
