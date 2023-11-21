@@ -70,6 +70,16 @@ export class Label extends Figure {
         this.updateFigure()
     }
 
+    private _isConverting: boolean
+
+    get isConverting(): boolean {
+        return this._isConverting;
+    }
+
+    set isConverting(value: boolean) {
+        this._isConverting = value;
+    }
+
     private _html: ForeignObject
 
     get html(): ForeignObject {
@@ -142,8 +152,6 @@ export class Label extends Figure {
             return this
         }
 
-        let x = 0, y = 0, w = 0, h = 0
-
         // Update the name if needed.
         const display = this.displayName
         if (this._currentDisplayName !== display) {
@@ -155,6 +163,59 @@ export class Label extends Figure {
             }
             this._currentDisplayName = display
         }
+
+        if (this.isTex && this._html.node.children.length === 0) {
+            return this
+        }
+
+        this.updatePositionAndWidth()
+    }
+
+    generateName(): string {
+        if (this.name === undefined) {
+            this.name = '?'
+            return this.name
+        }
+
+        if (this.name.includes('_')) {
+            // it has subscript part.
+        }
+
+        return this.name
+    }
+
+    hide(): Figure {
+        this.svg.hide()
+        this.html.hide()
+
+        return this
+    }
+
+    show(): Figure {
+        if (this._isHtml) {
+            this.svg.hide()
+            this.html.show()
+        } else {
+            this.svg.show()
+            this.html.hide()
+        }
+        return this
+    }
+
+    isShown(): Boolean {
+        return this.svg.visible() || this.html.visible()
+    }
+
+    get template(): string {
+        return this._config.template
+    }
+
+    set template(value: string) {
+        this._config.template = value
+    }
+
+    updatePositionAndWidth(): Label {
+        let x = 0, y = 0, w = 0, h = 0
 
         // Get the default position
         if (this._config.el instanceof Point) {
@@ -231,55 +292,28 @@ export class Label extends Figure {
         return this
     }
 
-    generateName(): string {
-        if (this.name === undefined) {
-            this.name = '?'
-            return this.name
-        }
-
-        if (this.name.includes('_')) {
-            // it has subscript part.
-        }
-
-        return this.name
-    }
-
-    hide(): Figure {
-        this.svg.hide()
-        this.html.hide()
-
-        return this
-    }
-
-    show(): Figure {
-        if (this._isHtml) {
-            this.svg.hide()
-            this.html.show()
-        } else {
-            this.svg.show()
-            this.html.hide()
-        }
-        return this
-    }
-
-    isShown(): Boolean {
-        return this.svg.visible() || this.html.visible()
-    }
-
-    get template(): string {
-        return this._config.template
-    }
-
-    set template(value: string) {
-        this._config.template = value
-    }
-
     addHtml(value: string): Label {
+        if (this._isConverting) return this
+
+        this.isConverting = true
+
         // Remove existing values.
         this.html.children().forEach(child => child.remove())
 
         // @ts-ignore
-        this.html.add(SVG(`<div style="display: inline-block; position: fixed">${this.isTex ? this._graph.toTex(value) : value}</div>`, true))
+        if (this.isTex) {
+            this.graph.toTex(value).then((value) => {
+                // @ts-ignore
+                this.html.add(SVG(`<div style="display: inline-block; position: fixed">${value}</div>`, true))
+                this.updatePositionAndWidth()
+
+                this.isConverting = false
+            })
+        } else {
+            // @ts-ignore
+            this.html.add(SVG(`<div style="display: inline-block; position: fixed">${value}</div>`, true))
+        }
+        // this.html.add(SVG(`<div style="display: inline-block; position: fixed">${this.isTex ? this._graph.toTex(value) : value}</div>`, true))
 
         this.isHtml = true
         return this

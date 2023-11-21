@@ -283,7 +283,7 @@ export class Graph {
         }
     }
 
-    toTex(value: string): string {
+    async toTex(value: string): Promise<string> {
         if (this._texConverter && this._texConverter.toTex) {
             return this._texConverter.toTex(value, this._texConverter.options)
         } else {
