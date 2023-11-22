@@ -27,6 +27,9 @@ export declare class Label extends Figure {
     private _config;
     private _currentDisplayName;
     constructor(graph: Graph, name: string, config?: LabelConfig);
+    private _isConverting;
+    get isConverting(): boolean;
+    set isConverting(value: boolean);
     private _html;
     get html(): ForeignObject;
     private _isHtml;
@@ -44,6 +47,7 @@ export declare class Label extends Figure {
     isShown(): Boolean;
     get template(): string;
     set template(value: string);
+    updatePositionAndWidth(): Label;
     addHtml(value: string): Label;
     offset(value: IPoint): Label;
     position(value: string): Label;

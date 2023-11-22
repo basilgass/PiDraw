@@ -229,7 +229,7 @@ class Graph {
             max: Math.round(this._origin.y / this._pixelsPerUnit.y)
         };
     }
-    toTex(value) {
+    async toTex(value) {
         if (this._texConverter && this._texConverter.toTex) {
             return this._texConverter.toTex(value, this._texConverter.options);
         }

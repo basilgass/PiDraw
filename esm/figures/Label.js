@@ -45,6 +45,13 @@ class Label extends Figure_1.Figure {
         // Update the label text and position
         this.updateFigure();
     }
+    _isConverting;
+    get isConverting() {
+        return this._isConverting;
+    }
+    set isConverting(value) {
+        this._isConverting = value;
+    }
     _html;
     get html() {
         return this._html;
@@ -98,7 +105,6 @@ class Label extends Figure_1.Figure {
         if (this.freeze || this.graph.freeze) {
             return this;
         }
-        let x = 0, y = 0, w = 0, h = 0;
         // Update the name if needed.
         const display = this.displayName;
         if (this._currentDisplayName !== display) {
@@ -111,6 +117,48 @@ class Label extends Figure_1.Figure {
             }
             this._currentDisplayName = display;
         }
+        if (this.isTex && this._html.node.children.length === 0) {
+            return this;
+        }
+        this.updatePositionAndWidth();
+    }
+    generateName() {
+        if (this.name === undefined) {
+            this.name = '?';
+            return this.name;
+        }
+        if (this.name.includes('_')) {
+            // it has subscript part.
+        }
+        return this.name;
+    }
+    hide() {
+        this.svg.hide();
+        this.html.hide();
+        return this;
+    }
+    show() {
+        if (this._isHtml) {
+            this.svg.hide();
+            this.html.show();
+        }
+        else {
+            this.svg.show();
+            this.html.hide();
+        }
+        return this;
+    }
+    isShown() {
+        return this.svg.visible() || this.html.visible();
+    }
+    get template() {
+        return this._config.template;
+    }
+    set template(value) {
+        this._config.template = value;
+    }
+    updatePositionAndWidth() {
+        let x = 0, y = 0, w = 0, h = 0;
         // Get the default position
         if (this._config.el instanceof Point_1.Point) {
             x = this._config.el.x;
@@ -181,46 +229,30 @@ class Label extends Figure_1.Figure {
         }
         return this;
     }
-    generateName() {
-        if (this.name === undefined) {
-            this.name = '?';
-            return this.name;
-        }
-        if (this.name.includes('_')) {
-            // it has subscript part.
-        }
-        return this.name;
-    }
-    hide() {
-        this.svg.hide();
-        this.html.hide();
-        return this;
-    }
-    show() {
-        if (this._isHtml) {
-            this.svg.hide();
-            this.html.show();
-        }
-        else {
-            this.svg.show();
-            this.html.hide();
-        }
-        return this;
-    }
-    isShown() {
-        return this.svg.visible() || this.html.visible();
-    }
-    get template() {
-        return this._config.template;
-    }
-    set template(value) {
-        this._config.template = value;
-    }
     addHtml(value) {
+        if (this._isConverting)
+            return this;
+        this.isConverting = true;
         // Remove existing values.
         this.html.children().forEach(child => child.remove());
-        // @ts-ignore
-        this.html.add((0, svg_js_1.SVG)(`<div style="display: inline-block; position: fixed">${this.isTex ? this._graph.toTex(value) : value}</div>`, true));
+        if (this.isTex) {
+            this.graph.toTex(value)
+                .then((value) => {
+                // @ts-ignore
+                this.html.add((0, svg_js_1.SVG)(`<div style="display: inline-block; position: fixed">${value}</div>`, true));
+                this.updatePositionAndWidth();
+                this.isConverting = false;
+            })
+                .catch(() => {
+                this.isConverting = false;
+            });
+        }
+        else {
+            // @ts-ignore
+            this.html.add((0, svg_js_1.SVG)(`<div style="display: inline-block; position: fixed">${value}</div>`, true));
+            this.isConverting = false;
+        }
+        // this.html.add(SVG(`<div style="display: inline-block; position: fixed">${this.isTex ? this._graph.toTex(value) : value}</div>`, true))
         this.isHtml = true;
         return this;
     }

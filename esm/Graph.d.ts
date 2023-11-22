@@ -134,7 +134,7 @@ export declare class Graph {
         min: number;
         max: number;
     };
-    toTex(value: string): string;
+    toTex(value: string): Promise<string>;
     distanceToPixels(distance: number, direction?: AXIS): number;
     distanceToUnit(pixelDistance: number, direction?: AXIS): number;
     unitsToPixels(point: IPoint): IPoint;

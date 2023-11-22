@@ -300,18 +300,22 @@ export class Label extends Figure {
         // Remove existing values.
         this.html.children().forEach(child => child.remove())
 
-        // @ts-ignore
         if (this.isTex) {
-            this.graph.toTex(value).then((value) => {
-                // @ts-ignore
-                this.html.add(SVG(`<div style="display: inline-block; position: fixed">${value}</div>`, true))
-                this.updatePositionAndWidth()
+            this.graph.toTex(value)
+                .then((value) => {
+                    // @ts-ignore
+                    this.html.add(SVG(`<div style="display: inline-block; position: fixed">${value}</div>`, true))
+                    this.updatePositionAndWidth()
 
-                this.isConverting = false
-            })
+                    this.isConverting = false
+                })
+                .catch(()=>{
+                    this.isConverting = false
+                })
         } else {
             // @ts-ignore
             this.html.add(SVG(`<div style="display: inline-block; position: fixed">${value}</div>`, true))
+            this.isConverting = false
         }
         // this.html.add(SVG(`<div style="display: inline-block; position: fixed">${this.isTex ? this._graph.toTex(value) : value}</div>`, true))
 
