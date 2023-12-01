@@ -9,6 +9,7 @@ import {Line} from "./Line";
 import {Plot} from "./Plot";
 import {mathLine, mathVector} from "../Calculus";
 import {StepValueType} from "../parser/parseStep";
+import {CircleAttr, G} from "@svgdotjs/svg.js";
 
 // import {mathVector} from "pimath/esm/maths/geometry/vector"
 
@@ -21,6 +22,7 @@ export class Point extends Figure {
     private _constrain: PointConfig
     private _scale: number
     private _shape: POINTSHAPE
+    private _trace: G
 
     constructor(graph: Graph, name: string, pixels: IPoint) {
         super(graph, name);
@@ -42,6 +44,16 @@ export class Point extends Figure {
         // Add the label
         this.generateName()
         this.label = new Label(this.graph, name, {el: this})
+    }
+
+    private _isTracing: { enabled: boolean, color: string, width:number}
+
+    get isTracing(): { enabled: boolean; color: string, width: number} {
+        return this._isTracing;
+    }
+
+    set isTracing(value: { enabled: boolean; color: string, width: number}) {
+        this._isTracing = value;
     }
 
     private _hiddenPoint: boolean
@@ -119,29 +131,6 @@ export class Point extends Figure {
         return this
     }
 
-    generateName(): string {
-        if (this.name === undefined) {
-            this.name = `P${Object.keys(this.graph.points).length}`
-        }
-        return super.generateName()
-    }
-
-    generateDisplayName(): Point {
-        if (this.displayName) {
-            this.label.displayName = this.displayName
-                .replace('?', this.name)
-                .replace('@', this.coordAsTex)
-        } else {
-            this.label.displayName = this.name
-        }
-
-        // TODO: check if removing this extra updateFigure breaks things...
-        // if (this.label.isHtml) {
-        //     this.label.updateFigure()
-        // }
-        return this
-    }
-
     asCross(): Point {
         this._shape = POINTSHAPE.CROSS
         this.update()
@@ -201,6 +190,29 @@ export class Point extends Figure {
     }
 
     updateLabel(): Point {
+        return this
+    }
+
+    generateName(): string {
+        if (this.name === undefined) {
+            this.name = `P${Object.keys(this.graph.points).length}`
+        }
+        return super.generateName()
+    }
+
+    generateDisplayName(): Point {
+        if (this.displayName) {
+            this.label.displayName = this.displayName
+                .replace('?', this.name)
+                .replace('@', this.coordAsTex)
+        } else {
+            this.label.displayName = this.name
+        }
+
+        // TODO: check if removing this extra updateFigure breaks things...
+        // if (this.label.isHtml) {
+        //     this.label.updateFigure()
+        // }
         return this
     }
 
@@ -293,7 +305,7 @@ export class Point extends Figure {
     draggable(options: {
         // grid?: Grid,
         constrain?: string | Figure,
-        bounds?: { x?: [number, number], y?: [number, number] }
+        bounds?: { x?: [number, number], y?: [number, number] , d?: [number, number]}
         callback?: Function
     }): Point {
         this._shape = POINTSHAPE.HANDLE
@@ -339,6 +351,7 @@ export class Point extends Figure {
             }
 
 
+
             // Constrain
             if (options.constrain) {
                 // Update the value to match the grid
@@ -355,8 +368,17 @@ export class Point extends Figure {
                         let v = new mathVector(options.constrain.center, {x, y}),
                             r = options.constrain.getRadiusAsPixels()
 
-                        x = options.constrain.center.x + v.x / v.norm * r
-                        y = options.constrain.center.y + v.y / v.norm * r
+                        if(options.bounds?.d){
+                            const d = Math.sqrt(v.x**2 + v.y**2)
+                            if(d < options.bounds.d[0] || d > options.bounds.d[1]){
+                                r = ( d < options.bounds.d[0] ) ? options.bounds.d[0] : options.bounds.d[1]
+                                x = options.constrain.center.x + v.x / v.norm * r
+                                y = options.constrain.center.y + v.y / v.norm * r
+                            }
+                        }else {
+                            x = options.constrain.center.x + v.x / v.norm * r
+                            y = options.constrain.center.y + v.y / v.norm * r
+                        }
                     } else if (options.constrain instanceof Line) {
                         //TODO: must constrain to the segment
                         y = options.constrain.math.getValueAtX(x)
@@ -388,6 +410,62 @@ export class Point extends Figure {
         this.svg.draggable()
             .on('dragmove', dragmove)
         return this
+    }
+
+    makeInvisible(value?: boolean): Point {
+        this._hiddenPoint = value !== false
+        this.hide()
+        return this
+    }
+
+    isInvisible(): Boolean {
+        return this._hiddenPoint
+    }
+
+    trace(color?: string, width?:number): void {
+        // Initilaisation must be with parameters.
+        if (this._trace == undefined && color === undefined) return
+
+        // Make sur the group exists.
+        if (this._trace === undefined) {
+            this._trace = this.graph.svg.group()
+            this._isTracing = {
+                enabled: true,
+                color: color,
+                width: width?width:this._scale
+            }
+
+        }
+
+        // Add the point to the group.
+        const pt = this.svg.clone()
+        pt.fill(this._isTracing.color)
+        pt.stroke(this._isTracing.color)
+
+        // @ts-ignore
+        pt.radius(this._isTracing.width)
+
+        this._trace.add(pt)
+        //
+        // // When moving the point add a new point to the group
+        // this.svg.on('dragmove', (e: any) => {
+        //     const {handler, box} = e.detail;
+        //     let {x, y} = box;
+        //
+        //     // Prevent default behavior
+        //     e.preventDefault()
+        //
+        //     // Do not allow to go outside the graph.
+        //     if (x < 0 || x > this.graph.width - box.width / 2) {
+        //         return
+        //     }
+        //     if (y < 0 || y > this.graph.height - box.height / 2) {
+        //         return
+        //     }
+        //
+        //     // Add the point to the group.
+        //     this._trace.add(this.svg.clone().stroke(color).stroke({width}))
+        // })
     }
 
     private _updateShape(): void {
@@ -629,11 +707,4 @@ export class Point extends Figure {
 
 
     }
-
-    makeInvisible(value?: boolean):Point{
-        this._hiddenPoint = value!==false
-        this.hide()
-        return this
-    }
-    isInvisible():Boolean{return this._hiddenPoint}
 }

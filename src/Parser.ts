@@ -5,7 +5,8 @@ import {Point} from "./figures/Point";
 import {Axis} from "./figures/Axis";
 import {
     generateBissector,
-    generateLine, generateMediator,
+    generateLine,
+    generateMediator,
     generateParallel,
     generatePerpendicular,
     generateTangent,
@@ -28,8 +29,9 @@ import {
 import {generateCircle} from "./parser/generateCircle";
 import {Line} from "./figures/Line";
 import {AXIS} from "./variables/enums";
+import {Circle} from "./figures/Circle";
 
-const ptOption: string = "*,o,sq,@",
+const ptOption: string = "*,o,sq,@,trace:color/size",
     lineOption: string = "",
     plotOption: string = ""
 
@@ -169,8 +171,7 @@ export const parserKeys: {
     }
 }
 
-function parserPreprocess(step: string): {label: string, key:string, code:string[], options:string[]}
-{
+function parserPreprocess(step: string): { label: string, key: string, code: string[], options: string[] } {
     let label = "",
         key = "",
         code: string[] = [],
@@ -264,11 +265,15 @@ export function parserHelperText(step: string): {
     parameters: string,
     description: string,
     options: string
-}{
+} {
     let {label, key, code, options} = parserPreprocess(step)
 
-    if(key===""){return null}
-    if(!parserKeys.hasOwnProperty(key)){return null}
+    if (key === "") {
+        return null
+    }
+    if (!parserKeys.hasOwnProperty(key)) {
+        return null
+    }
 
     return parserKeys[key]
 }
@@ -377,13 +382,13 @@ export class Parser {
         }
 
         // Build the new steps from the current point
-        const {freezedFigures} = this.generate(steps.slice(i), {refresh, keysOnly:false})
+        const {freezedFigures} = this.generate(steps.slice(i), {refresh, keysOnly: false})
 
         // Update globally the graph
         this.graph.update()
 
         // Freeze the static elements.
-        if(refresh) {
+        if (refresh) {
             freezedFigures.forEach(fig => {
                 fig.freeze = true
             })
@@ -507,14 +512,17 @@ export class Parser {
     }
 
     getParserKeys(construction: string): string[] {
-        return this.generate(this._processConstruction(construction), { keysOnly:true}).buildedKeys
+        return this.generate(this._processConstruction(construction), {keysOnly: true}).buildedKeys
     }
 
     preprocess(step: string): { label: string, key: string, code: string[], options: string[] } {
         return this._preprocess(step)
     }
 
-    generate(steps: string[], parameters: {refresh?:boolean, keysOnly: boolean}): { buildedKeys: string[], freezedFigures: Figure[] } {
+    generate(steps: string[], parameters: { refresh?: boolean, keysOnly: boolean }): {
+        buildedKeys: string[],
+        freezedFigures: Figure[]
+    } {
         // get all current figures.
         let builded: { step: string, figures: Figure[] },
             errors: string[] = [],
@@ -528,14 +536,12 @@ export class Parser {
                 continue
             }
 
-            if(construct[0]==='@'){
+            if (construct[0] === '@') {
                 // Special commands
-                if(construct==='@begin:static')freeze = true
-                if(construct==='@end:static')freeze = false
+                if (construct === '@begin:static') freeze = true
+                if (construct === '@end:static') freeze = false
                 continue
             }
-
-
 
 
             if (!construct.match(/^[A-Za-z0-9_]+/g)) {
@@ -551,28 +557,28 @@ export class Parser {
 
             // Preprocess the step
             // try {
-                let {label, key, code, options} = this._preprocess(construct)
+            let {label, key, code, options} = this._preprocess(construct)
 
-                buildedKeys.push(key)
+            buildedKeys.push(key)
 
-                // continue;
-                if (!parameters.keysOnly) {
-                    if (parserKeys[key]) {
-                        builded.figures = parserKeys[key].generate(this, label, code, options)
-                    } else {
-                        console.log('No key found for ' + construct)
-                    }
-
-                    // apply options
-                    this._postprocess(builded, options)
-
-                    // Do whatever check
-                    this._buildedSteps.push(builded)
-
-                    if(freeze){
-                        freezedFigures.push(...builded.figures)
-                    }
+            // continue;
+            if (!parameters.keysOnly) {
+                if (parserKeys[key]) {
+                    builded.figures = parserKeys[key].generate(this, label, code, options)
+                } else {
+                    console.log('No key found for ' + construct)
                 }
+
+                // apply options
+                this._postprocess(builded, options)
+
+                // Do whatever check
+                this._buildedSteps.push(builded)
+
+                if (freeze) {
+                    freezedFigures.push(...builded.figures)
+                }
+            }
 
             // } catch (error) {
             //     console.warn({
@@ -583,6 +589,14 @@ export class Parser {
         }
 
         return {buildedKeys, freezedFigures}
+    }
+
+    getHelperText(step: string): {
+        parameters: string,
+        description: string,
+        options: string
+    } {
+        return parserHelperText(step)
     }
 
     /**
@@ -626,7 +640,7 @@ export class Parser {
                     } else {
                         if (fig instanceof Point) {
                             fig.showLabel()
-                        }else{
+                        } else {
                             // Always hide by default every label other than points
                             (fig as Figure).hideLabel()
                         }
@@ -673,7 +687,7 @@ export class Parser {
                         // Special case for points
                         if (fig instanceof Point && ["*", "o", "sq"].indexOf(key) !== -1) {
                             setPointStyle(fig, key, options.length > 0 ? +options[0] : null)
-                        } else if (key==='static') {
+                        } else if (key === 'static') {
                             fig.freeze = true
                             // Drag options
                         } else if (key === 'drag' && fig instanceof Point) {
@@ -689,8 +703,15 @@ export class Parser {
                             }
 
                             // Determine the bounds
-                            let bounds: { x?: [number, number], y?: [number, number] } = {}
+                            let bounds: { x?: [number, number], y?: [number, number], d?: [number, number] } = {}
                             if (options[0] !== undefined) {
+                                if(follow instanceof Circle){
+                                    if(options[0]==='in'){
+                                        bounds['d'] = [0, follow.getRadiusAsPixels()-5]
+                                    }else if(options[0]==='out'){
+                                        bounds['d'] = [follow.getRadiusAsPixels()+5, 1000]
+                                    }
+                                }
                                 const bndX = options[0].split(":").map(x => +x)
                                 if (bndX.length === 2) {
                                     bounds['x'] = [bndX[0], bndX[1]]
@@ -707,6 +728,10 @@ export class Parser {
                                 constrain: follow,
                                 bounds
                             })
+                        } else if (key === 'trace') {
+                            if (fig instanceof Point) {
+                                fig.trace(param, +options[0])
+                            }
                         }
                         // Everything with DASH and DOTS
                         else if (key === 'dash' || key === 'dot') {
@@ -783,7 +808,7 @@ export class Parser {
                             fig.label.isTex = key === 'tex'
 
                             // Setting display name
-                            if(typeof param==="string" && param.includes('~')){
+                            if (typeof param === "string" && param.includes('~')) {
                                 fig.label.template = param
                             }
                             fig.displayName = param
@@ -846,14 +871,14 @@ export class Parser {
 
                         }
                         // Rotate the svg element
-                        else if(key==='rotate') {
+                        else if (key === 'rotate') {
                             // origin: x:y
                             // angle: number
 
                             const O = this._graph.getPoint(param)
-                            if(O instanceof Point) {
+                            if (O instanceof Point) {
                                 fig.svg.rotate(-options[0], O.x, O.y)
-                            }else{
+                            } else {
                                 fig.svg.rotate(-options[0])
                             }
                         }
@@ -893,14 +918,6 @@ export class Parser {
             .map(x => x.trim())                         // remove white spaces
             .filter(x => x !== '')                      // remove empty lines
             .filter(x => x[0] !== "$" && x[0] !== "%")  // remove commented lines
-    }
-
-    getHelperText(step: string): {
-        parameters: string,
-        description: string,
-        options: string
-    }{
-        return parserHelperText(step)
     }
 
 }

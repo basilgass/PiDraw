@@ -13,7 +13,19 @@ export declare class Point extends Figure {
     private _constrain;
     private _scale;
     private _shape;
+    private _trace;
     constructor(graph: Graph, name: string, pixels: IPoint);
+    private _isTracing;
+    get isTracing(): {
+        enabled: boolean;
+        color: string;
+        width: number;
+    };
+    set isTracing(value: {
+        enabled: boolean;
+        color: string;
+        width: number;
+    });
     private _hiddenPoint;
     get hiddenPoint(): boolean;
     set hiddenPoint(value: boolean);
@@ -31,8 +43,6 @@ export declare class Point extends Figure {
     set coordY(value: number);
     get coordAsTex(): string;
     addUnit(value: number, axis?: AXIS): Point;
-    generateName(): string;
-    generateDisplayName(): Point;
     asCross(): Point;
     asCircle(size?: number): Point;
     asSquare(size?: number): Point;
@@ -40,6 +50,8 @@ export declare class Point extends Figure {
     getDistanceTo(value: Figure, byDefault?: number): number;
     updateFigure(): Point;
     updateLabel(): Point;
+    generateName(): string;
+    generateDisplayName(): Point;
     /**
      * Constrain the point to be the middle of two other points.
      * @param {Point} A
@@ -63,11 +75,13 @@ export declare class Point extends Figure {
         bounds?: {
             x?: [number, number];
             y?: [number, number];
+            d?: [number, number];
         };
         callback?: Function;
     }): Point;
-    private _updateShape;
-    private _updateCoordinate;
     makeInvisible(value?: boolean): Point;
     isInvisible(): Boolean;
+    trace(color?: string, width?: number): void;
+    private _updateShape;
+    private _updateCoordinate;
 }

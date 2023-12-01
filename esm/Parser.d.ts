@@ -46,6 +46,11 @@ export declare class Parser {
         buildedKeys: string[];
         freezedFigures: Figure[];
     };
+    getHelperText(step: string): {
+        parameters: string;
+        description: string;
+        options: string;
+    };
     /**
      * Convert a construct string to the label, key, code and options)
      * A step string can be as following:
@@ -64,9 +69,4 @@ export declare class Parser {
      * @private
      */
     private _processConstruction;
-    getHelperText(step: string): {
-        parameters: string;
-        description: string;
-        options: string;
-    };
 }

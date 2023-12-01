@@ -214,9 +214,16 @@ a=arc P0,O,P->tex:\\theta
 T=inter p,t
 t1=P0T.->gold,w:5`
 
+		construct = `f(x)=1/4x^2-8
+P(2,-7)->drag:f
+Q(0,P.y)->trace:red/5`
+
+		construct = `A(3,2)
+c=circ A,4
+P(2,4)->drag:c/in`
 		// construct = "A(0,0)->tex:A_1=@\n" +
 		// 	"B(3,4)\n"
-        let parameters = 'grid,axis,x=-12:12,y=-20:20,nolabel',
+        let parameters = 'grid,axis,x=-12:12,y=-12:12,nolabel',
             parser = graph.parse(construct, parameters)
 
 		/**
