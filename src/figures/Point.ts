@@ -343,8 +343,8 @@ export class Point extends Figure {
                 }
             }
             if (options.bounds?.y) {
-                if (y < point.graph.unitsToPixels({y: options.bounds.y[0], x: 0}).y ||
-                    y > point.graph.unitsToPixels({y: options.bounds.y[1], x: 0}).y
+                if (y > point.graph.unitsToPixels({y: options.bounds.y[0], x: 0}).y ||
+                    y < point.graph.unitsToPixels({y: options.bounds.y[1], x: 0}).y
                 ) {
                     return
                 }

@@ -724,6 +724,7 @@ export class Parser {
                                 }
                             }
 
+                            console.log(bounds)
                             fig.draggable({
                                 constrain: follow,
                                 bounds
