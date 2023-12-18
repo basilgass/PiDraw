@@ -13,6 +13,7 @@ class Point extends Figure_1.Figure {
     _constrain;
     _scale;
     _shape;
+    _trace;
     constructor(graph, name, pixels) {
         super(graph, name);
         this._defaultScale = 6;
@@ -26,6 +27,13 @@ class Point extends Figure_1.Figure {
         // Add the label
         this.generateName();
         this.label = new Label_1.Label(this.graph, name, { el: this });
+    }
+    _isTracing;
+    get isTracing() {
+        return this._isTracing;
+    }
+    set isTracing(value) {
+        this._isTracing = value;
     }
     _hiddenPoint;
     get hiddenPoint() {
@@ -86,27 +94,6 @@ class Point extends Figure_1.Figure {
         }
         return this;
     }
-    generateName() {
-        if (this.name === undefined) {
-            this.name = `P${Object.keys(this.graph.points).length}`;
-        }
-        return super.generateName();
-    }
-    generateDisplayName() {
-        if (this.displayName) {
-            this.label.displayName = this.displayName
-                .replace('?', this.name)
-                .replace('@', this.coordAsTex);
-        }
-        else {
-            this.label.displayName = this.name;
-        }
-        // TODO: check if removing this extra updateFigure breaks things...
-        // if (this.label.isHtml) {
-        //     this.label.updateFigure()
-        // }
-        return this;
-    }
     asCross() {
         this._shape = enums_1.POINTSHAPE.CROSS;
         this.update();
@@ -153,6 +140,27 @@ class Point extends Figure_1.Figure {
         return this;
     }
     updateLabel() {
+        return this;
+    }
+    generateName() {
+        if (this.name === undefined) {
+            this.name = `P${Object.keys(this.graph.points).length}`;
+        }
+        return super.generateName();
+    }
+    generateDisplayName() {
+        if (this.displayName) {
+            this.label.displayName = this.displayName
+                .replace('?', this.name)
+                .replace('@', this.coordAsTex);
+        }
+        else {
+            this.label.displayName = this.name;
+        }
+        // TODO: check if removing this extra updateFigure breaks things...
+        // if (this.label.isHtml) {
+        //     this.label.updateFigure()
+        // }
         return this;
     }
     /**
@@ -258,8 +266,8 @@ class Point extends Figure_1.Figure {
                 }
             }
             if (options.bounds?.y) {
-                if (y < point.graph.unitsToPixels({ y: options.bounds.y[0], x: 0 }).y ||
-                    y > point.graph.unitsToPixels({ y: options.bounds.y[1], x: 0 }).y) {
+                if (y > point.graph.unitsToPixels({ y: options.bounds.y[0], x: 0 }).y ||
+                    y < point.graph.unitsToPixels({ y: options.bounds.y[1], x: 0 }).y) {
                     return;
                 }
             }
@@ -280,8 +288,18 @@ class Point extends Figure_1.Figure {
                 else {
                     if (options.constrain instanceof Circle_1.Circle) {
                         let v = new Calculus_1.mathVector(options.constrain.center, { x, y }), r = options.constrain.getRadiusAsPixels();
-                        x = options.constrain.center.x + v.x / v.norm * r;
-                        y = options.constrain.center.y + v.y / v.norm * r;
+                        if (options.bounds?.d) {
+                            const d = Math.sqrt(v.x ** 2 + v.y ** 2);
+                            if (d < options.bounds.d[0] || d > options.bounds.d[1]) {
+                                r = (d < options.bounds.d[0]) ? options.bounds.d[0] : options.bounds.d[1];
+                                x = options.constrain.center.x + v.x / v.norm * r;
+                                y = options.constrain.center.y + v.y / v.norm * r;
+                            }
+                        }
+                        else {
+                            x = options.constrain.center.x + v.x / v.norm * r;
+                            y = options.constrain.center.y + v.y / v.norm * r;
+                        }
                     }
                     else if (options.constrain instanceof Line_1.Line) {
                         //TODO: must constrain to the segment
@@ -309,6 +327,55 @@ class Point extends Figure_1.Figure {
         this.svg.draggable()
             .on('dragmove', dragmove);
         return this;
+    }
+    makeInvisible(value) {
+        this._hiddenPoint = value !== false;
+        this.hide();
+        return this;
+    }
+    isInvisible() {
+        return this._hiddenPoint;
+    }
+    trace(color, width) {
+        // Initilaisation must be with parameters.
+        if (this._trace == undefined && color === undefined)
+            return;
+        // Make sur the group exists.
+        if (this._trace === undefined) {
+            this._trace = this.graph.svg.group();
+            this._isTracing = {
+                enabled: true,
+                color: color,
+                width: width ? width : this._scale
+            };
+        }
+        // Add the point to the group.
+        const pt = this.svg.clone();
+        pt.fill(this._isTracing.color);
+        pt.stroke(this._isTracing.color);
+        // @ts-ignore
+        pt.radius(this._isTracing.width);
+        this._trace.add(pt);
+        //
+        // // When moving the point add a new point to the group
+        // this.svg.on('dragmove', (e: any) => {
+        //     const {handler, box} = e.detail;
+        //     let {x, y} = box;
+        //
+        //     // Prevent default behavior
+        //     e.preventDefault()
+        //
+        //     // Do not allow to go outside the graph.
+        //     if (x < 0 || x > this.graph.width - box.width / 2) {
+        //         return
+        //     }
+        //     if (y < 0 || y > this.graph.height - box.height / 2) {
+        //         return
+        //     }
+        //
+        //     // Add the point to the group.
+        //     this._trace.add(this.svg.clone().stroke(color).stroke({width}))
+        // })
     }
     _updateShape() {
         // If the shape exist and is the same, no need to continue.
@@ -504,12 +571,6 @@ class Point extends Figure_1.Figure {
             }
         }
     }
-    makeInvisible(value) {
-        this._hiddenPoint = value !== false;
-        this.hide();
-        return this;
-    }
-    isInvisible() { return this._hiddenPoint; }
 }
 exports.Point = Point;
 //# sourceMappingURL=Point.js.map

@@ -332,6 +332,9 @@ class NumExp {
                 else if (element.token === 'log') {
                     this._addToStack(stack, Math.log10(a));
                 }
+                else if (element.token === 'abs') {
+                    this._addToStack(stack, Math.abs(a));
+                }
             }
         }
         if (stack.length === 1) {
@@ -408,6 +411,7 @@ class Shutingyard {
                 'nthrt': { precedence: 4, associative: 'right', type: ShutingyardType.FUNCTION },
                 'ln': { precedence: 4, associative: 'right', type: ShutingyardType.FUNCTION },
                 'log': { precedence: 4, associative: 'right', type: ShutingyardType.FUNCTION },
+                'abs': { precedence: 4, associative: 'right', type: ShutingyardType.FUNCTION },
             };
             this._uniformize = false;
         }
@@ -424,6 +428,7 @@ class Shutingyard {
                 'tan': { precedence: 4, associative: 'right', type: ShutingyardType.FUNCTION },
                 'sqrt': { precedence: 4, associative: 'right', type: ShutingyardType.FUNCTION },
                 'nthrt': { precedence: 4, associative: 'right', type: ShutingyardType.FUNCTION },
+                'abs': { precedence: 4, associative: 'right', type: ShutingyardType.FUNCTION },
             };
             this._uniformize = true;
         }

@@ -13,7 +13,8 @@ const generatePoint_1 = require("./parser/generatePoint");
 const generateCircle_1 = require("./parser/generateCircle");
 const Line_1 = require("./figures/Line");
 const enums_1 = require("./variables/enums");
-const ptOption = "*,o,sq,@", lineOption = "", plotOption = "";
+const Circle_1 = require("./figures/Circle");
+const ptOption = "*,o,sq,@,trace:color/size", lineOption = "", plotOption = "";
 exports.parserKeys = {
     pt: {
         generate: generatePoint_1.generatePoint,
@@ -468,6 +469,9 @@ class Parser {
         }
         return { buildedKeys, freezedFigures };
     }
+    getHelperText(step) {
+        return parserHelperText(step);
+    }
     /**
      * Convert a construct string to the label, key, code and options)
      * A step string can be as following:
@@ -564,6 +568,14 @@ class Parser {
                             // Determine the bounds
                             let bounds = {};
                             if (options[0] !== undefined) {
+                                if (follow instanceof Circle_1.Circle) {
+                                    if (options[0] === 'in') {
+                                        bounds['d'] = [0, follow.getRadiusAsPixels() - 5];
+                                    }
+                                    else if (options[0] === 'out') {
+                                        bounds['d'] = [follow.getRadiusAsPixels() + 5, 1000];
+                                    }
+                                }
                                 const bndX = options[0].split(":").map(x => +x);
                                 if (bndX.length === 2) {
                                     bounds['x'] = [bndX[0], bndX[1]];
@@ -575,10 +587,16 @@ class Parser {
                                     bounds['y'] = [bndY[0], bndY[1]];
                                 }
                             }
+                            console.log(bounds);
                             fig.draggable({
                                 constrain: follow,
                                 bounds
                             });
+                        }
+                        else if (key === 'trace') {
+                            if (fig instanceof Point_1.Point) {
+                                fig.trace(param, +options[0]);
+                            }
                         }
                         // Everything with DASH and DOTS
                         else if (key === 'dash' || key === 'dot') {
@@ -750,9 +768,6 @@ class Parser {
             .map(x => x.trim()) // remove white spaces
             .filter(x => x !== '') // remove empty lines
             .filter(x => x[0] !== "$" && x[0] !== "%"); // remove commented lines
-    }
-    getHelperText(step) {
-        return parserHelperText(step);
     }
 }
 exports.Parser = Parser;

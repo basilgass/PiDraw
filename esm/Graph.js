@@ -401,6 +401,9 @@ class Graph {
     update() {
         for (let figure of this._figures) {
             figure.update();
+            if (figure instanceof Point_1.Point && figure.isTracing) {
+                figure.trace();
+            }
         }
         return this;
     }
