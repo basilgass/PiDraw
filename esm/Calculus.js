@@ -314,6 +314,15 @@ class NumExp {
                 else if (element.token === 'tan') {
                     this._addToStack(stack, Math.tan(a));
                 }
+                else if (element.token === 'asin') {
+                    this._addToStack(stack, Math.asin(a));
+                }
+                else if (element.token === 'acos') {
+                    this._addToStack(stack, Math.acos(a));
+                }
+                else if (element.token === 'atan') {
+                    this._addToStack(stack, Math.atan(a));
+                }
                 else if (element.token === 'sqrt') {
                     this._addToStack(stack, Math.sqrt(a));
                 }
@@ -407,6 +416,9 @@ class Shutingyard {
                 'sin': { precedence: 4, associative: 'right', type: ShutingyardType.FUNCTION },
                 'cos': { precedence: 4, associative: 'right', type: ShutingyardType.FUNCTION },
                 'tan': { precedence: 4, associative: 'right', type: ShutingyardType.FUNCTION },
+                'asin': { precedence: 4, associative: 'right', type: ShutingyardType.FUNCTION },
+                'acos': { precedence: 4, associative: 'right', type: ShutingyardType.FUNCTION },
+                'atan': { precedence: 4, associative: 'right', type: ShutingyardType.FUNCTION },
                 'sqrt': { precedence: 4, associative: 'right', type: ShutingyardType.FUNCTION },
                 'nthrt': { precedence: 4, associative: 'right', type: ShutingyardType.FUNCTION },
                 'ln': { precedence: 4, associative: 'right', type: ShutingyardType.FUNCTION },
@@ -426,6 +438,9 @@ class Shutingyard {
                 'sin': { precedence: 4, associative: 'right', type: ShutingyardType.FUNCTION },
                 'cos': { precedence: 4, associative: 'right', type: ShutingyardType.FUNCTION },
                 'tan': { precedence: 4, associative: 'right', type: ShutingyardType.FUNCTION },
+                'asin': { precedence: 4, associative: 'right', type: ShutingyardType.FUNCTION },
+                'acos': { precedence: 4, associative: 'right', type: ShutingyardType.FUNCTION },
+                'atan': { precedence: 4, associative: 'right', type: ShutingyardType.FUNCTION },
                 'sqrt': { precedence: 4, associative: 'right', type: ShutingyardType.FUNCTION },
                 'nthrt': { precedence: 4, associative: 'right', type: ShutingyardType.FUNCTION },
                 'abs': { precedence: 4, associative: 'right', type: ShutingyardType.FUNCTION },
