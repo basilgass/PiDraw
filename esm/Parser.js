@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Parser = exports.parserHelperText = exports.parserKeys = void 0;
+exports.Parser = exports.parserHelperText = exports.parserPreprocess = exports.parserKeys = void 0;
 const svg_js_1 = require("@svgdotjs/svg.js");
 const Point_1 = require("./figures/Point");
 const Axis_1 = require("./figures/Axis");
@@ -211,6 +211,7 @@ function parserPreprocess(step) {
     code = code_with_sep.join(",").split(',');
     return { label, key, code, options };
 }
+exports.parserPreprocess = parserPreprocess;
 function parserHelperText(step) {
     let { label, key, code, options } = parserPreprocess(step);
     if (key === "") {
@@ -587,7 +588,6 @@ class Parser {
                                     bounds['y'] = [bndY[0], bndY[1]];
                                 }
                             }
-                            console.log(bounds);
                             fig.draggable({
                                 constrain: follow,
                                 bounds

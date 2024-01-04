@@ -8,6 +8,12 @@ export declare const parserKeys: {
         options: string;
     };
 };
+export declare function parserPreprocess(step: string): {
+    label: string;
+    key: string;
+    code: string[];
+    options: string[];
+};
 export declare function parserHelperText(step: string): {
     parameters: string;
     description: string;

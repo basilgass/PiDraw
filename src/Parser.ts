@@ -171,7 +171,7 @@ export const parserKeys: {
     }
 }
 
-function parserPreprocess(step: string): { label: string, key: string, code: string[], options: string[] } {
+export function parserPreprocess(step: string): { label: string, key: string, code: string[], options: string[] } {
     let label = "",
         key = "",
         code: string[] = [],
@@ -724,7 +724,6 @@ export class Parser {
                                 }
                             }
 
-                            console.log(bounds)
                             fig.draggable({
                                 constrain: follow,
                                 bounds
