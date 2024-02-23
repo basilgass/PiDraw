@@ -122,7 +122,7 @@ exports.parserKeys = {
         generate: generatePlot_1.generatePlot,
         parameters: "func,min:max,@500,follow",
         description: "Tracer une fonction y=f(x)",
-        options: ""
+        options: "riemann:from/to/rectangles/pos/color"
     },
     fill: {
         generate: generatePlot_1.generateFillBetween,

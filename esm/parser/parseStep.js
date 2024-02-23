@@ -46,6 +46,23 @@ function getStepType(parser, value) {
             };
         }
     }
+    // It's a dynamic number based on a plot
+    if (value.match(/[a-z]\(.*/)) {
+        const v = getStepType(parser, value.split('(')[1].split(')')[0]);
+        const f = parser.graph.getFigure(value.split('(')[0]);
+        return {
+            type: STEP_TYPE.number,
+            kind: STEP_KIND.dynamic,
+            item: [f, v],
+            option: 'function'
+        };
+        // return {
+        //     type: STEP_TYPE.number,
+        //     kind: STEP_KIND.dynamic,
+        //     item: v.item,
+        //     option: value.split('(')[0]
+        // }
+    }
     // It's a dynamic number based on a point
     if (value.endsWith('.x') || value.endsWith('.y')) {
         const [name, option] = value.split('.'), A = parser.graph.getPoint(name);

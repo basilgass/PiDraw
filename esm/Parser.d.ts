@@ -1,5 +1,11 @@
 import { Graph } from "./Graph";
 import { Figure } from "./figures/Figure";
+export type ParserPrepocessType = {
+    label: string;
+    key: string;
+    code: string[];
+    options: string[];
+};
 export declare const parserKeys: {
     [Key: string]: {
         generate: Function;
@@ -8,12 +14,7 @@ export declare const parserKeys: {
         options: string;
     };
 };
-export declare function parserPreprocess(step: string): {
-    label: string;
-    key: string;
-    code: string[];
-    options: string[];
-};
+export declare function parserPreprocess(step: string): ParserPrepocessType;
 export declare function parserHelperText(step: string): {
     parameters: string;
     description: string;
@@ -39,12 +40,7 @@ export declare class Parser {
     update(construction: string, refresh?: boolean): void;
     updateLayout(parameters: string, constructUpdate?: boolean): Parser;
     getParserKeys(construction: string): string[];
-    preprocess(step: string): {
-        label: string;
-        key: string;
-        code: string[];
-        options: string[];
-    };
+    preprocess(step: string): ParserPrepocessType;
     generate(steps: string[], parameters: {
         refresh?: boolean;
         keysOnly: boolean;

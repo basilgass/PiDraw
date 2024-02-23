@@ -14,6 +14,11 @@ class Point extends Figure_1.Figure {
     _scale;
     _shape;
     _trace;
+    _isTracing;
+    _hiddenPoint;
+    _defaultScale;
+    _x;
+    _y;
     constructor(graph, name, pixels) {
         super(graph, name);
         this._defaultScale = 6;
@@ -28,25 +33,21 @@ class Point extends Figure_1.Figure {
         this.generateName();
         this.label = new Label_1.Label(this.graph, name, { el: this });
     }
-    _isTracing;
     get isTracing() {
         return this._isTracing;
     }
     set isTracing(value) {
         this._isTracing = value;
     }
-    _hiddenPoint;
     get hiddenPoint() {
         return this._hiddenPoint;
     }
     set hiddenPoint(value) {
         this._hiddenPoint = value;
     }
-    _defaultScale;
     get defaultScale() {
         return this._defaultScale;
     }
-    _x;
     get x() {
         return this._x;
     }
@@ -54,7 +55,6 @@ class Point extends Figure_1.Figure {
         this._x = value;
         this.update();
     }
-    _y;
     get y() {
         return this._y;
     }
@@ -401,12 +401,14 @@ class Point extends Figure_1.Figure {
         }
     }
     _updateCoordinate() {
+        // this._constrain.data = [Point, Point]
         if (this._constrain.type === enums_1.POINTCONSTRAIN.MIDDLE) {
             const A = this._constrain.data[0], B = this._constrain.data[1];
             this._x = (A.x + B.x) / 2;
             this._x = (A.x + B.x) / 2;
             this._y = (A.y + B.y) / 2;
         }
+        // this._constrain.data = [Line, Line]
         if (this._constrain.type === enums_1.POINTCONSTRAIN.INTERSECTION_LINES) {
             let a = this._constrain.data[0].math, b = this._constrain.data[1].math, intersection = a.intersection(b);
             if (intersection !== null) {
@@ -419,6 +421,7 @@ class Point extends Figure_1.Figure {
                 this.hide();
             }
         }
+        // this._constrain.data = [circle, line, k]
         if (this._constrain.type === enums_1.POINTCONSTRAIN.INTERSECTION_CIRCLE_LINE) {
             let circle = this._constrain.data[0], d = this._constrain.data[1], k = this._constrain.data[2] || 1;
             // Get the intersection of the circle with the line.
@@ -444,6 +447,7 @@ class Point extends Figure_1.Figure {
                 }
             }
         }
+        // this._constrain.data = [Point, Line|string]
         if (this._constrain.type === enums_1.POINTCONSTRAIN.PROJECTION) {
             const M = this._constrain.data[0], to = this._constrain.data[1];
             if (to === 'Ox') {
@@ -462,6 +466,7 @@ class Point extends Figure_1.Figure {
                 this._y = A.y + k * u.y;
             }
         }
+        // this._constrain.data = [A:Point, symmetry:Point|string|Line]
         if (this._constrain.type === enums_1.POINTCONSTRAIN.SYMMETRY) {
             const symmetry_reference = this._constrain.data[1], pt = this._constrain.data[0];
             if (pt instanceof Point && symmetry_reference instanceof Point) {
@@ -490,6 +495,7 @@ class Point extends Figure_1.Figure {
                 this._y = pt.y + 2 * (proj.y - pt.y);
             }
         }
+        // this._constrain.data = [A:Point, B:Point, scale, <From point>Point]
         if (this._constrain.type === enums_1.POINTCONSTRAIN.VECTOR) {
             const A = this._constrain.data[0], B = this._constrain.data[1], scale = this._constrain.data[2], X = this._constrain.data[3];
             if (X) {
@@ -501,6 +507,7 @@ class Point extends Figure_1.Figure {
                 this._y = A.y + (B.y - A.y) * scale;
             }
         }
+        // this._constrain.data = [A:Point, d:Line, distance:number, perpendicular:boolean]
         if (this._constrain.type === enums_1.POINTCONSTRAIN.DIRECTION) {
             const A = this._constrain.data[0], d = this._constrain.data[1], perp = this._constrain.data[3], v = perp ? d.math.normal : d.math.director, norm = v.norm;
             let distance = 1;
@@ -523,51 +530,52 @@ class Point extends Figure_1.Figure {
             this._x = A.x + v.x * distance / norm;
             this._y = A.y + v.y * distance / norm;
         }
+        // this._constrain.data = [A:StepValueType, B:StepValueType]
+        // StepValueType: {
+        //      type<number|figure|point|option>,
+        //      kind<static|dynamic>,
+        //      item<Point | Figure | string | number | (Point|Figure|number)[]>,
+        //      option?: string
+        // }
         if (this._constrain.type === enums_1.POINTCONSTRAIN.COORDINATES) {
             let ptX, ptY;
             [ptX, ptY] = this._constrain.data;
-            if (!isNaN(+ptX.item)) {
-                this._x = this.graph.unitsToPixels({ x: +ptX.item, y: 0 }).x;
+            this._x = this._updateOneCoordinate(ptX);
+            this._y = this._updateOneCoordinate(ptY);
+        }
+    }
+    _updateOneCoordinate(value) {
+        if (!isNaN(+value.item)) {
+            return this.graph.unitsToPixels({ x: +value.item, y: 0 }).x;
+        }
+        else {
+            if (value.option === 'x' && value.item instanceof Point) {
+                return value.item.x;
+            }
+            else if (value.option === 'y' && value.item instanceof Point) {
+                return value.item.y;
+            }
+            else if (value.option === 'distance' && value.item instanceof Array) {
+                const [X, Y, direction] = value.item;
+                if (X instanceof Point && Y instanceof Point)
+                    return this.graph.origin.x + (+direction) * X.getDistanceTo(Y);
+            }
+            else if (value.option === "function" && value.item instanceof Array) {
+                const [f, v] = value.item;
+                if (f instanceof Plot_1.Plot) {
+                    const vx = this.graph.pixelsToUnits({
+                        x: this._updateOneCoordinate(v),
+                        y: 0
+                    }).x;
+                    return this.graph.unitsToPixels({
+                        x: +v,
+                        y: f.evaluate(vx).y
+                    }).y;
+                }
             }
             else {
-                if (ptX.option === 'x' && ptX.item instanceof Point) {
-                    this._x = ptX.item.x;
-                }
-                else if (ptX.option === 'y' && ptX.item instanceof Point) {
-                    this._x = ptX.item.y;
-                }
-                else if (ptX.option === 'distance') {
-                    // @ts-ignore
-                    const [X, Y, direction] = ptX.item;
-                    if (X instanceof Point && Y instanceof Point) {
-                        // Must handle working from ORIGIN
-                        this._x = this.graph.origin.x + direction * X.getDistanceTo(Y);
-                    }
-                }
-                else {
-                    console.warn("Point constrain is not supported for ", ptX);
-                }
-            }
-            if (!isNaN(+ptY.item)) {
-                this._y = this.graph.unitsToPixels({ y: +ptY.item, x: 0 }).y;
-            }
-            else {
-                if (ptY.option === 'x' && ptY.item instanceof Point) {
-                    this._y = ptY.item.x;
-                }
-                else if (ptY.option === 'y' && ptY.item instanceof Point) {
-                    this._y = ptY.item.y;
-                }
-                else if (ptY.option === 'distance') {
-                    const [X, Y, direction] = ptY.item;
-                    if (X instanceof Point && Y instanceof Point) {
-                        // Must handle working from ORIGIN
-                        this._y = this.graph.origin.y - direction * X.getDistanceTo(Y);
-                    }
-                }
-                else {
-                    console.warn("Point constrain is not supported for ", ptY);
-                }
+                console.warn("Point constrain is not supported for ");
+                console.log(this._constrain);
             }
         }
     }

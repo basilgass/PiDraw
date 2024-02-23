@@ -14,7 +14,7 @@ export declare enum STEP_KIND {
 export type StepValueType = {
     type: STEP_TYPE;
     kind: STEP_KIND;
-    item: Point | Figure | string | number | (Point | Figure | number)[];
+    item: Point | Figure | string | number | (Point | Figure | number | unknown)[];
     option?: string;
 };
 /**

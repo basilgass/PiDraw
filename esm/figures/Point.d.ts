@@ -14,8 +14,12 @@ export declare class Point extends Figure {
     private _scale;
     private _shape;
     private _trace;
-    constructor(graph: Graph, name: string, pixels: IPoint);
     private _isTracing;
+    private _hiddenPoint;
+    private _defaultScale;
+    private _x;
+    private _y;
+    constructor(graph: Graph, name: string, pixels: IPoint);
     get isTracing(): {
         enabled: boolean;
         color: string;
@@ -26,15 +30,11 @@ export declare class Point extends Figure {
         color: string;
         width: number;
     });
-    private _hiddenPoint;
     get hiddenPoint(): boolean;
     set hiddenPoint(value: boolean);
-    private _defaultScale;
     get defaultScale(): number;
-    private _x;
     get x(): number;
     set x(value: number);
-    private _y;
     get y(): number;
     set y(value: number);
     get coord(): IPoint;
@@ -84,4 +84,5 @@ export declare class Point extends Figure {
     trace(color?: string, width?: number): void;
     private _updateShape;
     private _updateCoordinate;
+    private _updateOneCoordinate;
 }

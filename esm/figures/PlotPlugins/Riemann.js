@@ -91,12 +91,12 @@ class Riemann extends Figure_1.Figure {
                     });
                     document.dispatchEvent(event);
                 })
-                    .mouseover(function () {
-                    this.fill('orange');
-                })
-                    .mouseout(function () {
-                    this.fill('yellow');
-                })
+                    // .mouseover(function () {
+                    //     this.fill('orange')
+                    // })
+                    // .mouseout(function () {
+                    //     this.fill('yellow')
+                    // })
                     .move(pxX.x, pxX.y)
                     .addTo(this.svg));
             }

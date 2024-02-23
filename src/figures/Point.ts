@@ -9,7 +9,7 @@ import {Line} from "./Line";
 import {Plot} from "./Plot";
 import {mathLine, mathVector} from "../Calculus";
 import {StepValueType} from "../parser/parseStep";
-import {CircleAttr, G} from "@svgdotjs/svg.js";
+import {G} from "@svgdotjs/svg.js";
 
 // import {mathVector} from "pimath/esm/maths/geometry/vector"
 
@@ -23,6 +23,11 @@ export class Point extends Figure {
     private _scale: number
     private _shape: POINTSHAPE
     private _trace: G
+    private _isTracing: { enabled: boolean, color: string, width: number }
+    private _hiddenPoint: boolean
+    private _defaultScale: number
+    private _x: number
+    private _y: number
 
     constructor(graph: Graph, name: string, pixels: IPoint) {
         super(graph, name);
@@ -46,17 +51,13 @@ export class Point extends Figure {
         this.label = new Label(this.graph, name, {el: this})
     }
 
-    private _isTracing: { enabled: boolean, color: string, width:number}
-
-    get isTracing(): { enabled: boolean; color: string, width: number} {
+    get isTracing(): { enabled: boolean; color: string, width: number } {
         return this._isTracing;
     }
 
-    set isTracing(value: { enabled: boolean; color: string, width: number}) {
+    set isTracing(value: { enabled: boolean; color: string, width: number }) {
         this._isTracing = value;
     }
-
-    private _hiddenPoint: boolean
 
     get hiddenPoint(): boolean {
         return this._hiddenPoint;
@@ -66,13 +67,9 @@ export class Point extends Figure {
         this._hiddenPoint = value;
     }
 
-    private _defaultScale: number
-
     get defaultScale(): number {
         return this._defaultScale;
     }
-
-    private _x: number
 
     get x(): number {
         return this._x;
@@ -82,8 +79,6 @@ export class Point extends Figure {
         this._x = value;
         this.update()
     }
-
-    private _y: number
 
     get y(): number {
         return this._y;
@@ -305,7 +300,7 @@ export class Point extends Figure {
     draggable(options: {
         // grid?: Grid,
         constrain?: string | Figure,
-        bounds?: { x?: [number, number], y?: [number, number] , d?: [number, number]}
+        bounds?: { x?: [number, number], y?: [number, number], d?: [number, number] }
         callback?: Function
     }): Point {
         this._shape = POINTSHAPE.HANDLE
@@ -351,7 +346,6 @@ export class Point extends Figure {
             }
 
 
-
             // Constrain
             if (options.constrain) {
                 // Update the value to match the grid
@@ -368,14 +362,14 @@ export class Point extends Figure {
                         let v = new mathVector(options.constrain.center, {x, y}),
                             r = options.constrain.getRadiusAsPixels()
 
-                        if(options.bounds?.d){
-                            const d = Math.sqrt(v.x**2 + v.y**2)
-                            if(d < options.bounds.d[0] || d > options.bounds.d[1]){
-                                r = ( d < options.bounds.d[0] ) ? options.bounds.d[0] : options.bounds.d[1]
+                        if (options.bounds?.d) {
+                            const d = Math.sqrt(v.x ** 2 + v.y ** 2)
+                            if (d < options.bounds.d[0] || d > options.bounds.d[1]) {
+                                r = (d < options.bounds.d[0]) ? options.bounds.d[0] : options.bounds.d[1]
                                 x = options.constrain.center.x + v.x / v.norm * r
                                 y = options.constrain.center.y + v.y / v.norm * r
                             }
-                        }else {
+                        } else {
                             x = options.constrain.center.x + v.x / v.norm * r
                             y = options.constrain.center.y + v.y / v.norm * r
                         }
@@ -422,7 +416,7 @@ export class Point extends Figure {
         return this._hiddenPoint
     }
 
-    trace(color?: string, width?:number): void {
+    trace(color?: string, width?: number): void {
         // Initilaisation must be with parameters.
         if (this._trace == undefined && color === undefined) return
 
@@ -432,7 +426,7 @@ export class Point extends Figure {
             this._isTracing = {
                 enabled: true,
                 color: color,
-                width: width?width:this._scale
+                width: width ? width : this._scale
             }
 
         }
@@ -500,6 +494,7 @@ export class Point extends Figure {
     }
 
     private _updateCoordinate(): void {
+        // this._constrain.data = [Point, Point]
         if (this._constrain.type === POINTCONSTRAIN.MIDDLE) {
             const A: Point = this._constrain.data[0],
                 B: Point = this._constrain.data[1]
@@ -509,6 +504,7 @@ export class Point extends Figure {
             this._y = (A.y + B.y) / 2
         }
 
+        // this._constrain.data = [Line, Line]
         if (this._constrain.type === POINTCONSTRAIN.INTERSECTION_LINES) {
             let a: mathLine = this._constrain.data[0].math,
                 b: mathLine = this._constrain.data[1].math,
@@ -524,6 +520,7 @@ export class Point extends Figure {
             }
         }
 
+        // this._constrain.data = [circle, line, k]
         if (this._constrain.type === POINTCONSTRAIN.INTERSECTION_CIRCLE_LINE) {
             let circle: Circle = this._constrain.data[0],
                 d: Line = this._constrain.data[1],
@@ -565,6 +562,7 @@ export class Point extends Figure {
             }
         }
 
+        // this._constrain.data = [Point, Line|string]
         if (this._constrain.type === POINTCONSTRAIN.PROJECTION) {
             const M: Point = this._constrain.data[0],
                 to: Line | string = this._constrain.data[1]
@@ -587,6 +585,7 @@ export class Point extends Figure {
             }
         }
 
+        // this._constrain.data = [A:Point, symmetry:Point|string|Line]
         if (this._constrain.type === POINTCONSTRAIN.SYMMETRY) {
             const symmetry_reference = this._constrain.data[1],
                 pt = this._constrain.data[0]
@@ -620,6 +619,7 @@ export class Point extends Figure {
             }
         }
 
+        // this._constrain.data = [A:Point, B:Point, scale, <From point>Point]
         if (this._constrain.type === POINTCONSTRAIN.VECTOR) {
             const A: Point = this._constrain.data[0],
                 B: Point = this._constrain.data[1],
@@ -635,6 +635,7 @@ export class Point extends Figure {
             }
         }
 
+        // this._constrain.data = [A:Point, d:Line, distance:number, perpendicular:boolean]
         if (this._constrain.type === POINTCONSTRAIN.DIRECTION) {
             const A: Point = this._constrain.data[0],
                 d: Line = this._constrain.data[1],
@@ -663,48 +664,49 @@ export class Point extends Figure {
             this._y = A.y + v.y * distance / norm
         }
 
+        // this._constrain.data = [A:StepValueType, B:StepValueType]
+        // StepValueType: {
+        //      type<number|figure|point|option>,
+        //      kind<static|dynamic>,
+        //      item<Point | Figure | string | number | (Point|Figure|number)[]>,
+        //      option?: string
+        // }
         if (this._constrain.type === POINTCONSTRAIN.COORDINATES) {
             let ptX: StepValueType, ptY: StepValueType
             [ptX, ptY] = this._constrain.data
 
-            if (!isNaN(+ptX.item)) {
-                this._x = this.graph.unitsToPixels({x: +ptX.item, y: 0}).x
-            } else {
-                if (ptX.option === 'x' && ptX.item instanceof Point) {
-                    this._x = ptX.item.x
-                } else if (ptX.option === 'y' && ptX.item instanceof Point) {
-                    this._x = ptX.item.y
-                } else if (ptX.option === 'distance') {
-                    // @ts-ignore
-                    const [X, Y, direction] = ptX.item
-                    if (X instanceof Point && Y instanceof Point) {
-                        // Must handle working from ORIGIN
-                        this._x = this.graph.origin.x + direction * X.getDistanceTo(Y)
-                    }
-                } else {
-                    console.warn("Point constrain is not supported for ", ptX)
-                }
-            }
+            this._x = this._updateOneCoordinate(ptX)
+            this._y = this._updateOneCoordinate(ptY)
+        }
+    }
 
-            if (!isNaN(+ptY.item)) {
-                this._y = this.graph.unitsToPixels({y: +ptY.item, x: 0}).y
-            } else {
-                if (ptY.option === 'x' && ptY.item instanceof Point) {
-                    this._y = ptY.item.x
-                } else if (ptY.option === 'y' && ptY.item instanceof Point) {
-                    this._y = ptY.item.y
-                } else if (ptY.option === 'distance') {
-                    const [X, Y, direction] = ptY.item
-                    if (X instanceof Point && Y instanceof Point) {
-                        // Must handle working from ORIGIN
-                        this._y = this.graph.origin.y - direction * X.getDistanceTo(Y)
-                    }
-                } else {
-                    console.warn("Point constrain is not supported for ", ptY)
+    private _updateOneCoordinate(value: StepValueType): number {
+        if (!isNaN(+value.item)) {
+            return this.graph.unitsToPixels({x: +value.item, y: 0}).x
+        } else {
+            if (value.option === 'x' && value.item instanceof Point) {
+                return value.item.x
+            } else if (value.option === 'y' && value.item instanceof Point) {
+                return value.item.y
+            } else if (value.option === 'distance' && value.item instanceof Array) {
+                const [X, Y, direction] = value.item
+                if (X instanceof Point && Y instanceof Point) return this.graph.origin.x + (+direction) * X.getDistanceTo(Y)
+            } else if (value.option === "function" && value.item instanceof Array) {
+                const [f, v] = value.item
+                if (f instanceof Plot) {
+                    const vx = this.graph.pixelsToUnits({
+                        x: this._updateOneCoordinate(v as unknown as StepValueType),
+                        y: 0
+                    }).x
+                    return this.graph.unitsToPixels({
+                        x: +v,
+                        y: f.evaluate(vx).y
+                    }).y
                 }
+            } else {
+                console.warn("Point constrain is not supported for ")
+                console.log(this._constrain)
             }
         }
-
-
     }
 }

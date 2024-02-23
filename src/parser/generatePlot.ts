@@ -43,6 +43,22 @@ export function generatePlot(parser: Parser, name: string, code: string[], optio
         plot.follow(true)
     }
 
+    for(let opt of options){
+        if(opt.startsWith("riemann:")){
+            const [from, to, rectangles, pos, color, opacity] = opt.split(":")[1].split("/")
+            if(!isNaN(+from) && !isNaN(+to) && !isNaN(+rectangles)) {
+                const riemann = plot.riemann(+from, +to, +rectangles, pos===undefined?0:+pos)
+
+                if(color!==undefined){
+                    riemann.color({color, opacity: opacity===undefined?1:+opacity})
+                }
+            }
+
+
+        }
+    }
+
+
     // Plottings
     // PLot the function
     figures = [plot]

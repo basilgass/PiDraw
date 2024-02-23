@@ -17,7 +17,7 @@ export enum STEP_KIND {
 export type StepValueType = {
     type: STEP_TYPE,
     kind: STEP_KIND,
-    item: Point | Figure | string | number | (Point|Figure|number)[],
+    item: Point | Figure | string | number | (Point|Figure|number|unknown)[],
     option?: string
 }
 
@@ -55,6 +55,25 @@ export function getStepType(parser: Parser, value: string): StepValueType {
                 item: v
             }
         }
+    }
+
+    // It's a dynamic number based on a plot
+    if(value.match(/[a-z]\(.*/)){
+        const v = getStepType(parser, value.split('(')[1].split(')')[0])
+        const f = parser.graph.getFigure(value.split('(')[0])
+
+        return {
+            type: STEP_TYPE.number,
+            kind: STEP_KIND.dynamic,
+            item: [f, v],
+            option: 'function'
+        }
+        // return {
+        //     type: STEP_TYPE.number,
+        //     kind: STEP_KIND.dynamic,
+        //     item: v.item,
+        //     option: value.split('(')[0]
+        // }
     }
 
     // It's a dynamic number based on a point

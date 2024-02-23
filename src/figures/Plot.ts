@@ -115,7 +115,6 @@ export class Plot extends Figure {
 
     riemann(from: number, to: number, rectangles: number, pos?: number): Riemann {
         let R = new Riemann(this, from, to, rectangles, pos)
-
         this._plugins.push(R)
         return R
     }

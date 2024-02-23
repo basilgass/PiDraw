@@ -35,6 +35,8 @@ const ptOption: string = "*,o,sq,@,trace:color/size",
     lineOption: string = "",
     plotOption: string = ""
 
+export type ParserPrepocessType = { label: string, key: string, code: string[], options: string[] }
+
 export const parserKeys: {
     [Key: string]: {
         generate: Function,
@@ -149,7 +151,7 @@ export const parserKeys: {
         generate: generatePlot,
         parameters: "func,min:max,@500,follow",
         description: "Tracer une fonction y=f(x)",
-        options: ""
+        options: "riemann:from/to/rectangles/pos/color"
     },
     fill: {
         generate: generateFillBetween,
@@ -171,7 +173,7 @@ export const parserKeys: {
     }
 }
 
-export function parserPreprocess(step: string): { label: string, key: string, code: string[], options: string[] } {
+export function parserPreprocess(step: string): ParserPrepocessType {
     let label = "",
         key = "",
         code: string[] = [],
@@ -515,7 +517,7 @@ export class Parser {
         return this.generate(this._processConstruction(construction), {keysOnly: true}).buildedKeys
     }
 
-    preprocess(step: string): { label: string, key: string, code: string[], options: string[] } {
+    preprocess(step: string): ParserPrepocessType {
         return this._preprocess(step)
     }
 
@@ -608,7 +610,7 @@ export class Parser {
      * @param step
      * @private
      */
-    private _preprocess(step: string): { label: string, key: string, code: string[], options: string[] } {
+    private _preprocess(step: string): ParserPrepocessType {
         return parserPreprocess(step)
     }
 
