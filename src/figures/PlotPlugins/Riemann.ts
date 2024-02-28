@@ -24,6 +24,10 @@ export class Riemann extends Figure {
         if(pos>1){pos =1}
 
         this.svg = this.graph.svg.group()
+
+        // Add the riemann plugin to the plotBG
+        this.graph.layers.plotsBG.add(this.svg)
+
         this._rectangles = []
 
         this.updateFigure()
@@ -75,6 +79,11 @@ export class Riemann extends Figure {
 
     clean() {
         for (let r of this._rectangles) {
+            // Remove the listener
+            r.off('riemann')
+            r.click(null)
+            r.mouseover(null)
+            r.mouseout(null)
             r.remove()
         }
         this.svg.remove()
@@ -85,7 +94,7 @@ export class Riemann extends Figure {
             height,
             step = (this._to - this._from) / this._number,
             width = this.graph.distanceToPixels(step),
-            pxX
+            pxX, pxY
 
         // reset the rectangles if not the same number (for animation purpose)
         if (this._rectangles !== undefined && this._number !== this._rectangles.length) {
@@ -111,18 +120,26 @@ export class Riemann extends Figure {
                         height
                     )
                         .click(function () {
-                            let event = new CustomEvent('RiemannRectangleClick',
+                            let event = new CustomEvent('riemann.click',
                                 {
-                                    detail: this.data('values')
+                                    detail: this.data('values'),
                                 })
                             document.dispatchEvent(event)
                         })
-                        // .mouseover(function () {
-                        //     this.fill('orange')
-                        // })
-                        // .mouseout(function () {
-                        //     this.fill('yellow')
-                        // })
+                        .mouseover(function () {
+                            let event = new CustomEvent('riemann.mouseover',
+                                {
+                                    detail: this.data('values'),
+                                })
+                            document.dispatchEvent(event)
+                        })
+                        .mouseout(function () {
+                            let event = new CustomEvent('riemann.mouseout',
+                                {
+                                    detail: this.data('values'),
+                                })
+                            document.dispatchEvent(event)
+                        })
                         .move(pxX.x, pxX.y)
                         .addTo(this.svg)
                 )
@@ -134,7 +151,7 @@ export class Riemann extends Figure {
                 })
 
             // Add to the correct layer
-            this.graph.layers.main.add(this.svg)
+            this.graph.layers.plots.add(this.svg)
 
         }
 
@@ -147,10 +164,23 @@ export class Riemann extends Figure {
 
             // The value can be negative
             // (this._pos === undefined || this._pos) ? this._plot.evaluate(x).y : this._plot.evaluate(y).y, AXIS.VERTICAL
-            height = this.graph.distanceToPixels(this._plot.evaluate(x + step*this._pos).y, AXIS.VERTICAL)
-
+            const dy = this._plot.evaluate(x + step*this._pos).y
+            height = this.graph.distanceToPixels(dy, AXIS.VERTICAL)
+            pxY = this.graph.unitsToPixels({x: y, y: height})
             this._rectangles[i]
-                .data('values', {x, y, height, width})
+                .data('values', {
+                    box: {
+                        x: pxX.x,
+                        y: pxX.y,
+                        height, width
+                    },
+                    coords: {
+                        a: x,
+                        b: y,
+                        dx: step,
+                        dy
+                    }
+                })
                 .animate(500)
                 .height(Math.abs(height))
                 .width(width)

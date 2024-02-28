@@ -14,7 +14,7 @@ const generateCircle_1 = require("./parser/generateCircle");
 const Line_1 = require("./figures/Line");
 const enums_1 = require("./variables/enums");
 const Circle_1 = require("./figures/Circle");
-const ptOption = "*,o,sq,@,trace:color/size", lineOption = "", plotOption = "";
+const ptOption = "*,o,sq,tick,@,trace:color/size", lineOption = "", plotOption = "";
 exports.parserKeys = {
     pt: {
         generate: generatePoint_1.generatePoint,
@@ -546,8 +546,28 @@ class Parser {
                     // reserved keys
                     builded.figures.forEach(fig => {
                         // Special case for points
-                        if (fig instanceof Point_1.Point && ["*", "o", "sq"].indexOf(key) !== -1) {
+                        if (fig instanceof Point_1.Point && ["*", "o", "sq", "tick"].indexOf(key) !== -1) {
                             (0, generatePoint_1.setPointStyle)(fig, key, options.length > 0 ? +options[0] : null);
+                            if (key === "tick") {
+                                // Change the label.
+                                fig.label.isTex = true;
+                                if (fig.coord.x !== 0 && fig.coord.y === 0) {
+                                    fig.label.position('bc');
+                                    fig.displayName = fig.coord.x.toString();
+                                }
+                                else if (fig.coord.x === 0 && fig.coord.y !== 0) {
+                                    fig.label.position('ml');
+                                    fig.displayName = fig.coord.y.toString();
+                                }
+                                else if (fig.coord.x === 0 && fig.coord.y === 0) {
+                                    fig.label.position('bl');
+                                    fig.displayName = "0";
+                                }
+                                else {
+                                    fig.label.position('br');
+                                    fig.displayName = `(${fig.coord.x},${fig.coord.y})`;
+                                }
+                            }
                         }
                         else if (key === 'static') {
                             fig.freeze = true;

@@ -34,7 +34,8 @@ export declare enum POINTSHAPE {
     CIRCLE = 0,
     CROSS = 1,
     HANDLE = 2,
-    SQUARE = 3
+    SQUARE = 3,
+    TICK = 4
 }
 /**
  * Point constrain

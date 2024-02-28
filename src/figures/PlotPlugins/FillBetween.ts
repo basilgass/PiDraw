@@ -23,6 +23,7 @@ export class FillBetween extends Figure {
         this.svg = this.graph.svg.path(this._d)
             .fill({color: 'yellow', opacity: 0.2})
             .stroke({width: 1, color: 'black'})
+
         this.graph.layers.plotsBG.add(this.svg)
 
         this.updateFigure()

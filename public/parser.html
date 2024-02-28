@@ -221,6 +221,12 @@ Q(0,P.y)->trace:red/5`
 		construct = `A(3,2)
 c=circ A,4
 P(2,4)->drag:c/in`
+
+		construct = `f(x)=1/10x^2-1/2x+2->riemann:2/8/6
+g=fill f,2:8->fill:red/0.2
+A(2,0)->tex:2/bc,!
+B(8,0)->tex:8/bc,!
+d=AB.->move:0/-0.5,mark,tex:d=6/c`
 		// construct = "A(0,0)->tex:A_1=@\n" +
 		// 	"B(3,4)\n"
         let parameters = 'grid,axis,x=-12:12,y=-12:12,nolabel',

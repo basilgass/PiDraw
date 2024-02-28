@@ -37,7 +37,8 @@ export enum POINTSHAPE {
     CIRCLE,
     CROSS,
     HANDLE,
-    SQUARE
+    SQUARE,
+    TICK,
 }
 
 /**

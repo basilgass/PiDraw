@@ -239,7 +239,7 @@ class Label extends Figure_1.Figure {
             this.graph.toTex(value)
                 .then((value) => {
                 // @ts-ignore
-                this.html.add((0, svg_js_1.SVG)(`<div style="display: inline-block; position: fixed">${value}</div>`, true));
+                this.html.add((0, svg_js_1.SVG)(`<div style="display: inline-block; position: fixed; padding-left: 8px; padding-right: 8px">${value}</div>`, true));
                 this.updatePositionAndWidth();
                 this.isConverting = false;
             })

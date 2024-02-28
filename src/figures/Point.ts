@@ -9,7 +9,7 @@ import {Line} from "./Line";
 import {Plot} from "./Plot";
 import {mathLine, mathVector} from "../Calculus";
 import {StepValueType} from "../parser/parseStep";
-import {G} from "@svgdotjs/svg.js";
+import {A, Array, G} from "@svgdotjs/svg.js";
 
 // import {mathVector} from "pimath/esm/maths/geometry/vector"
 
@@ -19,6 +19,9 @@ export interface PointConfig {
 }
 
 export class Point extends Figure {
+    get shape(): POINTSHAPE {
+        return this._shape;
+    }
     private _constrain: PointConfig
     private _scale: number
     private _shape: POINTSHAPE
@@ -148,6 +151,16 @@ export class Point extends Figure {
         }
 
         this._shape = POINTSHAPE.SQUARE
+        this.update()
+        return this
+    }
+
+    asTick(size?: number): Point {
+        if (size !== undefined && size > 0) {
+            this.setSize(size)
+        }
+
+        this._shape = POINTSHAPE.TICK
         this.update()
         return this
     }
@@ -475,22 +488,42 @@ export class Point extends Figure {
 
         // Create the new shape
         if (this._shape === POINTSHAPE.CIRCLE) {
-            this.svg = this.graph.svg.circle(
-                this._scale
-            ).stroke('black').fill('white').data('shape', POINTSHAPE.CIRCLE);
+            this.svg = this.graph.svg.circle(this._scale)
+                .stroke('black').fill('white')
+                .data('shape', POINTSHAPE.CIRCLE);
         } else if (this._shape === POINTSHAPE.CROSS) {
-            this.svg = this.graph.svg.path(
-                `M${-this._scale},${-this._scale} L${+this._scale},${+this._scale} M${+this._scale},${-this._scale} L${-this._scale},${+this._scale}`
-            ).stroke('black').center(0, 0).data('shape', POINTSHAPE.CROSS);
+            this.svg = this.graph.svg
+                .path(`M${-this._scale},${-this._scale} L${+this._scale},${+this._scale} M${+this._scale},${-this._scale} L${-this._scale},${+this._scale}`)
+                .stroke('black')
+                .data('shape', POINTSHAPE.CROSS);
         } else if (this._shape === POINTSHAPE.SQUARE) {
-            this.svg = this.graph.svg.path(
-                `M${-this._scale},${-this._scale} L${+this._scale},${-this._scale} L${+this._scale},${+this._scale} L${-this._scale},${+this._scale} Z`
-            ).stroke('black').center(0, 0).data('shape', POINTSHAPE.SQUARE);
+            this.svg = this.graph.svg
+                .path(`M${-this._scale},${-this._scale} L${+this._scale},${-this._scale} L${+this._scale},${+this._scale} L${-this._scale},${+this._scale} Z`)
+                .stroke('black')
+                .data('shape', POINTSHAPE.SQUARE);
         } else if (this._shape === POINTSHAPE.HANDLE) {
-            this.svg = this.graph.svg.circle(
-                20
-            ).stroke('black').fill('white').opacity(0.4).data('shape', POINTSHAPE.HANDLE);
+            this.svg = this.graph.svg.circle(20)
+                .stroke('black').fill('white').opacity(0.4)
+                .data('shape', POINTSHAPE.HANDLE);
+        } else if (this._shape === POINTSHAPE.TICK ) {
+            if(this.coord.x!== 0 && this.coord.y===0) {
+                this.svg = this.graph.svg
+                    .path(`M0,${-this._scale} L0,${this._scale}`)
+                    .stroke('black')
+                    .data('shape', POINTSHAPE.TICK)
+            }else if(this.coord.x=== 0 && this.coord.y!==0) {
+                this.svg = this.graph.svg
+                    .path(`M${-this._scale},0 L${this._scale},0`)
+                    .stroke('black')
+                    .data('shape', POINTSHAPE.TICK)
+            }else {
+                this.svg = this.graph.svg
+                    .path(`M${-this._scale},0 L${this._scale},0 M0,${-this._scale} L0,${this._scale}`)
+                    .stroke('black')
+                    .data('shape', POINTSHAPE.TICK)
+            }
         }
+
     }
 
     private _updateCoordinate(): void {

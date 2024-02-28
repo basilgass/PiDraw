@@ -28,6 +28,8 @@ export function setPointStyle(pt: Point, style: string, size?: number) {
         pt.asCross()
     } else if (style === "sq") {
         pt.asSquare(size)
+    } else if (style === "tick") {
+        pt.asTick(size)
     }
 }
 

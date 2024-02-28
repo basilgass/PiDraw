@@ -1,7 +1,7 @@
 import { Graph } from "../Graph";
 import { Figure } from "./Figure";
 import { IPoint } from "../variables/interfaces";
-import { AXIS, POINTCONSTRAIN } from "../variables/enums";
+import { AXIS, POINTCONSTRAIN, POINTSHAPE } from "../variables/enums";
 import { Circle } from "./Circle";
 import { Line } from "./Line";
 import { StepValueType } from "../parser/parseStep";
@@ -10,6 +10,7 @@ export interface PointConfig {
     type: POINTCONSTRAIN;
 }
 export declare class Point extends Figure {
+    get shape(): POINTSHAPE;
     private _constrain;
     private _scale;
     private _shape;
@@ -46,6 +47,7 @@ export declare class Point extends Figure {
     asCross(): Point;
     asCircle(size?: number): Point;
     asSquare(size?: number): Point;
+    asTick(size?: number): Point;
     setSize(value: number): Point;
     getDistanceTo(value: Figure, byDefault?: number): number;
     updateFigure(): Point;

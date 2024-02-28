@@ -28,10 +28,10 @@ import {
 } from "./parser/generatePoint";
 import {generateCircle} from "./parser/generateCircle";
 import {Line} from "./figures/Line";
-import {AXIS} from "./variables/enums";
+import {AXIS, POINTSHAPE} from "./variables/enums";
 import {Circle} from "./figures/Circle";
 
-const ptOption: string = "*,o,sq,@,trace:color/size",
+const ptOption: string = "*,o,sq,tick,@,trace:color/size",
     lineOption: string = "",
     plotOption: string = ""
 
@@ -687,12 +687,32 @@ export class Parser {
                     // reserved keys
                     builded.figures.forEach(fig => {
                         // Special case for points
-                        if (fig instanceof Point && ["*", "o", "sq"].indexOf(key) !== -1) {
+                        if (fig instanceof Point && ["*", "o", "sq", "tick"].indexOf(key) !== -1) {
                             setPointStyle(fig, key, options.length > 0 ? +options[0] : null)
-                        } else if (key === 'static') {
+
+                            if(key === "tick") {
+                                // Change the label.
+                                fig.label.isTex = true
+                                if(fig.coord.x!==0 && fig.coord.y===0){
+                                    fig.label.position('bc')
+                                    fig.displayName = fig.coord.x.toString()
+                                }else if(fig.coord.x===0 && fig.coord.y!==0){
+                                    fig.label.position('ml')
+                                    fig.displayName = fig.coord.y.toString()
+                                }else if(fig.coord.x===0 && fig.coord.y===0){
+                                    fig.label.position('bl')
+                                    fig.displayName = "0"
+                                } else {
+                                    fig.label.position('br')
+                                    fig.displayName = `(${fig.coord.x},${fig.coord.y})`
+                                }
+                            }
+                        }
+                        else if (key === 'static') {
                             fig.freeze = true
                             // Drag options
-                        } else if (key === 'drag' && fig instanceof Point) {
+                        }
+                        else if (key === 'drag' && fig instanceof Point) {
                             // Get the figure to follow
                             // Might be the horizontal axes
                             let follow: Figure | string
@@ -730,7 +750,8 @@ export class Parser {
                                 constrain: follow,
                                 bounds
                             })
-                        } else if (key === 'trace') {
+                        }
+                        else if (key === 'trace') {
                             if (fig instanceof Point) {
                                 fig.trace(param, +options[0])
                             }
@@ -838,7 +859,8 @@ export class Parser {
                             // Make sure the label is visible
                             fig.showLabel().updateLabel()
                         }
-                            // Move the figure
+
+                        // Move the figure
                         // TODO: must change the value to UNIT and also move the label the same way.
                         else if (key.startsWith('move')) {
                             // move/4

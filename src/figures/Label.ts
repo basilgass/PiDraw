@@ -304,7 +304,7 @@ export class Label extends Figure {
             this.graph.toTex(value)
                 .then((value) => {
                     // @ts-ignore
-                    this.html.add(SVG(`<div style="display: inline-block; position: fixed">${value}</div>`, true))
+                    this.html.add(SVG(`<div style="display: inline-block; position: fixed; padding-left: 8px; padding-right: 8px">${value}</div>`, true))
                     this.updatePositionAndWidth()
 
                     this.isConverting = false

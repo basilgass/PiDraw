@@ -9,7 +9,11 @@ const Circle_1 = require("./Circle");
 const Line_1 = require("./Line");
 const Plot_1 = require("./Plot");
 const Calculus_1 = require("../Calculus");
+const svg_js_1 = require("@svgdotjs/svg.js");
 class Point extends Figure_1.Figure {
+    get shape() {
+        return this._shape;
+    }
     _constrain;
     _scale;
     _shape;
@@ -112,6 +116,14 @@ class Point extends Figure_1.Figure {
             this.setSize(size);
         }
         this._shape = enums_1.POINTSHAPE.SQUARE;
+        this.update();
+        return this;
+    }
+    asTick(size) {
+        if (size !== undefined && size > 0) {
+            this.setSize(size);
+        }
+        this._shape = enums_1.POINTSHAPE.TICK;
         this.update();
         return this;
     }
@@ -388,16 +400,46 @@ class Point extends Figure_1.Figure {
         }
         // Create the new shape
         if (this._shape === enums_1.POINTSHAPE.CIRCLE) {
-            this.svg = this.graph.svg.circle(this._scale).stroke('black').fill('white').data('shape', enums_1.POINTSHAPE.CIRCLE);
+            this.svg = this.graph.svg.circle(this._scale)
+                .stroke('black').fill('white')
+                .data('shape', enums_1.POINTSHAPE.CIRCLE);
         }
         else if (this._shape === enums_1.POINTSHAPE.CROSS) {
-            this.svg = this.graph.svg.path(`M${-this._scale},${-this._scale} L${+this._scale},${+this._scale} M${+this._scale},${-this._scale} L${-this._scale},${+this._scale}`).stroke('black').center(0, 0).data('shape', enums_1.POINTSHAPE.CROSS);
+            this.svg = this.graph.svg
+                .path(`M${-this._scale},${-this._scale} L${+this._scale},${+this._scale} M${+this._scale},${-this._scale} L${-this._scale},${+this._scale}`)
+                .stroke('black')
+                .data('shape', enums_1.POINTSHAPE.CROSS);
         }
         else if (this._shape === enums_1.POINTSHAPE.SQUARE) {
-            this.svg = this.graph.svg.path(`M${-this._scale},${-this._scale} L${+this._scale},${-this._scale} L${+this._scale},${+this._scale} L${-this._scale},${+this._scale} Z`).stroke('black').center(0, 0).data('shape', enums_1.POINTSHAPE.SQUARE);
+            this.svg = this.graph.svg
+                .path(`M${-this._scale},${-this._scale} L${+this._scale},${-this._scale} L${+this._scale},${+this._scale} L${-this._scale},${+this._scale} Z`)
+                .stroke('black')
+                .data('shape', enums_1.POINTSHAPE.SQUARE);
         }
         else if (this._shape === enums_1.POINTSHAPE.HANDLE) {
-            this.svg = this.graph.svg.circle(20).stroke('black').fill('white').opacity(0.4).data('shape', enums_1.POINTSHAPE.HANDLE);
+            this.svg = this.graph.svg.circle(20)
+                .stroke('black').fill('white').opacity(0.4)
+                .data('shape', enums_1.POINTSHAPE.HANDLE);
+        }
+        else if (this._shape === enums_1.POINTSHAPE.TICK) {
+            if (this.coord.x !== 0 && this.coord.y === 0) {
+                this.svg = this.graph.svg
+                    .path(`M0,${-this._scale} L0,${this._scale}`)
+                    .stroke('black')
+                    .data('shape', enums_1.POINTSHAPE.TICK);
+            }
+            else if (this.coord.x === 0 && this.coord.y !== 0) {
+                this.svg = this.graph.svg
+                    .path(`M${-this._scale},0 L${this._scale},0`)
+                    .stroke('black')
+                    .data('shape', enums_1.POINTSHAPE.TICK);
+            }
+            else {
+                this.svg = this.graph.svg
+                    .path(`M${-this._scale},0 L${this._scale},0 M0,${-this._scale} L0,${this._scale}`)
+                    .stroke('black')
+                    .data('shape', enums_1.POINTSHAPE.TICK);
+            }
         }
     }
     _updateCoordinate() {
@@ -555,12 +597,12 @@ class Point extends Figure_1.Figure {
             else if (value.option === 'y' && value.item instanceof Point) {
                 return value.item.y;
             }
-            else if (value.option === 'distance' && value.item instanceof Array) {
+            else if (value.option === 'distance' && value.item instanceof svg_js_1.Array) {
                 const [X, Y, direction] = value.item;
                 if (X instanceof Point && Y instanceof Point)
                     return this.graph.origin.x + (+direction) * X.getDistanceTo(Y);
             }
-            else if (value.option === "function" && value.item instanceof Array) {
+            else if (value.option === "function" && value.item instanceof svg_js_1.Array) {
                 const [f, v] = value.item;
                 if (f instanceof Plot_1.Plot) {
                     const vx = this.graph.pixelsToUnits({

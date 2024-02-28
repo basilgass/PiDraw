@@ -31,6 +31,9 @@ function setPointStyle(pt, style, size) {
     else if (style === "sq") {
         pt.asSquare(size);
     }
+    else if (style === "tick") {
+        pt.asTick(size);
+    }
 }
 exports.setPointStyle = setPointStyle;
 function generatePoint(parser, name, code, options) {
