@@ -120,25 +120,13 @@ export class Riemann extends Figure {
                         height
                     )
                         .click(function () {
-                            let event = new CustomEvent('riemann.click',
-                                {
-                                    detail: this.data('values'),
-                                })
-                            document.dispatchEvent(event)
+                            makeEvent('riemann.click', this.data('values'))
                         })
                         .mouseover(function () {
-                            let event = new CustomEvent('riemann.mouseover',
-                                {
-                                    detail: this.data('values'),
-                                })
-                            document.dispatchEvent(event)
+                            makeEvent('riemann.mouseover', this.data('values'))
                         })
                         .mouseout(function () {
-                            let event = new CustomEvent('riemann.mouseout',
-                                {
-                                    detail: this.data('values'),
-                                })
-                            document.dispatchEvent(event)
+                            makeEvent('riemann.mouseout', this.data('values'))
                         })
                         .move(pxX.x, pxX.y)
                         .addTo(this.svg)
@@ -169,6 +157,9 @@ export class Riemann extends Figure {
             pxY = this.graph.unitsToPixels({x: y, y: height})
             this._rectangles[i]
                 .data('values', {
+                    id: i,
+                    rectangle: this._rectangles[i],
+                    rectangles: this._rectangles,
                     box: {
                         x: pxX.x,
                         y: pxX.y,
@@ -190,4 +181,12 @@ export class Riemann extends Figure {
 
         return this
     }
+}
+
+function makeEvent(name: string, values: any) {
+    let event = new CustomEvent(name,
+        {
+            detail: values,
+        })
+    document.dispatchEvent(event)
 }

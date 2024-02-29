@@ -284,12 +284,12 @@ class Parser {
                 if (!updateResult) {
                     // Not the same step ! Everything after this must be removed from the graph!
                     for (let j = +i; j < this._buildedSteps.length; j++) {
-                        if (this._buildedSteps[j].figures === undefined) {
+                        // No figures to remove
+                        if (this._buildedSteps[j].figures === undefined)
                             continue;
-                        }
-                        for (let fig of this._buildedSteps[j].figures) {
+                        // Remove the figures
+                        for (let fig of this._buildedSteps[j].figures)
                             fig.remove();
-                        }
                     }
                     this._buildedSteps = this._buildedSteps.slice(0, i);
                     break;

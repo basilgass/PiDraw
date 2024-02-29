@@ -28,8 +28,11 @@
 <body>
 <div x-data="">
     <div id="root"></div>
-    <button onclick="update()">TO</button>
-    <button onclick="updatePlot()">PLOT</button>
+	<div class="mt-5">
+		<button class="border px-5 rounded" onclick="update()"> UPDATE</button>
+		<button class="border px-5 rounded" onclick="updatePlot()"> PLOT </button>
+		<button class="border px-5 rounded" onclick="updateRects()"> INCREASE RECTS </button>
+	</div>
 </div>
 <script>
 	let graph = new PiDraw('root')
@@ -52,6 +55,10 @@
 
 	function updatePlot () {
 		fx.plot('sqrt(2*x+3)')
+	}
+
+	function updateRects () {
+		riemanns.number = 32
 	}
 
 	function RRClick (evt) {

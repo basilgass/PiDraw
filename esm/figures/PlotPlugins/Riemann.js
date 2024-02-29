@@ -93,22 +93,13 @@ class Riemann extends Figure_1.Figure {
                 height = 0;
                 this._rectangles.push(this.graph.svg.rect(width, height)
                     .click(function () {
-                    let event = new CustomEvent('riemann.click', {
-                        detail: this.data('values'),
-                    });
-                    document.dispatchEvent(event);
+                    makeEvent('riemann.click', this.data('values'));
                 })
                     .mouseover(function () {
-                    let event = new CustomEvent('riemann.mouseover', {
-                        detail: this.data('values'),
-                    });
-                    document.dispatchEvent(event);
+                    makeEvent('riemann.mouseover', this.data('values'));
                 })
                     .mouseout(function () {
-                    let event = new CustomEvent('riemann.mouseout', {
-                        detail: this.data('values'),
-                    });
-                    document.dispatchEvent(event);
+                    makeEvent('riemann.mouseout', this.data('values'));
                 })
                     .move(pxX.x, pxX.y)
                     .addTo(this.svg));
@@ -133,6 +124,9 @@ class Riemann extends Figure_1.Figure {
             pxY = this.graph.unitsToPixels({ x: y, y: height });
             this._rectangles[i]
                 .data('values', {
+                id: i,
+                rectangle: this._rectangles[i],
+                rectangles: this._rectangles,
                 box: {
                     x: pxX.x,
                     y: pxX.y,
@@ -154,4 +148,10 @@ class Riemann extends Figure_1.Figure {
     }
 }
 exports.Riemann = Riemann;
+function makeEvent(name, values) {
+    let event = new CustomEvent(name, {
+        detail: values,
+    });
+    document.dispatchEvent(event);
+}
 //# sourceMappingURL=Riemann.js.map
