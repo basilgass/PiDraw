@@ -21,6 +21,7 @@ export declare class Plot extends Figure {
     private _plugins;
     constructor(graph: Graph, name: string, fn: Function | string, config?: PlotConfig);
     get fx(): Function | NumExp;
+    get plugins(): any[];
     generateName(): string;
     updatePlugins(): Plot;
     plot(fn: string | Function, speed?: number): Plot;

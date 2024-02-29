@@ -35,6 +35,9 @@ class Plot extends Figure_1.Figure {
     get fx() {
         return this._fx;
     }
+    get plugins() {
+        return this._plugins;
+    }
     generateName() {
         if (this.name === undefined) {
             let n = this.graph.figures.filter(fig => fig instanceof Plot).length, idx = Math.trunc(n / 5);

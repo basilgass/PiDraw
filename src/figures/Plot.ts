@@ -1,12 +1,11 @@
 import {Figure} from "./Figure";
 import {Graph} from "../Graph";
 import {IPoint} from "../variables/interfaces";
-import {G, Path, Rect} from "@svgdotjs/svg.js";
+import {Path} from "@svgdotjs/svg.js";
 import {Riemann} from "./PlotPlugins/Riemann";
 import {Follow} from "./PlotPlugins/Follow";
 import {FillBetween} from "./PlotPlugins/FillBetween";
 import {NumExp} from "../Calculus";
-// import {NumExp} from "pimath/esm/maths/expressions/numexp";
 
 export interface PlotConfig {
     domain: { min: number, max: number },
@@ -48,6 +47,10 @@ export class Plot extends Figure {
 
     get fx(): Function | NumExp {
         return this._fx;
+    }
+
+    get plugins(): any[] {
+        return this._plugins;
     }
 
     generateName(): string {
