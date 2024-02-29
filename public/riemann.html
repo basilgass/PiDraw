@@ -32,6 +32,7 @@
 		<button class="border px-5 rounded" onclick="update()"> UPDATE</button>
 		<button class="border px-5 rounded" onclick="updatePlot()"> PLOT </button>
 		<button class="border px-5 rounded" onclick="updateRects()"> INCREASE RECTS </button>
+		<div class="ml-5 px-5 bg-red-100 text-red-600" id="overoutput"></div>
 	</div>
 </div>
 <script>
@@ -66,6 +67,14 @@
 	}
 
 	document.addEventListener('riemann.click', RRClick)
+
+	document.addEventListener('riemann.mouseover', evt => {
+		document.getElementById('overoutput').innerText = evt.detail.index
+		evt.detail.rectangle.fill('red')
+	})
+	document.addEventListener('riemann.mouseout', evt => {
+		evt.detail.rectangle.fill('yellow')
+	})
 </script>
 </body>
 </html>

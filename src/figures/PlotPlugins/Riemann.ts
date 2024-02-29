@@ -18,10 +18,14 @@ export class Riemann extends Figure {
         this._from = from
         this._to = to
         this._number = rectangles
-        this._pos = pos === undefined?0:pos
+        this._pos = pos === undefined ? 0 : pos
 
-        if(pos<0){pos =0}
-        if(pos>1){pos =1}
+        if (pos < 0) {
+            pos = 0
+        }
+        if (pos > 1) {
+            pos = 1
+        }
 
         this.svg = this.graph.svg.group()
 
@@ -114,24 +118,29 @@ export class Riemann extends Figure {
                 pxX = this.graph.unitsToPixels({x: x, y: 0})
                 height = 0
 
-                this._rectangles.push(
-                    this.graph.svg.rect(
-                        width,
-                        height
-                    )
-                        .click(function () {
-                            makeEvent('riemann.click', this.data('values'))
-                        })
-                        .mouseover(function () {
-                            makeEvent('riemann.mouseover', this.data('values'))
-                        })
-                        .mouseout(function () {
-                            makeEvent('riemann.mouseout', this.data('values'))
-                        })
-                        .move(pxX.x, pxX.y)
-                        .addTo(this.svg)
+                const rectangle = this.graph.svg.rect(
+                    width,
+                    height
                 )
+                    .move(pxX.x, pxX.y)
+                    .addTo(this.svg)
+                this._rectangles.push(rectangle)
             }
+
+            // Add events for all rectangles.
+            const rectanglesForEvents = this._rectangles
+            this._rectangles.forEach(rectangle => {
+                rectangle
+                    .click(function () {
+                        makeEvent('riemann.click', this.data('values'), rectanglesForEvents)
+                    })
+                    .mouseover(function () {
+                        makeEvent('riemann.mouseover', this.data('values'), rectanglesForEvents)
+                    })
+                    .mouseout(function () {
+                        makeEvent('riemann.mouseout', this.data('values'), rectanglesForEvents)
+                    })
+            })
 
             this.svg.fill('yellow')
                 .stroke({
@@ -152,14 +161,12 @@ export class Riemann extends Figure {
 
             // The value can be negative
             // (this._pos === undefined || this._pos) ? this._plot.evaluate(x).y : this._plot.evaluate(y).y, AXIS.VERTICAL
-            const dy = this._plot.evaluate(x + step*this._pos).y
+            const dy = this._plot.evaluate(x + step * this._pos).y
             height = this.graph.distanceToPixels(dy, AXIS.VERTICAL)
             pxY = this.graph.unitsToPixels({x: y, y: height})
             this._rectangles[i]
                 .data('values', {
-                    id: i,
-                    rectangle: this._rectangles[i],
-                    rectangles: this._rectangles,
+                    index: i,
                     box: {
                         x: pxX.x,
                         y: pxX.y,
@@ -183,10 +190,14 @@ export class Riemann extends Figure {
     }
 }
 
-function makeEvent(name: string, values: any) {
+function makeEvent(name: string, values: any, targets: Rect[]): void {
     let event = new CustomEvent(name,
         {
-            detail: values,
+            detail: {
+                ...values,
+                rectangle: targets[values.index],
+                rectangles: targets
+            },
         })
     document.dispatchEvent(event)
 }

@@ -91,19 +91,25 @@ class Riemann extends Figure_1.Figure {
                 // pixels value
                 pxX = this.graph.unitsToPixels({ x: x, y: 0 });
                 height = 0;
-                this._rectangles.push(this.graph.svg.rect(width, height)
+                const rectangle = this.graph.svg.rect(width, height)
+                    .move(pxX.x, pxX.y)
+                    .addTo(this.svg);
+                this._rectangles.push(rectangle);
+            }
+            // Add events for all rectangles.
+            const rectanglesForEvents = this._rectangles;
+            this._rectangles.forEach(rectangle => {
+                rectangle
                     .click(function () {
-                    makeEvent('riemann.click', this.data('values'));
+                    makeEvent('riemann.click', this.data('values'), rectanglesForEvents);
                 })
                     .mouseover(function () {
-                    makeEvent('riemann.mouseover', this.data('values'));
+                    makeEvent('riemann.mouseover', this.data('values'), rectanglesForEvents);
                 })
                     .mouseout(function () {
-                    makeEvent('riemann.mouseout', this.data('values'));
-                })
-                    .move(pxX.x, pxX.y)
-                    .addTo(this.svg));
-            }
+                    makeEvent('riemann.mouseout', this.data('values'), rectanglesForEvents);
+                });
+            });
             this.svg.fill('yellow')
                 .stroke({
                 color: 'black', width: 1
@@ -124,9 +130,7 @@ class Riemann extends Figure_1.Figure {
             pxY = this.graph.unitsToPixels({ x: y, y: height });
             this._rectangles[i]
                 .data('values', {
-                id: i,
-                rectangle: this._rectangles[i],
-                rectangles: this._rectangles,
+                index: i,
                 box: {
                     x: pxX.x,
                     y: pxX.y,
@@ -148,9 +152,13 @@ class Riemann extends Figure_1.Figure {
     }
 }
 exports.Riemann = Riemann;
-function makeEvent(name, values) {
+function makeEvent(name, values, targets) {
     let event = new CustomEvent(name, {
-        detail: values,
+        detail: {
+            ...values,
+            rectangle: targets[values.index],
+            rectangles: targets
+        },
     });
     document.dispatchEvent(event);
 }
