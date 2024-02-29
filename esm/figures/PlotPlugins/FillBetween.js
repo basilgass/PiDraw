@@ -11,8 +11,8 @@ class FillBetween extends Figure_1.Figure {
     _to;
     _samples;
     _d;
-    constructor(plot, plot2, from, to, samples) {
-        super(plot.graph, '');
+    constructor(plot, plot2, from, to, samples, name) {
+        super(plot.graph, name || '');
         this._plot = plot;
         this._plot2 = plot2;
         this._from = from < to ? +from : +to;

@@ -10,8 +10,8 @@ export class FillBetween extends Figure {
     private _samples: number
     private _d: string
 
-    constructor(plot: Plot, plot2: Plot, from: number, to: number, samples: number) {
-        super(plot.graph, '');
+    constructor(plot: Plot, plot2: Plot, from: number, to: number, samples: number, name?: string) {
+        super(plot.graph, name||'');
 
         this._plot = plot
         this._plot2 = plot2

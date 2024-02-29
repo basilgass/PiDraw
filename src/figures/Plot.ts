@@ -129,8 +129,8 @@ export class Plot extends Figure {
         return P
     }
 
-    fillBetween(plot: Plot, from: number, to: number, samples?: number): FillBetween {
-        let P = new FillBetween(this, plot, from, to, samples === undefined ? this._config.samples : samples)
+    fillBetween(plot: Plot, from: number, to: number, samples?: number, name?: string): FillBetween {
+        let P = new FillBetween(this, plot, from, to, samples === undefined ? this._config.samples : samples, name)
 
         this._plugins.push(P)
         return P

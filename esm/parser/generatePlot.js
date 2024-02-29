@@ -37,6 +37,7 @@ function generatePlot(parser, name, code, options) {
     if (code.includes('follow')) {
         plot.follow(true);
     }
+    // TODO: Move riemann to an external parser, like fillBetween ?
     for (let opt of options) {
         if (opt.startsWith("riemann:")) {
             const [from, to, rectangles, pos, color, opacity] = opt.split(":")[1].split("/");
@@ -88,7 +89,7 @@ function generateFillBetween(parser, name, code, options) {
         // Get the main figure
         let FX = parser.graph.getFigure(f), GX = g !== null ? parser.graph.getFigure(g) : null;
         if (FX instanceof Plot_1.Plot) {
-            figures = [FX.fillBetween((GX instanceof Plot_1.Plot) ? GX : null, min, max)];
+            figures = [FX.fillBetween((GX instanceof Plot_1.Plot) ? GX : null, min, max, undefined, name)];
         }
     }
     /**

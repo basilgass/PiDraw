@@ -7,7 +7,7 @@ export declare class FillBetween extends Figure {
     private _to;
     private _samples;
     private _d;
-    constructor(plot: Plot, plot2: Plot, from: number, to: number, samples: number);
+    constructor(plot: Plot, plot2: Plot, from: number, to: number, samples: number, name?: string);
     get plot(): Plot;
     clean(): void;
     updateFigure(): FillBetween;

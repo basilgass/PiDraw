@@ -27,7 +27,7 @@ export declare class Plot extends Figure {
     plot(fn: string | Function, speed?: number): Plot;
     riemann(from: number, to: number, rectangles: number, pos?: number): Riemann;
     follow(showTangent?: boolean): Follow;
-    fillBetween(plot: Plot, from: number, to: number, samples?: number): FillBetween;
+    fillBetween(plot: Plot, from: number, to: number, samples?: number, name?: string): FillBetween;
     getPartialPath(from: number, to: number, samples?: number, reversed?: boolean, firstToken?: string): string;
     evaluate(x: number): IPoint;
     private _parse;

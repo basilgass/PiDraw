@@ -100,8 +100,8 @@ class Plot extends Figure_1.Figure {
         this._plugins.push(P);
         return P;
     }
-    fillBetween(plot, from, to, samples) {
-        let P = new FillBetween_1.FillBetween(this, plot, from, to, samples === undefined ? this._config.samples : samples);
+    fillBetween(plot, from, to, samples, name) {
+        let P = new FillBetween_1.FillBetween(this, plot, from, to, samples === undefined ? this._config.samples : samples, name);
         this._plugins.push(P);
         return P;
     }
