@@ -159,7 +159,7 @@ export const parserKeys: {
         description: "Remplir l'espace entre une fonction et l'axe Ox ou entre deux fonctions, borné par a et b",
         options: ""
     },
-    parametric: {
+    param: {
         generate: generateParametricPlot,
         parameters: "sin(t),cos(t),a,b",
         description: "Tracer une fonction paramétrique, en utilisant a et b comme borne.",
