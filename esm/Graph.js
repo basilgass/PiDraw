@@ -14,7 +14,6 @@ const enums_1 = require("./variables/enums");
 const Arc_1 = require("./figures/Arc");
 const Parser_1 = require("./Parser");
 const Parametric_1 = require("./figures/Parametric");
-// import {Numeric} from "pimath/esm/maths/numeric";
 const Bezier_1 = require("./figures/Bezier");
 const Path_1 = require("./figures/Path");
 const Polygon_1 = require("./figures/Polygon");

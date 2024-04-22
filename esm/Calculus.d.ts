@@ -53,7 +53,7 @@ export declare class NumExp {
     private _isValid;
     get isValid(): boolean;
     set isValid(value: boolean);
-    evaluate(values: {
+    evaluate(values?: {
         [Key: string]: number;
     }): number;
     private _extractDecimalPart;

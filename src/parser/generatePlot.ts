@@ -1,6 +1,7 @@
 import {Plot} from "../figures/Plot";
 import {Figure} from "../figures/Figure";
 import {BuildStep, Parser} from "../Parser";
+import {NumExp} from "../Calculus";
 
 export function updatePlot(parser: Parser, BStep: BuildStep, fx: string): boolean {
     if (BStep.figures.length > 0 && BStep.figures[0] instanceof Plot) {
@@ -22,13 +23,13 @@ export function generatePlot(parser: Parser, name: string, code: string[], optio
         samples: number = 100
 
     // Get the samples
-    for(let check of code){
-        if(check.startsWith("@")){
+    for (let check of code) {
+        if (check.startsWith("@")) {
             samples = +check.substring(1)
         }
 
-        if(check.includes(":")){
-            [domain.min, domain.max] = check.split(":").map(x=>+x)
+        if (check.includes(":")) {
+            [domain.min, domain.max] = check.split(":").map(x => +x)
         }
     }
 
@@ -44,14 +45,14 @@ export function generatePlot(parser: Parser, name: string, code: string[], optio
     }
 
     // TODO: Move riemann to an external parser, like fillBetween ?
-    for(let opt of options){
-        if(opt.startsWith("riemann:")){
+    for (let opt of options) {
+        if (opt.startsWith("riemann:")) {
             const [from, to, rectangles, pos, color, opacity] = opt.split(":")[1].split("/")
-            if(!isNaN(+from) && !isNaN(+to) && !isNaN(+rectangles)) {
-                const riemann = plot.riemann(+from, +to, +rectangles, pos===undefined?0:+pos)
+            if (!isNaN(+from) && !isNaN(+to) && !isNaN(+rectangles)) {
+                const riemann = plot.riemann(+from, +to, +rectangles, pos === undefined ? 0 : +pos)
 
-                if(color!==undefined){
-                    riemann.color({color, opacity: opacity===undefined?1:+opacity})
+                if (color !== undefined) {
+                    riemann.color({color, opacity: opacity === undefined ? 1 : +opacity})
                 }
             }
 
@@ -70,14 +71,16 @@ export function generatePlot(parser: Parser, name: string, code: string[], optio
 export function generateParametricPlot(parser: Parser, name: string, code: string[], options: string[]): Figure[] {
     let figures: Figure[]
 
-    if (code.length < 3) {
-        return []
-    }
+    if (code.length < 2) return []
 
     let fx = code[0],
         fy = code[1],
-        a = !isNaN(+code[2]) ? +code[2] : 0,
-        b = !isNaN(+code[3]) ? +code[3] : 2 * Math.PI
+        a = new NumExp(
+            code[2] === undefined ? '0' : code[2], true
+        ).evaluate(),
+        b = new NumExp(
+            code[3] === undefined ? '2pi' : code[3], true
+        ).evaluate()
 
     figures = [
         parser.graph.parametric(fx, fy, {
@@ -102,12 +105,12 @@ export function generateFillBetween(parser: Parser, name: string, code: string[]
     if (code.length > 0) {
         f = code.shift()
 
-        if(code[0]!==undefined && !code[0].includes(":")){
+        if (code[0] !== undefined && !code[0].includes(":")) {
             g = code.shift()
         }
 
-        if(code[0]!==undefined && code[0].includes(":")){
-            [min,max] = code.shift().split(":").map(x=>+x)
+        if (code[0] !== undefined && code[0].includes(":")) {
+            [min, max] = code.shift().split(":").map(x => +x)
         }
     }
 

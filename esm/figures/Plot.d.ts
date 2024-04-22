@@ -6,12 +6,12 @@ import { Follow } from "./PlotPlugins/Follow";
 import { FillBetween } from "./PlotPlugins/FillBetween";
 import { NumExp } from "../Calculus";
 export interface PlotConfig {
-    domain: {
+    domain?: {
         min: number;
         max: number;
     };
-    samples: number;
-    animate: boolean;
+    samples?: number;
+    animate?: boolean;
 }
 export declare class Plot extends Figure {
     private _config;

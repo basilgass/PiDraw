@@ -8,9 +8,9 @@ import {FillBetween} from "./PlotPlugins/FillBetween";
 import {NumExp} from "../Calculus";
 
 export interface PlotConfig {
-    domain: { min: number, max: number },
-    samples: number,
-    animate: boolean
+    domain?: { min: number, max: number },
+    samples?: number,
+    animate?: boolean
 }
 
 export class Plot extends Figure {

@@ -72,6 +72,10 @@
     <div class="text-center font-xs text-gray-300 mt-20 mb-5">Made with love (and some coffee) by B. Gass</div>
 </div>
 <script>
+	const a = new PiNum('pi')
+	console.log(a.evaluate())
+
+
 	function autoParse() {
         let graph = new PiDraw('root'),
             axis = graph.axis(),
@@ -227,6 +231,8 @@ g=fill f,2:8->fill:red/0.2
 A(2,0)->tex:2/bc,!
 B(8,0)->tex:8/bc,!
 d=AB.->move:0/-0.5,mark,tex:d=6/c`
+
+		construct = "f(t)=sin(t),cos(t),0,2pi"
 		// construct = "A(0,0)->tex:A_1=@\n" +
 		// 	"B(3,4)\n"
         let parameters = 'grid,axis,x=-12:12,y=-12:12,nolabel',

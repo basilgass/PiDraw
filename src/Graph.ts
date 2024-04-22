@@ -19,7 +19,6 @@ import {GraphConfig} from "./variables/types";
 import {Arc} from "./figures/Arc";
 import {Parser, parserKeys} from "./Parser";
 import {Parametric} from "./figures/Parametric";
-// import {Numeric} from "pimath/esm/maths/numeric";
 import {Bezier, BezierPoint} from "./figures/Bezier";
 import {Path} from "./figures/Path";
 import {Polygon} from "./figures/Polygon";

@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.generateFillBetween = exports.generateParametricPlot = exports.generatePlot = exports.updatePlot = void 0;
 const Plot_1 = require("../figures/Plot");
+const Calculus_1 = require("../Calculus");
 function updatePlot(parser, BStep, fx) {
     if (BStep.figures.length > 0 && BStep.figures[0] instanceof Plot_1.Plot) {
         // Modify the plot.
@@ -57,10 +58,9 @@ function generatePlot(parser, name, code, options) {
 exports.generatePlot = generatePlot;
 function generateParametricPlot(parser, name, code, options) {
     let figures;
-    if (code.length < 3) {
+    if (code.length < 2)
         return [];
-    }
-    let fx = code[0], fy = code[1], a = !isNaN(+code[2]) ? +code[2] : 0, b = !isNaN(+code[3]) ? +code[3] : 2 * Math.PI;
+    let fx = code[0], fy = code[1], a = new Calculus_1.NumExp(code[2] === undefined ? '0' : code[2], true).evaluate(), b = new Calculus_1.NumExp(code[3] === undefined ? '2pi' : code[3], true).evaluate();
     figures = [
         parser.graph.parametric(fx, fy, {
             samples: 100,

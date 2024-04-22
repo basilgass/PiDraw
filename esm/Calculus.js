@@ -212,6 +212,7 @@ class NumExp {
         catch (e) {
             this._rpn = null;
             this._isValid = false;
+            console.log(e);
         }
     }
     _rpn;
@@ -256,7 +257,7 @@ class NumExp {
                 }
             }
             else if (element.tokenType === ShutingyardType.VARIABLE) {
-                if (values[element.token] !== undefined) {
+                if (values && values[element.token] !== undefined) {
                     this._addToStack(stack, +values[element.token]);
                 }
             }
@@ -567,15 +568,16 @@ class Shutingyard {
                 let token = kToken[tokenIdx];
                 if (expr.slice(i, i + token.length) === token) {
                     // We have found a constant.
-                    // add it, but with remove the last letter
-                    normalizedExpr += token.slice(0, -1);
-                    i += token.length - 1;
+                    normalizedExpr += token;
+                    i += token.length;
                     // Exit the loop
                     break;
                 }
                 tokenIdx++;
             }
             // The function token are solved.
+            if (i >= expr.length)
+                break;
             crtToken = expr[i];
             nextToken = expr[i + 1];
             normalizedExpr += crtToken;
@@ -604,7 +606,7 @@ class Shutingyard {
             i++;
         }
         // add the last token
-        return normalizedExpr + nextToken;
+        return normalizedExpr + (nextToken !== undefined ? nextToken : '');
     }
     /**
      * Parse an expression using the shutting yard tree algorithms
@@ -628,6 +630,9 @@ class Shutingyard {
             }
             // Get the next token and the corresponding new (ending) position
             [token, tokenPos, tokenType] = this.NextToken(expr, tokenPos);
+            if (expr === '2pi') {
+                console.log(token, tokenPos, tokenType);
+            }
             switch (tokenType) {
                 case 'monom':
                 case 'coefficient':
