@@ -21,16 +21,20 @@
     <script src="https://cdn.tailwindcss.com"></script>
 
     <!-- PiDraw -->
-    <script src="../dev/pidraw.js"></script>
+    <script src="../dist/pidraw.js"></script>
 </head>
 
 <body>
+    <h2>HELLO WORLD</h2>
+
     <div x-data="">
         <div id="root"></div>
         <button onclick="update()">TO</button>
         <button onclick="updatePlot()">PLOT</button>
     </div>
     <script>
+
+        console.log(PiDraw);
         let graph = new PiDraw('root',
             {
                 xMin: -4,
@@ -46,18 +50,23 @@
             domain: { min: 0, max: 10 }
         })
         graph.plot('x^2')
-	// let fx = graph.plot('sqrt(x)*sin(x)+2/5*x', {
-	// 		samples: 20,
-	// 		domain: { min: 0, max: 20 }
-	// 	}),
-	// 	fx2 = graph.plot('1/10*(x^2-5*x)'),
-	// 	fx3 = graph.plot('-1/10*(x^2-4*x)+5')
-    // let F = fx.follow(true)
-    //
-    // let FB = fx2.fillBetween(fx3, 1, 5)
-    //
-    // let FB2 = fx3.fillBetween(false, -7, 5)
-    // FB2.svg.fill({color: 'red'})
+
+        const pt = graph.point(1, 1)
+        pt.displayName = katex.renderToString('P(1,1)')
+        pt.label.isTex = true
+        pt.update()
+        // let fx = graph.plot('sqrt(x)*sin(x)+2/5*x', {
+        // 		samples: 20,
+        // 		domain: { min: 0, max: 20 }
+        // 	}),
+        // 	fx2 = graph.plot('1/10*(x^2-5*x)'),
+        // 	fx3 = graph.plot('-1/10*(x^2-4*x)+5')
+        // let F = fx.follow(true)
+        //
+        // let FB = fx2.fillBetween(fx3, 1, 5)
+        //
+        // let FB2 = fx3.fillBetween(false, -7, 5)
+        // FB2.svg.fill({color: 'red'})
     </script>
 </body>
 

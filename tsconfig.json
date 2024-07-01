@@ -1,16 +1,35 @@
 {
   "compilerOptions": {
-    "outDir": "./esm/",
+    "target": "ES2022",
+    "useDefineForClassFields": true,
+    "module": "ESNext",
+    "strict": true,
+    "lib": [
+      "ESNext",
+      "DOM",
+    ],
+    "skipLibCheck": true,
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
     "noImplicitAny": true,
-    "module": "commonjs",
-    "target": "esnext",
     "allowJs": true,
     "sourceMap": true,
-    "moduleResolution": "node",
     "declaration": true,
-    "removeComments": false
+    "removeComments": false,
+    "outDir": "dist",
+    "rootDir": "lib",
   },
   "include": [
-    "./src/**/*"
+    "lib",
+    "tests",
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "lib/**/*.d.ts",
+    "tests/**/*.d.ts"
   ]
 }
