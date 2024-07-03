@@ -19,22 +19,14 @@ let draw
 createApp({
     mounted() {
         // const parsedCode = PiDraw.parse(this.code)
+        draw = PiDraw.Parse.build(
+            'root',
+            this.parameter,
+            this.code,
+            (value: string): string => katex.renderToString(value, { throwOnError: false })
+        )
 
-        draw = new PiDraw.graph('root', {
-            width: 800,
-            height: 600,
-            origin: { x: 400, y: 300 },
-            display: {
-                grid: true,
-                subgrid: 3,
-                axis: { x: 3, y: 1 }
-            },
-            tex: (value: string): string => katex.renderToString(value, { throwOnError: false })
-        })
-
-        draw.load(this.code)
-
-        const result = PiDraw.parser_documentation
+        const result = PiDraw.Parse.documentation
 
         this.output.innerHTML = Object.keys(result).map((key) => {
             return `<div class="border rounded flex flex-col gap-2">
@@ -50,6 +42,7 @@ createApp({
     },
     setup() {
         const output = ref(null)
+        const parameter = ref('x=-5:10,y=-3:5,grid,axis')
         const code = ref(`A(3,1)->red,w=0.5,drag=grid,tex=\\sin(\\alpha)/mc/0;0.3
 B(-2,-1)->blue/0.4,?,w=0.1,label
 AB=AB.->dash=7,w=5,!,label=hello=world/mc/0;0.3,black/0.1
@@ -70,10 +63,14 @@ X=inter x,AB->w=10,red
             code,
             message,
             output,
+            parameter,
             modify: () => {
             },
             update: () => {
                 draw.refresh(code.value)
+            },
+            updateLayout: () => {
+                draw.refreshLayout(parameter.value)
             },
             analyseCode: () => {
                 console.log('analyseCode');

@@ -10,7 +10,7 @@ import { AbstractFigure } from "./figures/AbstractFigure"
 import { Box } from "@svgdotjs/svg.js"
 import { Circle, ICircleConfig } from "./figures/Circle"
 import { Polygon, IPolygonConfig } from "./figures/Polygon"
-import { IParser, PARSER_TYPE, graphParser } from "./Parser"
+import { IParser, PARSER_TYPE, graphLayoutParser, graphParser } from "./Parser"
 import { Grid } from "./figures/Grid"
 import { Arc, IArcConfig } from "./figures/Arc"
 import { CoordinateSystem } from "./figures/CoordinateSystem"
@@ -42,7 +42,8 @@ export class Graph {
         wrapper.style.border = 'thin solid black'
         document.getElementById(id)?.appendChild(wrapper)
 
-        const defaultUnit = config?.unit ?? 50
+        const defaultUnit = config?.ppu ?? 50
+
         this.#config = Object.assign({
             width: 800,
             height: 600,
@@ -102,7 +103,6 @@ export class Graph {
 
         // Remove the axis
         this.#layers.axis.clear()
-
 
         if (this.#display.subgrid) {
             this.subgrid('SUBGRID', this.#display.subgrid)
@@ -238,6 +238,37 @@ export class Graph {
         }
     }
 
+    static build(id: string,
+        config: string,
+        code: string,
+        toTeX: (value: string) => string = (value: string) => value
+    ): Graph {
+        /**
+         *  draw = new PiDraw.Graph('root',
+            {
+                ...parseLayout.config,
+                tex: (value: string): string => katex.renderToString(value, { throwOnError: false }),
+                display: {
+                    ...parseLayout.display,
+                }
+            }
+        )
+
+        draw.load(this.code)
+         */
+        const parseLayout = graphLayoutParser(config)
+        const graph = new Graph(id, {
+            ...parseLayout.config,
+            tex: toTeX,
+            display: {
+                ...parseLayout.display,
+            }
+        })
+
+        graph.load(code)
+
+        return graph
+    }
     static parse(input: string): IParser[] {
         return graphParser(input)
 
@@ -614,10 +645,20 @@ export class Graph {
      * @param code string
      */
     public refresh(code: string) {
-        //TODO: Refresh must be better optimized
         Object.keys(this.figures).forEach((name) => {
             this.figures[name].element.remove()
         })
         this.load(code)
+    }
+
+    public refreshLayout(code: string) {
+        // Update the configuration
+        const layout = graphLayoutParser(code)
+
+        this.#config = layout.config
+        this.#display = layout.display
+
+        // Update the layout
+        this.updateLayout()
     }
 }

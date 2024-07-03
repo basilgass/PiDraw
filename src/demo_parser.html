@@ -38,6 +38,7 @@
 <body class="min-h-screen">
     <div id="app" class="flex flex-col gap-3">
         <h1 class="text-center text-2xl font-semibold my-10">Graph builder</h1>
+        <input v-model="parameter" id="param" class="border px-3 py-1" @input="updateLayout" />
         <textarea v-model="code" id="construct" rows="10" class="border p-3 rounded w-full" @input="update"></textarea>
         <!-- output -->
         <div id="root" class="w-full max-w-3xl mx-auto"></div>

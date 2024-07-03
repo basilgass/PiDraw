@@ -6,7 +6,7 @@ const { createApp, ref } = Vue
 
 createApp({
     mounted: () => {
-        const draw = new PiDraw.graph('root')
+        const draw = new PiDraw.Graph('root')
 
         // for (let i = 0; i < 4; i++) {
         //     for (let j = 0; j < 4; j++) {

@@ -5,10 +5,15 @@
 // export const PiNum = NumExp
 
 import { Graph } from "./Graph"
-import { parser_documentation } from "./Parser"
+import { graphLayoutParser, parser_documentation, } from "./Parser"
+import { IGraphConstructorConfig } from "./pidraw.common"
 
 export const PiDraw = {
-    graph: Graph,
-    parse: (input: string) => Graph.parse(input),
-    parser_documentation: parser_documentation
+    Graph: Graph,
+    Parse: {
+        build: (id: string, config: string, code: string, toTex: (value: string) => string) => Graph.build(id, config, code, toTex),
+        load: (input: string) => Graph.parse(input),
+        documentation: parser_documentation,
+        config: (input: string, config?: IGraphConstructorConfig) => graphLayoutParser(input, config)
+    }
 }

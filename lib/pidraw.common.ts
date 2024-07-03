@@ -22,7 +22,7 @@ export interface IGraphConstructorConfig {
     height?: number,
     origin?: XY,
     system?: COORDINATE_SYSTEM,
-    unit?: number,
+    ppu?: number,
     axis?: {
         x: XY,
         y: XY,

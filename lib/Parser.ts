@@ -1,4 +1,4 @@
-import { DOMAIN, XY } from "./pidraw.common"
+import { COORDINATE_SYSTEM, DOMAIN, IGraphConfig, IGraphConstructorConfig, IGraphDisplay, XY } from "./pidraw.common"
 
 /**
  * The parser type is used to identify the type of the parser.
@@ -117,9 +117,8 @@ export const parser_documentation = {
     }
 }
 
-
-type IParserOptions = (string | number | XY | DOMAIN)
-interface IParserParameters {
+export type IParserOptions = (string | number | XY | DOMAIN)
+export interface IParserParameters {
     value: string | boolean,
     options: IParserOptions[]
 }
@@ -137,7 +136,8 @@ const PARSER_BOOLEAN_VALUES = [
     'hide', // Hide the figure and the label
     'ultrathin', 'thin', 'thick', 'ultrathick',
     'dash', 'dot',
-    'tex', 'label'
+    'tex', 'label', // TeX or Text label
+    'axis', 'grid' // Parameter for the layout
 ]
 
 /**
@@ -179,6 +179,80 @@ export function graphParser(input: string): IParser[] {
     return output
 }
 
+export function graphLayoutParser(input: string, customConfig?: IGraphConstructorConfig): { config: IGraphConfig, display: IGraphDisplay } {
+
+    const config: IGraphConstructorConfig = Object.assign({
+        width: 800,
+        height: 600,
+        origin: { x: 400, y: 300 },
+        system: COORDINATE_SYSTEM.CARTESIAN_2D,
+        ppu: 50,
+        display: {
+            grid: false,
+            subgrid: 0,
+            axis: false
+        },
+        tex: (value: string): string => value
+    }, customConfig)
+
+    const parameters = _parserParametersCode(input)
+
+    if (parameters.ppu) {
+        config.ppu = parseFloat(parameters.ppu.value as string)
+    }
+
+    const ppu = config.ppu as unknown as number
+
+    // Determine the axis limits
+    if (parameters.x && config.origin) {
+        const xDimension = _getUnitDimension(parameters.x.value as string)
+        config.width = xDimension.width * ppu
+        config.origin.x = xDimension.origin * ppu
+    }
+    if (parameters.y && config.origin) {
+        const yDimension = _getUnitDimension(parameters.y.value as string)
+        config.height = yDimension.width * (config.ppu as unknown as number)
+        config.origin.y = yDimension.origin * (config.ppu as unknown as number)
+    }
+
+    // Display the grid
+    if (parameters.grid && config.display) { config.display.grid = true }
+
+    // Display the axis
+    if (parameters.axis && config.display) { config.display.axis = true }
+
+    return {
+        config: {
+            width: config.width as unknown as number,
+            height: config.height as unknown as number,
+            origin: config.origin as unknown as XY,
+            system: config.system as unknown as COORDINATE_SYSTEM,
+            axis: {
+                x: { x: ppu, y: 0 },
+                y: { x: 0, y: -ppu },
+                z: { x: -ppu / Math.sqrt(2), y: ppu / Math.sqrt(2) }
+            }
+        },
+        display: config.display as unknown as IGraphDisplay
+    }
+}
+
+function _getUnitDimension(value: string): { width: number, origin: number } {
+    if (value) {
+        const { min, max } = _parserParametersOptions([value] as string[])[0] as DOMAIN
+
+        if (!isNaN(+min) && !isNaN(+max)) {
+            // Determiner the width of the graph
+            return {
+                width: Math.abs(max - min),
+                origin: Math.abs(min)
+            }
+        }
+    }
+
+    // Default to 20 unites
+    return { width: 20, origin: 10 }
+}
 /**
  * Parse the first part of the input string:
  * <key>=<code>-><parameters>
@@ -289,8 +363,8 @@ function _parserParametersCode(parameters_code: string): Record<string, IParserP
                         options: []
                     }
                     return acc
-
                 } else {
+                    // Default to a color.
                     acc.color = {
                         value: key,
                         options: []

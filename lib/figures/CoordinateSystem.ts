@@ -1,4 +1,4 @@
-import { Marker, G, Svg, Line as svgLine } from "@svgdotjs/svg.js"
+import { Marker, Svg, Line as svgLine } from "@svgdotjs/svg.js"
 import { COORDINATE_SYSTEM, IAxisConfig, XY } from "../pidraw.common"
 import { AbstractFigure } from "./AbstractFigure"
 import { computeLine, createMarker } from "../Calculus"
