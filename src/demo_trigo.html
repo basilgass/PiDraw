@@ -21,18 +21,8 @@
     <!-- adding vue -->
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
 
-    <!-- adding katex -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"
-        integrity="sha384-nB0miv6/jRmo5UMMR1wu3Gz6NLsoTkbqJghGIsx//Rlm+ZU03BU6SQNC66uf4l5+" crossorigin="anonymous">
-
-    <!-- The loading of KaTeX is deferred to speed up page rendering -->
-    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"
-        integrity="sha384-7zkQWkzuo3B5mTepMUcHkMB5jZaolc2xDwL6VFqjFALcbeS9Ggm/Yr2r3Dy4lfFg"
-        crossorigin="anonymous"></script>
-
-
     <!-- adding pimath.css  -->
-    <link rel=" stylesheet" href="/src/app.css" />
+    <link rel="stylesheet" href="/src/app.css" />
 </head>
 
 <body class="min-h-screen">
@@ -41,13 +31,11 @@
         <textarea v-model="code" id="construct" rows="10" class="border p-3 rounded w-full" @input="update"></textarea>
         <!-- output -->
         <div id="root" class="w-full max-w-3xl mx-auto"></div>
-
-        <div ref="output" class="w-full grid grid-cols-1 md:grid-cols-2 gap-3"></div>
     </div>
     </div>
 
 
-    <script type="module" src="/src/demo_parser.ts"> </script>
+    <script type="module" src="/src/demo_trigo.ts"> </script>
 </body>
 
 </html>

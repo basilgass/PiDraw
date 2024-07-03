@@ -18,15 +18,105 @@ export enum PARSER_TYPE {
     PARALLEL = 'para',          // OK : para <line>,<point>
     MEDIATOR = 'med',           // OK : med <point>,<point>
     TANGENT = 'tan',
-    BISECTOR = 'biss',
+    BISECTOR = 'bis',
     // CIRCLES
     CIRCLE = 'circ',            // OK : <center>,<radius>
+    ARC = 'arc',                // OK : arc <point>,<point>,<point>
     // PLOTS
     PLOT = 'plot',              // OK : plot <function>
     // POLYGONS
     POLYGON = 'poly',           // OK : poly <point>,<point>,<point>,...
     REGULAR = 'reg',            // OK: reg <center>,<radius>,<sides>
 }
+
+export const parser_documentation = {
+    point: {
+        description: 'Create a point',
+        code: 'A(3,4)',
+        parameters: ['drag', 'drag:grid', 'drag:axis', 'drag:x', 'drag:y', 'drag:<figure>']
+    },
+    mid: {
+        description: 'Create the middle of two points',
+        code: 'mid <point>,<point>',
+        parameters: []
+    },
+    projection: {
+        description: 'Create the projection of a point on a line',
+        code: 'proj <point>,<line>',
+        parameters: []
+    },
+    intersection: {
+        description: 'Create the intersection of two lines',
+        code: 'inter <line>,<line>',
+        parameters: []
+    },
+    symmetry: {
+        description: 'Create the symmetry of a point',
+        code: 'sym <point>,<point|line>',
+        parameters: []
+    },
+    line: {
+        description: 'Create a line, a half line or a segment',
+        code: '<line> | line[ | <line>.',
+        parameters: ['dash', 'dot']
+    },
+    vector: {
+        description: 'Create a vector',
+        code: 'v<line>',
+        parameters: []
+    },
+    perpendicular: {
+        description: 'Create the perpendicular of a line from a point',
+        code: 'perp <line>,<point>',
+        parameters: []
+    },
+    parallel: {
+        description: 'Create a parallel line from a point',
+        code: 'para <line>,<point>',
+        parameters: []
+    },
+    mediator: {
+        description: 'Create the mediator of two points',
+        code: 'med <point>,<point>',
+        parameters: []
+    },
+    tangent: {
+        description: 'Create a tangent line from a point to a circle',
+        code: 'tan <point>,<point>',
+        parameters: []
+    },
+    bisector: {
+        description: 'Create the bisector of an angle',
+        code: 'bis <point>,<point>,<point>',
+        parameters: []
+    },
+    circle: {
+        description: 'Create a circle',
+        code: 'circ <point>,<radius>',
+        parameters: []
+    },
+    arc: {
+        description: 'Create an arc',
+        code: 'arc <point>,<point>,<point>[,<number>]',
+        parameters: []
+    },
+    plot: {
+        description: 'Plot a function',
+        code: 'plot <function>[,<domain>]',
+        parameters: []
+    },
+    polygon: {
+        description: 'Create a polygon',
+        code: 'poly <point>,<point>,<point>,...',
+        parameters: []
+    },
+    regular: {
+        description: 'Create a regular polygon',
+        code: 'reg <center>,<radius>,<sides>',
+        parameters: []
+    }
+}
+
 
 type IParserOptions = (string | number | XY | DOMAIN)
 interface IParserParameters {
@@ -46,7 +136,8 @@ const PARSER_BOOLEAN_VALUES = [
     '?',    // Hide the label, not the figure
     'hide', // Hide the figure and the label
     'ultrathin', 'thin', 'thick', 'ultrathick',
-    'dash', 'dot'
+    'dash', 'dot',
+    'tex', 'label'
 ]
 
 /**
@@ -57,9 +148,18 @@ const PARSER_BOOLEAN_VALUES = [
 export function graphParser(input: string): IParser[] {
     const output: IParser[] = []
 
-    const lines = input.split('\n').filter((line) => line.trim() !== '')
+    const lines = input
+        .split('\n')
+        .filter((line) => line.trim() !== '')
 
+    let objIsStatic = false
     for (const line of lines) {
+        // If lines starts with '@', it's a command
+        if (line.startsWith('@')) {
+            if (line.startsWith('@begin:static')) { objIsStatic = true }
+            if (line.startsWith('@end:static')) { objIsStatic = false }
+            continue
+        }
 
         // Split the line into key_code and parameters at '->'
         const [key_code, parameters_code] = line.split('->')
@@ -69,6 +169,7 @@ export function graphParser(input: string): IParser[] {
 
         // Split the parameters into key and value at ','
         if (parameters_code !== undefined) {
+            result.parameters.static = { value: !!objIsStatic, options: [] }
             result.parameters = Object.assign(result.parameters, _parserParametersCode(parameters_code))
         }
 
@@ -80,6 +181,10 @@ export function graphParser(input: string): IParser[] {
 
 /**
  * Parse the first part of the input string:
+ * <key>=<code>-><parameters>
+ * [key] is the id of the figure
+ * [code] is the type of the figure
+ * [parameters] is the parameters of the figure
  * it contains the key and the figure code
  * @param key_code 
  * @returns 
@@ -153,6 +258,8 @@ function _parseKeyCode(key_code: string): IParser {
 /**
  * Parse the second part of the input string:
  * it contains the parameters of the figure (color, width, etc.)
+ * <key>=<code>-><parameters>
+ * <parameters> is a list of <options> separated by ','
  * @param parameters_code 
  * @returns 
  */
@@ -200,7 +307,7 @@ function _parserParametersCode(parameters_code: string): Record<string, IParserP
 }
 
 /**
- * Parse each parameters and split it in <key>:<value> and <options>
+ * Parse each parameters and split it in <key>=<value> and <options>
  * @param options string[]
  * @returns 
  */
@@ -211,6 +318,11 @@ function _parserParametersOptions(options: string[]): IParserOptions[] {
                 // DOMAIN
                 const [x, y] = option.split(':')
                 return { min: parseFloat(x), max: parseFloat(y) }
+            } else if (option.includes(';')) {
+                // COORDINATE
+                const [x, y] = option.split(';')
+                return { x: parseFloat(x), y: parseFloat(y) }
+
             } else if (!isNaN(+option)) {
                 return +option
             } else if (option.includes('/')) {

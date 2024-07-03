@@ -835,7 +835,7 @@ export function computeLine(
 
         x2 = origin.x
         if (length) {
-            y2 = direction.y > 0 ? origin.y + length * direction.y : 0 + padding
+            y2 = direction.y < 0 ? origin.y + length * direction.y : 0 + padding
         } else {
             y2 = direction.y > 0 ? height - padding : 0 + padding
         }

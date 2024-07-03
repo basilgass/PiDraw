@@ -4,12 +4,39 @@ export interface IGraphConfig {
     width: number,
     height: number,
     origin: XY,
-    // grids: XY,
+    system: COORDINATE_SYSTEM,
     axis: {
         x: XY,
         y: XY,
         z?: XY
     }
+}
+
+export interface IGraphDisplay {
+    grid?: boolean,
+    subgrid?: number,
+    axis?: boolean | { x?: boolean | number | IAxisConfig, y?: boolean | number | IAxisConfig, z?: boolean | number | IAxisConfig },
+}
+export interface IGraphConstructorConfig {
+    width?: number,
+    height?: number,
+    origin?: XY,
+    system?: COORDINATE_SYSTEM,
+    unit?: number,
+    axis?: {
+        x: XY,
+        y: XY,
+        z?: XY
+    },
+    display?: IGraphDisplay,
+    tex?: (value: string) => string
+}
+
+export interface IAxisConfig {
+    color?: string,
+    padding?: number,
+    half?: boolean,
+    length?: number
 }
 
 export interface IFigureAppearanceConfig {
@@ -67,14 +94,14 @@ export interface DOMAIN {
 }
 
 export enum LAYER_NAME {
-    AXIS = 'axis',
     BACKGROUND = 'background',
-    FOREGROUND = 'foreground',
     GRIDS = 'grids',
+    AXIS = 'axis',
     MAIN = 'main',
     PLOTS_BACKGROUND = 'plots_BG',
     PLOTS = 'plots',
     PLOTS_FOREGROUND = 'plots_FG',
+    FOREGROUND = 'foreground',
     POINTS = 'points',
     INTERACTIVE = 'interactive',
 }
@@ -115,10 +142,10 @@ export enum LINECONSTRAINT {
     TANGENT = 'tangent',                // a point and a circle
     MEDIATOR = "mediator",              // two points
     SLOPE = 'slope',                    // a point and a slope
-    BISSECTOR = "bissector",            // two lines
+    BISECTOR = "bisector",            // two lines
 }
 
-export enum POLYGONCONSTRAINT {
+export enum POLYGON_CONSTRAINT {
     FIXED = 'fixed',
     REGULAR = 'regular',
     STAR = 'star'

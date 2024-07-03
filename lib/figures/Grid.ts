@@ -23,6 +23,8 @@ export class Grid extends AbstractFigure {
     constructor(rootSVG: Svg, name: string, values: IGridConfig) {
         super(rootSVG, name)
 
+        this.static = true
+
         this.#config = Object.assign(
             {
                 ...this.graphConfig,
@@ -55,7 +57,6 @@ export class Grid extends AbstractFigure {
     }
 
     computed(): this {
-
         const gridPath = [
             ...this.#computeLines(this.#config.axis.x, this.#config.axis.y),
             ...this.#computeLines(this.#config.axis.y, this.#config.axis.x)

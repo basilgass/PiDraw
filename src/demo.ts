@@ -88,7 +88,7 @@ createApp({
 
         const poly = draw.create.polygon({
             vertices: [pt, projX, pt2, projY],
-        }, 'poly').fill('green').stroke('black', 2)
+        }, 'poly').fill('green/0.3').stroke('black', 2)
 
         const regularPolygon = draw.create.polygon(
             {

@@ -109,8 +109,10 @@ export abstract class AbstractFigure {
         return this
     }
 
-    update(): this {
-        if (this.static) { return this }
+    update(forceUpdate?: boolean): this {
+        if (this.static && forceUpdate !== true) {
+            return this
+        }
 
         this.computed()
 
@@ -122,8 +124,12 @@ export abstract class AbstractFigure {
 
 
     // The position depends on the figure.
-    addLabel(value?: string, asHtml?: boolean): Label {
-        this.#label = new Label(this.#element, this.#name, value, asHtml)
+    addLabel(text?: string, asHtml?: boolean, texConverter?: (value: string) => string): Label {
+        this.#label = new Label(this.#element, this.#name, {
+            text: text ?? this.#name,
+            asHtml: asHtml ?? false,
+            texConverter: texConverter ?? ((value: string) => value)
+        })
         this.moveLabel()
         return this.#label
     }

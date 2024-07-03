@@ -32,6 +32,10 @@ export class Line extends AbstractFigure {
         this.#end = value
     }
 
+    get angle(): number {
+        return Math.atan2(-this.direction.y, this.direction.x) * 180 / Math.PI
+    }
+
     constructor(rootSVG: Svg, name: string, values: ILineConfig) {
         super(rootSVG, name)
 
@@ -146,6 +150,22 @@ export class Line extends AbstractFigure {
     }
 
     moveLabel(): this {
+        if (!this.label) { return this }
+
+        // If it's a segment, place it at the middle of the segment
+        if (this.#config.shape === 'segment') {
+            const x = (this.start.x + this.end.x) / 2
+            const y = (this.start.y + this.end.y) / 2
+
+            let angle = -this.angle
+            if (angle > 90) { angle = angle - 180 }
+            if (angle < -90) { angle = angle + 180 }
+
+            this.label.move(x, y)
+            this.label.rotate(angle)
+            this.label.position()
+        }
+
         return this
     }
 }

@@ -1,11 +1,11 @@
-import { G, Marker, SVG, Svg, Line as svgLine } from "@svgdotjs/svg.js"
+import { Marker, SVG, Svg } from "@svgdotjs/svg.js"
 import '@svgdotjs/svg.draggable.js'
 
-import { AXIS, COORDINATE_SYSTEM, DOMAIN, ILayers, LAYER_NAME, XY, XYZ, isXY } from "./pidraw.common"
+import { COORDINATE_SYSTEM, DOMAIN, IGraphConfig, IGraphConstructorConfig, IGraphDisplay, ILayers, LAYER_NAME, XY, XYZ, isXY } from "./pidraw.common"
 import { IPointConfig, Point } from "./figures/Point"
 import { ILineConfig, Line } from "./figures/Line"
 import { IPlotConfig, Plot } from "./figures/Plot"
-import { computeLine, createMarker, toPixels } from "./Calculus"
+import { createMarker, toPixels } from "./Calculus"
 import { AbstractFigure } from "./figures/AbstractFigure"
 import { Box } from "@svgdotjs/svg.js"
 import { Circle, ICircleConfig } from "./figures/Circle"
@@ -13,6 +13,8 @@ import { Polygon, IPolygonConfig } from "./figures/Polygon"
 import { IParser, PARSER_TYPE, graphParser } from "./Parser"
 import { Grid } from "./figures/Grid"
 import { Arc, IArcConfig } from "./figures/Arc"
+import { CoordinateSystem } from "./figures/CoordinateSystem"
+import { LABEL_POSITION } from "./labels/Label"
 
 interface IDraggableConfig {
     grid?: boolean
@@ -26,15 +28,13 @@ interface IDraggableConfig {
 
 export class Graph {
     #rootSVG: Svg
-    #width: number
-    #height: number
-    #origin: { x: number, y: number }
-    // #grids: { x: number, y: number }
-    #axis: { x: XY, y: XY, z?: XY }
     #layers: ILayers
     #figures: Record<string, AbstractFigure>
+    #config: IGraphConfig
+    #display: IGraphDisplay
+    #toTex: (value: string) => string
 
-    constructor(id: string) {
+    constructor(id: string, config?: IGraphConstructorConfig) {
         const wrapper = document.createElement('DIV')
         wrapper.style.position = 'relative'
         wrapper.style.width = '100%'
@@ -42,25 +42,38 @@ export class Graph {
         wrapper.style.border = 'thin solid black'
         document.getElementById(id)?.appendChild(wrapper)
 
-        this.#width = 800
-        this.#height = 600
-        this.#origin = { x: 400, y: 300 }
-        this.#axis = {
-            x: { x: 50, y: 0 },
-            y: { x: 0, y: -50 },
-            z: { x: -50 / Math.sqrt(2), y: 50 / Math.sqrt(2) }
-        }
+        const defaultUnit = config?.unit ?? 50
+        this.#config = Object.assign({
+            width: 800,
+            height: 600,
+            origin: { x: 400, y: 300 },
+            system: COORDINATE_SYSTEM.CARTESIAN_2D,
+            axis: {
+                x: { x: defaultUnit, y: 0 },
+                y: { x: 0, y: -defaultUnit },
+                z: { x: -defaultUnit / Math.sqrt(2), y: defaultUnit / Math.sqrt(2) }
+            }
+        }, config)
+
+        // TexConverter 
+        this.#toTex = config?.tex ?? ((value: string) => value)
+
+        this.#display = Object.assign({
+            grid: true,
+            subgrid: 0,
+            axis: true
+        }, config?.display)
 
         this.#rootSVG = SVG()
             .addTo(wrapper)
-            .viewbox(0, 0, this.#width, this.#height)
+            .viewbox(0, 0, this.#config.width, this.#config.height)
 
         this.#rootSVG.data('config', {
-            width: this.#width,
-            height: this.#height,
-            origin: this.#origin,
+            width: this.#config.width,
+            height: this.#config.height,
+            origin: this.#config.origin,
             // grids: this.#grids,
-            axis: this.#axis
+            axis: this.#config.axis
         })
 
         // Define the layers
@@ -74,26 +87,45 @@ export class Graph {
 
         this.#figures = {}
 
-        this.subgrid('SUBGRID', 5)
-            .stroke('purple/0.5', 0.1)
-        this.grid('MAINGRID', this.#axis)
-            .stroke('lightgray', 1)
-
-        this.coordinate_system(COORDINATE_SYSTEM.CARTESIAN_2D)
+        this.#makeLayout()
         return this
     }
 
     get rootSVG() { return this.#rootSVG }
     get figures() { return this.#figures }
+    get config() { return this.#config }
+    set config(value: IGraphConfig) { this.#config = value }
 
+    #makeLayout(): void {
+        // Remove the grid
+        this.#layers.grids.clear()
+
+        // Remove the axis
+        this.#layers.axis.clear()
+
+
+        if (this.#display.subgrid) {
+            this.subgrid('SUBGRID', this.#display.subgrid)
+                .stroke('purple/0.5', 0.1)
+        }
+        if (this.#display.grid) {
+            this.grid('MAINGRID', this.#config.axis)
+                .stroke('lightgray', 1)
+        }
+
+        if (this.#display.axis) {
+            this.coordinate_system(this.#config.system)
+        }
+
+    }
     public grid(name: string, gridConfig: { x: XY, y: XY }): AbstractFigure {
         // const group = this.#rootSVG.group().attr('id', name)
 
         const aGrid = new Grid(this.#rootSVG, name, {
             axis: gridConfig,
-            origin: this.#origin,
-            width: this.#width,
-            height: this.#height,
+            origin: this.#config.origin,
+            width: this.#config.width,
+            height: this.#config.height,
             subdivisions: 0
         })
 
@@ -104,65 +136,21 @@ export class Graph {
 
     public subgrid(name: string, subdivision: number): AbstractFigure {
         const subAxis = {
-            x: { x: this.#axis.x.x / subdivision, y: this.#axis.x.y / subdivision },
-            y: { x: this.#axis.y.x / subdivision, y: this.#axis.y.y / subdivision }
+            x: { x: this.#config.axis.x.x / subdivision, y: this.#config.axis.x.y / subdivision },
+            y: { x: this.#config.axis.y.x / subdivision, y: this.#config.axis.y.y / subdivision }
         }
         return this.grid(name, subAxis)
     }
 
-    public coordinate_system(system: COORDINATE_SYSTEM) {
+    public coordinate_system(system: COORDINATE_SYSTEM): AbstractFigure {
+        const axis = new CoordinateSystem(
+            this.#rootSVG,
+            'COORDINATE_SYSTEM',
+            system)
 
-        if (system === COORDINATE_SYSTEM.CARTESIAN_2D) {
-            this.axis('Ox', AXIS.X, { padding: 20 })
-            this.axis('Oy', AXIS.Y, { padding: 20 })
+        this.#layers.axis.add(axis.element)
 
-        } else if (system === COORDINATE_SYSTEM.CARTESIAN_3D) {
-            this.axis('Ox', AXIS.Z, { color: 'red', padding: 10, half: true, length: 2 })
-            this.axis('Oy', AXIS.X, { color: 'blue', padding: 10, half: true, length: 2 })
-            this.axis('Oz', AXIS.Y, { color: 'green', padding: 10, half: true, length: 2 })
-        }
-    }
-
-    #axisLine(direction: XY, origin: XY, padding = 0, half_axis = false, length?: number): svgLine | null {
-        // origin: XY, direction: XY, graph: { width: number, height: number }, padding = 0, half_axis = false, length?: number
-        const data = computeLine(origin, direction, this.#width, this.#height, padding, half_axis, length)
-        if (data === null) { return null }
-
-        return this.#rootSVG.line(data[0].x, data[0].y, data[1].x, data[1].y)
-    }
-    public axis(name: string, type: AXIS, config?: {
-        color?: string,
-        padding?: number,
-        half?: boolean,
-        length?: number
-    }): G {
-        const direction =
-            type === AXIS.X ? this.#axis.x :
-                type === AXIS.Y ? this.#axis.y :
-                    this.#axis.z
-
-        if (direction === undefined) { throw new Error('Invalid axis type') }
-
-        const color = config?.color ?? 'black'
-        const padding = config?.padding ?? 0
-        const half_axis = config?.half ?? false
-        const length = config?.length ?? 0
-
-        const group = this.#rootSVG.group().attr('id', name)
-        const arrow = this.marker(10).end.fill(color)
-
-        const axis = this.#axisLine(direction, this.#origin, padding, half_axis, length)
-
-
-        if (axis !== null) {
-            axis.stroke({ color: color, width: 1 })
-                .marker('end', arrow)
-            group.add(axis)
-        }
-
-        this.#layers.axis.add(group)
-
-        return group
+        return axis
     }
 
     public marker(scale: number): { start: Marker, end: Marker } {
@@ -171,24 +159,18 @@ export class Graph {
 
     // public toCoordinates(pixels: XY): XY {
     //     return {
-    //         x: (pixels.x - this.#origin.x) / this.#grids.x,
-    //         y: -(pixels.y - this.#origin.y) / this.#grids.y
+    //         x: (pixels.x - this.#config.origin.x) / this.#grids.x,
+    //         y: -(pixels.y - this.#config.origin.y) / this.#grids.y
     //     }
     // }
 
     public toPixels(pixels: number | XY | XYZ): XY {
-        return toPixels(pixels, {
-            width: this.#width,
-            height: this.#height,
-            origin: this.#origin,
-            // grids: this.#grids,
-            axis: this.#axis
-        })
+        return toPixels(pixels, this.config)
     }
 
     get create() {
         return {
-            point: (coordinates: XY | IPointConfig, name: string, label = { create: true, html: false }): Point => {
+            point: (coordinates: XY | IPointConfig, name: string, label?: { html: boolean }): Point => {
                 const value = isXY(coordinates) ?
                     {
                         coordinates: this.toPixels(coordinates),
@@ -203,8 +185,13 @@ export class Graph {
                 this.#layers.points.add(pt.element)
                 this.#figures[name] = pt
 
-                if (label.create) {
-                    pt.addLabel(name, label.html)
+                if (label) {
+                    // Define the label name.
+                    pt.addLabel(
+                        name,
+                        label.html,
+                        this.#toTex
+                    )
                 }
                 return pt
             },
@@ -258,7 +245,6 @@ export class Graph {
 
     load(code: string): this {
         const parsedCode = Graph.parse(code)
-
         parsedCode.forEach((item) => {
             let obj: AbstractFigure | undefined
 
@@ -352,6 +338,13 @@ export class Graph {
                         B: this.#figures[item.code[1]] as unknown as Line
                     }
                 }, item.id)
+            } else if (item.key === PARSER_TYPE.ARC) {
+                obj = this.create.arc({
+                    start: this.#figures[item.code[0]] as unknown as XY,
+                    center: this.#figures[item.code[1]] as unknown as XY,
+                    end: this.#figures[item.code[2]] as unknown as XY,
+                    radius: parseFloat(item.code[3]) ?? 1
+                }, item.id)
             } else {
                 console.log('Parser: not yet implemented')
                 console.log(item)
@@ -362,21 +355,47 @@ export class Graph {
                 Object.keys(item.parameters).forEach((key) => {
                     const { value, options } = item.parameters[key]
                     switch (key) {
+                        case 'static':
+                        case '#': {
+                            obj.static = value as boolean
+                            break
+                        }
+
+                        case 'label':
+                        case 'tex': {
+                            const text = value === true ? obj.name : value as string
+                            const label = obj.addLabel(
+                                text,
+                                key === 'tex',
+                                this.#toTex
+                            )
+
+                            if (options.length) {
+                                const pos = options[0] as unknown as LABEL_POSITION
+
+                                let offset: XY = { x: 0, y: 0 }
+                                if (isXY(options[1])) {
+                                    offset = options[1]
+                                    offset.x = toPixels(offset.x, this.#config).x
+                                    offset.y = -toPixels(offset.y, this.#config).y
+                                }
+
+                                label.position(pos, offset)
+                            }
+                            break
+                        }
                         // Drag and dynamic figures
                         case 'drag': {
                             // Actually, the drag can only be used on a point with coordinates.
                             const pt = obj as Point
-                            const options: IDraggableConfig = value === undefined ? {} : { grid: (value as string) === 'grid' }
+                            const options: IDraggableConfig = value === undefined ? {} :
+                                (value as string) === 'grid' ? { grid: true } :
+                                    { follow: this.#figures[value as string] as unknown as AbstractFigure }
 
-                            this.draggable(pt, options)
                             pt.asCircle(30)
+                            this.draggable(pt, options)
                             break
                         }
-                        case '#': {
-                            obj.static = true
-                            break
-                        }
-
 
                         // Appearance: Color
                         case 'color': {
@@ -428,8 +447,6 @@ export class Graph {
         return this
     }
 
-
-
     draggable(figure: AbstractFigure, options?: IDraggableConfig) {
 
         const dragmove = (e: Event & { detail: { box: Box, handler: unknown } }): void => {
@@ -437,7 +454,7 @@ export class Graph {
             const ptFigure = figure as Point
 
             // Get the event details
-            const { handler, box } = e.detail
+            const { box } = e.detail
 
             // Get the bounding box
             let { x, y } = box
@@ -446,10 +463,10 @@ export class Graph {
             e.preventDefault()
 
             // Do not allow to go outside the graph.
-            if (x < 0 || x > this.#width - box.width / 2) {
+            if (x < 0 || x > this.#config.width - box.width / 2) {
                 return
             }
-            if (y < 0 || y > this.#height - box.height / 2) {
+            if (y < 0 || y > this.#config.height - box.height / 2) {
                 return
             }
 
@@ -469,8 +486,8 @@ export class Graph {
 
             // Grid constraints
             if (options?.grid) {
-                const xGrid = this.#axis.x.x,
-                    yGrid = this.#axis.y.y
+                const xGrid = this.#config.axis.x.x,
+                    yGrid = this.#config.axis.y.y
 
                 x = Math.round(x / xGrid) * xGrid
                 y = Math.round(y / yGrid) * yGrid
@@ -555,7 +572,28 @@ export class Graph {
         return figure
     }
 
-    public update(except?: string[]) {
+    // Update the layout of the graph
+    public updateLayout() {
+        // Update the viewbox
+        this.#rootSVG.viewbox(0, 0, this.#config.width, this.#config.height)
+
+        // Update the transfer data
+        this.#rootSVG.data('config', {
+            width: this.#config.width,
+            height: this.#config.height,
+            origin: this.#config.origin,
+            axis: this.#config.axis
+        })
+
+        // Redo the layout
+        this.#makeLayout()
+
+        // Force a global update.
+        this.update([], true)
+    }
+
+    // Update each figures in the graph
+    public update(except?: string[], forceUpdate?: boolean) {
 
         if (except === undefined) { except = [] }
 
@@ -566,11 +604,15 @@ export class Graph {
                     this.figures[name].updateLabel()
                 } else {
                     // Update figure and label
-                    this.figures[name].update()
+                    this.figures[name].update(forceUpdate)
                 }
             })
     }
 
+    /**
+     * Refresh the graph with a new parser code
+     * @param code string
+     */
     public refresh(code: string) {
         //TODO: Refresh must be better optimized
         Object.keys(this.figures).forEach((name) => {

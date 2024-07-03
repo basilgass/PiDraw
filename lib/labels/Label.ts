@@ -1,7 +1,8 @@
 import { G, Text as svgLabel, ForeignObject as svgHTML, SVG } from "@svgdotjs/svg.js"
+import { XY } from "../pidraw.common"
 
 type LabelType = svgLabel | svgHTML
-type LABEL_POSITION = 'tl' | 'tc' | 'tr' | 'ml' | 'mc' | 'mr' | 'bl' | 'bc' | 'br'
+export type LABEL_POSITION = 'tl' | 'tc' | 'tr' | 'ml' | 'mc' | 'mr' | 'bl' | 'bc' | 'br'
 export class Label {
     #element: G
     #name: string
@@ -10,8 +11,9 @@ export class Label {
     #isHtml: boolean
     #x: number
     #y: number
-
     #style: string
+    #texConverter: (value: string) => string
+    #alignement: LABEL_POSITION
 
     get name() { return this.#name }
     get x() { return this.#x }
@@ -19,14 +21,23 @@ export class Label {
     get y() { return this.#y }
     set y(value: number) { this.#y = value }
     get isHtml() { return this.#isHtml }
+    get shape() { return this.#shape }
+    get alignement() { return this.#alignement }
 
-    constructor(rootG: G, name: string, value?: string, asHtml?: boolean) {
+    constructor(rootG: G, name: string, config: {
+        text?: string,
+        asHtml?: boolean,
+        texConverter?: (value: string) => string
+    }) {
         this.#element = rootG
         this.#name = name
-        this.#displayName = value ?? name
-        this.#isHtml = asHtml ?? false
+        this.#displayName = config.text ?? name
+        this.#isHtml = config.asHtml ?? false
+        this.#texConverter = config.texConverter ?? ((value: string) => value)
         this.#x = 0
         this.#y = 0
+
+        this.#alignement = 'br'
 
         this.#style = 'display: block; position: fixed; padding-left: 8px; padding-right: 8px; border: thin solid black; background-color: purple; color: white; white-space:nowrap'
 
@@ -41,8 +52,8 @@ export class Label {
         this.#shape = this.#isHtml ?
             this.#element.foreignObject(1, 1)
                 .attr('style', "overflow:visible")
-                .add(SVG(`<div style="${this.#style}">${this.#displayName}</div>`, true)) :
-            this.#element.text(this.#displayName)
+                .add(SVG(`<div style="${this.#style}">${this.displayName}</div>`, true)) :
+            this.#element.text(this.displayName)
 
         this.#shape.attr('id', `${this.#name}-label`)
 
@@ -52,6 +63,13 @@ export class Label {
     // Get the label of the figure.
     get label(): LabelType { return this.#shape }
 
+    get displayName() {
+        if (this.#isHtml) {
+            return this.#texConverter(this.#displayName)
+        }
+
+        return this.#displayName
+    }
     // Set the label of the figure.
     setLabel(text?: string): this {
         // Default label is the name of the figure.
@@ -70,13 +88,20 @@ export class Label {
         this.#shape.move(x, y)
         return this
     }
+    rotate(angle: number): this {
+        this.#shape.transform({
+            rotate: angle,
+            origin: { x: this.#x, y: this.#y }
+        })
+        return this
+    }
 
-    position(alignement: LABEL_POSITION): this {
+    position(alignement?: LABEL_POSITION, offset?: XY): this {
+        if (alignement === undefined) { alignement = this.#alignement }
+
         // Current object position
         let x = this.#x,
             y = this.#y
-
-        const offset = { x: 0, y: 0 }
 
         // Get and set the width of the label
         let width = 0, height = 0
@@ -109,9 +134,9 @@ export class Label {
         }
 
         if (this.#shape instanceof svgHTML) {
-            this.#shape.center(x + (offset.x ?? 0), y - (offset.y ?? 0))
+            this.#shape.center(x + (offset?.x ?? 0), y - (offset?.y ?? 0))
         } else {
-            this.#shape.center(x + (offset.x ?? 0), y - (offset.y ?? 0))
+            this.#shape.center(x + (offset?.x ?? 0), y - (offset?.y ?? 0))
         }
         return this
     }

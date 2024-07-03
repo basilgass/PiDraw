@@ -5,8 +5,10 @@
 // export const PiNum = NumExp
 
 import { Graph } from "./Graph"
+import { parser_documentation } from "./Parser"
 
 export const PiDraw = {
     graph: Graph,
-    parse: (input: string) => Graph.parse(input)
+    parse: (input: string) => Graph.parse(input),
+    parser_documentation: parser_documentation
 }

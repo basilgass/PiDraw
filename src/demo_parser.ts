@@ -1,28 +1,59 @@
 import { PiDraw } from "../lib/main"
 
-
-
 const { createApp, ref } = Vue
+
+const escapeHTML = str =>
+    str.replace(
+        /[&<>'"]/g,
+        tag =>
+        ({
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            "'": '&#39;',
+            '"': '&quot;'
+        }[tag] || tag)
+    );
 
 let draw
 createApp({
     mounted() {
         // const parsedCode = PiDraw.parse(this.code)
 
-        draw = new PiDraw.graph('root')
+        draw = new PiDraw.graph('root', {
+            width: 800,
+            height: 600,
+            origin: { x: 400, y: 300 },
+            display: {
+                grid: true,
+                subgrid: 3,
+                axis: { x: 3, y: 1 }
+            },
+            tex: (value: string): string => katex.renderToString(value, { throwOnError: false })
+        })
+
         draw.load(this.code)
 
+        const result = PiDraw.parser_documentation
+
+        this.output.innerHTML = Object.keys(result).map((key) => {
+            return `<div class="border rounded flex flex-col gap-2">
+            <h2 class="font-semibold text-lg bg-gray-200 p-3">${key}</h2>
+            <p class="px-3">${escapeHTML(result[key].description)}</p>
+            <pre class="px-3 pb-3">${escapeHTML(result[key].code)}</pre>
+            </div>`
+        }).join('')
         // Extract only the parameters.
         // const parameters = result.map((item) => item.parameters)
         // console.table(parameters[2].label);
 
     },
     setup() {
-
-        const code = ref(`A(3,4)->red,w=0.5,drag=grid
-B(-2,-1)->blue/0.4,?,w=0.1
-AB=AB.->dash=7,w=5,!,label=hello=world/mc/0:4,black/0.1
-f=plot x^2*sin(x)/8->#,samples=500,w=2,color=orange
+        const output = ref(null)
+        const code = ref(`A(3,1)->red,w=0.5,drag=grid,tex=\\sin(\\alpha)/mc/0;0.3
+B(-2,-1)->blue/0.4,?,w=0.1,label
+AB=AB.->dash=7,w=5,!,label=hello=world/mc/0;0.3,black/0.1
+f=plot x^2*sin(x)/8->#,w=2,color=orange
 C=circ A,3->w=10,color=green,fill=red/0.3
 p1=perp AB,A
 Px=proj A,x->w=5
@@ -38,6 +69,7 @@ X=inter x,AB->w=10,red
         return {
             code,
             message,
+            output,
             modify: () => {
             },
             update: () => {
