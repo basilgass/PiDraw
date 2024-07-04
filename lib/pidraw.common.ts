@@ -61,8 +61,8 @@ export function isXY(obj: unknown): obj is XY {
         obj !== undefined &&
         (
             (
-                Object.hasOwn(obj, 'x') &&
-                Object.hasOwn(obj, 'y')
+                Object.hasOwn(obj as object, 'x') &&
+                Object.hasOwn(obj as object, 'y')
             ) ||
             obj.constructor.name === 'Point'
         )
@@ -73,8 +73,8 @@ export function isDOMAIN(obj: unknown): obj is DOMAIN {
         obj !== undefined &&
         (
             (
-                Object.hasOwn(obj, 'min') &&
-                Object.hasOwn(obj, 'max')
+                Object.hasOwn(obj as object, 'min') &&
+                Object.hasOwn(obj as object, 'max')
             )
         )
 }

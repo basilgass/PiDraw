@@ -394,8 +394,18 @@ export class Graph {
                         }
 
                         // Appearance: stroke-dasharray
+                        case 'dot':
                         case 'dash': {
-                            obj.dash(value as string)
+                            obj.dash(typeof value === "string" ? value : key === 'dash' ? `${this.#config.axis.x.x / 2}` : '2')
+                            break
+                        }
+
+                        case '!':
+                            obj.shape.hide()
+                            break
+                        case 'hide': {
+                            obj.hide()
+                            obj.label?.hide()
                             break
                         }
                     }

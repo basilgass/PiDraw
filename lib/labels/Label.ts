@@ -69,6 +69,15 @@ export class Label {
 
         return this.#displayName
     }
+
+    hide() {
+        this.#shape.hide()
+        return this
+    }
+    show() {
+        this.#shape.show()
+        return this
+    }
     // Set the label of the figure.
     setLabel(text?: string): this {
         // Default label is the name of the figure.

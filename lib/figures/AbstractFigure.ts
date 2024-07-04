@@ -48,6 +48,14 @@ export abstract class AbstractFigure {
     get static() { return this.#static }
     set static(value: boolean) { this.#static = value }
 
+    hide() {
+        this.#element.hide()
+        return this
+    }
+    show() {
+        this.#element.show()
+        return this
+    }
 
     fill(color?: string): this {
         if (typeof color === 'string' && color.includes('/')) {

@@ -60,9 +60,9 @@ T16(0,-7.07)->tex=\\scriptsize-\\frac{\\sqrt{2}}{2}/rm/0.5;0
 T17(0,-8.6)->tex=\\scriptsize-\\frac{\\sqrt{3}}{2}/rm/0.5;0
 T19(0,-10)->tex=\\scriptsize -1/rb/0.5;0
 T(10,10)->hide
-X1(10,5.77)->tex=\\scriptsize \\frac{\\sqrt{3}}{3}/mr/0.5;
-X2(10,10)->tex=\\scriptsize 1/mr/0.5;
-X3(10,17.3)->tex=\\scriptsize \\sqrt{3}/mr/0.5;
+X1(10,5.77)->tex=\\scriptsize \\frac{\\sqrt{3}}{3}/mr/0.5;0
+X2(10,10)->tex=\\scriptsize 1/mr/0.5;0
+X3(10,17.3)->tex=\\scriptsize \\sqrt{3}/mr/0.5;0
 X4(10,-5.77)->tex=\\scriptsize -\\frac{\\sqrt{3}}{3}/mr/0.5;0
 X5(10,-10)->tex=\\scriptsize -1/mr/0.5;0
 X6(10,-17.3)->tex=\\scriptsize -\\sqrt{3}/mr/0.5;0
