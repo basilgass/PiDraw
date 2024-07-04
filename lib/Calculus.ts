@@ -61,7 +61,6 @@ export class mathVector {
     }
 
     get unit(): mathVector {
-
         const n = this.norm
         return new mathVector(this._x / n, this._y / n)
     }
