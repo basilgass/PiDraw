@@ -1,4 +1,4 @@
-import { PiDraw } from "../lib/main"
+import PiDraw from "../lib";
 
 const { createApp, ref } = Vue
 
@@ -20,14 +20,14 @@ createApp({
     mounted() {
         // this.code = 'f(x)=sin(x),-pi:2pi'
         // const parsedCode = PiDraw.parse(this.code)
-        draw = PiDraw.Parse.build(
+        draw = PiDraw.build(
             'root',
             this.parameter,
             this.code,
             (value: string): string => katex.renderToString(value, { throwOnError: false })
         )
 
-        const result = PiDraw.Parse.documentation
+        const result = PiDraw.documentation()
 
         this.output.innerHTML = Object.keys(result).map((key) => {
             return `<div class="border rounded flex flex-col gap-2">

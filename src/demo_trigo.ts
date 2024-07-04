@@ -1,6 +1,4 @@
-import { PiDraw } from "../lib"
-
-
+import PiDraw from "../lib"
 
 const { createApp, ref } = Vue
 
@@ -9,7 +7,7 @@ createApp({
     mounted() {
         // const parsedCode = PiDraw.parse(this.code)
 
-        draw = PiDraw.Graph.build(
+        draw = PiDraw.build(
             'root',
             `axis,x=-12:12,y=-20:20,ppu=20`,
             this.code,

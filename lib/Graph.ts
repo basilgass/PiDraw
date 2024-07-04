@@ -34,13 +34,18 @@ export class Graph {
     #display: IGraphDisplay
     #toTex: (value: string) => string
 
-    constructor(id: string, config?: IGraphConstructorConfig) {
+    constructor(id: string | HTMLElement, config?: IGraphConstructorConfig) {
         const wrapper = document.createElement('DIV')
         wrapper.style.position = 'relative'
         wrapper.style.width = '100%'
         wrapper.style.height = 'auto'
         wrapper.style.border = 'thin solid black'
-        document.getElementById(id)?.appendChild(wrapper)
+
+        if (typeof id === 'string') {
+            document.getElementById(id)?.appendChild(wrapper)
+        } else {
+            id.appendChild(wrapper)
+        }
 
         const defaultUnit = config?.ppu ?? 50
 
@@ -760,7 +765,7 @@ export class Graph {
         this.updateLayout()
     }
 
-    public parserDocumnetation() {
+    static documentation() {
         return parser_documentation
     }
 }

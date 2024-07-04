@@ -11,11 +11,17 @@ export default defineConfig({
 			name: "PiDraw",
 			formats: ["es"],
 			fileName: "pidraw"
-		}
+		},
+		emptyOutDir: true,
 	},
 	plugins: [
 		dtsPlugin({ 
-			include: ['lib', "es2022"] 
+			beforeWriteFile: (filePath, content) => (
+				{
+				filePath: filePath.replace("index.d.ts", "pidraw.d.ts"),
+				content,
+			}),
+			include: ['lib', "es2022"]
 		}), // generate .d.ts files for the lib folder
 	],
 	rollupOptions: {

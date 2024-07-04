@@ -1,12 +1,11 @@
-import { PiDraw } from "../lib/main"
-
+import PiDraw from "../lib"
 
 
 const { createApp, ref } = Vue
 
 createApp({
     mounted: () => {
-        const draw = new PiDraw.Graph('root')
+        const draw = new PiDraw('root')
 
         // for (let i = 0; i < 4; i++) {
         //     for (let j = 0; j < 4; j++) {
