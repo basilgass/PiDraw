@@ -90,12 +90,6 @@ export class Arc extends AbstractFigure {
 
         const x = this.center.x + d * v.x * (r + 20)
         const y = this.center.y + d * v.y * (r + 20)
-        console.log(r,
-            this.center.x, this.center.y,
-            this.start.x, this.start.y,
-            this.end.x, this.end.y,
-            d,
-            x, y, OA.x, OA.y, OB.x, OB.y, v.x, v.y)
 
         // Auto label placement.
         if (d * v.x > 0 && d * v.y > 0) {
@@ -111,8 +105,6 @@ export class Arc extends AbstractFigure {
             // Label is top left
             this.label.alignement = 'ml'
         }
-
-        console.log('placement: ', this.label.alignement)
 
         this.label.move(x, y)
 

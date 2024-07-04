@@ -304,7 +304,6 @@ export class Graph {
         const parsedCode = Graph.parse(code)
 
         parsedCode.forEach((item) => {
-
             let obj: AbstractFigure | undefined
             try {
                 obj = this.#loadSingleItem(item)

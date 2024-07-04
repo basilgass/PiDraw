@@ -21,7 +21,7 @@ export class mathVector {
         this._x = 0
         this._y = 0
 
-        if (typeof x === 'number' && typeof y === 'number') {
+        if (!isNaN(+x) && !isNaN(+y)) {
             this._x = +x
             this._y = +y
         } else if (isXY(x) && isXY(y)) {
