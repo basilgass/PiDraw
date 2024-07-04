@@ -7,12 +7,16 @@ export default defineConfig({
 		outDir: "dist",
 		copyPublicDir: false,
 		lib: {
-			entry: resolve(__dirname, "lib/main.ts"),
+			entry: resolve(__dirname, "lib/index.ts"),
+			name: "PiDraw",
 			formats: ["es"],
+			fileName: "pidraw"
 		}
 	},
 	plugins: [
-		dtsPlugin({ include: ['lib', "es2022"] }), // generate .d.ts files for the lib folder
+		dtsPlugin({ 
+			include: ['lib', "es2022"] 
+		}), // generate .d.ts files for the lib folder
 	],
 	rollupOptions: {
 		external: ["vue"],

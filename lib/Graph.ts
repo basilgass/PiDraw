@@ -9,7 +9,7 @@ import { createMarker, toPixels } from "./Calculus"
 import { AbstractFigure } from "./figures/AbstractFigure"
 import { Circle, ICircleConfig } from "./figures/Circle"
 import { Polygon, IPolygonConfig } from "./figures/Polygon"
-import { IParser, PARSER_TYPE, graphLayoutParser, graphParser } from "./Parser"
+import { IParser, PARSER_TYPE, graphLayoutParser, graphParser, parser_documentation } from "./Parser"
 import { Grid } from "./figures/Grid"
 import { Arc, IArcConfig } from "./figures/Arc"
 import { CoordinateSystem } from "./figures/CoordinateSystem"
@@ -758,5 +758,9 @@ export class Graph {
 
         // Update the layout
         this.updateLayout()
+    }
+
+    public parserDocumnetation() {
+        return parser_documentation
     }
 }

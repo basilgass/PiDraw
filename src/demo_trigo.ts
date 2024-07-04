@@ -1,4 +1,4 @@
-import { PiDraw } from "../lib/main"
+import { PiDraw } from "../lib"
 
 
 

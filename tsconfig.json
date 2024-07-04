@@ -17,9 +17,9 @@
     "noImplicitAny": true,
     "allowJs": true,
     "sourceMap": true,
-    "declaration": true,
-    "removeComments": false,
+    "removeComments": true,
     "outDir": "dist",
+    "declaration": true,
     "rootDir": "lib",
   },
   "include": [
