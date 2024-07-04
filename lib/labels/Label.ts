@@ -23,6 +23,7 @@ export class Label {
     get isHtml() { return this.#isHtml }
     get shape() { return this.#shape }
     get alignement() { return this.#alignement }
+    set alignement(value: LABEL_POSITION) { this.#alignement = value }
 
     constructor(rootG: G, name: string, config: {
         text?: string,
@@ -38,9 +39,7 @@ export class Label {
         this.#y = 0
 
         this.#alignement = 'br'
-
         this.#style = 'display: block; position: fixed; white-space:nowrap'
-
         this.#shape = this.#makeLabel()
     }
 
@@ -85,7 +84,7 @@ export class Label {
     move(x: number, y: number): this {
         this.#x = x
         this.#y = y
-        this.#shape.move(x, y)
+        this.position()
         return this
     }
     rotate(angle: number): this {
@@ -99,6 +98,7 @@ export class Label {
     position(alignement?: LABEL_POSITION, offset?: XY): this {
         if (alignement === undefined) { alignement = this.#alignement }
 
+        // TODO: label placement / alignement to optimize !
         // Current object position
         let x = this.#x,
             y = this.#y

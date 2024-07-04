@@ -42,7 +42,7 @@ export class Arc extends AbstractFigure {
             start: { x: 0, y: 0 },
             center: { x: 10, y: 10 },
             end: { x: 0, y: 10 },
-            radius: 50,
+            radius: this.graphConfig.axis.x.x,
             morphToSquare: true,
             sector: false,
             mark: false
@@ -91,22 +91,22 @@ export class Arc extends AbstractFigure {
         const x = this.center.x + d * v.x * (r + 20)
         const y = this.center.y + d * v.y * (r + 20)
 
-        this.label.move(x, y)
-
         // Auto label placement.
         if (d * v.x > 0 && d * v.y > 0) {
             // Label is bottom right
-            this.label.position('br')
+            this.label.alignement = 'mr'
         } else if (d * v.x < 0 && d * v.y > 0) {
             // Label is bottom left
-            this.label.position('bl')
+            this.label.alignement = 'ml'
         } else if (d * v.x > 0 && d * v.y < 0) {
             // label is top right
-            this.label.position('tr')
+            this.label.alignement = 'mr'
         } else if (d * v.x < 0 && d * v.y < 0) {
             // Label is top left
-            this.label.position('tl')
+            this.label.alignement = 'ml'
         }
+
+        this.label.move(x, y)
 
         return this
     }

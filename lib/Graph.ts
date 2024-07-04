@@ -319,7 +319,7 @@ export class Graph {
 
                         case 'label':
                         case 'tex': {
-                            const text = value as boolean ? obj.name : value as string
+                            const text = typeof value === 'string' ? value : obj.name
                             const label = obj.addLabel(
                                 text,
                                 key === 'tex',
@@ -335,7 +335,6 @@ export class Graph {
                                     offset.x = toPixels(offset.x, this.#config).x
                                     offset.y = -toPixels(offset.y, this.#config).y
                                 }
-
                                 label.position(pos, offset)
                             }
                             break

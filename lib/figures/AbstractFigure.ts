@@ -142,7 +142,6 @@ export abstract class AbstractFigure {
 
         // if the label is dynamic, update it.
         // TODO: dynamic label update.
-
         this.moveLabel()
 
         return this
