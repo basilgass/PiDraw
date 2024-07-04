@@ -75,6 +75,8 @@ export class Arc extends AbstractFigure {
     }
     moveLabel(): this {
         // No label - no need to continue
+        console.log('MOVE LABEL')
+
         if (!this.label) { return this }
 
         // Radius of the arc.
@@ -91,6 +93,8 @@ export class Arc extends AbstractFigure {
         const x = this.center.x + d * v.x * (r + 20)
         const y = this.center.y + d * v.y * (r + 20)
 
+        console.log(r, d, x, y)
+
         // Auto label placement.
         if (d * v.x > 0 && d * v.y > 0) {
             // Label is bottom right
@@ -105,6 +109,8 @@ export class Arc extends AbstractFigure {
             // Label is top left
             this.label.alignement = 'ml'
         }
+
+        console.log('placement: ', this.label.alignement)
 
         this.label.move(x, y)
 
