@@ -18,6 +18,7 @@ const escapeHTML = str =>
 let draw
 createApp({
     mounted() {
+        // this.code = 'f(x)=sin(x),-pi:2pi'
         // const parsedCode = PiDraw.parse(this.code)
         draw = PiDraw.Parse.build(
             'root',

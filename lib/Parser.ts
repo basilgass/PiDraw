@@ -1,4 +1,6 @@
-import { COORDINATE_SYSTEM, DOMAIN, IGraphConfig, IGraphConstructorConfig, IGraphDisplay, XY } from "./pidraw.common"
+import { NumExp } from "./Calculus"
+import { AbstractFigure } from "./figures/AbstractFigure"
+import { COORDINATE_SYSTEM, DOMAIN, IGraphConfig, IGraphConstructorConfig, IGraphDisplay, isDOMAIN, XY } from "./pidraw.common"
 
 /**
  * The parser type is used to identify the type of the parser.
@@ -23,7 +25,8 @@ export enum PARSER_TYPE {
     CIRCLE = 'circ',            // OK : <center>,<radius>
     ARC = 'arc',                // OK : arc <point>,<point>,<point>
     // PLOTS
-    PLOT = 'plot',              // OK : plot <function>
+    PLOT = 'plot',              // OK : plot <function>[,@<number>,<domain>,<domain>]
+    PARAMETRIC = 'parametric',  // OK : parametric <function>,<function>[,@<number>,<domain>]
     // POLYGONS
     POLYGON = 'poly',           // OK : poly <point>,<point>,<point>,...
     REGULAR = 'reg',            // OK: reg <center>,<radius>,<sides>
@@ -37,89 +40,94 @@ export const parser_documentation = {
     },
     mid: {
         description: 'Create the middle of two points',
-        code: 'mid <point>,<point>',
+        code: 'A=mid <point>,<point>',
         parameters: []
     },
     projection: {
         description: 'Create the projection of a point on a line',
-        code: 'proj <point>,<line>',
+        code: 'A=proj <point>,<line>',
         parameters: []
     },
     intersection: {
         description: 'Create the intersection of two lines',
-        code: 'inter <line>,<line>',
+        code: 'A=inter <line>,<line>',
         parameters: []
     },
     symmetry: {
         description: 'Create the symmetry of a point',
-        code: 'sym <point>,<point|line>',
+        code: 'A=sym <point>,<point|line>',
         parameters: []
     },
     line: {
         description: 'Create a line, a half line or a segment',
-        code: '<line> | line[ | <line>.',
+        code: 'd=<line> | <line>[ | <line>.',
         parameters: ['dash', 'dot']
     },
     vector: {
         description: 'Create a vector',
-        code: 'v<line>',
+        code: 'd=v<line>',
         parameters: []
     },
     perpendicular: {
         description: 'Create the perpendicular of a line from a point',
-        code: 'perp <line>,<point>',
+        code: 'd=perp <line>,<point>',
         parameters: []
     },
     parallel: {
         description: 'Create a parallel line from a point',
-        code: 'para <line>,<point>',
+        code: 'd=para <line>,<point>',
         parameters: []
     },
     mediator: {
         description: 'Create the mediator of two points',
-        code: 'med <point>,<point>',
+        code: 'd=med <point>,<point>',
         parameters: []
     },
     tangent: {
         description: 'Create a tangent line from a point to a circle',
-        code: 'tan <point>,<point>',
+        code: 'd=tan <point>,<point>',
         parameters: []
     },
     bisector: {
         description: 'Create the bisector of an angle',
-        code: 'bis <point>,<point>,<point>',
+        code: 'd=bis <point>,<point>,<point>',
         parameters: []
     },
     circle: {
         description: 'Create a circle',
-        code: 'circ <point>,<radius>',
+        code: 'c=circ <point>,<radius>',
         parameters: []
     },
     arc: {
         description: 'Create an arc',
-        code: 'arc <point>,<point>,<point>[,<number>]',
+        code: 'c=arc <point>,<point>,<point>[,<number>]',
         parameters: []
     },
     plot: {
         description: 'Plot a function',
-        code: 'plot <function>[,<domain>]',
+        code: 'f(x)=[f=plot ]<function>[@<number>,<domain>,<image>]',
+        parameters: []
+    },
+    parametric: {
+        description: 'Plot a parametric function',
+        code: 'f(t)=[f=parametric ]<function_x>,<function_y>[,<domain>]',
         parameters: []
     },
     polygon: {
         description: 'Create a polygon',
-        code: 'poly <point>,<point>,<point>,...',
+        code: 'p=poly <point>,<point>,<point>,...',
         parameters: []
     },
     regular: {
         description: 'Create a regular polygon',
-        code: 'reg <center>,<radius>,<sides>',
+        code: 'p=reg <center>,<radius>,<sides>',
         parameters: []
     }
 }
 
-export type IParserOptions = (string | number | XY | DOMAIN)
+export type IParserOptions = (string | number | XY | DOMAIN | AbstractFigure)
 export interface IParserParameters {
-    value: string | boolean,
+    value: IParserOptions,
     options: IParserOptions[]
 }
 export interface IParser {
@@ -253,6 +261,7 @@ function _getUnitDimension(value: string): { width: number, origin: number } {
     // Default to 20 unites
     return { width: 20, origin: 10 }
 }
+
 /**
  * Parse the first part of the input string:
  * <key>=<code>-><parameters>
@@ -278,7 +287,73 @@ function _parseKeyCode(key_code: string): IParser {
         id = key_code.split('(')[0]
         key = PARSER_TYPE.POINT
         code = key_code.split('(')[1].split(')')[0].split(',')
+
+        // Code should be a list of numbers (x,y)
+        // TODO: it can also be a list of expressions (like 2/3 or 2pi)
+        // TODO: it can also be a list of points (like A.x,B.y)
+
+    } else if (key_code.includes('(x)=')) {
+        let expression_and_options: string
+        [id, expression_and_options] = key_code.split('=')
+
+        key = PARSER_TYPE.PLOT
+        const [expression, ...options] = expression_and_options.split(',')
+
+        // Define the expression.
+        code = [expression]
+
+        // Define the options.
+        const opts = _parserParametersOptions(options)
+
+        if (opts.length > 0) {
+            // The sample is the first number value.
+            const samples = opts.filter((value) => typeof value === 'number')[0]
+            if (samples) { parameters.samples = { value: samples as number, options: [] } }
+
+            // The domain is the first DOMAIN value.
+            const domain_image = opts.filter((value) => isDOMAIN(value))
+            if (domain_image.length > 0) {
+                parameters.domain = { value: domain_image[0] as DOMAIN, options: [] }
+            }
+
+            // The image is the second DOMAIN value.
+            if (domain_image.length > 1) {
+                parameters.image = { value: domain_image[1] as DOMAIN, options: [] }
+
+            }
+        }
+
+    } else if (key_code.includes('(t)=')) {
+        let expression_and_options: string
+        [id, expression_and_options] = key_code.split('=')
+
+        key = PARSER_TYPE.PARAMETRIC
+        const [expr1, expr2, ...options] = expression_and_options.split(',')
+
+        // Define the expression.
+        code = [expr1, expr2]
+
+        // Define the options.
+        const opts = _parserParametersOptions(options)
+
+        if (opts.length > 0) {
+            // The sample is the first number value.
+            const samples = opts.filter((value) => typeof value === 'number')[0]
+            if (samples) { parameters.samples = { value: samples as number, options: [] } }
+
+            // The domain
+            const domain = opts.filter((value) => isDOMAIN(value))[0]
+            if (domain) {
+                parameters.domain = { value: domain as DOMAIN, options: [] }
+            }
+
+        }
     } else if (key_code.includes('=') && !key_code.includes(' ')) {
+        // Possibilities:
+        // 1. d=AB => id='d', key=LINE, code=['A', 'B']
+        // 2. d=AB. => id='d', key=LINE, code=['A', 'B']
+        // 3. d=[AB[ => id='d', key=LINE, code=['A', 'B']
+        // 4. d=vAB => id='d', key=LINE, code=['A', 'B']
         // Extract the line (with = sign). The id is before the '=' and the code is after '='
         let list_of_points: string
         [id, list_of_points] = key_code.split('=')
@@ -311,6 +386,7 @@ function _parseKeyCode(key_code: string): IParser {
         // d=PxPy => points = ['Px', 'Py']
         // Use a Regexp to split the code into points.
         code = list_of_points.split(/(?=[A-Z])/)
+
     } else {
         id = key_code.split('=')[0]
         const [keyString, ...codeString] = key_code.split('=')[1].split(' ')
@@ -390,15 +466,24 @@ function _parserParametersOptions(options: string[]): IParserOptions[] {
         return options.map((option) => {
             if (option.includes(':')) {
                 // DOMAIN
-                const [x, y] = option.split(':')
-                return { min: parseFloat(x), max: parseFloat(y) }
+                const [a, b] = option.split(':')
+                return {
+                    min: _parseNumber(a),
+                    max: _parseNumber(b)
+                }
+
             } else if (option.includes(';')) {
                 // COORDINATE
                 const [x, y] = option.split(';')
-                return { x: parseFloat(x), y: parseFloat(y) }
+                return {
+                    x: _parseNumber(x),
+                    y: _parseNumber(y)
+                }
 
             } else if (!isNaN(+option)) {
                 return +option
+            } else if (option.startsWith('@')) {
+                return +option.slice(1)
             } else if (option.includes('/')) {
                 const [numerator, denominator] = option.split('/')
                 if (!isNaN(+numerator) && !isNaN(+denominator) && +denominator !== 0) {
@@ -410,4 +495,8 @@ function _parserParametersOptions(options: string[]): IParserOptions[] {
         })
     }
     return []
+}
+
+function _parseNumber(value: string): number {
+    return isNaN(+value) ? new NumExp(value).evaluate() : parseFloat(value)
 }

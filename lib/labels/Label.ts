@@ -39,7 +39,7 @@ export class Label {
 
         this.#alignement = 'br'
 
-        this.#style = 'display: block; position: fixed; padding-left: 8px; padding-right: 8px; border: thin solid black; background-color: purple; color: white; white-space:nowrap'
+        this.#style = 'display: block; position: fixed; white-space:nowrap'
 
         this.#shape = this.#makeLabel()
     }

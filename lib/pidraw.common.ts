@@ -68,6 +68,17 @@ export function isXY(obj: unknown): obj is XY {
         )
 }
 
+export function isDOMAIN(obj: unknown): obj is DOMAIN {
+    return obj !== null &&
+        obj !== undefined &&
+        (
+            (
+                Object.hasOwn(obj, 'min') &&
+                Object.hasOwn(obj, 'max')
+            )
+        )
+}
+
 export function isLine(obj: unknown): obj is { follow: 'x' | 'y' | 'z', start: XY, direction: XY } {
     return obj !== null &&
         typeof obj === 'object' &&

@@ -1,13 +1,12 @@
-import { Marker, SVG, Svg } from "@svgdotjs/svg.js"
+import { Box, Marker, SVG, Svg } from "@svgdotjs/svg.js"
 import '@svgdotjs/svg.draggable.js'
 
-import { COORDINATE_SYSTEM, DOMAIN, IGraphConfig, IGraphConstructorConfig, IGraphDisplay, ILayers, LAYER_NAME, XY, XYZ, isXY } from "./pidraw.common"
+import { COORDINATE_SYSTEM, DOMAIN, IGraphConfig, IGraphConstructorConfig, IGraphDisplay, ILayers, LAYER_NAME, XY, XYZ, isDOMAIN, isXY } from "./pidraw.common"
 import { IPointConfig, Point } from "./figures/Point"
 import { ILineConfig, Line } from "./figures/Line"
 import { IPlotConfig, Plot } from "./figures/Plot"
 import { createMarker, toPixels } from "./Calculus"
 import { AbstractFigure } from "./figures/AbstractFigure"
-import { Box } from "@svgdotjs/svg.js"
 import { Circle, ICircleConfig } from "./figures/Circle"
 import { Polygon, IPolygonConfig } from "./figures/Polygon"
 import { IParser, PARSER_TYPE, graphLayoutParser, graphParser } from "./Parser"
@@ -15,6 +14,7 @@ import { Grid } from "./figures/Grid"
 import { Arc, IArcConfig } from "./figures/Arc"
 import { CoordinateSystem } from "./figures/CoordinateSystem"
 import { LABEL_POSITION } from "./labels/Label"
+import { IParametricConfig, Parametric } from "./figures/Parametric"
 
 interface IDraggableConfig {
     grid?: boolean
@@ -211,6 +211,14 @@ export class Graph {
 
                 return plot
             },
+            parametric: (constraints: IParametricConfig, name: string): Parametric => {
+                const plot = new Parametric(this.#rootSVG, name, constraints)
+
+                this.#layers.plots.add(plot.element)
+                this.#figures[name] = plot
+
+                return plot
+            },
             circle: (constraints: ICircleConfig, name: string): Circle => {
                 const circle = new Circle(this.#rootSVG, name, constraints)
 
@@ -270,117 +278,34 @@ export class Graph {
         return graph
     }
     static parse(input: string): IParser[] {
-        return graphParser(input)
-
+        try {
+            return graphParser(input)
+        } catch (e) {
+            console.warn('PiDraw Parse code cannot be analyzed', input)
+            return []
+        }
     }
 
+    /**
+     * The parsing function to load a graph from a parser code
+     * It works in two parts:
+     * - create the figure with their constraints
+     * - apply the options to the figure
+     * 
+     * @param code string : The parser code (multi line)
+     * @returns 
+     */
     load(code: string): this {
         const parsedCode = Graph.parse(code)
+
         parsedCode.forEach((item) => {
+
             let obj: AbstractFigure | undefined
-
-            if (item.key === PARSER_TYPE.POINT) {
-                obj = this.create.point({
-                    x: parseFloat(item.code[0]),
-                    y: parseFloat(item.code[1])
-                }, item.id)
-            } else if (item.key === PARSER_TYPE.MIDDLE) {
-                obj = this.create.point({
-                    middle: {
-                        A: this.#figures[item.code[0]] as unknown as Point,
-                        B: this.#figures[item.code[1]] as unknown as Point
-                    }
-                }, item.id)
-
-            } else if (item.key === PARSER_TYPE.PROJECTION) {
-                obj = this.create.point({
-                    projection: {
-                        axis: (['x', 'y'].includes(item.code[1])) ? (item.code[1] as unknown as 'x' | 'y') : (this.#figures[item.code[1]] as Line),
-                        point: this.#figures[item.code[0]] as unknown as Point
-                    }
-                }, item.id)
-            } else if (item.key === PARSER_TYPE.LINE) {
-                let shape: 'line' | 'vector' | 'segment' | 'half_line' = 'line'
-
-                if (item.parameters.shape !== undefined) {
-                    shape = item.parameters.shape.value as 'line' | 'vector' | 'segment' | 'half_line'
-                }
-
-                obj = this.create.line({
-                    through: {
-                        A: this.#figures[item.code[0]] as unknown as XY,
-                        B: this.#figures[item.code[1]] as unknown as XY
-                    },
-                    shape
-                }, item.id)
-            } else if (item.key === PARSER_TYPE.PERPENDICULAR) {
-                obj = this.create.line({
-                    perpendicular: {
-                        to: this.#figures[item.code[0]] as unknown as Line,
-                        through: this.#figures[item.code[1]] as unknown as Point
-                    }
-                }, item.id)
-            } else if (item.key === PARSER_TYPE.PARALLEL) {
-                obj = this.create.line({
-                    parallel: {
-                        to: this.#figures[item.code[0]] as unknown as Line,
-                        through: this.#figures[item.code[1]] as unknown as Point
-                    }
-                }, item.id)
-            } else if (item.key === PARSER_TYPE.MEDIATOR) {
-                obj = this.create.line({
-                    mediator: {
-                        A: this.#figures[item.code[0]] as unknown as Point,
-                        B: this.#figures[item.code[1]] as unknown as Point
-                    }
-                }, item.id)
-            } else if (item.key === PARSER_TYPE.CIRCLE) {
-                obj = this.create.circle({
-                    center: this.#figures[item.code[0]] as unknown as XY,
-                    radius: parseFloat(item.code[1])
-                }, item.id)
-            } else if (item.key === PARSER_TYPE.PLOT) {
-                obj = this.create.plot({
-                    expression: item.code[0]
-                }, item.id)
-            } else if (item.key === PARSER_TYPE.POLYGON) {
-                // The polygon parser can be defined by:
-                // - a list of vertices
-                obj = this.create.polygon({
-                    vertices: item.code.map((name) => this.#figures[name] as unknown as XY)
-                }, item.id)
-            } else if (item.key === PARSER_TYPE.REGULAR) {
-                // - a center, number of sides and a radius
-                // The radius can be a number or a point.
-                // In case of the point, the radius is the distance between the center and the point.
-                obj = this.create.polygon({
-                    regular: {
-                        center: this.#figures[item.code[0]] as unknown as XY,
-                        radius: isNaN(+item.code[1]) ?
-                            this.#figures[item.code[1]] as unknown as XY :
-                            parseFloat(item.code[1]),
-                        sides: parseInt(item.code[2]),
-                    }
-                }, item.id)
-            } else if (item.key === PARSER_TYPE.INTERSECTION) {
-                obj = this.create.point({
-                    intersection: {
-                        A: this.#figures[item.code[0]] as unknown as Line,
-                        B: this.#figures[item.code[1]] as unknown as Line
-                    }
-                }, item.id)
-            } else if (item.key === PARSER_TYPE.ARC) {
-                obj = this.create.arc({
-                    start: this.#figures[item.code[0]] as unknown as XY,
-                    center: this.#figures[item.code[1]] as unknown as XY,
-                    end: this.#figures[item.code[2]] as unknown as XY,
-                    radius: parseFloat(item.code[3]) ?? 1
-                }, item.id)
-            } else {
-                console.log('Parser: not yet implemented')
-                console.log(item)
+            try {
+                obj = this.#loadSingleItem(item)
+            } catch (e) {
+                console.warn('The current PiDraw Parser item cannot be loaded', item)
             }
-
             // Manage the options (only if the figure is created)
             if (obj !== undefined) {
                 Object.keys(item.parameters).forEach((key) => {
@@ -474,10 +399,184 @@ export class Graph {
             }
         })
 
-
         return this
     }
 
+    #loadSingleItem(item: IParser): AbstractFigure {
+        let obj: AbstractFigure | undefined
+
+        // Preprocess the code
+        const code = this.#codeFormater(item.code)
+
+        if (item.key === PARSER_TYPE.POINT) {
+            obj = this.create.point({
+                x: code[0] as number,
+                y: code[1] as number,
+            }, item.id)
+        } else if (item.key === PARSER_TYPE.MIDDLE) {
+            obj = this.create.point({
+                middle: {
+                    A: code[0] as Point,
+                    B: code[1] as Point
+                }
+            }, item.id)
+
+        } else if (item.key === PARSER_TYPE.PROJECTION) {
+            obj = this.create.point({
+                projection: {
+                    axis: ['x', 'y'].includes(code[1] as string) ?
+                        code[1] as string as 'x' | 'y' :
+                        code[1] as Line,
+                    point: code[0] as Point
+                }
+            }, item.id)
+        } else if (item.key === PARSER_TYPE.LINE) {
+            let shape: 'line' | 'vector' | 'segment' | 'half_line' = 'line'
+
+            if (item.parameters.shape !== undefined) {
+                shape = item.parameters.shape.value as 'line' | 'vector' | 'segment' | 'half_line'
+            }
+
+            obj = this.create.line({
+                through: {
+                    A: code[0] as XY,
+                    B: code[1] as XY
+                },
+                shape
+            }, item.id)
+        } else if (item.key === PARSER_TYPE.PERPENDICULAR) {
+            obj = this.create.line({
+                perpendicular: {
+                    to: code[0] as Line,
+                    through: code[1] as Point
+                }
+            }, item.id)
+        } else if (item.key === PARSER_TYPE.PARALLEL) {
+            obj = this.create.line({
+                parallel: {
+                    to: code[0] as Line,
+                    through: code[1] as Point
+                }
+            }, item.id)
+        } else if (item.key === PARSER_TYPE.MEDIATOR) {
+            obj = this.create.line({
+                mediator: {
+                    A: code[0] as Point,
+                    B: code[1] as Point
+                }
+            }, item.id)
+        } else if (item.key === PARSER_TYPE.CIRCLE) {
+            obj = this.create.circle({
+                center: code[0] as XY,
+                radius: code[1] as number
+            }, item.id)
+        } else if (item.key === PARSER_TYPE.PLOT) {
+            const plotConfig: IPlotConfig = { expression: code[0] as string }
+
+            // Custom samples
+            if (item.parameters.samples !== undefined) {
+                plotConfig.samples = item.parameters.samples.value as number
+            }
+
+            // Custom domain
+            if (item.parameters.domain !== undefined) {
+                plotConfig.domain = item.parameters.domain.value as DOMAIN
+            }
+
+            // Custom image
+            if (item.parameters.image !== undefined) {
+                plotConfig.image = item.parameters.image.value as DOMAIN
+            }
+
+
+            obj = this.create.plot(plotConfig, item.id)
+        } else if (item.key === PARSER_TYPE.PARAMETRIC) {
+            // f(t)=sin(x),cos(2x)
+            const parametricConfig: IParametricConfig = {
+                expressions: {
+                    x: code[0] as string,
+                    y: code[1] as string
+                }
+            }
+
+            // Custom samples
+            if (item.parameters.samples !== undefined) {
+                parametricConfig.samples = item.parameters.samples.value as number
+            }
+
+            // Custom domain
+            if (item.parameters.domain !== undefined) {
+                parametricConfig.domain = item.parameters.domain.value as DOMAIN
+            }
+
+            obj = this.create.parametric(parametricConfig, item.id)
+        } else if (item.key === PARSER_TYPE.POLYGON) {
+            // The polygon parser can be defined by:
+            // - a list of vertices
+            obj = this.create.polygon({
+                vertices: code as XY[]
+            }, item.id)
+        } else if (item.key === PARSER_TYPE.REGULAR) {
+            // - a center, number of sides and a radius
+            // The radius can be a number or a point.
+            // In case of the point, the radius is the distance between the center and the point.
+            obj = this.create.polygon({
+                regular: {
+                    center: code[0] as XY,
+                    radius: isXY(code[1]) ?
+                        code[1] :
+                        code[1] as number,
+                    sides: Math.trunc(code[2] as number),
+                }
+            }, item.id)
+        } else if (item.key === PARSER_TYPE.INTERSECTION) {
+            obj = this.create.point({
+                intersection: {
+                    A: code[0] as Line,
+                    B: code[1] as Line
+                }
+            }, item.id)
+        } else if (item.key === PARSER_TYPE.ARC) {
+            obj = this.create.arc({
+                start: code[0] as XY,
+                center: code[1] as XY,
+                end: code[2] as XY,
+                radius: (code[3] as number) ?? 1
+            }, item.id)
+        } else {
+            console.log('Parser: not yet implemented')
+            console.log(item)
+        }
+
+        return obj
+    }
+    #codeFormater(code: string[]): (AbstractFigure | DOMAIN | XY | number | string)[] {
+        const arr: (AbstractFigure | DOMAIN | XY | number | string)[] = code.map((item) => {
+            // It's a figure
+            if (Object.hasOwn(this.figures, item)) {
+                return this.figures[item]
+            } else if (item.includes(':')) {
+                // It's a domain
+                const [min, max] = item.split(':').map(parseFloat)
+                return { min, max } as DOMAIN
+            } else if (item.includes(';')) {
+                // It's a point
+                const [x, y] = item.split(';').map(parseFloat)
+                return { x, y }
+            } else if (item.startsWith('@')) {
+                // It's a number, using slices to remove the @
+                return +item.slice(1)
+            } else if (!isNaN(+item)) {
+                // It's a number
+                return parseFloat(item)
+            }
+
+            // In any other case, return the item as string
+            return item
+        })
+
+        return arr
+    }
     draggable(figure: AbstractFigure, options?: IDraggableConfig) {
 
         const dragmove = (e: Event & { detail: { box: Box, handler: unknown } }): void => {

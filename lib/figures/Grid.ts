@@ -5,6 +5,7 @@ import { computeLine } from "../Calculus"
 
 interface IGridConfig {
     axis: { x: XY, y: XY },
+    scale?: { x: number, y: number },
     origin: XY,
     width: number,
     height: number,
@@ -32,6 +33,9 @@ export class Grid extends AbstractFigure {
             },
             values
         )
+
+        // TODO: implement a "scaling factor" for the axis
+        // this.#config.axis.x.x = Math.PI * this.#config.axis.x.x / 4
 
         // Generate the base shape
         this.shape = this.#makeShape()
