@@ -118,7 +118,7 @@ export class Graph {
                 .stroke('lightgray', 1)
         }
 
-        if (this.#display.axis) {
+        if (this.#display.axis && this.#config.system) {
             this.coordinate_system(this.#config.system)
         }
 

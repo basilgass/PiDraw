@@ -6,7 +6,8 @@
   "main": "dist/pidraw.js",
   "types": "dist/pidraw.d.ts",
   "files": [
-    "dist"
+    "dist",
+    "lib"
   ],
   "scripts": {
     "test": "vitest",

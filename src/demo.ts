@@ -1,12 +1,20 @@
 import PiDraw from "../lib"
+import { COORDINATE_SYSTEM } from "../lib/pidraw.common"
 
 
 const { createApp, ref } = Vue
 
 createApp({
     mounted: () => {
-        const draw = new PiDraw('root')
-
+        const el = document.getElementById('root') as HTMLElement
+        const draw = new PiDraw(el, {
+            width: 470,
+            height: 470,
+            origin: {
+                x: 30,
+                y: 480
+            }
+        })
         // for (let i = 0; i < 4; i++) {
         //     for (let j = 0; j < 4; j++) {
         //         draw.create.point({ x: i, y: j }, `helper_${i}-${j}`)

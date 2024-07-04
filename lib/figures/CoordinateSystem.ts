@@ -152,7 +152,9 @@ export class CoordinateSystem extends AbstractFigure {
             length
         ) as unknown as [XY, XY]
 
-        axis.plot(data[0].x, data[0].y, data[1].x, data[1].y)
+        if(data !== null){
+            axis.plot(data[0].x, data[0].y, data[1].x, data[1].y)
+        }
 
         axis.stroke({ color: color, width: 1 })
             .marker('end', arrow)
