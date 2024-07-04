@@ -57,32 +57,19 @@ export interface XY {
 }
 
 export function isXY(obj: unknown): obj is XY {
-    return obj !== null &&
-        obj !== undefined &&
-        (
-            (
-                Object.hasOwn(obj as object, 'x') &&
-                Object.hasOwn(obj as object, 'y')
-            ) ||
-            obj.constructor.name === 'Point'
-        )
+    // @ts-expect-error : obj is XY
+    return obj !== null && obj !== undefined && obj.x !== undefined && obj.y !== undefined
 }
 
 export function isDOMAIN(obj: unknown): obj is DOMAIN {
-    return obj !== null &&
-        obj !== undefined &&
-        (
-            (
-                Object.hasOwn(obj as object, 'min') &&
-                Object.hasOwn(obj as object, 'max')
-            )
-        )
+    // @ts-expect-error : obj is DOMAIN
+    return obj !== null && obj !== undefined && obj.min !== undefined && obj.max !== undefined
 }
 
 export function isLine(obj: unknown): obj is { follow: 'x' | 'y' | 'z', start: XY, direction: XY } {
     return obj !== null &&
         typeof obj === 'object' &&
-        obj.constructor.name === 'Line'
+        obj.constructor.name.startsWith('Line')
 }
 
 export function isXYZ(obj: unknown): obj is XY {
