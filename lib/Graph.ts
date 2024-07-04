@@ -1,7 +1,7 @@
 import { Box, Marker, SVG, Svg } from "@svgdotjs/svg.js"
 import '@svgdotjs/svg.draggable.js'
 
-import { COORDINATE_SYSTEM, DOMAIN, IGraphConfig, IGraphConstructorConfig, IGraphDisplay, ILayers, LAYER_NAME, XY, XYZ, isDOMAIN, isXY } from "./pidraw.common"
+import { COORDINATE_SYSTEM, DOMAIN, IGraphConfig, IGraphConstructorConfig, IGraphDisplay, ILayers, LAYER_NAME, XY, XYZ, isXY } from "./pidraw.common"
 import { IPointConfig, Point } from "./figures/Point"
 import { ILineConfig, Line } from "./figures/Line"
 import { IPlotConfig, Plot } from "./figures/Plot"
@@ -313,13 +313,13 @@ export class Graph {
                     switch (key) {
                         case 'static':
                         case '#': {
-                            obj.static = value as boolean
+                            obj.static = value as unknown as boolean
                             break
                         }
 
                         case 'label':
                         case 'tex': {
-                            const text = value === true ? obj.name : value as string
+                            const text = value as boolean ? obj.name : value as string
                             const label = obj.addLabel(
                                 text,
                                 key === 'tex',
@@ -402,7 +402,7 @@ export class Graph {
         return this
     }
 
-    #loadSingleItem(item: IParser): AbstractFigure {
+    #loadSingleItem(item: IParser): AbstractFigure | undefined {
         let obj: AbstractFigure | undefined
 
         // Preprocess the code

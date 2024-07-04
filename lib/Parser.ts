@@ -125,7 +125,7 @@ export const parser_documentation = {
     }
 }
 
-export type IParserOptions = (string | number | XY | DOMAIN | AbstractFigure)
+export type IParserOptions = (string | number | boolean | XY | DOMAIN | AbstractFigure)
 export interface IParserParameters {
     value: IParserOptions,
     options: IParserOptions[]
