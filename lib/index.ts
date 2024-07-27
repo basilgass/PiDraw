@@ -4,9 +4,5 @@
 // export const PiDraw = Graph
 // export const PiNum = NumExp
 
-import { Graph as PiDraw } from "./Graph"
-import * as common from "./pidraw.common.ts"
-
-export default PiDraw
-
-export const PiDrawConfig = common
+export { Graph as PiGraph } from "./Graph"
+export { Parser as PiParser } from "./Parser"

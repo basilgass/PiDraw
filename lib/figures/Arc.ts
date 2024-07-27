@@ -12,6 +12,7 @@ export interface IArcConfig {
     sector?: boolean,
     mark?: boolean
 }
+
 export class Arc extends AbstractFigure {
     #config: IArcConfig
     #markers: { start: Marker, end: Marker }

@@ -1,5 +1,6 @@
 import { G, Text as svgLabel, ForeignObject as svgHTML } from "@svgdotjs/svg.js"
 
+export type TeXConverterType = (value: string) => string
 export interface IGraphConfig {
     width: number,
     height: number,
@@ -7,15 +8,14 @@ export interface IGraphConfig {
     system: COORDINATE_SYSTEM,
     axis: {
         x: XY,
-        y: XY,
-        z?: XY
+        y: XY
     }
 }
 
 export interface IGraphDisplay {
     grid?: boolean,
     subgrid?: number,
-    axis?: boolean | { x?: boolean | number | IAxisConfig, y?: boolean | number | IAxisConfig, z?: boolean | number | IAxisConfig },
+    axis?: boolean | { x: boolean | number | IAxisConfig, y: boolean | number | IAxisConfig },
 }
 export interface IGraphConstructorConfig {
     width?: number,
@@ -25,11 +25,10 @@ export interface IGraphConstructorConfig {
     ppu?: number,
     axis?: {
         x: XY,
-        y: XY,
-        z?: XY
+        y: XY
     },
     display?: IGraphDisplay,
-    tex?: (value: string) => string
+    tex?: TeXConverterType
 }
 
 export interface IAxisConfig {
@@ -66,27 +65,15 @@ export function isDOMAIN(obj: unknown): obj is DOMAIN {
     return obj !== null && obj !== undefined && obj.min !== undefined && obj.max !== undefined
 }
 
-export function isLine(obj: unknown): obj is { follow: 'x' | 'y' | 'z', start: XY, direction: XY } {
+export function isLine(obj: unknown): obj is { follow: 'x' | 'y', start: XY, direction: XY } {
     return obj !== null &&
         typeof obj === 'object' &&
         obj.constructor.name.startsWith('Line')
 }
 
-export function isXYZ(obj: unknown): obj is XY {
-    return (typeof obj === 'object') &&
-        obj !== null &&
-        Object.hasOwn(obj, 'x') &&
-        Object.hasOwn(obj, 'y') &&
-        Object.hasOwn(obj, 'z')
-}
-
-export interface XYZ {
-    x: number,
-    y: number,
-    z: number
-}
 
 export interface DOMAIN {
+    axis?: 'x' | 'y',
     min: number,
     max: number
 }
@@ -108,13 +95,11 @@ export type ILayers = Record<LAYER_NAME, G>
 
 export enum AXIS {
     'X' = 'Ox',
-    'Y' = 'Oy',
-    'Z' = 'Oz'
+    'Y' = 'Oy'
 }
 
 export enum COORDINATE_SYSTEM {
     'CARTESIAN_2D' = 'cartesian_2d',
-    'CARTESIAN_3D' = 'cartesian_3d',
     'POLAR' = 'polar',
 }
 

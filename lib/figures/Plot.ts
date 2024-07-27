@@ -1,7 +1,7 @@
 import { Svg } from "@svgdotjs/svg.js"
 import { AbstractFigure } from "./AbstractFigure"
 import { DOMAIN, XY } from "../pidraw.common"
-import { NumExp, toPixels } from "../Calculus"
+import { NumExp, toPixels, toCoordinates } from "../Calculus"
 import { Path } from "@svgdotjs/svg.js"
 
 export interface IPlotConfig {
@@ -13,9 +13,13 @@ export interface IPlotConfig {
 
 export class Plot extends AbstractFigure {
     #config: IPlotConfig
+    #numExp: NumExp
     get config() { return this.#config }
     set config(value: IPlotConfig) {
         this.#config = value
+
+        this.#numExp = new NumExp(this.#config.expression)
+
         this.computed()
     }
 
@@ -29,6 +33,8 @@ export class Plot extends AbstractFigure {
 
         // Generate the base shape
         this.shape = this.#makeShape()
+
+        this.#numExp = new NumExp(this.#config.expression)
 
         // Compute the shape
         this.computed()
@@ -54,7 +60,7 @@ export class Plot extends AbstractFigure {
         // Get the mathematical function from the config
         const fn: string = this.#config.expression
 
-        if (fn === '') { return this }
+        if (!fn || fn === '') { return this }
 
         // Get the domain from the config
         const minX = -this.graphConfig.origin.x / this.graphConfig.axis.x.x - 1
@@ -65,11 +71,8 @@ export class Plot extends AbstractFigure {
         // Get the samples from the config
         const samples = (this.#config.samples ?? this.graphConfig.axis.x.x)
 
-
-        if (!fn) { return this }
-
         // Make the numeric expression.
-        const expr = new NumExp(fn)
+        const expr = this.#numExp
 
 
         // Get the (x;y) points from the function
@@ -119,5 +122,22 @@ export class Plot extends AbstractFigure {
 
     moveLabel(): this {
         return this
+    }
+
+    evaluate(x: number): XY {
+        return toPixels(
+            { x, y: this.#numExp.evaluate({ x }) }
+            , this.graphConfig)
+    }
+
+    follow(x: number, y: number): XY {
+
+        /**
+         * TODO: implement the nearestPointToPath function
+         * return nearestPointToPath( { x, y }, fig.shape as svgPath, 1 )
+         */
+        const pt = toCoordinates({ x, y }, this.graphConfig)
+        return this.evaluate(pt.x)
+
     }
 }

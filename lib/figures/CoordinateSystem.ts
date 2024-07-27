@@ -5,13 +5,12 @@ import { computeLine, createMarker } from "../Calculus"
 
 export interface ICoordinateSystem {
     x: { direction: XY } & IAxisConfig,
-    y: { direction: XY } & IAxisConfig,
-    z?: { direction: XY } & IAxisConfig
+    y: { direction: XY } & IAxisConfig
 }
 
 export class CoordinateSystem extends AbstractFigure {
     #config: ICoordinateSystem
-    #axis: { x: svgLine, y: svgLine, z?: svgLine }
+    #axis: { x: svgLine, y: svgLine }
 
     get config() { return this.#config }
     set config(value: ICoordinateSystem) {
@@ -21,7 +20,6 @@ export class CoordinateSystem extends AbstractFigure {
 
     get xAxis() { return this.#axis.x }
     get yAxis() { return this.#axis.y }
-    get zAxis() { return this.#axis.z }
 
     constructor(rootSVG: Svg, name: string, values: COORDINATE_SYSTEM | ICoordinateSystem) {
         super(rootSVG, name)
@@ -44,32 +42,11 @@ export class CoordinateSystem extends AbstractFigure {
     }
 
     #defaultConfig(coordinateSystem: COORDINATE_SYSTEM): ICoordinateSystem {
-        if (coordinateSystem === COORDINATE_SYSTEM.CARTESIAN_3D && this.graphConfig.axis.z) {
-            return {
-                x: {
-                    direction: this.graphConfig.axis.z,
-                    color: 'red',
-                    padding: 10,
-                    half: true,
-                    length: 2
-                },
-                y: {
-                    direction: this.graphConfig.axis.x,
-                    color: 'blue',
-                    padding: 10,
-                    half: true,
-                    length: 2
-                },
-                z: {
-                    direction: this.graphConfig.axis.y,
-                    color: 'green',
-                    padding: 10,
-                    half: true,
-                    length: 2
-                }
-            }
+        if (coordinateSystem === COORDINATE_SYSTEM.POLAR) {
+            // TODO: Implement the polar coordinate system
         }
 
+        // Default return 2D Cartesian coordinate system
         return {
             x: {
                 direction: this.graphConfig.axis.x,
@@ -88,7 +65,7 @@ export class CoordinateSystem extends AbstractFigure {
         }
     }
 
-    #makeShape(): { x: svgLine, y: svgLine, z?: svgLine } {
+    #makeShape(): { x: svgLine, y: svgLine } {
         this.element.clear()
 
         // Create the path
@@ -96,7 +73,7 @@ export class CoordinateSystem extends AbstractFigure {
             .attr('id', 'coordinate-system')
 
         // Create the axis
-        const axis: { x: svgLine, y: svgLine, z?: svgLine } = {
+        const axis: { x: svgLine, y: svgLine } = {
             x: this.element.line(0, 0, 0, 0)
                 .attr('id', 'Ox'),
             y: this.element.line(0, 0, 0, 0)
@@ -105,13 +82,6 @@ export class CoordinateSystem extends AbstractFigure {
         this.shape.add(axis.x)
             .add(axis.y)
 
-
-        if (this.#config.z !== undefined && this.graphConfig.axis.z !== undefined) {
-            axis.z = this.element.line(0, 0, 0, 0)
-                .attr('id', 'Oz')
-
-            this.shape.add(axis.z)
-        }
 
         // Add the shape to the group.
         this.element.add(this.shape)
@@ -123,9 +93,6 @@ export class CoordinateSystem extends AbstractFigure {
         this.#updateAxis(this.#axis.x, this.#config.x.direction, this.#config.x)
         this.#updateAxis(this.#axis.y, this.#config.y.direction, this.#config.y)
 
-        if (this.#axis.z !== undefined && this.#config.z) {
-            this.#updateAxis(this.#axis.z, this.#config.z.direction, this.#config.z)
-        }
         return this
     }
     moveLabel(): this {
@@ -152,7 +119,7 @@ export class CoordinateSystem extends AbstractFigure {
             length
         ) as unknown as [XY, XY]
 
-        if(data !== null){
+        if (data !== null) {
             axis.plot(data[0].x, data[0].y, data[1].x, data[1].y)
         }
 

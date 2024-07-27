@@ -11,6 +11,7 @@
         "POINTCONSTRAIN",
         "POINTCONSTRAINT",
         "POINTSHAPE",
+        "strokeable",
         "subgrid",
         "svgdotjs",
         "viewbox"

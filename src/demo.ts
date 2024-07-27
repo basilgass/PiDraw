@@ -1,20 +1,11 @@
-import PiDraw from "../lib"
-import { COORDINATE_SYSTEM } from "../lib/pidraw.common"
+import { PiGraph } from '../lib'
 
 
 const { createApp, ref } = Vue
 
 createApp({
     mounted: () => {
-        const el = document.getElementById('root') as HTMLElement
-        const draw = new PiDraw(el, {
-            width: 470,
-            height: 470,
-            origin: {
-                x: 30,
-                y: 480
-            }
-        })
+        const draw = new PiGraph('root')
         // for (let i = 0; i < 4; i++) {
         //     for (let j = 0; j < 4; j++) {
         //         draw.create.point({ x: i, y: j }, `helper_${i}-${j}`)
@@ -23,18 +14,18 @@ createApp({
         // }
         const pt = draw.create.point({ x: 1, y: -2 }, 'A')
         const pt2 = draw.create.point({ x: 2, y: 3 }, 'B').asCircle(20)
-        draw.draggable(pt2)
+        draw.draggable(pt2, { follow: ['grid'] })
 
         const pt_middle = draw.create.point({
             middle: { A: pt, B: pt2 }
         }, 'MIDDLE').asCrosshair()
 
         const projY = draw.create.point({
-            projection: { axis: 'y', point: pt2 }
+            projection: { axis: 'Oy', point: pt2 }
         }, 'C')
 
         const projX = draw.create.point({
-            projection: { axis: 'x', point: pt2 }
+            projection: { axis: 'Ox', point: pt2 }
         }, 'D')
 
         const line = draw.create.line({
@@ -66,6 +57,13 @@ createApp({
         }, 'fx')
             .stroke('orange', 2)
 
+        const Pplot = draw.create.point(
+            { x: 0, y: 0 }
+            , 'Pplot'
+        ).asSquare(20).fill('red')
+        draw.draggable(Pplot, { follow: [fx] })
+
+
         const c1 = draw.create.circle(
             {
                 radius: 2,
@@ -86,7 +84,7 @@ createApp({
         const pCircle = draw.create.point({
             x: -2, y: -2
         }, 'pC').asCircle(10)
-        draw.draggable(pCircle, { follow: c3 })
+        draw.draggable(pCircle, { follow: [c3] })
 
         const pProjLine = draw.create.point({
             projection: { axis: parallel, point: pt }
@@ -117,6 +115,7 @@ createApp({
         arc.addLabel('angle', true)
         // arc.label?.position('tl')
         // pt.coordinates = { x: 2, y: 3 }
+
     },
     setup() {
         const code = ref('')

@@ -10,6 +10,11 @@ export interface IPolygonConfig {
         radius: number | XY,
         sides: number
     }
+    mark?: {
+        center?: {
+            length?: number
+        }
+    }
 }
 export class Polygon extends AbstractFigure {
     #config: IPolygonConfig
@@ -18,6 +23,10 @@ export class Polygon extends AbstractFigure {
     set config(value: IPolygonConfig) {
         this.#config = value
         this.#makeShape()
+    }
+
+    get vertices() {
+        return this.#config.vertices
     }
 
     get radius(): number {
@@ -59,12 +68,42 @@ export class Polygon extends AbstractFigure {
     #makeShape() {
         this.element.clear()
 
-        this.shape = this.element.polygon(this.#figuresXYtoArray())
+        const pointsCoordinates = this.#figuresXYtoArray()
+        this.shape = this.element.polygon(pointsCoordinates)
 
         this.fill().stroke()
 
         this.element.add(this.shape)
 
+        // Add marks if they exists.
+        if (this.#config.mark) {
+
+            // Set the length of the mark
+            const length = this.#config.mark.center?.length ?? 0
+
+            // Get the center of the figure. It's the average of all vertices.
+            const center = pointsCoordinates.reduce((acc, pt) => {
+                acc.x += pt[0]
+                acc.y += pt[1]
+                return acc
+            }
+                , { x: 0, y: 0 })
+
+            center.x /= pointsCoordinates.length
+            center.y /= pointsCoordinates.length
+
+            // Draw a thin gray line from the center to each vertex
+            pointsCoordinates.forEach(pt => {
+                // Get the vector from the center to the vertex
+                const OP = new mathVector(center, { x: pt[0], y: pt[1] })
+                if (length) {
+                    OP.setLength(length * 20)
+                }
+
+                this.element.line(center.x, center.y, center.x + OP.x, center.y + OP.y).stroke({ color: 'gray', width: 0.5 })
+            })
+
+        }
         return this.shape
     }
 

@@ -72,4 +72,15 @@ export class Circle extends AbstractFigure {
 
         return this
     }
+
+    follow(x: number, y: number): XY {
+        const r = this.radius
+        const dx = x - this.center.x
+        const dy = y - this.center.y
+        const d = Math.sqrt(dx ** 2 + dy ** 2)
+        x = dx / d * r + this.center.x
+        y = dy / d * r + this.center.y
+
+        return { x, y }
+    }
 }

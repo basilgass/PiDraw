@@ -2,19 +2,23 @@ import { Svg, Shape } from "@svgdotjs/svg.js"
 import { XY, isLine } from "../pidraw.common"
 import { AbstractFigure } from "./AbstractFigure"
 import { Line } from "./Line"
+import { toCoordinates, toPixels } from "../Calculus"
 
+export type ILine = Line | 'Ox' | 'Oy'
 export interface IPointConfig {
     shape?: 'circle' | 'square' | 'crosshair'
     size?: number,
+    pixels?: XY,
     coordinates?: XY,
     middle?: { A: XY, B: XY },
-    intersection?: { A: Line, B: Line }
-    projection?: { axis: 'x' | 'y' | Line, point: XY }
+    intersection?: { A: ILine, B: ILine },
+    projection?: { axis: ILine, point: XY },
+    symmetry?: { A: XY, B: XY | ILine }
 }
 
 export class Point extends AbstractFigure {
     // Coordinates of the point in pixels
-    #coordinates: XY
+    #pixels: XY
 
     #config: IPointConfig
 
@@ -36,7 +40,7 @@ export class Point extends AbstractFigure {
         super(rootSVG, name)
 
         // Default values
-        this.#coordinates = { x: NaN, y: NaN }
+        this.#pixels = { x: NaN, y: NaN }
 
         // Default config
         this.#config = Object.assign(
@@ -55,20 +59,26 @@ export class Point extends AbstractFigure {
         return this
     }
 
-    get coordinates() { return this.#coordinates }
-    set coordinates(value: XY) {
-        this.#coordinates = value
-        this.shape.center(this.#coordinates.x, this.#coordinates.y)
+    get pixels() { return this.#pixels }
+    set pixels(value: XY) {
+        this.#pixels = value
+        this.shape.center(this.#pixels.x, this.#pixels.y)
     }
-    get x() { return this.#coordinates.x }
+
+    // Used to store the original coordinates of the point
+    get coordinates(): XY {
+        return toCoordinates(this.#pixels, this.graphConfig)
+    }
+
+    get x() { return this.#pixels.x }
     set x(value: number) {
-        this.#coordinates.x = value
-        this.shape.center(value, this.#coordinates.y)
+        this.#pixels.x = value
+        this.shape.center(value, this.#pixels.y)
     }
-    get y() { return this.#coordinates.y }
+    get y() { return this.#pixels.y }
     set y(value: number) {
-        this.#coordinates.y = value
-        this.shape.center(this.#coordinates.x, value)
+        this.#pixels.y = value
+        this.shape.center(this.#pixels.x, value)
     }
 
     asCircle(size?: number): this {
@@ -96,18 +106,18 @@ export class Point extends AbstractFigure {
         switch (this.config.shape) {
             case 'circle':
                 this.shape = this.element.circle(this.size)
-                    .center(this.#coordinates.x, this.#coordinates.y)
+                    .center(this.#pixels.x, this.#pixels.y)
                 break
             case 'square':
                 this.shape = this.element.rect(this.size, this.size)
-                    .center(this.#coordinates.x, this.#coordinates.y)
+                    .center(this.#pixels.x, this.#pixels.y)
                 break
             case 'crosshair':
                 {
                     const diagonal_size = this.size / Math.sqrt(2)
                     this.shape = this.element.path(
                         `M ${-diagonal_size} ${diagonal_size} L ${diagonal_size} ${-diagonal_size} M ${-diagonal_size} ${-diagonal_size} L ${diagonal_size} ${diagonal_size}`
-                    ).center(this.#coordinates.x, this.#coordinates.y)
+                    ).center(this.#pixels.x, this.#pixels.y)
                     break
                 }
         }
@@ -120,17 +130,18 @@ export class Point extends AbstractFigure {
 
     computed(): this {
         // Update the coordinates, depending on the constraints settings
-        if (this.#config.coordinates && isNaN(this.#coordinates.x)) {
-            this.coordinates = this.#config.coordinates
-
+        if (this.#config.coordinates) {
+            this.pixels = toPixels(this.#config.coordinates, this.graphConfig)
             return this
         }
 
         if (this.#config.middle) {
             const A = this.#config.middle.A
             const B = this.#config.middle.B
-            this.x = (A.x + B.x) / 2
-            this.y = (A.y + B.y) / 2
+
+            this.#pixels.x = (A.x + B.x) / 2
+            this.#pixels.y = (A.y + B.y) / 2
+
             return this
         }
 
@@ -138,13 +149,13 @@ export class Point extends AbstractFigure {
 
             const pt = this.#config.projection.point
 
-            if (this.#config.projection.axis === 'x') {
+            if (this.#config.projection.axis === 'Ox') {
                 this.x = pt.x
                 this.y = this.graphConfig.origin.y
                 return this
             }
 
-            if (this.#config.projection.axis === 'y') {
+            if (this.#config.projection.axis === 'Oy') {
                 this.x = this.graphConfig.origin.x
                 this.y = pt.y
                 return this
@@ -167,15 +178,15 @@ export class Point extends AbstractFigure {
         }
 
         if (this.#config.intersection) {
-            const line1 = this.#config.intersection.A
-            const line2 = this.#config.intersection.B
+            const line1 = this.#config.intersection.A as Line
+            const line2 = this.#config.intersection.B as Line
             // Get the intersection of two lines.
             const coord = line1.math
                 .intersection(line2.math)
 
             if (coord === null) { return this }
 
-            this.coordinates = coord
+            this.pixels = coord
         }
 
         return this

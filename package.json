@@ -14,7 +14,7 @@
     "dev": "vite serve",
     "build": "tsc --p ./tsconfig-build.json && vite build",
     "preview": "vite preview",
-    "dependencies-check": "madge --image graph.svg  ./lib/main.ts"
+    "dependencies-check": "madge --image graph.svg  ./lib/index.ts"
   },
   "repository": {
     "type": "git",

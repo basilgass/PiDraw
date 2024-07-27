@@ -1,4 +1,4 @@
-import PiDraw from "../lib";
+import { PiParser } from '../lib'
 
 const { createApp, ref } = Vue
 
@@ -19,15 +19,44 @@ let draw
 createApp({
     mounted() {
         // this.code = 'f(x)=sin(x),-pi:2pi'
+        this.code = `A(8,3)->red,w=5,drag=grid
+B(-4,-1)->blue,w=10
+M=mid A,B
+P1=proj A,Ox
+P2=proj A,Oy
+d=AB
+e=line P1,P2
+p=perp d,M
+q=med A,M
+C(1,-2)
+p1=poly A,B,C->fill=teal/0.3,red/0.5,w=10
+q=para d,C
+f(x)=x^2*sin(x)/8
+g(t)=t^2/4,sin(t)
+c=circ A,3
+a=arc C,B,A,1
+d1=BC.
+v1=vCA
+X(0,0)->drag=f
+d=follow f->red,w=4,dash
+`
+
+        //         this.code = `a=line x=3
+        // b=line y=-1
+        // c=line 2x-3y=5
+        // d=line y=2/3x-1
+        // e=line 2x=3y-4`
         // const parsedCode = PiDraw.parse(this.code)
-        draw = PiDraw.build(
+        draw = new PiParser(
             'root',
-            this.parameter,
-            this.code,
-            (value: string): string => katex.renderToString(value, { throwOnError: false })
+            {
+                tex: (value) => katex.renderToString(value, { throwOnError: false, displayMode: true }),
+                parameters: this.parameter,
+                input: this.code
+            }
         )
 
-        const result = PiDraw.documentation()
+        const result = PiParser.documentation()
 
         this.output.innerHTML = Object.keys(result).map((key) => {
             return `<div class="border rounded flex flex-col gap-2">
@@ -58,7 +87,6 @@ T(1,1)
 x=PxT
 X=inter x,AB->w=10,red
 `)
-
         const message = ref("no message now")
         return {
             code,

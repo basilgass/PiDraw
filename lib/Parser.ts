@@ -1,502 +1,582 @@
-import { NumExp } from "./Calculus"
+import { Graph, IDraggableConfig } from "./Graph"
+import { IParser, IParserParameters, PARSER_TYPE, PARSER_COLOR_VALUES, convertValues, IParserConfig, IParserSettings } from "./parser/parser.common"
+import { COORDINATE_SYSTEM, IGraphConfig, IGraphDisplay, isDOMAIN, XY } from "./pidraw.common"
+import { parser_documentation } from "./parser/parser_documentation"
+import { buildPoint } from "./parser/buildPoint"
 import { AbstractFigure } from "./figures/AbstractFigure"
-import { COORDINATE_SYSTEM, DOMAIN, IGraphConfig, IGraphConstructorConfig, IGraphDisplay, isDOMAIN, XY } from "./pidraw.common"
+import { buildLine } from "./parser/buildLine"
+import { buildPlot } from "./parser/buildPlot"
+import { IPlotConfig } from "./figures/Plot"
+import { IParametricConfig } from "./figures/Parametric"
+import { buildCircle } from "./parser/buildCircle"
+import { IArcConfig } from "./figures/Arc"
+import { ICircleConfig } from "./figures/Circle"
+import { buildPolygon } from "./parser/buildPolygon"
+import { LABEL_POSITION } from "./labels/Label"
+import { Point } from "./figures/Point"
 
-/**
- * The parser type is used to identify the type of the parser.
- * The value is the key of the parser.
- */
-export enum PARSER_TYPE {
-    UNKNOWN = 'unknown',        // OK
-    // POINTS
-    POINT = 'point',            // OK: (x,y)
-    MIDDLE = 'mid',             // OK: mid <point>,<point>
-    PROJECTION = 'proj',        // OK: proj <point>,<line>
-    INTERSECTION = 'inter',     // OK: inter <line>,<line> // TODO: inter <line>,<circle>
-    SYMMETRY = 'sym',
-    // LINES
-    LINE = 'line',              // OK : <point><point> or line <point>,<point>
-    PERPENDICULAR = 'perp',     // OK : perp <line>,<point>
-    PARALLEL = 'para',          // OK : para <line>,<point>
-    MEDIATOR = 'med',           // OK : med <point>,<point>
-    TANGENT = 'tan',
-    BISECTOR = 'bis',
-    // CIRCLES
-    CIRCLE = 'circ',            // OK : <center>,<radius>
-    ARC = 'arc',                // OK : arc <point>,<point>,<point>
-    // PLOTS
-    PLOT = 'plot',              // OK : plot <function>[,@<number>,<domain>,<domain>]
-    PARAMETRIC = 'parametric',  // OK : parametric <function>,<function>[,@<number>,<domain>]
-    // POLYGONS
-    POLYGON = 'poly',           // OK : poly <point>,<point>,<point>,...
-    REGULAR = 'reg',            // OK: reg <center>,<radius>,<sides>
-}
+export class Parser extends Graph {
+    #code: IParser[]
+    #settings: IParserSettings
 
-export const parser_documentation = {
-    point: {
-        description: 'Create a point',
-        code: 'A(3,4)',
-        parameters: ['drag', 'drag:grid', 'drag:axis', 'drag:x', 'drag:y', 'drag:<figure>']
-    },
-    mid: {
-        description: 'Create the middle of two points',
-        code: 'A=mid <point>,<point>',
-        parameters: []
-    },
-    projection: {
-        description: 'Create the projection of a point on a line',
-        code: 'A=proj <point>,<line>',
-        parameters: []
-    },
-    intersection: {
-        description: 'Create the intersection of two lines',
-        code: 'A=inter <line>,<line>',
-        parameters: []
-    },
-    symmetry: {
-        description: 'Create the symmetry of a point',
-        code: 'A=sym <point>,<point|line>',
-        parameters: []
-    },
-    line: {
-        description: 'Create a line, a half line or a segment',
-        code: 'd=<line> | <line>[ | <line>.',
-        parameters: ['dash', 'dot']
-    },
-    vector: {
-        description: 'Create a vector',
-        code: 'd=v<line>',
-        parameters: []
-    },
-    perpendicular: {
-        description: 'Create the perpendicular of a line from a point',
-        code: 'd=perp <line>,<point>',
-        parameters: []
-    },
-    parallel: {
-        description: 'Create a parallel line from a point',
-        code: 'd=para <line>,<point>',
-        parameters: []
-    },
-    mediator: {
-        description: 'Create the mediator of two points',
-        code: 'd=med <point>,<point>',
-        parameters: []
-    },
-    tangent: {
-        description: 'Create a tangent line from a point to a circle',
-        code: 'd=tan <point>,<point>',
-        parameters: []
-    },
-    bisector: {
-        description: 'Create the bisector of an angle',
-        code: 'd=bis <point>,<point>,<point>',
-        parameters: []
-    },
-    circle: {
-        description: 'Create a circle',
-        code: 'c=circ <point>,<radius>',
-        parameters: []
-    },
-    arc: {
-        description: 'Create an arc',
-        code: 'c=arc <point>,<point>,<point>[,<number>]',
-        parameters: []
-    },
-    plot: {
-        description: 'Plot a function',
-        code: 'f(x)=[f=plot ]<function>[@<number>,<domain>,<image>]',
-        parameters: []
-    },
-    parametric: {
-        description: 'Plot a parametric function',
-        code: 'f(t)=[f=parametric ]<function_x>,<function_y>[,<domain>]',
-        parameters: []
-    },
-    polygon: {
-        description: 'Create a polygon',
-        code: 'p=poly <point>,<point>,<point>,...',
-        parameters: []
-    },
-    regular: {
-        description: 'Create a regular polygon',
-        code: 'p=reg <center>,<radius>,<sides>',
-        parameters: []
-    }
-}
+    constructor(id: string | HTMLElement, config?: IParserConfig) {
+        super(id, {
+            tex: config?.tex ?? ((value) => value)
+        })
 
-export type IParserOptions = (string | number | boolean | XY | DOMAIN | AbstractFigure)
-export interface IParserParameters {
-    value: IParserOptions,
-    options: IParserOptions[]
-}
-export interface IParser {
-    id: string;
-    key: PARSER_TYPE;
-    code: string[];
-    parameters: Record<string, IParserParameters>;
-}
+        this.#settings = {}
 
-const PARSER_BOOLEAN_VALUES = [
-    '#',    // Figure is static (no update)
-    '!',    // Hide the figure, not the label
-    '?',    // Hide the label, not the figure
-    'hide', // Hide the figure and the label
-    'ultrathin', 'thin', 'thick', 'ultrathick',
-    'dash', 'dot',
-    'tex', 'label', // TeX or Text label
-    'axis', 'grid' // Parameter for the layout
-]
-
-/**
- * Parse the input string and return an array of IParser.
- * @param input The input string to parse.
- * @returns An array of IParser.
- */
-export function graphParser(input: string): IParser[] {
-    const output: IParser[] = []
-
-    const lines = input
-        .split('\n')
-        .filter((line) => line.trim() !== '')
-
-    let objIsStatic = false
-    for (const line of lines) {
-        // If lines starts with '@', it's a command
-        if (line.startsWith('@')) {
-            if (line.startsWith('@begin:static')) { objIsStatic = true }
-            if (line.startsWith('@end:static')) { objIsStatic = false }
-            continue
+        // Build the layout using the default values or the parameters
+        if (config?.parameters) {
+            this.refreshLayout(config.parameters)
         }
 
+        // Define the code to display
+        this.#code = []
+        if (config?.input) {
+            this.#build(config.input)
+        }
+
+        return this
+    }
+
+    static documentation() {
+        return parser_documentation
+    }
+
+    get code() {
+        return this.#code
+    }
+
+    public refresh(code: string) {
+        // Remove every figures
+        Object.keys(this.figures).forEach((name) => {
+            this.figures[name].element.remove()
+        })
+
+        // Reload the figures
+        this.#build(code)
+    }
+
+    public refreshLayout(code?: string) {
+        // Update the configuration
+        const layout = this.#parseLayout(code)
+
+        this.config = layout.config
+        this.display = layout.display
+        this.#settings = layout.settings
+
+        // Update the layout (from the extended Graph class)
+        this.updateLayout()
+    }
+
+    /**
+     * Prepare the code to load
+     * @param input Input code to parse and prepare
+     * @returns 
+     */
+    #prepare(input: string): IParser[] {
+        // Reset the code.
+        // TODO: check if resetting the code with events are correctly removed.
+        const data: IParser[] = []
+
+        // Split and filter the inputs
+        // - remove empty lines
+        // - skip line starting with '$'
+        const lines = input
+            .split('\n')
+            .filter((line) => line.trim() !== '' && !line.startsWith('$'))
+
+        // Define the block variables
+        const block: Record<string, IParserParameters> = {}
+
+        // Loop through each lines
+        for (const line of lines) {
+            // If lines starts with '@', it's a command
+            if (line.startsWith('@')) {
+                const { key, value } = this.#defineCommand(line)
+                block[key] = { value, options: [] }
+                continue
+            }
+
+            // Parse the line
+            const parsedLine = this.#parseLine(line)
+
+            // Add the block data to the parameters.
+            parsedLine.parameters = Object.assign(
+                parsedLine.parameters,
+                block
+            )
+            data.push(parsedLine)
+        }
+
+
+        return data
+    }
+
+    /**
+     * Build the figures from the code
+     */
+    #build(input: string) {
+        this.#code = this.#prepare(input)
+
+        // Loop through each code
+        this.#code.forEach((item) => {
+            let obj: AbstractFigure | undefined
+
+            // Check the key
+            switch (item.key) {
+                case PARSER_TYPE.POINT:
+                case PARSER_TYPE.MIDDLE:
+                case PARSER_TYPE.PROJECTION:
+                case PARSER_TYPE.INTERSECTION:
+                case PARSER_TYPE.SYMMETRY:
+                    {
+                        // Prepare the point using the config settings
+                        if (typeof this.#settings.points === 'string' &&
+                            item.parameters['*'] === undefined &&
+                            item.parameters.o === undefined &&
+                            item.parameters.s === undefined
+                        ) {
+                            item.parameters[this.#settings.points] = { value: true, options: [] }
+                        }
+                        const config = buildPoint(item, this.figures, this.config)
+
+                        if (config) {
+                            obj = this.create.point(config, item.id)
+                        }
+
+                        break
+                    }
+                case PARSER_TYPE.LINE:
+                case PARSER_TYPE.MEDIATOR:
+                case PARSER_TYPE.PERPENDICULAR:
+                case PARSER_TYPE.PARALLEL:
+                    {
+                        const config = buildLine(item, this.figures, this.config)
+                        if (config) {
+                            obj = this.create.line(config, item.id)
+                        }
+                        break
+                    }
+                case PARSER_TYPE.PLOT:
+                case PARSER_TYPE.PARAMETRIC:
+                    {
+                        const config = buildPlot(item, this.figures, this.config)
+
+                        if (config && Object.hasOwn(config, 'expression')) {
+                            obj = this.create.plot(config as IPlotConfig, item.id)
+                        } else if (config && Object.hasOwn(config, 'expressions')) {
+                            obj = this.create.parametric(config as IParametricConfig, item.id)
+                        } else {
+                            console.log('Unknown input:', input, item)
+                        }
+                        break
+                    }
+                case PARSER_TYPE.CIRCLE:
+                case PARSER_TYPE.ARC:
+                    {
+                        const config = buildCircle(item, this.figures, this.config)
+                        if (config && Object.hasOwn(config, 'start') && Object.hasOwn(config, 'end')) {
+                            obj = this.create.arc(config as IArcConfig, item.id)
+                        } else if (config) {
+                            obj = this.create.circle(config as ICircleConfig, item.id)
+                        }
+                        break
+                    }
+                case PARSER_TYPE.POLYGON:
+                case PARSER_TYPE.REGULAR:
+                    {
+                        const config = buildPolygon(item, this.figures, this.config)
+                        if (config) {
+                            obj = this.create.polygon(config, item.id)
+                        }
+                        break
+                    }
+                case PARSER_TYPE.FOLLOW:
+                    console.log('this.#buildFollow(item)', item)
+                    break
+                case PARSER_TYPE.UNKNOWN:
+                    console.log('Unknown:', item)
+                    break
+            }
+
+            if (obj) {
+                // Apply defaults settings to the object
+                if (this.#settings.label &&
+                    obj instanceof Point &&
+                    item.parameters.label === undefined && item.parameters.tex === undefined
+                ) {
+                    item.parameters.label = { value: true, options: [] }
+                }
+                if (this.#settings.tex &&
+                    obj instanceof Point &&
+                    item.parameters.label === undefined && item.parameters.tex === undefined
+                ) {
+                    item.parameters.tex = { value: true, options: [] }
+                }
+
+                if (obj instanceof Point && this.#settings.points === false) {
+                    item.parameters['!'] = { value: true, options: [] }
+                }
+
+                this.#applyOptions(item.parameters, obj)
+            }
+        })
+
+
+    }
+
+    #applyOptions(options: Record<string, IParserParameters>, obj: AbstractFigure) {
+        Object.keys(options).forEach((key) => {
+            switch (key) {
+                // Appearance
+                case 'w':
+                    obj.stroke(options[key].value as number)
+                    break
+                case 'ultrathin':
+                    obj.stroke(0.5)
+                    break
+                case 'thin':
+                    obj.stroke(0.75)
+                    break
+                case 'thick':
+                    obj.stroke(2.5)
+                    break
+                case 'ultrathick':
+                    obj.stroke(4)
+                    break
+                case 'color':
+                    obj.stroke(options[key].value as string)
+                    break
+                case 'fill':
+                    obj.fill(options[key].value as string)
+                    break
+                case 'dash':
+                    options[key].value === true ?
+                        obj.dash() :
+                        obj.dash(options[key].value as string)
+                    break
+                case 'dot':
+                    obj.dot()
+                    break
+
+                // Visibility
+                case 'hide':
+                case '!':
+                    obj.hide()
+                    break
+                case '#':
+                case 'static':
+                    obj.static = options[key].value as boolean
+                    break
+                case '?':
+                    obj.label?.hide()
+                    break
+
+                // Label and text
+                case 'label':
+                case 'tex':
+                    obj.addLabel(
+                        options[key].value === true ? obj.name : options[key].value as string,
+                        key === 'tex',
+                        this.toTex
+                    )
+
+                    if (obj.label) {
+                        const alignement = options[key].options[0] === false ? 'br' : options[key].options[0] as LABEL_POSITION
+                        const offsetAsUnits = options[key].options[1] as XY | undefined ?? { x: 0, y: 0 }
+                        const offset = {
+                            x: offsetAsUnits.x * this.config.axis.x.x,
+                            y: -offsetAsUnits.y * this.config.axis.y.y
+                        }
+
+                        obj.label.position(
+                            alignement,
+                            offset
+                        )
+                    }
+
+                    break
+
+                // Draggable
+                case 'drag':
+                    // Actually, only points are draggable
+                    if (obj instanceof Point) {
+                        const dragConfig: IDraggableConfig = { follow: [] };
+
+                        // Check the options
+                        [options[key].value as string, ...options[key].options].forEach((dragFollow) => {
+                            if (['grid', 'Ox', 'Oy'].includes(dragFollow as string)) {
+                                dragConfig.follow?.push(this.follow(dragFollow as string, obj))
+                            }
+
+                            if (isDOMAIN(dragFollow)) {
+                                const axis = dragFollow.axis ?? 'x'
+                                const DeltaA = this.config.origin[axis] + this.toPixels(dragFollow.min)[axis]
+                                const DeltaB = this.config.origin[axis] + this.toPixels(dragFollow.max)[axis]
+
+                                const DeltaMin = Math.min(DeltaA, DeltaB)
+                                const DeltaMax = Math.max(DeltaA, DeltaB)
+                                dragConfig.follow?.push(
+                                    (x: number, y: number) => {
+                                        return {
+                                            x: axis === 'x' ? Math.max(DeltaMin, Math.min(x, DeltaMax)) : x,
+                                            y: axis === 'y' ? Math.max(DeltaMin, Math.min(y, DeltaMax)) : y
+                                        }
+                                    }
+                                )
+                            }
+
+                            if (Object.hasOwn(this.figures, dragFollow as string)) {
+                                const figToFollow = this.figures[dragFollow as string]
+
+                                dragConfig.follow?.push((x: number, y: number) => figToFollow.follow(x, y))
+                            }
+                        })
+
+                        // Move the point to the interactive layer
+                        this.layers.interactive.add(obj.element)
+                        // Resize the draggable point
+
+                        obj.asCircle(20)
+                            .fill('white/0.8')
+
+                        this.draggable(obj, dragConfig)
+                    }
+                    break
+            }
+        })
+    }
+
+    #defineCommand(command: string): { key: string, value: boolean } {
+        // A command is: @<begin|end>:<key>
+
+        // Remove the '@' and split the command into key and value
+        const [value, key] = command.slice(1).split(':')
+
+        // Return the key and value
+        return { key, value: value === 'begin' }
+
+    }
+
+    #parseLayout(code?: string): { config: IGraphConfig, display: IGraphDisplay, settings: IParserSettings } {
+        // Split the code into key and parameters
+        const parameters = this.#parseParameters(code)
+
+        // Define the configuration
+        const ppu = parameters.ppu ? parseFloat(parameters.ppu.value as string) : 50
+        const dx = isDOMAIN(parameters.x.value) ? Math.abs(parameters.x.value.max - parameters.x.value.min) : 16
+        const dy = isDOMAIN(parameters.y.value) ? Math.abs(parameters.y.value.max - parameters.y.value.min) : 16
+
+        const width = dx * ppu
+        const height = dy * ppu
+        const origin = {
+            x: (isDOMAIN(parameters.x.value) ? -parameters.x.value.min : 8) * ppu,
+            y: (isDOMAIN(parameters.y.value) ? parameters.y.value.max : 8) * ppu
+        }
+
+        const system = COORDINATE_SYSTEM.CARTESIAN_2D
+        const axisConfig = {
+            x: { x: ppu, y: 0 },
+            y: { x: 0, y: -ppu }
+        }
+
+        // Display options
+        const grid = parameters.grid ? true : false
+        const axis = parameters.axis ? true : false
+        const subgrid = parameters.subgrid ? parseFloat(parameters.subgrid.value as string) : 0
+
+        // Parser specific settings
+        const settings: IParserSettings = {
+            label: parameters.label ? true : false,
+            tex: parameters.tex ? true : false,
+            points: parameters['no-points'] ? false : parameters.points ? parameters.points.value as 'o' | '*' | 's' : 'o'
+        }
+
+        return {
+            config: {
+                width,
+                height,
+                origin,
+                system,
+                axis: axisConfig,
+            },
+            display: {
+                grid,
+                subgrid,
+                axis
+            },
+            settings
+        }
+    }
+
+    #parseLine(line: string): IParser {
         // Split the line into key_code and parameters at '->'
         const [key_code, parameters_code] = line.split('->')
 
-        // Split the code into key and code at '='
-        const result = _parseKeyCode(key_code)
+        const config = this.#parseKeyCode(key_code)
 
-        // Split the parameters into key and value at ','
-        if (parameters_code !== undefined) {
-            result.parameters.static = { value: !!objIsStatic, options: [] }
-            result.parameters = Object.assign(result.parameters, _parserParametersCode(parameters_code))
+        // Parse the parameters
+        config.parameters = this.#parseParameters(parameters_code)
+
+        return config
+
+    }
+
+    #parseKeyCode(key_code: string): IParser {
+
+        // There are 3 possibilities for the key_code:
+        // 1. A(3,4) => id='A', key=POINT, code= ['3','4']
+        // 2. d=AB => id='AB', key=LINE, code=['A', 'B']
+        // 3. d=<key> <code> => id='d', key='<key>' code
+
+        // Extract the point (no = sign). The id is before the '(' and the code is between '(' and ')'
+        if (key_code.match(/^[A-Z][0-9]*\(.*\)$/)) {
+            return this.#parseKeyCodePoint(key_code)
         }
 
-        output.push(result)
-    }
-
-    return output
-}
-
-export function graphLayoutParser(input: string, customConfig?: IGraphConstructorConfig): { config: IGraphConfig, display: IGraphDisplay } {
-
-    const config: IGraphConstructorConfig = Object.assign({
-        width: 800,
-        height: 600,
-        origin: { x: 400, y: 300 },
-        system: COORDINATE_SYSTEM.CARTESIAN_2D,
-        ppu: 50,
-        display: {
-            grid: false,
-            subgrid: 0,
-            axis: false
-        },
-        tex: (value: string): string => value
-    }, customConfig)
-
-    const parameters = _parserParametersCode(input)
-
-    if (parameters.ppu) {
-        config.ppu = parseFloat(parameters.ppu.value as string)
-    }
-
-    const ppu = config.ppu as unknown as number
-
-    // Determine the axis limits
-    if (parameters.x && config.origin) {
-        const xDimension = _getUnitDimension(parameters.x.value as string)
-        config.width = xDimension.width * ppu
-        config.origin.x = xDimension.origin * ppu
-    }
-    if (parameters.y && config.origin) {
-        const yDimension = _getUnitDimension(parameters.y.value as string)
-        config.height = yDimension.width * (config.ppu as unknown as number)
-        config.origin.y = yDimension.origin * (config.ppu as unknown as number)
-    }
-
-    // Display the grid
-    if (parameters.grid && config.display) { config.display.grid = true }
-
-    // Display the axis
-    if (parameters.axis && config.display) { config.display.axis = true }
-
-    return {
-        config: {
-            width: config.width as unknown as number,
-            height: config.height as unknown as number,
-            origin: config.origin as unknown as XY,
-            system: config.system as unknown as COORDINATE_SYSTEM,
-            axis: {
-                x: { x: ppu, y: 0 },
-                y: { x: 0, y: -ppu },
-                z: { x: -ppu / Math.sqrt(2), y: ppu / Math.sqrt(2) }
-            }
-        },
-        display: config.display as unknown as IGraphDisplay
-    }
-}
-
-function _getUnitDimension(value: string): { width: number, origin: number } {
-    if (value) {
-        const { min, max } = _parserParametersOptions([value] as string[])[0] as DOMAIN
-
-        if (!isNaN(+min) && !isNaN(+max)) {
-            // Determiner the width of the graph
-            return {
-                width: Math.abs(max - min),
-                origin: Math.abs(min)
-            }
-        }
-    }
-
-    // Default to 20 unites
-    return { width: 20, origin: 10 }
-}
-
-/**
- * Parse the first part of the input string:
- * <key>=<code>-><parameters>
- * [key] is the id of the figure
- * [code] is the type of the figure
- * [parameters] is the parameters of the figure
- * it contains the key and the figure code
- * @param key_code 
- * @returns 
- */
-function _parseKeyCode(key_code: string): IParser {
-    // Key code can be:
-    // 1. A(3,4) => id='A', key=POINT, code= ['3','4']
-    // 2. AB => id='AB', key=LINE, code=['A', 'B']
-    // 3. d=<key> <code> => id='d', key='<key>' code='<code>'
-    let id = '',
-        key: PARSER_TYPE = PARSER_TYPE.UNKNOWN,
-        code: string[] = []
-    const parameters: Record<string, IParserParameters> = {}
-
-    // Extract the point (no = sign). The id is before the '(' and the code is between '(' and ')'
-    if (!key_code.includes('=') && key_code.includes('(')) {
-        id = key_code.split('(')[0]
-        key = PARSER_TYPE.POINT
-        code = key_code.split('(')[1].split(')')[0].split(',')
-
-        // Code should be a list of numbers (x,y)
-        // TODO: it can also be a list of expressions (like 2/3 or 2pi)
-        // TODO: it can also be a list of points (like A.x,B.y)
-
-    } else if (key_code.includes('(x)=')) {
-        let expression_and_options: string
-        [id, expression_and_options] = key_code.split('=')
-
-        key = PARSER_TYPE.PLOT
-        const [expression, ...options] = expression_and_options.split(',')
-
-        // Define the expression.
-        code = [expression]
-
-        // Define the options.
-        const opts = _parserParametersOptions(options)
-
-        if (opts.length > 0) {
-            // The sample is the first number value.
-            const samples = opts.filter((value) => typeof value === 'number')[0]
-            if (samples) { parameters.samples = { value: samples as number, options: [] } }
-
-            // The domain is the first DOMAIN value.
-            const domain_image = opts.filter((value) => isDOMAIN(value))
-            if (domain_image.length > 0) {
-                parameters.domain = { value: domain_image[0] as DOMAIN, options: [] }
-            }
-
-            // The image is the second DOMAIN value.
-            if (domain_image.length > 1) {
-                parameters.image = { value: domain_image[1] as DOMAIN, options: [] }
-
-            }
+        // Extract the plot or parametric function
+        if (key_code.match(/^[a-z][0-9]*\([x|t]\)/)) {
+            return this.#parseKeyCodePlot(key_code)
         }
 
-    } else if (key_code.includes('(t)=')) {
-        let expression_and_options: string
-        [id, expression_and_options] = key_code.split('=')
-
-        key = PARSER_TYPE.PARAMETRIC
-        const [expr1, expr2, ...options] = expression_and_options.split(',')
-
-        // Define the expression.
-        code = [expr1, expr2]
-
-        // Define the options.
-        const opts = _parserParametersOptions(options)
-
-        if (opts.length > 0) {
-            // The sample is the first number value.
-            const samples = opts.filter((value) => typeof value === 'number')[0]
-            if (samples) { parameters.samples = { value: samples as number, options: [] } }
-
-            // The domain
-            const domain = opts.filter((value) => isDOMAIN(value))[0]
-            if (domain) {
-                parameters.domain = { value: domain as DOMAIN, options: [] }
-            }
-
-        }
-    } else if (key_code.includes('=') && !key_code.includes(' ')) {
-        // Possibilities:
-        // 1. d=AB => id='d', key=LINE, code=['A', 'B']
-        // 2. d=AB. => id='d', key=LINE, code=['A', 'B']
-        // 3. d=[AB[ => id='d', key=LINE, code=['A', 'B']
-        // 4. d=vAB => id='d', key=LINE, code=['A', 'B']
         // Extract the line (with = sign). The id is before the '=' and the code is after '='
-        let list_of_points: string
-        [id, list_of_points] = key_code.split('=')
+        // This is a special version (no spaces) and should be checked first
+        if (key_code.includes('=') && !key_code.includes(' ')) {
+            return this.#parseKeyCodeLine(key_code)
+        }
 
-        // the line can be a:
-        // line         d=AB
-        // half line    d=[AB[ or d=]AB]
-        // segment      d=AB.
-        // vector       d=vAB
-        key = PARSER_TYPE.LINE
 
-        if (list_of_points.includes('[') || key_code.includes(']')) {
-            parameters.shape = { value: 'half_line', options: [] }
-            // Remove the brackets from listofpoints
-            list_of_points = list_of_points.replace('[', '').replace(']', '')
-        } else if (list_of_points.endsWith('.')) {
-            parameters.shape = { value: 'segment', options: [] }
-            // Remove the dot from listofpoints
-            list_of_points = list_of_points.slice(0, -1)
-        } else if (list_of_points.startsWith('v')) {
+
+        // Extract the usual key code: <id>=<key> <code>
+        const [id, ...data] = key_code.split('=')
+        const [key, ...code] = data.join('=').split(' ')
+
+        if (Object.values(PARSER_TYPE).includes(key as PARSER_TYPE) && code.length > 0) {
+            return {
+                id,
+                key: key as PARSER_TYPE,
+                code: code.join(' ').split(','), // Split the code into an array of strings
+                parameters: {}
+            }
+        }
+
+        // Default to unknown
+        return {
+            id: '',
+            key: PARSER_TYPE.UNKNOWN,
+            code: [code.join(' ')],
+            parameters: {}
+        }
+    }
+
+    #parseKeyCodePoint(key_code: string): IParser {
+        // Extract the point (no = sign). The id is before the '(' and the code is between '(' and ')'
+        const id = key_code.split('(')[0]
+        const code = key_code.split('(')[1].split(')')[0].split(',')
+        const parameters = this.#parseParameters(key_code.split(')')[1])
+
+        return {
+            id,
+            key: PARSER_TYPE.POINT,
+            code,
+            parameters
+        }
+    }
+
+    #parseKeyCodeLine(key_code: string): IParser {
+        // Extract the line (with = sign). The id is before the '=' and the code is after '='
+        const [id, ...datas] = key_code.split('=')
+        let data = datas.join('=')
+
+        const parameters: Record<string, IParserParameters> = {}
+
+        if (data.startsWith('v')) {
+            data = data.slice(1)
             parameters.shape = { value: 'vector', options: [] }
-            // Remove the v from listofpoints
-            list_of_points = list_of_points.slice(1)
+        } else if (data.endsWith('.')) {
+            data = data.slice(0, -1)
+            parameters.shape = { value: 'segment', options: [] }
+        } else {
+            parameters.shape = { value: 'line', options: [] }
         }
 
+        const code = data.split(/(?=[A-Z])/)
 
-        // The code is a list of points, without spaces:
-        // d=AB => points = ['A', 'B']
-        // d=A1B2 => points = ['A1', 'B2']
-        // d=PxPy => points = ['Px', 'Py']
-        // Use a Regexp to split the code into points.
-        code = list_of_points.split(/(?=[A-Z])/)
-
-    } else {
-        id = key_code.split('=')[0]
-        const [keyString, ...codeString] = key_code.split('=')[1].split(' ')
-
-        if (Object.values(PARSER_TYPE).includes(keyString as PARSER_TYPE) && codeString.length > 0) {
-            key = keyString as PARSER_TYPE
-            code = codeString.join(' ').split(',').map((item) => item.trim())
+        return {
+            id,
+            key: PARSER_TYPE.LINE,
+            code,
+            parameters
         }
     }
 
-    return {
-        id,
-        key: key,
-        code: code,
-        parameters
+    #parseKeyCodePlot(key_code: string): IParser {
+        // Extract the plot or parametric function
+        const [id_xt, data] = key_code.split('=')
+
+        // Remove the (x) or (t) from the id
+        const id = id_xt.split('(')[0]
+
+        // Determine the type of the parser (plot or parametric)
+        const key = key_code.includes('(x)=') ? PARSER_TYPE.PLOT : PARSER_TYPE.PARAMETRIC
+
+        // Extract the expression and options
+        const [expression, ...options] = data.split(',')
+
+        // Define the code
+        const code = key === PARSER_TYPE.PLOT ?
+            [expression] :
+            [expression, options.shift() ?? '']
+
+        // Define the parameters
+        const parameters = {
+            samples: { value: options.filter(x => x.startsWith('@'))[0] ?? 100, options: [] },
+            domain: { value: options.filter(x => x.includes(':'))[0] ?? {}, options: [] },
+            image: { value: options.filter(x => x.includes(':'))[1] ?? {}, options: [] },
+        }
+
+        return {
+            id,
+            key,
+            code,
+            parameters
+        }
     }
-}
 
-/**
- * Parse the second part of the input string:
- * it contains the parameters of the figure (color, width, etc.)
- * <key>=<code>-><parameters>
- * <parameters> is a list of <options> separated by ','
- * @param parameters_code 
- * @returns 
- */
-function _parserParametersCode(parameters_code: string): Record<string, IParserParameters> {
-    return parameters_code.split(',').reduce<Record<string, IParserParameters>>(
-        (acc, cur) => {
-            // Parameters code can be:
-            // 1. red   => key = 'color', value='red', options=[]
-            // 2. red/0.5 => key = 'color', value='red', options=[0.5]
-            // 3. w=0.5 => key = 'w', value='0.5', options=[]
-            // 4. ! or ... => key = '!', value=true, options=[]
+    #parseParameters(parameters_code?: string): Record<string, IParserParameters> {
+        if (parameters_code === undefined) { return {} }
 
-            const [key, ...values] = cur.split('=')
+        // Parameters value
+        const parameters: Record<string, IParserParameters> = {}
 
-            // if the values are empty, it may be a color or a boolean value.
-            if (values.length === 0) {
-                if (PARSER_BOOLEAN_VALUES.includes(key)) {
-                    acc[key] = {
-                        value: true,
-                        options: []
-                    }
-                    return acc
-                } else if (key.startsWith('drag')) {
-                    const [, param] = key.split(':')
-                    acc.drag = {
-                        value: param,
-                        options: []
-                    }
-                    return acc
+        // Split the parameters into an array of strings
+        const data = parameters_code.split(',')
+
+
+        // Each parameter is <key>=<value>/<options>/...
+        // Some parameters are boolean (no = sign)
+        data.forEach((parameter) => {
+            if (!parameter.includes('=')) {
+                // Might be a boolean value or a color
+                const [color,] = parameter.split('/')
+                if (PARSER_COLOR_VALUES.includes(color)) {
+                    parameters.color = { value: parameter, options: [] }
                 } else {
-                    // Default to a color.
-                    acc.color = {
-                        value: key,
-                        options: []
-                    }
-                    return acc
+                    parameters[parameter] = { value: true, options: [] }
                 }
 
+            } else {
+                const [key, ...values] = parameter.split('=')
+                const options = convertValues(values.join('=').split('/'), {})
+
+                const value = options.shift() ?? true
+                parameters[key] = { value, options }
             }
-
-            const [value, ...options] = values.join('=').split('/')
-            acc[key] = { value, options: _parserParametersOptions(options) }
-            return acc
-        }, {})
-}
-
-/**
- * Parse each parameters and split it in <key>=<value> and <options>
- * @param options string[]
- * @returns 
- */
-function _parserParametersOptions(options: string[]): IParserOptions[] {
-    if (options.length > 0) {
-        return options.map((option) => {
-            if (option.includes(':')) {
-                // DOMAIN
-                const [a, b] = option.split(':')
-                return {
-                    min: _parseNumber(a),
-                    max: _parseNumber(b)
-                }
-
-            } else if (option.includes(';')) {
-                // COORDINATE
-                const [x, y] = option.split(';')
-                return {
-                    x: _parseNumber(x),
-                    y: _parseNumber(y)
-                }
-
-            } else if (!isNaN(+option)) {
-                return +option
-            } else if (option.startsWith('@')) {
-                return +option.slice(1)
-            } else if (option.includes('/')) {
-                const [numerator, denominator] = option.split('/')
-                if (!isNaN(+numerator) && !isNaN(+denominator) && +denominator !== 0) {
-                    return parseFloat(numerator) / parseFloat(denominator)
-                }
-            }
-
-            return option
         })
-    }
-    return []
-}
 
-function _parseNumber(value: string): number {
-    return isNaN(+value) ? new NumExp(value).evaluate() : parseFloat(value)
+        // Parse the parameters
+        return parameters
+    }
 }

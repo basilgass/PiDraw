@@ -14,6 +14,7 @@ export class Label {
     #style: string
     #texConverter: (value: string) => string
     #alignement: LABEL_POSITION
+    #offset: XY
 
     get name() { return this.#name }
     get x() { return this.#x }
@@ -39,6 +40,8 @@ export class Label {
         this.#y = 0
 
         this.#alignement = 'br'
+        this.#offset = { x: 0, y: 0 }
+
         this.#style = 'display: block; position: fixed; white-space:nowrap'
         this.#shape = this.#makeLabel()
     }
@@ -106,6 +109,11 @@ export class Label {
 
     position(alignement?: LABEL_POSITION, offset?: XY): this {
         if (alignement === undefined) { alignement = this.#alignement }
+        if (offset === undefined) { offset = this.#offset }
+
+        // Set the alignement and offset
+        this.#alignement = alignement
+        this.#offset = offset
 
         // TODO: label placement / alignement to optimize !
         // Current object position
@@ -143,9 +151,9 @@ export class Label {
         }
 
         if (this.#shape instanceof svgHTML) {
-            this.#shape.center(x + (offset?.x ?? 0), y - (offset?.y ?? 0))
+            this.#shape.center(x + (offset.x ?? 0), y - (offset.y ?? 0))
         } else {
-            this.#shape.center(x + (offset?.x ?? 0), y - (offset?.y ?? 0))
+            this.#shape.center(x + (offset.x ?? 0), y - (offset.y ?? 0))
         }
         return this
     }

@@ -1,14 +1,16 @@
 import { AbstractFigure } from "./AbstractFigure"
 import { XY } from "../pidraw.common"
 import { Svg, Shape, Line as svgLine } from "@svgdotjs/svg.js"
-import { computeLine, mathLine } from "../Calculus"
+import { computeLine, createMarker, mathLine } from "../Calculus"
 
+export type ILineType = 'segment' | 'half_line' | 'line' | 'vector'
 export interface ILineConfig {
     through?: { A: XY, B: XY },
+    director?: { A: XY, d: XY },
     mediator?: { A: XY, B: XY },
     parallel?: { to: Line, through: XY },
     perpendicular?: { to: Line, through: XY },
-    shape?: 'segment' | 'half_line' | 'line' | 'vector'
+    shape?: ILineType
 }
 
 // A line is a figure defined by a point and a vector
@@ -86,6 +88,13 @@ export class Line extends AbstractFigure {
             this.end.x, this.end.y
         )
 
+        // Apply the style
+        if (this.#config.shape === 'vector') {
+            const marker = createMarker(this.rootSVG, 10).end
+            const line = this.shape as svgLine
+            line.marker('end', marker)
+        }
+
         // Apply the stroke and fill.
         this.fill().stroke()
 
@@ -101,7 +110,13 @@ export class Line extends AbstractFigure {
 
             // Direction
             direction = this.direction
-
+        } else if (this.#config.director && this.#config.director.A && this.#config.director.d) {
+            this.start = this.#config.director.A
+            this.end = {
+                x: this.#config.director.A.x + this.#config.director.d.x,
+                y: this.#config.director.A.y + this.#config.director.d.y
+            }
+            direction = this.#config.director.d
         } else if (this.#config.parallel && this.#config.parallel.to && this.#config.parallel.through) {
             this.start = this.#config.parallel.through
             direction = this.#config.parallel.to.direction
@@ -167,5 +182,9 @@ export class Line extends AbstractFigure {
         }
 
         return this
+    }
+
+    follow(x: number, y: number): XY {
+        return this.math.projection({ x, y })
     }
 }

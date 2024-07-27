@@ -1,10 +1,10 @@
-import PiDraw from "../lib"
+import { PiGraph } from "../lib"
 
 const { createApp, ref } = Vue
 
 createApp({
     mounted: () => {
-        const draw = new PiDraw('root')
+        const draw = new PiGraph('root')
 
         const pos = ['tl', 'tc', 'tr', 'ml', 'mc', 'mr', 'bl', 'bc', 'br']
 

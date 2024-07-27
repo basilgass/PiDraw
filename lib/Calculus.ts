@@ -2,8 +2,8 @@
  * The calculus class is intended to replace PiMath and avoid using "fractions" and work directly with number.
  */
 
-import { Marker, Svg } from "@svgdotjs/svg.js"
-import { IGraphConfig, XY, XYZ, isXY } from "./pidraw.common"
+import { Marker, Path as svgPath, Svg } from "@svgdotjs/svg.js"
+import { IGraphConfig, XY, isXY } from "./pidraw.common"
 
 export function numberCorrection(value: number, number_of_digits = 10): number {
     return +value.toFixed(number_of_digits)
@@ -16,6 +16,7 @@ export function isInfinity(value: number): boolean {
 export function distanceAB(A: XY, B: XY): number {
     return Math.sqrt((B.x - A.x) ** 2 + (B.y - A.y) ** 2)
 }
+
 export class mathVector {
     constructor(x: number | XY, y: number | XY) {
         this._x = 0
@@ -97,6 +98,14 @@ export class mathVector {
 
     add(v: mathVector): mathVector {
         return new mathVector(this._x + v.x, this._y + v.y)
+    }
+
+    setLength(length: number): this {
+        const n = this.norm
+        this._x = this._x * length / n
+        this._y = this._y * length / n
+
+        return this
     }
 }
 
@@ -190,6 +199,19 @@ export class mathLine {
             return null
         }
         return { x, y }
+    }
+
+    projection(value: XY): XY {
+        // d = (dx,dy)
+        // p = (px,py)
+        // k = (d.p)/(d.d)
+        // proj = k.d
+        const d = this._director,
+            p = new mathVector(this._A, value)
+
+        const k = mathVector.scalarProduct(d, p) / mathVector.scalarProduct(d, d)
+
+        return { x: this._A.x + d.x * k, y: this._A.y + d.y * k }
     }
 }
 
@@ -781,26 +803,28 @@ class Shutingyard {
     }
 }
 
-export function toPixels(pixels: number | XY | XYZ, config: IGraphConfig): XY {
-    if (typeof pixels === 'number') {
+export function toPixels(coordinates: number | XY, config: IGraphConfig): XY {
+    if (typeof coordinates === 'number') {
         return {
-            x: pixels * config.axis.x.x,
-            y: pixels * config.axis.y.y
+            x: coordinates * config.axis.x.x,
+            y: coordinates * config.axis.y.y
         }
-
-    }
-    if ('z' in pixels && 'z' in config.axis && config.axis.z) {
-        // 3D coordinates : convert to 2D
-        return {
-            x: pixels.x * config.axis.x.x + pixels.y * config.axis.y.x + pixels.z * config.axis.z.x + config.origin.x,
-            y: -pixels.x * config.axis.x.y + pixels.y * config.axis.y.y + pixels.z * config.axis.z.y + config.origin.y
-        }
-
     }
 
     return {
-        x: config.origin.x + pixels.x * config.axis.x.x + pixels.y * config.axis.y.x,
-        y: config.origin.y + pixels.x * config.axis.x.y + pixels.y * config.axis.y.y
+        x: config.origin.x +
+            coordinates.x * config.axis.x.x +
+            coordinates.y * config.axis.y.x,
+        y: config.origin.y +
+            coordinates.x * config.axis.x.y +
+            coordinates.y * config.axis.y.y
+    }
+}
+
+export function toCoordinates(pixels: XY, config: IGraphConfig): XY {
+    return {
+        x: (pixels.x - config.origin.x) / config.axis.x.x,
+        y: (pixels.y - config.origin.y) / config.axis.y.y
     }
 }
 
@@ -963,4 +987,24 @@ export function createMarker(svg: Svg, scale: number): { start: Marker, end: Mar
                 add.path(`M1,0 L1,${scale}, L${scale * 1.2},${scale / 2} L1,0z`)
             }).ref(scale, scale / 2)
     }
+}
+
+//TODO: optimize the neearesPointToPath function
+export function nearestPointToPath(value: XY, path: svgPath, precision = 1): XY {
+    const xy = path.pointAt(0)
+
+    function distance(a: XY, b: XY): number {
+        return (a.x - b.x) ** 2 + (a.y - b.y) ** 2
+    }
+
+    for (let t = precision; t < path.length(); t += precision) {
+        const { x, y } = path.pointAt(t)
+
+        // Check if the distance with the current value is less than the previous one.
+        if (distance(value, { x, y }) < distance(value, xy)) {
+            xy.x = x
+            xy.y = y
+        }
+    }
+    return xy
 }

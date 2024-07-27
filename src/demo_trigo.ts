@@ -1,20 +1,19 @@
-import PiDraw from "../lib"
+import { PiParser } from "../lib"
 
 const { createApp, ref } = Vue
 
 let draw
 createApp({
     mounted() {
-        // const parsedCode = PiDraw.parse(this.code)
+        // const parsedCode = PiParser.parse(this.code)
 
-        draw = PiDraw.build(
+        draw = new PiParser(
             'root',
-            `axis,x=-12:12,y=-20:20,ppu=20`,
-            this.code,
-            (value: string) => katex.renderToString(value, {
-                throwOnError: false,
-                displayMode: true
-            }),
+            {
+                parameters: `axis,x=-12:12,y=-20:20,ppu=20`,
+                input: this.code,
+                tex: (value) => katex.renderToString(value, { throwOnError: false, displayMode: true }),
+            }
         )
 
         // Extract only the parameters.
@@ -69,15 +68,15 @@ X6(10,-17.3)->tex=\\scriptsize -\\sqrt{3}/mr/0.5;0
 t=TP0
 @end:static
 P(7.07,7.07)->drag=c
-C=proj P,x->hide
-S=proj P,y->hide
+C=proj P,Ox->hide
+S=proj P,Oy->hide
 c=PC.->dash
 s=PS.->dash
 p0=PO->dot
 p=PO.->w=3
 c1=OC.->green,w=5
 s1=OS.->red,w=5
-a=arc P0,O,P->tex=\\theta/mc
+a=arc P0,O,P,1->tex=\\theta/mc
 T=inter p,t
 t1=P0T.->gold,w=5`
         )

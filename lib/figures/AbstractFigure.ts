@@ -1,5 +1,5 @@
 import { Svg, G, Shape } from "@svgdotjs/svg.js"
-import { IFigureAppearanceConfig, IGraphConfig } from "../pidraw.common"
+import { IFigureAppearanceConfig, IGraphConfig, XY } from "../pidraw.common"
 import { } from "@svgdotjs/svg.js"
 import { Label } from "../labels/Label"
 
@@ -10,6 +10,7 @@ export abstract class AbstractFigure {
     #shape: Shape
     #appearance: IFigureAppearanceConfig
     #static: boolean
+    #isDraggable: boolean
     #label: Label | null
 
     // abstract #makeShape(): Shape
@@ -19,6 +20,7 @@ export abstract class AbstractFigure {
         this.#rootSVG = rootSVG
         this.#name = name
         this.#static = false
+        this.#isDraggable = false
 
         this.#label = null
         this.#element = this.#rootSVG.group().attr('id', this.#name)
@@ -30,7 +32,7 @@ export abstract class AbstractFigure {
             },
             fill: {
                 color: 'transparent',
-                opacity: 1
+                opacity: 1.0
             },
         }
 
@@ -47,6 +49,8 @@ export abstract class AbstractFigure {
     get graphConfig() { return this.#rootSVG.data('config') as IGraphConfig }
     get static() { return this.#static }
     set static(value: boolean) { this.#static = value }
+    get isDraggable() { return this.#isDraggable }
+    set isDraggable(value: boolean) { this.#isDraggable = value }
 
     hide() {
         this.#element.hide()
@@ -57,18 +61,26 @@ export abstract class AbstractFigure {
         return this
     }
 
+    // Defines the shape as strokeable and fillable.
+    strokeable(): Shape[] {
+        return [this.#shape]
+    }
+    fillable(): Shape[] {
+        return [this.#shape]
+    }
+
     fill(color?: string): this {
-        if (typeof color === 'string' && color.includes('/')) {
+        if (color !== undefined) {
             const [colorName, opacity] = color.split('/')
             this.#appearance.fill.color = colorName
-            this.#appearance.fill.opacity = parseFloat(opacity)
-            this.#shape.fill(this.#appearance.fill)
-            return this
+            this.#appearance.fill.opacity = opacity === undefined ? 1 : +opacity
         }
-        this.#appearance.fill.color = color ?? this.#appearance.fill.color
 
-        this.#shape.fill(this.#appearance.fill)
-        this.#shape.opacity(this.#appearance.fill.opacity)
+        this.fillable().forEach((shape) => {
+            shape.fill(this.#appearance.fill)
+            shape.opacity(this.#appearance.fill.opacity)
+        })
+
         return this
     }
 
@@ -77,30 +89,32 @@ export abstract class AbstractFigure {
     stroke(strokeWidth: number): this
     stroke(color: string, strokeWidth: number): this
     stroke(color?: string | number, strokeWidth?: number): this {
-
-
-        if (typeof color === 'string' && color.includes('/')) {
+        if (typeof color === 'string') {
             const [colorName, opacity] = color.split('/')
-
             this.#appearance.stroke.color = colorName
-            this.#appearance.stroke.width = (strokeWidth ?? this.#appearance.stroke.width)
-            this.#appearance.stroke.opacity = parseFloat(opacity)
-
-            this.#shape.stroke(this.#appearance.stroke)
-            return this
+            this.#appearance.stroke.opacity = opacity === undefined ? 1 : +opacity
+            this.#appearance.stroke.width = strokeWidth ?? this.#appearance.stroke.width
+        }
+        if (typeof color === 'number' || strokeWidth === undefined) {
+            this.#appearance.stroke.width = color as number
         }
 
-        this.#appearance.stroke.color = (typeof color === 'string') ? color : this.#appearance.stroke.color
-        this.#appearance.stroke.width = (typeof color === 'number') ? color : (strokeWidth ?? this.#appearance.stroke.width)
-        this.#appearance.stroke.opacity = 1
+        this.strokeable().forEach((shape) => {
+            shape.stroke(this.#appearance.stroke)
+            shape.opacity(this.#appearance.stroke.opacity)
+        })
 
-        this.#shape.stroke(this.#appearance.stroke)
         return this
     }
 
     dash(dasharray?: string): this {
-        this.#shape.stroke({ dasharray: dasharray ?? '5' })
+        this.strokeable().forEach((shape) => {
+            shape.stroke({ dasharray: dasharray ?? (this.graphConfig.axis.x.x / 2).toString() })
+        })
         return this
+    }
+    dot(): this {
+        return this.dash((3).toString())
     }
 
     clear(all?: boolean): this {
@@ -118,7 +132,13 @@ export abstract class AbstractFigure {
     }
 
     update(forceUpdate?: boolean): this {
-        if (this.static && forceUpdate !== true) {
+        if (this.name === 'B') {
+            console.log(this.name, this.static)
+        }
+
+        if (
+            (this.static || this.#isDraggable)
+            && forceUpdate !== true) {
             return this
         }
 
@@ -153,5 +173,9 @@ export abstract class AbstractFigure {
         this.moveLabel()
 
         return this
+    }
+
+    follow(x: number, y: number): XY {
+        return { x, y }
     }
 }
