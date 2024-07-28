@@ -111,8 +111,6 @@ export class Plot extends AbstractFigure {
             return `${cmd} ${x} ${y}`
         }).join(' ')
 
-        // console.log(path)
-
         // Update the path
         const shape = this.shape as Path
         shape.plot(path)
@@ -124,7 +122,11 @@ export class Plot extends AbstractFigure {
         return this
     }
 
-    evaluate(x: number): XY {
+    evaluate(x: number, asCoordinates?: boolean): XY {
+        if (asCoordinates === true) {
+            return { x, y: this.#numExp.evaluate({ x }) }
+        }
+
         return toPixels(
             { x, y: this.#numExp.evaluate({ x }) }
             , this.graphConfig)
@@ -138,6 +140,5 @@ export class Plot extends AbstractFigure {
          */
         const pt = toCoordinates({ x, y }, this.graphConfig)
         return this.evaluate(pt.x)
-
     }
 }

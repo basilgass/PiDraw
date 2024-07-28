@@ -1,7 +1,7 @@
 import { Svg } from "@svgdotjs/svg.js"
 import { AbstractFigure } from "./AbstractFigure"
 import { DOMAIN, XY } from "../pidraw.common"
-import { NumExp } from "../Calculus"
+import { NumExp, toPixels } from "../Calculus"
 import { Path } from "@svgdotjs/svg.js"
 
 export interface IParametricConfig {
@@ -15,6 +15,10 @@ export interface IParametricConfig {
 
 export class Parametric extends AbstractFigure {
     #config: IParametricConfig
+    #numExp: {
+        x: NumExp,
+        y: NumExp
+    }
     get config() { return this.#config }
     set config(value: IParametricConfig) {
         this.#config = value
@@ -28,6 +32,14 @@ export class Parametric extends AbstractFigure {
         this.#config = Object.assign({
             expressions: { x: '', y: '' },
         }, values)
+
+
+        if (this.#config.expressions.x === '' || this.#config.expressions.y === '') { return this }
+
+        this.#numExp = {
+            x: new NumExp(this.#config.expressions.x),
+            y: new NumExp(this.#config.expressions.y),
+        }
 
         // Generate the base shape
         this.shape = this.#makeShape()
@@ -53,19 +65,11 @@ export class Parametric extends AbstractFigure {
     }
 
     computed(): this {
-        // Get the mathematical function from the config
-        const fx: string = this.#config.expressions.x,
-            fy: string = this.#config.expressions.y
-
-        if (fx === '' || fy === '') { return this }
-
         // Get the samples from the config
         const samples = (this.#config.samples ?? this.graphConfig.axis.x.x)
         const domain = (this.#config.domain ?? { min: -2 * Math.PI, max: 2 * Math.PI })
 
         // Make the numeric expression.
-        const exprX = new NumExp(fx),
-            exprY = new NumExp(fy)
 
         // Get the (x;y) points from the function
         // 0 < x < width
@@ -73,9 +77,9 @@ export class Parametric extends AbstractFigure {
         const points: XY[] = []
 
         for (let t = domain.min; t < domain.max; t += 1 / samples) {
-            const x = exprX.evaluate({ t }) * this.graphConfig.axis.x.x + this.graphConfig.origin.x,
-                y = exprY.evaluate({ t }) * this.graphConfig.axis.y.y + this.graphConfig.origin.y
-
+            const { x, y } = this.evaluate(t)
+            // const x = exprX.evaluate({ t }) * this.graphConfig.axis.x.x + this.graphConfig.origin.x,
+            //     y = exprY.evaluate({ t }) * this.graphConfig.axis.y.y + this.graphConfig.origin.y
             points.push({ x, y })
         }
 
@@ -96,5 +100,14 @@ export class Parametric extends AbstractFigure {
 
     moveLabel(): this {
         return this
+    }
+
+    evaluate(t: number): XY {
+        return toPixels(
+            {
+                x: this.#numExp.x.evaluate({ t }),
+                y: this.#numExp.y.evaluate({ t })
+            }
+            , this.graphConfig)
     }
 }

@@ -33,7 +33,7 @@ export class Polygon extends AbstractFigure {
         if (!this.#config.regular) { return this.graphConfig.axis.x.x }
 
         if (typeof this.#config.regular.radius === 'number') {
-            return toPixels(this.#config.regular.radius, this.graphConfig).x
+            return toPixels(this.#config.regular.radius, this.graphConfig)
         }
 
         if (this.#config.vertices && isXY(this.#config.vertices[0]) && isXY(this.#config.regular.radius)) {

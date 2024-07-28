@@ -3,7 +3,7 @@
  */
 
 import { Marker, Path as svgPath, Svg } from "@svgdotjs/svg.js"
-import { IGraphConfig, XY, isXY } from "./pidraw.common"
+import { DOMAIN, IGraphConfig, XY, isDOMAIN, isXY } from "./pidraw.common"
 
 export function numberCorrection(value: number, number_of_digits = 10): number {
     return +value.toFixed(number_of_digits)
@@ -803,22 +803,51 @@ class Shutingyard {
     }
 }
 
-export function toPixels(coordinates: number | XY, config: IGraphConfig): XY {
+export function toPixels<T>(coordinates: T, config: IGraphConfig, axis?: 'x' | 'y' | undefined): T {
+    // It's a number
     if (typeof coordinates === 'number') {
-        return {
-            x: coordinates * config.axis.x.x,
-            y: coordinates * config.axis.y.y
+        if (axis === 'y') {
+            return coordinates * config.axis.y.y as T
         }
+        return coordinates * config.axis.x.x as T
     }
 
-    return {
-        x: config.origin.x +
-            coordinates.x * config.axis.x.x +
-            coordinates.y * config.axis.y.x,
-        y: config.origin.y +
-            coordinates.x * config.axis.x.y +
-            coordinates.y * config.axis.y.y
+    // It's a domain
+    if (isDOMAIN(coordinates)) {
+        let min, max
+        if (axis === 'y') {
+            min = config.origin.y +
+                coordinates.min * config.axis.y.y
+            max = config.origin.y +
+                coordinates.max * config.axis.y.y
+
+        } else {
+            min = config.origin.x +
+                coordinates.min * config.axis.x.x,
+                max = config.origin.x +
+                coordinates.max * config.axis.x.x
+        }
+
+        return {
+            min: Math.min(min, max),
+            max: Math.max(min, max)
+        } as T
     }
+
+    // It's a point
+    if (isXY(coordinates)) {
+        return {
+            x: config.origin.x +
+                coordinates.x * config.axis.x.x +
+                coordinates.y * config.axis.y.x,
+            y: config.origin.y +
+                coordinates.x * config.axis.x.y +
+                coordinates.y * config.axis.y.y
+        } as T
+    }
+
+    // No changes
+    return coordinates
 }
 
 export function toCoordinates(pixels: XY, config: IGraphConfig): XY {

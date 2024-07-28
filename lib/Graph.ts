@@ -14,6 +14,8 @@ import { Arc, IArcConfig } from "./figures/Arc"
 import { CoordinateSystem } from "./figures/CoordinateSystem"
 import { IParametricConfig, Parametric } from "./figures/Parametric"
 import { Follow, IFollowConfig } from "./figures/Follow"
+import { FillBetween, IFillBetweenConfig } from "./figures/FillBetween"
+import { IRiemannConfig, Riemann } from "./figures/Riemann"
 
 export type IDraggableFollow = ((x: number, y: number) => XY) | AbstractFigure | string
 export interface IDraggableConfig {
@@ -165,15 +167,9 @@ export class Graph {
         return createMarker(this.#rootSVG, scale)
     }
 
-    // public toCoordinates(pixels: XY): XY {
-    //     return {
-    //         x: (pixels.x - this.#config.origin.x) / this.#grids.x,
-    //         y: -(pixels.y - this.#config.origin.y) / this.#grids.y
-    //     }
-    // }
 
-    public toPixels(pixels: number | XY): XY {
-        return toPixels(pixels, this.config)
+    public toPixels<T>(pixels: T, axis?: 'x' | 'y' | undefined): T {
+        return toPixels(pixels, this.config, axis)
     }
 
     get create() {
@@ -259,10 +255,26 @@ export class Graph {
             follow: (values: IFollowConfig, name: string): AbstractFigure => {
                 const follow = new Follow(this.#rootSVG, name, values)
 
-                this.#layers.main.add(follow.element)
+                this.#layers.plots_FG.add(follow.element)
                 this.#figures[name] = follow
 
                 return follow
+            },
+            fillbetween: (values: IFillBetweenConfig, name: string): AbstractFigure => {
+                const fillbetween = new FillBetween(this.#rootSVG, name, values)
+
+                this.#layers.plots_BG.add(fillbetween.element)
+                this.#figures[name] = fillbetween
+
+                return fillbetween
+            },
+            riemann: (values: IRiemannConfig, name: string): AbstractFigure => {
+                const riemann = new Riemann(this.#rootSVG, name, values)
+
+                this.#layers.plots_BG.add(riemann.element)
+                this.#figures[name] = riemann
+
+                return riemann
             }
         }
     }

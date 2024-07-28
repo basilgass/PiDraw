@@ -2,9 +2,11 @@ import { Svg, Circle as svgCircle, Line as svgLine, G, Shape } from "@svgdotjs/s
 import { AbstractFigure } from "./AbstractFigure"
 import { XY } from "../pidraw.common"
 import { computeLine, toCoordinates } from "../Calculus"
+import { Plot } from "./Plot"
 
 export interface IFollowConfig {
-    follow: (value: number) => XY,
+    follow: Plot,
+    tangent?: boolean,
     size?: number
 }
 
@@ -27,14 +29,19 @@ export class Follow extends AbstractFigure {
 
         // Store the constraints
         this.#config = Object.assign({
-            follow: { x: '', y: '' },
             size: 10,
         }, values)
 
-        this.#reference = { x: 0, y: 0 }
+        // Default fill color
+        this.appearance.fill.color = 'black'
+
+        this.#reference = this.#config.follow.follow(0, 0)
         this.#delta = { x: 0, y: 0 }
         this.#tangent = this.element.line()
+
+        // Draw the point at x=0
         this.#point = this.element.circle(this.#config.size)
+            .center(this.#reference.x, this.#reference.y)
 
         // Generate the base shape
         this.shape = this.#makeShape()
@@ -53,12 +60,10 @@ export class Follow extends AbstractFigure {
             // #reference is in pixels : it's the point where the mouse is
             clientXY = clientXY.matrixTransform(this.rootSVG.node.getScreenCTM()?.inverse())
 
-            // convert to units
-            const units = toCoordinates(clientXY, this.graphConfig)
-
             // calculate the follow point : it's the point on the Path
             // - it is automatically converted to pixels
-            const follow = this.#config.follow(units.x)
+            const follow = this.#config.follow.follow(clientXY.x, clientXY.y)
+
 
             // Update the point
             if (isNaN(follow.y)) {
@@ -66,12 +71,13 @@ export class Follow extends AbstractFigure {
             } else {
                 // Make sure the point is visible
                 this.#point.show()
+
                 // Move the point
                 this.#point.center(follow.x, follow.y)
 
                 // Build the delta point and the corresponding line.
                 this.#reference = follow
-                this.#delta = this.#config.follow(units.x + 0.01)
+                this.#delta = this.#config.follow.follow(clientXY.x + 0.01, clientXY.y + 0.01)
                 this.computed()
             }
         })
@@ -79,7 +85,6 @@ export class Follow extends AbstractFigure {
     }
 
     #makeShape(): G {
-
         // Create the path
         this.shape = this.element.group().attr({ id: this.name })
 

@@ -1,11 +1,11 @@
 import { Graph, IDraggableConfig } from "./Graph"
 import { IParser, IParserParameters, PARSER_TYPE, PARSER_COLOR_VALUES, convertValues, IParserConfig, IParserSettings } from "./parser/parser.common"
-import { COORDINATE_SYSTEM, IGraphConfig, IGraphDisplay, isDOMAIN, XY } from "./pidraw.common"
+import { COORDINATE_SYSTEM, DOMAIN, IGraphConfig, IGraphDisplay, isDOMAIN, XY } from "./pidraw.common"
 import { parser_documentation } from "./parser/parser_documentation"
 import { buildPoint } from "./parser/buildPoint"
 import { AbstractFigure } from "./figures/AbstractFigure"
 import { buildLine } from "./parser/buildLine"
-import { buildPlot } from "./parser/buildPlot"
+import { buildFillBetween, buildFollow, buildPlot, buildRiemann } from "./parser/buildPlot"
 import { IPlotConfig } from "./figures/Plot"
 import { IParametricConfig } from "./figures/Parametric"
 import { buildCircle } from "./parser/buildCircle"
@@ -194,8 +194,32 @@ export class Parser extends Graph {
                         break
                     }
                 case PARSER_TYPE.FOLLOW:
-                    console.log('this.#buildFollow(item)', item)
-                    break
+                    {
+                        const config = buildFollow(item, this.figures, this.config)
+
+                        if (config) {
+                            obj = this.create.follow(config, item.id)
+                        }
+                        break
+                    }
+                case PARSER_TYPE.FILL_BETWEEN:
+                    {
+                        const config = buildFillBetween(item, this.figures, this.config)
+
+                        if (config) {
+                            obj = this.create.fillbetween(config, item.id)
+                        }
+                        break
+                    }
+                case PARSER_TYPE.RIEMANN:
+                    {
+                        const config = buildRiemann(item, this.figures, this.config)
+
+                        if (config) {
+                            obj = this.create.riemann(config, item.id)
+                        }
+                        break
+                    }
                 case PARSER_TYPE.UNKNOWN:
                     console.log('Unknown:', item)
                     break
@@ -313,16 +337,13 @@ export class Parser extends Graph {
 
                             if (isDOMAIN(dragFollow)) {
                                 const axis = dragFollow.axis ?? 'x'
-                                const DeltaA = this.config.origin[axis] + this.toPixels(dragFollow.min)[axis]
-                                const DeltaB = this.config.origin[axis] + this.toPixels(dragFollow.max)[axis]
+                                const delta: DOMAIN = this.toPixels(dragFollow, axis)
 
-                                const DeltaMin = Math.min(DeltaA, DeltaB)
-                                const DeltaMax = Math.max(DeltaA, DeltaB)
                                 dragConfig.follow?.push(
                                     (x: number, y: number) => {
                                         return {
-                                            x: axis === 'x' ? Math.max(DeltaMin, Math.min(x, DeltaMax)) : x,
-                                            y: axis === 'y' ? Math.max(DeltaMin, Math.min(y, DeltaMax)) : y
+                                            x: axis === 'x' ? Math.max(delta.min, Math.min(x, delta.max)) : x,
+                                            y: axis === 'y' ? Math.max(delta.min, Math.min(y, delta.max)) : y
                                         }
                                     }
                                 )
@@ -572,7 +593,13 @@ export class Parser extends Graph {
                 const options = convertValues(values.join('=').split('/'), {})
 
                 const value = options.shift() ?? true
-                parameters[key] = { value, options }
+
+                // Special case if value is a color and options is of lenth 1
+                if (PARSER_COLOR_VALUES.includes(value as string) && options.length === 1) {
+                    parameters[key] = { value: `${value as string}/${options[0] as number}`, options: [] }
+                } else {
+                    parameters[key] = { value, options }
+                }
             }
         })
 

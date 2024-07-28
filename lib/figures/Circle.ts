@@ -21,7 +21,7 @@ export class Circle extends AbstractFigure {
     get center() { return this.#config.center }
     get radius(): number {
         if (typeof this.#config.radius === 'number') {
-            return toPixels(this.#config.radius, this.graphConfig).x
+            return toPixels(this.#config.radius, this.graphConfig)
         }
 
         return distanceAB(this.center, this.#config.radius)

@@ -29,7 +29,7 @@ export class Arc extends AbstractFigure {
     get end() { return this.#config.end }
     get radius() {
         if (typeof this.#config.radius === 'number') {
-            return toPixels(this.#config.radius, this.graphConfig).x
+            return toPixels(this.#config.radius, this.graphConfig)
         }
 
         return distanceAB(this.center, this.#config.radius ?? this.#config.start)

@@ -26,7 +26,9 @@ export enum PARSER_TYPE {
     POLYGON = 'poly',           // OK : poly <point>,<point>,<point>,...
     REGULAR = 'reg',            // OK: reg <center>,<radius>,<sides>
     // SPECIAL FIGURES
-    FOLLOW = 'follow',         // OK: follow <point>,<function>
+    FOLLOW = 'follow',          // OK : follow <function>,<tangent?>
+    FILL_BETWEEN = 'fill',      // OK : fillbetween <function>,<function?>,<domain?>
+    RIEMANN = 'riemann',        // riemann <function>,<domain>,<number>
 }
 
 export type IParserValues = (string | number | boolean | XY | DOMAIN | AbstractFigure)
