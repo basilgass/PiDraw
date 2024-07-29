@@ -52,6 +52,8 @@ export function buildFollow(item: IParser, figures: Record<string, AbstractFigur
         }
     }
 
+    return null
+
 }
 
 export function buildFillBetween(item: IParser, figures: Record<string, AbstractFigure>, graphConfig: IGraphConfig): IFillBetweenConfig | null {

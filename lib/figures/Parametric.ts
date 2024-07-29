@@ -33,9 +33,6 @@ export class Parametric extends AbstractFigure {
             expressions: { x: '', y: '' },
         }, values)
 
-
-        if (this.#config.expressions.x === '' || this.#config.expressions.y === '') { return this }
-
         this.#numExp = {
             x: new NumExp(this.#config.expressions.x),
             y: new NumExp(this.#config.expressions.y),

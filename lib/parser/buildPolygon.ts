@@ -1,7 +1,7 @@
 import { AbstractFigure } from "../figures/AbstractFigure"
 import { Point } from "../figures/Point"
 import { IPolygonConfig } from "../figures/Polygon"
-import { IGraphConfig } from "../pidraw.common"
+import { IGraphConfig, XY } from "../pidraw.common"
 import { convertValues, IParser, PARSER_TYPE } from "./parser.common"
 
 export function buildPolygon(item: IParser, figures: Record<string, AbstractFigure>, graphConfig: IGraphConfig): IPolygonConfig | null {
@@ -11,7 +11,7 @@ export function buildPolygon(item: IParser, figures: Record<string, AbstractFigu
         // item.code = [<point>,<point>,...]
         const points = code
         if (points.every(p => p instanceof Point)) {
-            return { vertices: points }
+            return { vertices: points as XY[] }
         }
     }
 
