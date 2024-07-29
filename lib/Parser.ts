@@ -1,17 +1,8 @@
 import { Graph, IDraggableConfig } from "./Graph"
 import { IParser, IParserParameters, PARSER_TYPE, PARSER_COLOR_VALUES, convertValues, IParserConfig, IParserSettings } from "./parser/parser.common"
 import { COORDINATE_SYSTEM, DOMAIN, IGraphConfig, IGraphDisplay, isDOMAIN, XY } from "./pidraw.common"
-import { parser_documentation } from "./parser/parser_documentation"
-import { buildPoint } from "./parser/buildPoint"
+import { parser_config } from "./parser/parser.config"
 import { AbstractFigure } from "./figures/AbstractFigure"
-import { buildLine } from "./parser/buildLine"
-import { buildFillBetween, buildFollow, buildPlot, buildRiemann } from "./parser/buildPlot"
-import { IPlotConfig } from "./figures/Plot"
-import { IParametricConfig } from "./figures/Parametric"
-import { buildCircle } from "./parser/buildCircle"
-import { IArcConfig } from "./figures/Arc"
-import { ICircleConfig } from "./figures/Circle"
-import { buildPolygon } from "./parser/buildPolygon"
 import { LABEL_POSITION } from "./labels/Label"
 import { Point } from "./figures/Point"
 
@@ -41,7 +32,7 @@ export class Parser extends Graph {
     }
 
     static documentation() {
-        return parser_documentation
+        return parser_config
     }
 
     get code() {
@@ -102,6 +93,7 @@ export class Parser extends Graph {
             // Parse the line
             const parsedLine = this.#parseLine(line)
 
+
             // Add the block data to the parameters.
             parsedLine.parameters = Object.assign(
                 parsedLine.parameters,
@@ -120,110 +112,154 @@ export class Parser extends Graph {
     #build(input: string) {
         this.#code = this.#prepare(input)
 
+        const pConfig = parser_config
+
         // Loop through each code
         this.#code.forEach((item) => {
             let obj: AbstractFigure | undefined
+            const graphCreate = this.create
 
-            // Check the key
-            switch (item.key) {
-                case PARSER_TYPE.POINT:
-                case PARSER_TYPE.MIDDLE:
-                case PARSER_TYPE.PROJECTION:
-                case PARSER_TYPE.INTERSECTION:
-                case PARSER_TYPE.SYMMETRY:
-                    {
-                        // Prepare the point using the config settings
-                        if (typeof this.#settings.points === 'string' &&
-                            item.parameters['*'] === undefined &&
-                            item.parameters.o === undefined &&
-                            item.parameters.s === undefined
-                        ) {
-                            item.parameters[this.#settings.points] = { value: true, options: [] }
-                        }
-                        const config = buildPoint(item, this.figures, this.config)
+            if (pConfig[item.key]) {
+                const { build, create, parameters } = pConfig[item.key]
 
+                // if <parameters> is not empty, it means the figure has specific parameters
+                // Check if they are defined in the item.parameters
+                if (parameters && parameters.length > 0 && Object.keys(item.parameters).length === 0) {
+                    const keys = Object.keys(item.parameters).filter(key => parameters.includes(key))
+                    keys.forEach((parameter) => {
+                        item.parameters[parameter] = { value: true, options: [] }
+                    })
+                }
+
+                // Create the object
+                // TODO: make it eslint friendly and ts friendly
+                if (Object.hasOwn(graphCreate, create)) {
+                    try {
+                        const config = build(item, this.figures, this.config)
                         if (config) {
-                            obj = this.create.point(config, item.id)
+                            /* eslint-disable */
+                            // @ts-expect-error: create is string and is not 
+                            obj = this.create[create](config, item.id)
+                            /* eslint-enable */
                         }
+                    } catch (e) {
+                        // TODO: the build*** function should return an error message
+                        console.log(e)
 
-                        break
                     }
-                case PARSER_TYPE.LINE:
-                case PARSER_TYPE.MEDIATOR:
-                case PARSER_TYPE.PERPENDICULAR:
-                case PARSER_TYPE.PARALLEL:
-                    {
-                        const config = buildLine(item, this.figures, this.config)
-                        if (config) {
-                            obj = this.create.line(config, item.id)
-                        }
-                        break
-                    }
-                case PARSER_TYPE.PLOT:
-                case PARSER_TYPE.PARAMETRIC:
-                    {
-                        const config = buildPlot(item, this.figures, this.config)
-
-                        if (config && Object.hasOwn(config, 'expression')) {
-                            obj = this.create.plot(config as IPlotConfig, item.id)
-                        } else if (config && Object.hasOwn(config, 'expressions')) {
-                            obj = this.create.parametric(config as IParametricConfig, item.id)
-                        } else {
-                            console.log('Unknown input:', input, item)
-                        }
-                        break
-                    }
-                case PARSER_TYPE.CIRCLE:
-                case PARSER_TYPE.ARC:
-                    {
-                        const config = buildCircle(item, this.figures, this.config)
-                        if (config && Object.hasOwn(config, 'start') && Object.hasOwn(config, 'end')) {
-                            obj = this.create.arc(config as IArcConfig, item.id)
-                        } else if (config) {
-                            obj = this.create.circle(config as ICircleConfig, item.id)
-                        }
-                        break
-                    }
-                case PARSER_TYPE.POLYGON:
-                case PARSER_TYPE.REGULAR:
-                    {
-                        const config = buildPolygon(item, this.figures, this.config)
-                        if (config) {
-                            obj = this.create.polygon(config, item.id)
-                        }
-                        break
-                    }
-                case PARSER_TYPE.FOLLOW:
-                    {
-                        const config = buildFollow(item, this.figures, this.config)
-
-                        if (config) {
-                            obj = this.create.follow(config, item.id)
-                        }
-                        break
-                    }
-                case PARSER_TYPE.FILL_BETWEEN:
-                    {
-                        const config = buildFillBetween(item, this.figures, this.config)
-
-                        if (config) {
-                            obj = this.create.fillbetween(config, item.id)
-                        }
-                        break
-                    }
-                case PARSER_TYPE.RIEMANN:
-                    {
-                        const config = buildRiemann(item, this.figures, this.config)
-
-                        if (config) {
-                            obj = this.create.riemann(config, item.id)
-                        }
-                        break
-                    }
-                case PARSER_TYPE.UNKNOWN:
-                    console.log('Unknown:', item)
-                    break
+                }
             }
+
+
+            // switch (item.key) {
+            //     case PARSER_TYPE.POINT:
+            //     case PARSER_TYPE.MIDDLE:
+            //     case PARSER_TYPE.PROJECTION:
+            //     case PARSER_TYPE.INTERSECTION:
+            //     case PARSER_TYPE.SYMMETRY:
+            //         {
+            //             // Prepare the point using the config settings
+            //             if (typeof this.#settings.points === 'string' &&
+            //                 item.parameters['*'] === undefined &&
+            //                 item.parameters.o === undefined &&
+            //                 item.parameters.s === undefined
+            //             ) {
+            //                 item.parameters[this.#settings.points] = { value: true, options: [] }
+            //             }
+            //             const config = buildPoint(item, this.figures, this.config)
+
+            //             if (config) {
+            //                 obj = this.create.point(config, item.id)
+            //             }
+
+            //             break
+            //         }
+            //     case PARSER_TYPE.LINE:
+            //     case PARSER_TYPE.MEDIATOR:
+            //     case PARSER_TYPE.PERPENDICULAR:
+            //     case PARSER_TYPE.PARALLEL:
+            //         {
+            //             const config = buildLine(item, this.figures, this.config)
+            //             if (config) {
+            //                 obj = this.create.line(config, item.id)
+            //             }
+            //             break
+            //         }
+            //     case PARSER_TYPE.PLOT:
+            //         {
+            //             const config = buildPlot(item, this.figures, this.config)
+
+            //             if (config && Object.hasOwn(config, 'expression')) {
+            //                 obj = this.create.plot(config as IPlotConfig, item.id)
+            //             }
+            //             break
+            //         }
+            //     case PARSER_TYPE.PARAMETRIC:
+            //         {
+            //             const config = buildPlot(item, this.figures, this.config)
+
+            //             if (config && Object.hasOwn(config, 'expressions')) {
+            //                 obj = this.create.parametric(config as IParametricConfig, item.id)
+            //             }
+            //             break
+            //         }
+            //     case PARSER_TYPE.CIRCLE:
+            //         {
+            //             const config = buildCircle(item, this.figures, this.config)
+            //             if (config) {
+            //                 obj = this.create.circle(config as ICircleConfig, item.id)
+            //             }
+            //             break
+            //         }
+            //     case PARSER_TYPE.ARC:
+            //         {
+            //             const config = buildCircle(item, this.figures, this.config)
+            //             if (config) {
+            //                 obj = this.create.arc(config as IArcConfig, item.id)
+            //             }
+            //             break
+            //         }
+            //     case PARSER_TYPE.POLYGON:
+            //     case PARSER_TYPE.REGULAR:
+            //         {
+            //             const config = buildPolygon(item, this.figures, this.config)
+            //             if (config) {
+            //                 obj = this.create.polygon(config, item.id)
+            //             }
+            //             break
+            //         }
+            //     case PARSER_TYPE.FOLLOW:
+            //         {
+            //             const config = buildFollow(item, this.figures, this.config)
+
+            //             if (config) {
+            //                 obj = this.create.follow(config, item.id)
+            //             }
+            //             break
+            //         }
+            //     case PARSER_TYPE.FILL_BETWEEN:
+            //         {
+            //             const config = buildFillBetween(item, this.figures, this.config)
+
+            //             if (config) {
+            //                 obj = this.create.fillbetween(config, item.id)
+            //             }
+            //             break
+            //         }
+            //     case PARSER_TYPE.RIEMANN:
+            //         {
+            //             const config = buildRiemann(item, this.figures, this.config)
+
+            //             if (config) {
+            //                 obj = this.create.riemann(config, item.id)
+            //             }
+            //             break
+            //         }
+            //     case PARSER_TYPE.UNKNOWN:
+            //         console.log('Unknown:', item)
+            //         break
+            // }
+
 
             if (obj) {
                 // Apply defaults settings to the object
@@ -439,7 +475,10 @@ export class Parser extends Graph {
         const config = this.#parseKeyCode(key_code)
 
         // Parse the parameters
-        config.parameters = this.#parseParameters(parameters_code)
+        config.parameters = Object.assign(
+            config.parameters,
+            this.#parseParameters(parameters_code)
+        )
 
         return config
 
@@ -468,11 +507,10 @@ export class Parser extends Graph {
             return this.#parseKeyCodeLine(key_code)
         }
 
-
-
         // Extract the usual key code: <id>=<key> <code>
         const [id, ...data] = key_code.split('=')
         const [key, ...code] = data.join('=').split(' ')
+
 
         if (Object.values(PARSER_TYPE).includes(key as PARSER_TYPE) && code.length > 0) {
             return {
@@ -519,6 +557,9 @@ export class Parser extends Graph {
         } else if (data.endsWith('.')) {
             data = data.slice(0, -1)
             parameters.shape = { value: 'segment', options: [] }
+        } else if (data.endsWith('[')) {
+            data = data.slice(0, -1)
+            parameters.shape = { value: 'half_line', options: [] }
         } else {
             parameters.shape = { value: 'line', options: [] }
         }

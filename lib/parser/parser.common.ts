@@ -28,7 +28,7 @@ export enum PARSER_TYPE {
     // SPECIAL FIGURES
     FOLLOW = 'follow',          // OK : follow <function>,<tangent?>
     FILL_BETWEEN = 'fill',      // OK : fillbetween <function>,<function?>,<domain?>
-    RIEMANN = 'riemann',        // riemann <function>,<domain>,<number>
+    RIEMANN = 'riemann',        // riemann <function>,<domain>,<number>,<position>
 }
 
 export type IParserValues = (string | number | boolean | XY | DOMAIN | AbstractFigure)

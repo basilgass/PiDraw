@@ -918,7 +918,9 @@ export function computeLine(
         y1 = origin.y - k_start * direction.y
 
         const k_end = length ?
-            length : (width - origin.x - padding) / direction.x
+            length : direction.x < 0 ?
+                (- origin.x - padding) / direction.x :
+                (width - origin.x - padding) / direction.x
 
         x2 = origin.x + k_end * direction.x
         y2 = origin.y + k_end * direction.y

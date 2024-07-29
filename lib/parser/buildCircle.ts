@@ -16,6 +16,13 @@ export function buildCircle(item: IParser, figures: Record<string, AbstractFigur
         }
     }
 
+    return null
+
+}
+
+export function buildArc(item: IParser, figures: Record<string, AbstractFigure>, graphConfig: IGraphConfig): ICircleConfig | IArcConfig | null {
+    const code = convertValues(item.code, figures)
+
     if (item.key === PARSER_TYPE.ARC && code.length >= 3) {
         // item.code = [<point>,<point>,<point>,[<radius>]]
         const [start, center, end, radius] = code
@@ -25,7 +32,5 @@ export function buildCircle(item: IParser, figures: Record<string, AbstractFigur
         }
     }
 
-
     return null
-
 }

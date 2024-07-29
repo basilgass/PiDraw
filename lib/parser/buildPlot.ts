@@ -18,6 +18,13 @@ export function buildPlot(item: IParser, figures: Record<string, AbstractFigure>
         }
     }
 
+    return null
+
+}
+
+export function buildParametric(item: IParser, figures: Record<string, AbstractFigure>, graphConfig: IGraphConfig): IParametricConfig | null {
+    const code = convertValues(item.code, figures)
+
     if (item.key === PARSER_TYPE.PARAMETRIC && code.length === 2) {
         // item.code = [<function>,<function>]
         const [x, y] = code
@@ -27,7 +34,6 @@ export function buildPlot(item: IParser, figures: Record<string, AbstractFigure>
     }
 
     return null
-
 }
 
 export function buildFollow(item: IParser, figures: Record<string, AbstractFigure>, graphConfig: IGraphConfig): IFollowConfig | null {

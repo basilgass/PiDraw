@@ -1,6 +1,6 @@
-import { Svg, Circle as svgCircle, Line as svgLine, G, Shape } from "@svgdotjs/svg.js"
+import { Svg, Circle as G } from "@svgdotjs/svg.js"
 import { AbstractFigure } from "./AbstractFigure"
-import { computeLine, toPixels } from "../Calculus"
+import { toPixels } from "../Calculus"
 import { Plot } from "./Plot"
 import { DOMAIN } from "../pidraw.common"
 

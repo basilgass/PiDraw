@@ -40,6 +40,16 @@ v1=vCA
 X(0,0)->drag=f
 `
 
+        this.code = `A(2,3)
+B(5,-1)
+d=AB.
+C(1,-2)
+D(-1,1)
+v=vCD
+E(1,1)
+F(6,3)
+h=FE[`
+
         //         this.code = `a=line x=3
         // b=line y=-1
         // c=line 2x-3y=5
@@ -71,7 +81,7 @@ X(0,0)->drag=f
     },
     setup() {
         const output = ref(null)
-        const parameter = ref('x=-5:10,y=-3:5,grid,axis')
+        const parameter = ref('x=-5:10,y=-3:5,grid,axis,tex')
         const code = ref(`A(3,1)->red,w=0.5,drag=grid,tex=\\sin(\\alpha)/mc/0;0.3
 B(-2,-1)->blue/0.4,?,w=0.1,label
 AB=AB.->dash=7,w=5,!,label=hello=world/mc/0;0.3,black/0.1

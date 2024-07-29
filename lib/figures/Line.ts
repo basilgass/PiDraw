@@ -137,6 +137,8 @@ export class Line extends AbstractFigure {
             }
         }
 
+        // If the line is not a segment and not a vector, we need to compute the line
+        // it is designed for the line and half_line
         if (this.#config.shape === undefined || this.#config.shape === 'line' || this.#config.shape === 'half_line') {
 
             // Get the start and end points of the line
