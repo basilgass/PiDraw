@@ -41,9 +41,7 @@ export class Parser extends Graph {
 
     public refresh(code: string) {
         // Remove every figures
-        Object.keys(this.figures).forEach((name) => {
-            this.figures[name].element.remove()
-        })
+        this.clear()
 
         // Reload the figures
         this.#build(code)

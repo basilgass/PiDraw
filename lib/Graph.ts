@@ -346,6 +346,13 @@ export class Graph {
         return figure
     }
 
+    public clear() {
+        Object.keys(this.figures).forEach((name) => {
+            this.figures[name].element.remove()
+        })
+
+        this.#figures = {}
+    }
     // Update the layout of the graph
     public updateLayout() {
         // Update the viewbox
