@@ -111,6 +111,12 @@ export class Label {
         if (alignement === undefined) { alignement = this.#alignement }
         if (offset === undefined) { offset = this.#offset }
 
+        // Make sure the offset is correct (NaN value must be zero.)
+        offset = {
+            x: isNaN(offset.x) ? 0 : offset.x,
+            y: isNaN(offset.y) ? 0 : offset.y
+        }
+
         // Set the alignement and offset
         this.#alignement = alignement
         this.#offset = offset

@@ -115,6 +115,15 @@ export class Parser extends Graph {
 
         // Loop through each code
         this.#code.forEach((item) => {
+            // Determine the id of the figure.
+            let id = item.id
+            // Make sure the id is unique (if not, add a number)
+            let i = 1
+            while (Object.hasOwn(this.figures, id)) {
+                id = `${item.id}${i++}`
+            }
+            item.id = id
+
             let obj: AbstractFigure | undefined
             const graphCreate = this.create
 
