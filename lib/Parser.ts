@@ -623,14 +623,14 @@ export class Parser extends Graph {
                 } else {
                     parameters[parameter] = { value: true, options: [] }
                 }
-
             } else {
                 const [key, ...values] = parameter.split('=')
+
                 const options = convertValues(values.join('=').split('/'), {})
 
                 const value = options.shift() ?? true
 
-                // Special case if value is a color and options is of lenth 1
+                // Special case if value is a color and options is of length 1
                 if (PARSER_COLOR_VALUES.includes(value as string) && options.length === 1) {
                     parameters[key] = { value: `${value as string}/${options[0] as number}`, options: [] }
                 } else {
