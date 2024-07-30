@@ -568,6 +568,9 @@ export class Parser extends Graph {
         } else if (data.endsWith('.')) {
             data = data.slice(0, -1)
             parameters.shape = { value: 'segment', options: [] }
+        } else if (data.startsWith('[')) {
+            data = data.slice(1)
+            parameters.shape = { value: 'half_line', options: [] }
         } else if (data.endsWith('[')) {
             data = data.slice(0, -1)
             parameters.shape = { value: 'half_line', options: [] }
