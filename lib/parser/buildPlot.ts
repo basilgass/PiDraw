@@ -5,7 +5,7 @@ import { IFollowConfig } from "../figures/Follow"
 import { IParametricConfig } from "../figures/Parametric"
 import { IPlotConfig, Plot } from "../figures/Plot"
 import { IRiemannConfig } from "../figures/Riemann"
-import { IGraphConfig, isDOMAIN } from "../pidraw.common"
+import { DOMAIN, IGraphConfig, isDOMAIN } from "../pidraw.common"
 import { convertValues, IParser, PARSER_TYPE } from "./parser.common"
 
 export function buildPlot(item: IParser, figures: Record<string, AbstractFigure>, graphConfig: IGraphConfig): IPlotConfig | null {
@@ -24,7 +24,7 @@ export function buildPlot(item: IParser, figures: Record<string, AbstractFigure>
         // domain is the first DOMAIN object
         // image is the second DOMAIN object
         // samples is number
-        const domains = data.filter((x) => isDOMAIN(x))
+        const domains = data.filter((x) => isDOMAIN(x)) as DOMAIN[]
         if (domains.length > 0) {
             cfg.domain = domains[0]
         }
@@ -32,7 +32,7 @@ export function buildPlot(item: IParser, figures: Record<string, AbstractFigure>
             cfg.image = domains[1]
         }
 
-        const samples = data.filter(d => typeof d === 'number')
+        const samples = data.filter(d => typeof d === 'number') as number[]
         if (samples.length > 0) {
             cfg.samples = samples[0] > 0 ? samples[0] : 10
         }
