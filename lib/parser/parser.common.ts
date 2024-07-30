@@ -100,11 +100,13 @@ export function convertValues(options: string[], figures: Record<string, Abstrac
         } else if (option.includes(';')) {
             // COORDINATE: x;y
             const [x, y] = option.split(';')
-            return {
-                x: parseFloat(x),
-                y: parseFloat(y)
-            }
 
+            if (!isNaN(+x) && !isNaN(+y)) {
+                return {
+                    x: parseFloat(x),
+                    y: parseFloat(y)
+                }
+            }
         } else if (!isNaN(+option)) {
             // A NUMBER
             return parseFloat(option)

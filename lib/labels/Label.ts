@@ -135,9 +135,9 @@ export class Label {
         }
 
         if (alignement.includes('l')) {
-            x = x - width / 2
+            x = x - width / 2 + (alignement.includes('m') ? -10 : 0)
         } else if (alignement.includes('r')) {
-            x = x + width / 2
+            x = x + width / 2 + (alignement.includes('m') ? 10 : 0)
         } else if (alignement.includes('c')) {
             x = +x
         }

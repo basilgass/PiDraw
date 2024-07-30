@@ -603,7 +603,6 @@ export class Parser extends Graph {
         // Split the parameters into an array of strings
         const data = parameters_code.split(',')
 
-
         // Each parameter is <key>=<value>/<options>/...
         // Some parameters are boolean (no = sign)
         data.forEach((parameter) => {

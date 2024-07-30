@@ -55,6 +55,15 @@ g(x)=(x+2)/(x+1),-1:10->blue
 h(x)=1->green,thin
 i(x)=-1->green,thin`
 
+        this.code = `f(x)=3*(1-x)/((sqrt(x)-1)*(x-4)),0:1
+g(x)=3*(1-x)/((sqrt(x)-1)*(x-4)),1.01:3.9
+h(x)=3*(1-x)/((sqrt(x)-1)*(x-4)),4.01:10
+g=line x=4->red
+h=line y=0.05->lime
+A(1,2)->tex=(1;2)/bc/0;-1,-white
+t(x)=10,-0.1:0.1
+X(0,10)->tex=10/cm/-0.4;0,!`
+
         //         this.code = `a=line x=3
         // b=line y=-1
         // c=line 2x-3y=5
@@ -64,7 +73,7 @@ i(x)=-1->green,thin`
         draw = new PiParser(
             'root',
             {
-                tex: (value) => katex.renderToString(value, { throwOnError: false, displayMode: true }),
+                tex: (value) => katex.renderToString(`${value}`, { throwOnError: false, displayMode: true }),
                 parameters: this.parameter,
                 code: this.code
             }
