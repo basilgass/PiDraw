@@ -11,7 +11,7 @@ createApp({
             'root',
             {
                 parameters: `axis,x=-12:12,y=-20:20,ppu=20`,
-                input: this.code,
+                code: this.code,
                 tex: (value) => katex.renderToString(value, { throwOnError: false, displayMode: true }),
             }
         )

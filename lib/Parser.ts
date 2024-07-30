@@ -24,8 +24,8 @@ export class Parser extends Graph {
 
         // Define the code to display
         this.#code = []
-        if (config?.input) {
-            this.#build(config.input)
+        if (config?.code) {
+            this.#build(config.code)
         }
 
         return this

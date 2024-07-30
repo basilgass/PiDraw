@@ -34,9 +34,9 @@ export enum PARSER_TYPE {
 export type IParserValues = (string | number | boolean | XY | DOMAIN | AbstractFigure)
 
 export interface IParserConfig {
-    tex?: TeXConverterType,
     parameters?: string,
-    input?: string
+    code?: string
+    tex?: TeXConverterType,
 }
 export interface IParserSettings {
     label?: boolean,

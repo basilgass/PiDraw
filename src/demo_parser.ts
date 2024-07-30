@@ -61,7 +61,7 @@ h=FE[`
             {
                 tex: (value) => katex.renderToString(value, { throwOnError: false, displayMode: true }),
                 parameters: this.parameter,
-                input: this.code
+                code: this.code
             }
         )
 

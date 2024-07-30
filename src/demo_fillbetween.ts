@@ -25,7 +25,7 @@ r=riemann f,6:9,4->fill=green/0.4
             {
                 tex: (value) => katex.renderToString(value, { throwOnError: false, displayMode: true }),
                 parameters: this.parameter,
-                input: this.code
+                code: this.code
             }
         )
 
