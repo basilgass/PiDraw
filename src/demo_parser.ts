@@ -50,6 +50,11 @@ E(1,1)
 F(6,3)
 h=FE[`
 
+        this.code = `f(x)=(-x+2)/(x+1),-10:-1->blue
+f(x)=(x+2)/(x+1),-1:10->blue
+h(x)=1->green,thin
+i(x)=-1->green,thin`
+
         //         this.code = `a=line x=3
         // b=line y=-1
         // c=line 2x-3y=5
