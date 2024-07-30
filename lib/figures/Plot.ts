@@ -29,6 +29,7 @@ export class Plot extends AbstractFigure {
         // Store the constraints
         this.#config = Object.assign({
             expression: '',
+            samples: this.graphConfig.axis.x.x,
         }, values)
 
         // Generate the base shape
@@ -83,7 +84,7 @@ export class Plot extends AbstractFigure {
         for (let x = domain.min; x < domain.max; x += 1 / samples) {
             const y = expr.evaluate({ x })
 
-            if (isNaN(y) || y < image.min || y > image.max) {
+            if (isNaN(y) || y === Infinity || y === -Infinity || y < image.min || y > image.max) {
                 const coords = toPixels({ x, y: 0 }, this.graphConfig)
                 points.push({ x: coords.x, y: NaN })
             } else {

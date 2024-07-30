@@ -93,7 +93,6 @@ export class Parser extends Graph {
             // Parse the line
             const parsedLine = this.#parseLine(line)
 
-
             // Add the block data to the parameters.
             parsedLine.parameters = Object.assign(
                 parsedLine.parameters,
@@ -423,14 +422,17 @@ export class Parser extends Graph {
 
         // Define the configuration
         const ppu = parameters.ppu ? parseFloat(parameters.ppu.value as string) : 50
-        const dx = isDOMAIN(parameters.x.value) ? Math.abs(parameters.x.value.max - parameters.x.value.min) : 16
-        const dy = isDOMAIN(parameters.y.value) ? Math.abs(parameters.y.value.max - parameters.y.value.min) : 16
+        const xDomain = parameters.x && isDOMAIN(parameters.x.value) ? parameters.x.value : { min: -8, max: 8 }
+        const yDomain = parameters.y && isDOMAIN(parameters.y.value) ? parameters.y.value : { min: -8, max: 8 }
+        const dx = Math.abs(xDomain.max - xDomain.min)
+        const dy = Math.abs(yDomain.max - yDomain.min)
+
 
         const width = dx * ppu
         const height = dy * ppu
         const origin = {
-            x: (isDOMAIN(parameters.x.value) ? -parameters.x.value.min : 8) * ppu,
-            y: (isDOMAIN(parameters.y.value) ? parameters.y.value.max : 8) * ppu
+            x: -xDomain.min * ppu,
+            y: yDomain.max * ppu
         }
 
         const system = COORDINATE_SYSTEM.CARTESIAN_2D
@@ -584,26 +586,11 @@ export class Parser extends Graph {
         // Determine the type of the parser (plot or parametric)
         const key = key_code.includes('(x)=') ? PARSER_TYPE.PLOT : PARSER_TYPE.PARAMETRIC
 
-        // Extract the expression and options
-        const [expression, ...options] = data.split(',')
-
-        // Define the code
-        const code = key === PARSER_TYPE.PLOT ?
-            [expression] :
-            [expression, options.shift() ?? '']
-
-        // Define the parameters
-        const parameters = {
-            samples: { value: options.filter(x => x.startsWith('@'))[0] ?? 100, options: [] },
-            domain: { value: options.filter(x => x.includes(':'))[0] ?? {}, options: [] },
-            image: { value: options.filter(x => x.includes(':'))[1] ?? {}, options: [] },
-        }
-
         return {
             id,
             key,
-            code,
-            parameters
+            code: data.split(','),
+            parameters: {}
         }
     }
 

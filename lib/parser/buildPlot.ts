@@ -1,3 +1,4 @@
+import { loadConfigFromFile } from "vite"
 import { AbstractFigure } from "../figures/AbstractFigure"
 import { IFillBetweenConfig } from "../figures/FillBetween"
 import { IFollowConfig } from "../figures/Follow"
@@ -7,15 +8,36 @@ import { IRiemannConfig } from "../figures/Riemann"
 import { IGraphConfig, isDOMAIN } from "../pidraw.common"
 import { convertValues, IParser, PARSER_TYPE } from "./parser.common"
 
-export function buildPlot(item: IParser, figures: Record<string, AbstractFigure>, graphConfig: IGraphConfig): IPlotConfig | IParametricConfig | null {
+export function buildPlot(item: IParser, figures: Record<string, AbstractFigure>, graphConfig: IGraphConfig): IPlotConfig | null {
     const code = convertValues(item.code, figures)
 
-    if (item.key === PARSER_TYPE.PLOT && code.length === 1) {
-        // item.code = [<function>]
-        const [f] = code
-        if (typeof f === 'string') {
-            return { expression: f }
+    // console.log(item)
+    // console.log(code)
+
+    if (item.key === PARSER_TYPE.PLOT) {
+        // item.code = [<function>,<domain>,<image>,<@samples>]
+        const [f, ...data] = code
+
+        const cfg: IPlotConfig = { expression: typeof f === 'number' ? f.toString() : f as string }
+
+        // data *can* contains: domain, image, samples
+        // domain is the first DOMAIN object
+        // image is the second DOMAIN object
+        // samples is number
+        const domains = data.filter((x) => isDOMAIN(x))
+        if (domains.length > 0) {
+            cfg.domain = domains[0]
         }
+        if (domains.length > 1) {
+            cfg.image = domains[1]
+        }
+
+        const samples = data.filter(d => typeof d === 'number')
+        if (samples.length > 0) {
+            cfg.samples = samples[0] > 0 ? samples[0] : 10
+        }
+
+        return cfg
     }
 
     return null

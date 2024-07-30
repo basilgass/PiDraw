@@ -225,7 +225,6 @@ export class NumExp {
     constructor(value: string, uniformize?: boolean) {
         this._expression = value
 
-
         try {
             this._rpn = new Shutingyard(ShutingyardMode.NUMERIC).parse(value, uniformize ?? true).rpn
             this._isValid = true

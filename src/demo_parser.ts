@@ -50,8 +50,8 @@ E(1,1)
 F(6,3)
 h=FE[`
 
-        this.code = `f(x)=(-x+2)/(x+1),-10:-1->blue
-f(x)=(x+2)/(x+1),-1:10->blue
+        this.code = `f(x)=(-x+2)/(x+1),-10:-1,-3:3,@50->blue
+g(x)=(x+2)/(x+1),-1:10->blue
 h(x)=1->green,thin
 i(x)=-1->green,thin`
 
@@ -86,7 +86,7 @@ i(x)=-1->green,thin`
     },
     setup() {
         const output = ref(null)
-        const parameter = ref('x=-5:10,y=-3:5,grid,axis,tex')
+        const parameter = ref('x=-5:10,grid,axis,tex')
         const code = ref(`A(3,1)->red,w=0.5,drag=grid,tex=\\sin(\\alpha)/mc/0;0.3
 B(-2,-1)->blue/0.4,?,w=0.1,label
 AB=AB.->dash=7,w=5,!,label=hello=world/mc/0;0.3,black/0.1
