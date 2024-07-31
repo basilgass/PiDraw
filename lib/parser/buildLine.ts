@@ -94,6 +94,19 @@ export function buildLine(item: IParser, figures: Record<string, AbstractFigure>
             return { parallel: { to, through } }
         }
     }
+
+    if (item.key === PARSER_TYPE.BISECTOR && code.length === 2) {
+        const [d1, d2] = code
+        if (d1 instanceof Line && d2 instanceof Line) {
+            return { bisector: { d1, d2 } }
+        }
+    }
+    if (item.key === PARSER_TYPE.BISECTOR && code.length === 3) {
+        const [B, A, C] = code
+        if (A instanceof Point && B instanceof Point && C instanceof Point) {
+            return { bisector: { A, B, C } }
+        }
+    }
     return null
 
 }

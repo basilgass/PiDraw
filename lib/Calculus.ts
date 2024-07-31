@@ -909,16 +909,19 @@ export function computeLine(
     } else {
         // We have a diagonal line
         // OP = OA + k * direction => k = (OP - OA)/direction
+
+        // TODO: There is a problem with line, half line - must rework the computedLine function
         const k_start = half_axis ?
             (direction.x < 0 ? -1 : 1) * padding / direction.x :
             length ? length : (origin.x - padding) / direction.x
+
 
         x1 = origin.x - k_start * direction.x
         y1 = origin.y - k_start * direction.y
 
         const k_end = length ?
             length : direction.x < 0 ?
-                (- origin.x - padding) / direction.x :
+                (width - origin.x - padding) / direction.x :
                 (width - origin.x - padding) / direction.x
 
         x2 = origin.x + k_end * direction.x

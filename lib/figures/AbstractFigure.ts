@@ -132,10 +132,6 @@ export abstract class AbstractFigure {
     }
 
     update(forceUpdate?: boolean): this {
-        if (this.name === 'B') {
-            console.log(this.name, this.static)
-        }
-
         if (
             (this.static || this.#isDraggable)
             && forceUpdate !== true) {

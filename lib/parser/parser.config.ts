@@ -102,12 +102,14 @@ export const parser_config: Record<string, {
     //     code: 'd=tan <point>,<point>',
     //     parameters: []
     // },
-    // bisector: {
-    // name: 'bisector',
-    //     description: 'Create the bisector of an angle',
-    //     code: 'd=bis <point>,<point>,<point>',
-    //     parameters: []
-    // },
+    bis: {
+        name: 'bisector',
+        description: 'Create the bisector of an angle',
+        code: 'd=bis <point>,<point>,<point>',
+        parameters: [],
+        build: buildLine,
+        create: 'line'
+    },
     circ: {
         name: 'circle',
         description: 'Create a circle',

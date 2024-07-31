@@ -1,7 +1,7 @@
 import { AbstractFigure } from "./AbstractFigure"
 import { XY } from "../pidraw.common"
 import { Svg, Shape, Line as svgLine } from "@svgdotjs/svg.js"
-import { computeLine, createMarker, mathLine } from "../Calculus"
+import { computeLine, createMarker, mathLine, mathVector } from "../Calculus"
 
 export type ILineType = 'segment' | 'half_line' | 'line' | 'vector'
 export interface ILineConfig {
@@ -10,6 +10,7 @@ export interface ILineConfig {
     mediator?: { A: XY, B: XY },
     parallel?: { to: Line, through: XY },
     perpendicular?: { to: Line, through: XY },
+    bisector?: { d1: Line, d2: Line } | { A: XY, B: XY, C: XY },
     shape?: ILineType
 }
 
@@ -135,6 +136,31 @@ export class Line extends AbstractFigure {
                 x: this.#config.mediator.B.y - this.#config.mediator.A.y,
                 y: -(this.#config.mediator.B.x - this.#config.mediator.A.x)
             }
+        } else if (this.#config.bisector) {
+            // Either we have two lines or three points
+            if ('d1' in this.#config.bisector && 'd2' in this.#config.bisector) {
+                // TODO: Implement the bisector of two lines
+            }
+
+            if ('A' in this.#config.bisector && 'B' in this.#config.bisector && 'C' in this.#config.bisector) {
+                const { A, B, C } = this.#config.bisector
+
+                const AB = new mathVector(A, B),
+                    normAB = AB.norm,
+                    AC = new mathVector(A, C),
+                    normAC = AC.norm
+
+
+                // the bisector go through A
+                this.start = A
+
+                // The direction of the bisector is the sum of the two normalise vectors
+                direction = {
+                    x: AB.x / normAB + AC.x / normAC,
+                    y: AB.y / normAB + AC.y / normAC
+                }
+
+            }
         }
 
         // If the line is not a segment and not a vector, we need to compute the line
@@ -150,6 +176,7 @@ export class Line extends AbstractFigure {
                 0,
                 this.#config.shape === 'half_line'
             )
+
 
             // (this.#config.shape === 'line' || this.#config.shape === 'half_line') && 
             // If the data is not null, update the start and end points of the line

@@ -71,6 +71,11 @@ X(0,0)->drag=f
         // e=line 2x=3y-4`
         // const parsedCode = PiDraw.parse(this.code)
         // this.code = 'A(8,3)->tex=@'
+
+        this.code = `A(1,2)->drag=grid
+B(2,0)->drag=grid
+C(-2,7)->drag=grid
+b=bis B,A,C`
         draw = new PiParser(
             'root',
             {
