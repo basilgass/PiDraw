@@ -95,16 +95,16 @@ export class Arc extends AbstractFigure {
         // Auto label placement.
         if (d * v.x > 0 && d * v.y > 0) {
             // Label is bottom right
-            this.label.alignement = 'mr'
+            this.label.config.alignement = 'mr'
         } else if (d * v.x < 0 && d * v.y > 0) {
             // Label is bottom left
-            this.label.alignement = 'ml'
+            this.label.config.alignement = 'ml'
         } else if (d * v.x > 0 && d * v.y < 0) {
             // label is top right
-            this.label.alignement = 'mr'
+            this.label.config.alignement = 'mr'
         } else if (d * v.x < 0 && d * v.y < 0) {
             // Label is top left
-            this.label.alignement = 'ml'
+            this.label.config.alignement = 'ml'
         }
 
         this.label.move(x, y)
