@@ -1,11 +1,13 @@
 import { Graph, IDraggableConfig } from "./Graph"
-import { IParser, IParserParameters, PARSER_TYPE, PARSER_COLOR_VALUES, convertValues, IParserConfig, IParserSettings } from "./parser/parser.common"
+import { IParser, IParserParameters, PARSER_TYPE, PARSER_COLOR_VALUES, convertValues, IParserConfig, IParserSettings, IParserValues } from "./parser/parser.common"
 import { COORDINATE_SYSTEM, DOMAIN, IGraphConfig, IGraphDisplay, isDOMAIN, XY } from "./pidraw.common"
 import { parser_config } from "./parser/parser.config"
 import { AbstractFigure } from "./figures/AbstractFigure"
 import { LABEL_POSITION } from "./labels/Label"
 import { Point } from "./figures/Point"
 
+// TODO: dynamic label with @ for coordinates - important for draggable.
+// TODO: label / tex with empty value (like false or true) => use the figure name.
 export class Parser extends Graph {
     #code: IParser[]
     #settings: IParserSettings
@@ -626,10 +628,14 @@ export class Parser extends Graph {
                 }
             } else {
                 const [key, ...values] = parameter.split('=')
-
                 const options = convertValues(values.join('=').split('/'), {})
 
-                const value = options.shift() ?? true
+                // Special case when key is label or tex
+                let value: IParserValues = options.shift() ?? true
+
+                if (['label', 'tex'].includes(key)) {
+                    value = values[0] ?? ''
+                }
 
                 // Special case if value is a color and options is of length 1
                 if (PARSER_COLOR_VALUES.includes(value as string) && options.length === 1) {
@@ -637,6 +643,7 @@ export class Parser extends Graph {
                 } else {
                     parameters[key] = { value, options }
                 }
+
             }
         })
 

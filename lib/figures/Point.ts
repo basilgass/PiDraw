@@ -56,6 +56,8 @@ export class Point extends AbstractFigure {
         // Update the shape
         this.shape = this.#makeShape()
 
+        // update the label
+
         return this
     }
 
@@ -200,4 +202,13 @@ export class Point extends AbstractFigure {
         return this
     }
 
+    computeLabel(): string {
+        if (this.label?.config.text.includes('@')) {
+            const coords = toCoordinates(this.#pixels, this.graphConfig)
+
+            return this.label.config.text.replace('@', `(${coords.x};${coords.y})`)
+        }
+
+        return this.label?.config.text ?? this.name
+    }
 }

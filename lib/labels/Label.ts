@@ -3,46 +3,63 @@ import { XY } from "../pidraw.common"
 
 type LabelType = svgLabel | svgHTML
 export type LABEL_POSITION = 'tl' | 'tc' | 'tr' | 'ml' | 'mc' | 'mr' | 'bl' | 'bc' | 'br'
+export interface ILabelConfig {
+    text: string,
+    asHtml: boolean,
+    alignement: LABEL_POSITION,
+    offset: XY,
+    texConverter: (value: string) => string
+}
 export class Label {
     #element: G
     #name: string
     #shape: LabelType
+    #config: ILabelConfig
     #displayName: string
-    #isHtml: boolean
     #x: number
     #y: number
     #style: string
-    #texConverter: (value: string) => string
-    #alignement: LABEL_POSITION
-    #offset: XY
 
-    get name() { return this.#name }
+    get config() { return this.#config }
     get x() { return this.#x }
     set x(value: number) { this.#x = value }
     get y() { return this.#y }
     set y(value: number) { this.#y = value }
-    get isHtml() { return this.#isHtml }
+    get asHtml() { return this.#config.asHtml }
     get shape() { return this.#shape }
-    get alignement() { return this.#alignement }
-    set alignement(value: LABEL_POSITION) { this.#alignement = value }
+    get alignement() { return this.#config.alignement }
 
-    constructor(rootG: G, name: string, config: {
-        text?: string,
-        asHtml?: boolean,
-        texConverter?: (value: string) => string
-    }) {
+    constructor(rootG: G, name: string, config: ILabelConfig) {
+        // The parent group : the figure which the label is attached to.
         this.#element = rootG
+
+        // The name of the label - it's the name / id of the label.
+        // Uses the name of the base figure.
         this.#name = name
+
+        // Store the configuration of the label.
+        this.#config = Object.assign(
+            {
+                text: name,
+                asHtml: false,
+                alignement: 'br',
+                offset: { x: 0, y: 0 },
+                texConverter: (value: string) => value
+            },
+            config
+        )
+
+        // displayName is the text displayed on the label.
         this.#displayName = config.text ?? name
-        this.#isHtml = config.asHtml ?? false
-        this.#texConverter = config.texConverter ?? ((value: string) => value)
+
+        // Position of the label
         this.#x = 0
         this.#y = 0
 
-        this.#alignement = 'br'
-        this.#offset = { x: 0, y: 0 }
-
+        // Default style
         this.#style = 'display: block; position: fixed; white-space:nowrap'
+
+        // Create the label shape
         this.#shape = this.#makeLabel()
     }
 
@@ -51,7 +68,7 @@ export class Label {
         if (this.#shape) { this.#shape.remove() }
 
         // Create a new label.
-        this.#shape = this.#isHtml ?
+        this.#shape = this.#config.asHtml ?
             this.#element.foreignObject(1, 1)
                 .attr('style', "overflow:visible")
                 .add(SVG(`<div style="${this.#style}">${this.displayName}</div>`, true)) :
@@ -66,12 +83,12 @@ export class Label {
     get label(): LabelType { return this.#shape }
 
     get displayName() {
-        if (this.#isHtml) {
-            return this.#texConverter(this.#displayName)
+        if (this.#config.asHtml) {
+            return this.#config.texConverter(this.#displayName)
         }
-
         return this.#displayName
     }
+
 
     hide() {
         this.#shape.hide()
@@ -89,7 +106,6 @@ export class Label {
         // Update the text.
         this.#makeLabel()
 
-        // this.moveLabel()
         return this
     }
 
@@ -108,8 +124,8 @@ export class Label {
     }
 
     position(alignement?: LABEL_POSITION, offset?: XY): this {
-        if (alignement === undefined) { alignement = this.#alignement }
-        if (offset === undefined) { offset = this.#offset }
+        if (alignement === undefined) { alignement = this.#config.alignement }
+        if (offset === undefined) { offset = this.#config.offset }
 
         // Make sure the offset is correct (NaN value must be zero.)
         offset = {
@@ -118,8 +134,8 @@ export class Label {
         }
 
         // Set the alignement and offset
-        this.#alignement = alignement
-        this.#offset = offset
+        this.#config.alignement = alignement
+        this.#config.offset = offset
 
         // TODO: label placement / alignement to optimize !
         // Current object position

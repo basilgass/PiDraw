@@ -9,5 +9,5 @@
     ".scss",
     ".less"
   ],
-  "entryFilePath": "\\lib\\main.ts"
+  "entryFilePath": "\\lib\\index.ts"
 }

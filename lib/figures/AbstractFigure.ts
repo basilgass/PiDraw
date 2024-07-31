@@ -153,12 +153,18 @@ export abstract class AbstractFigure {
 
     // The position depends on the figure.
     addLabel(text?: string, asHtml?: boolean, texConverter?: (value: string) => string): Label {
-        this.#label = new Label(this.#element, this.#name, {
-            text: text ?? this.#name,
-            asHtml: asHtml ?? false,
-            texConverter: texConverter ?? ((value: string) => value)
-        })
-        this.moveLabel()
+        this.#label = new Label(
+            this.#element,
+            this.#name,
+            {
+                text: text ?? this.#name,
+                asHtml: asHtml ?? false,
+                alignement: 'br',
+                offset: { x: 0, y: 0 },
+                texConverter: texConverter ?? ((value: string) => value)
+            })
+
+        this.updateLabel()
         return this.#label
     }
     get label() { return this.#label }
@@ -169,10 +175,16 @@ export abstract class AbstractFigure {
         if (!this.#label) { return this }
 
         // if the label is dynamic, update it.
-        // TODO: dynamic label update.
+        this.#label.setLabel(this.computeLabel())
+
+        // Move the label position
         this.moveLabel()
 
         return this
+    }
+
+    computeLabel(): string {
+        return this.#label?.config.text ?? this.#name
     }
 
     follow(x: number, y: number): XY {

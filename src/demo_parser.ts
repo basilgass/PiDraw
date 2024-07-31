@@ -19,7 +19,7 @@ let draw
 createApp({
     mounted() {
         // this.code = 'f(x)=sin(x),-pi:2pi'
-        this.code = `A(8,3)->red,w=5,drag=grid
+        this.code = `A(8,3)->red,w=5,drag=grid,tex=@
 B(-4,-1)->blue,w=10
 M=mid A,B
 P1=proj A,Ox
@@ -40,29 +40,29 @@ v1=vCA
 X(0,0)->drag=f
 `
 
-        this.code = `A(2,3)
-B(5,-1)
-d=AB.
-C(1,-2)
-D(-1,1)
-v=vCD
-E(1,1)
-F(6,3)
-h=FE[`
+        //         this.code = `A(2,3)
+        // B(5,-1)
+        // d=AB.
+        // C(1,-2)
+        // D(-1,1)
+        // v=vCD
+        // E(1,1)
+        // F(6,3)
+        // h=FE[`
 
-        this.code = `f(x)=(-x+2)/(x+1),-10:-1,-3:3,@50->blue
-g(x)=(x+2)/(x+1),-1:10->blue
-h(x)=1->green,thin
-i(x)=-1->green,thin`
+        //         this.code = `f(x)=(-x+2)/(x+1),-10:-1,-3:3,@50->blue
+        // g(x)=(x+2)/(x+1),-1:10->blue
+        // h(x)=1->green,thin
+        // i(x)=-1->green,thin`
 
-        this.code = `f(x)=3*(1-x)/((sqrt(x)-1)*(x-4)),0:1
-g(x)=3*(1-x)/((sqrt(x)-1)*(x-4)),1.01:3.9
-h(x)=3*(1-x)/((sqrt(x)-1)*(x-4)),4.01:10
-g=line x=4->red
-h=line y=0.05->lime
-A(1,2)->tex=(1;2)/bc/0;-1,-white
-t(x)=10,-0.1:0.1
-X(0,10)->tex=10/cm/-0.4;0,!`
+        //         this.code = `f(x)=3*(1-x)/((sqrt(x)-1)*(x-4)),0:1
+        // g(x)=3*(1-x)/((sqrt(x)-1)*(x-4)),1.01:3.9
+        // h(x)=3*(1-x)/((sqrt(x)-1)*(x-4)),4.01:10
+        // g=line x=4->red
+        // h=line y=0.05->lime
+        // A(1,2)->tex=(1;2)/bc/0;-1,-white
+        // t(x)=10,-0.1:0.1
+        // X(0,10)->tex=10/cm/-0.4;0,!`
 
         //         this.code = `a=line x=3
         // b=line y=-1
@@ -70,6 +70,7 @@ X(0,10)->tex=10/cm/-0.4;0,!`
         // d=line y=2/3x-1
         // e=line 2x=3y-4`
         // const parsedCode = PiDraw.parse(this.code)
+        // this.code = 'A(8,3)->tex=@'
         draw = new PiParser(
             'root',
             {
