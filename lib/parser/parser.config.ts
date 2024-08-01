@@ -48,7 +48,7 @@ export const parser_config: Record<string, {
         build: buildPoint,
         create: 'point'
     },
-    symmetry: {
+    sym: {
         name: 'symmetry',
         description: 'Create the symmetry of a point',
         code: 'A=sym <point>,<point|line>',

@@ -2,7 +2,7 @@ import { Svg, Shape } from "@svgdotjs/svg.js"
 import { XY, isLine } from "../pidraw.common"
 import { AbstractFigure } from "./AbstractFigure"
 import { Line } from "./Line"
-import { toCoordinates, toPixels } from "../Calculus"
+import { mathVector, toCoordinates, toPixels } from "../Calculus"
 
 export type ILine = Line | 'Ox' | 'Oy'
 export interface IPointConfig {
@@ -189,6 +189,43 @@ export class Point extends AbstractFigure {
             if (coord === null) { return this }
 
             this.pixels = coord
+        }
+
+        if (this.#config.symmetry) {
+            // Two cases: symmetry with a point or symmetry with a line
+            const A = this.#config.symmetry.A
+            const B = this.#config.symmetry.B
+
+            if (B instanceof Line) {
+                // Symmetry with a line
+                const d = new mathVector(B.direction)      // direction vector of the line 
+                const n = d.normal   // normal vector to the line
+                const BA = new mathVector(A, B.start) // vector BA
+
+                const proj = BA.projection(n)
+
+                this.x = A.x + 2 * proj.x
+                this.y = A.y + 2 * proj.y
+            } else if (B === 'Ox') {
+                // Symmetry with the Ox axis
+                this.x = A.x
+                this.y = 2 * this.graphConfig.origin.y - A.y
+            } else if (B === 'Oy') {
+                // Symmetry with the Oy axis
+                this.x = 2 * this.graphConfig.origin.x - A.x
+                this.y = A.y
+            } else {
+                // Symmetry with a point B = (x0, y0)
+                const x0 = B.x
+                const y0 = B.y
+                // Compute the vector AB
+                const dx = A.x - x0
+                const dy = A.y - y0
+                // Compute the symmetry (symmetry center + vector AB)
+                this.x = x0 - dx
+                this.y = y0 - dy
+            }
+
         }
 
         return this

@@ -73,9 +73,11 @@ export class Parser extends Graph {
 
         // Split and filter the inputs
         // - remove empty lines
+        // - trim each lines.
         // - skip line starting with '$'
         const lines = input
             .split('\n')
+            .map((line) => line.trim())
             .filter((line) => line.trim() !== '' && !line.startsWith('$'))
 
         // Define the block variables

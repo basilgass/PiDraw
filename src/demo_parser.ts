@@ -74,8 +74,13 @@ X(0,0)->drag=f
 
         this.code = `A(1,2)->drag=grid
 B(2,0)->drag=grid
-C(-2,7)->drag=grid
-b=bis B,A,C`
+C(6,5)->drag=grid
+b=bis B,A,C
+T=sym B,A
+K=sym B,b
+
+A1=sym A,Ox
+A2=sym A,Oy`
         draw = new PiParser(
             'root',
             {

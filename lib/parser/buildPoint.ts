@@ -77,12 +77,12 @@ function buildPoint_config(item: IParser, figures: Record<string, AbstractFigure
         const A = code[0]
         const B = code[1]
 
-        if (A instanceof Point && (B instanceof Point || B instanceof Line)) {
+        if (A instanceof Point &&
+            (B instanceof Point || B instanceof Line || B === 'Ox' || B === 'Oy')
+        ) {
             return { symmetry: { A, B } }
         }
     }
-
-
 
     return null
 }

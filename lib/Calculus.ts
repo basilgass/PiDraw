@@ -18,16 +18,19 @@ export function distanceAB(A: XY, B: XY): number {
 }
 
 export class mathVector {
-    constructor(x: number | XY, y: number | XY) {
+    constructor(x: number | XY, y?: number | XY) {
         this._x = 0
         this._y = 0
 
-        if (!isNaN(+x) && !isNaN(+y)) {
-            this._x = +x
-            this._y = +y
-        } else if (isXY(x) && isXY(y)) {
+        if (isXY(x) && isXY(y)) {
             this._x = y.x - x.x
             this._y = y.y - x.y
+        } else if (isXY(x) && y === undefined) {
+            this._x = x.x
+            this._y = x.y
+        } else if (!isNaN(+x) && y !== undefined && !isNaN(+y)) {
+            this._x = +x
+            this._y = +y
         }
 
         return this
