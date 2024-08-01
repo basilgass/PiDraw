@@ -72,20 +72,22 @@ X(0,0)->drag=f
         // const parsedCode = PiDraw.parse(this.code)
         // this.code = 'A(8,3)->tex=@'
 
-        //         this.code = `A(1,2)->drag=grid,tex=A=@/tr/1;3
-        // B(2,0)->drag=grid
-        // C(6,5)->drag=grid
-        // b=bis B,A,C
-        // T=sym B,A
-        // K=sym B,b
+        this.code = `A(1,2)->drag=grid,tex=A=@/tr/1;3
+        B(2,0)->drag=grid
+        C(6,5)->drag=grid
+        b=bis B,A,C
+        T=sym B,A
+        K=sym B,b
 
-        // A1=sym A,Ox
-        //   A2=sym A,Oy
-        // l1=AK.
-        // l2=AT[
-        // l3=TC`
+        A1=sym A,Ox
+          A2=sym A,Oy
+        l1=AK
+        l2=AT
+        l3=TC
+        l4=BA2
+        I=inter l3,l4`
 
-        this.code = `A(1,2)->drag=grid,tex=A=@/tr/1;3`
+        // this.code = `A(1,2)->drag=grid,tex=A=@/tr/1;3`
         draw = new PiParser(
             'root',
             {

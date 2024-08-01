@@ -6,8 +6,7 @@ import { AbstractFigure } from "./figures/AbstractFigure"
 import { LABEL_POSITION } from "./labels/Label"
 import { Point } from "./figures/Point"
 
-// TODO: dynamic label with @ for coordinates - important for draggable.
-// TODO: label / tex with empty value (like false or true) => use the figure name.
+// TODO: intersection of a line and a circle
 export class Parser extends Graph {
     #code: IParser[]
     #settings: IParserSettings

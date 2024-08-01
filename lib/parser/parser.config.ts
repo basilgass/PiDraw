@@ -40,7 +40,7 @@ export const parser_config: Record<string, {
         build: buildPoint,
         create: 'point'
     },
-    intersection: {
+    inter: {
         name: 'intersection',
         description: 'Create the intersection of two lines',
         code: 'A=inter <line>,<line>',
