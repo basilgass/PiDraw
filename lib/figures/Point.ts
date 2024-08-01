@@ -10,6 +10,12 @@ export interface IPointConfig {
     size?: number,
     pixels?: XY,
     coordinates?: XY,
+    direction?: {
+        point: XY,
+        direction: ILine | { A: XY, B: XY },
+        distance: number,
+        perpendicular?: boolean
+    }
     middle?: { A: XY, B: XY },
     intersection?: { A: ILine, B: ILine },
     projection?: { axis: ILine, point: XY },
@@ -226,6 +232,39 @@ export class Point extends AbstractFigure {
                 this.y = y0 - dy
             }
 
+        }
+
+        if (this.#config.direction) {
+            const { point, direction, distance } = this.#config.direction
+
+            if (direction === 'Ox') {
+                this.x = point.x + toPixels(distance, this.graphConfig)
+                this.y = point.y
+                return this
+            }
+
+            if (direction === 'Oy') {
+                this.x = point.x
+                this.y = point.y - toPixels(distance, this.graphConfig)
+                return this
+            }
+
+            if (direction instanceof Line) {
+                const d = new mathVector(this.#config.direction.perpendicular ? direction.normal : direction.direction).unit
+
+                const pixels = toPixels(distance, this.graphConfig)
+                this.x = point.x + pixels * d.x
+                this.y = point.y + pixels * d.y
+                return this
+            }
+
+            if (direction.A && direction.B) {
+                const d = new mathVector(direction.A, direction.B)
+
+                this.x = point.x + distance * d.x
+                this.y = point.y + distance * d.y
+                return this
+            }
         }
 
         return this

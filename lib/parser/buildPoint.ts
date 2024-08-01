@@ -1,7 +1,8 @@
+import { mathVector, toPixels } from "../Calculus"
 import { AbstractFigure } from "../figures/AbstractFigure"
 import { Line } from "../figures/Line"
 import { IPointConfig, Point } from "../figures/Point"
-import { IGraphConfig } from "../pidraw.common"
+import { IGraphConfig, XY } from "../pidraw.common"
 import { convertValues, IParser, PARSER_TYPE } from "./parser.common"
 
 export function buildPoint(item: IParser, figures: Record<string, AbstractFigure>, graphConfig: IGraphConfig): IPointConfig | { x: number, y: number } | null {
@@ -84,5 +85,38 @@ function buildPoint_config(item: IParser, figures: Record<string, AbstractFigure
         }
     }
 
+    if (item.key === PARSER_TYPE.DIRECTION_POINT && code.length >= 3) {
+        const [A, line, distance, perpendicular] = code
+
+        if (A instanceof Point &&
+            (line instanceof Line || line === 'Ox' || line === 'Oy') &&
+            typeof distance === 'number') {
+
+            return {
+                direction: {
+                    direction: line,
+                    distance: distance,
+                    point: A,
+                    perpendicular: perpendicular !== undefined
+                },
+            }
+        }
+    }
+
+    if (item.key === PARSER_TYPE.VECTOR_POINT && code.length >= 2) {
+        const [A, B, scale, startingPoint] = code
+
+        if (A instanceof Point && B instanceof Point) {
+            const point = startingPoint instanceof Point ? startingPoint : A
+
+            return {
+                direction: {
+                    point,
+                    direction: { A, B },
+                    distance: (scale as number) ?? 1
+                }
+            }
+        }
+    }
     return null
 }

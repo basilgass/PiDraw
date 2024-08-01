@@ -4,11 +4,13 @@ import { DOMAIN, TeXConverterType, XY } from "../pidraw.common"
 export enum PARSER_TYPE {
     UNKNOWN = 'unknown',        // OK
     // POINTS
-    POINT = 'point',            // OK: (x,y)
+    POINT = 'pt',               // OK: (x,y)
     MIDDLE = 'mid',             // OK: mid <point>,<point>
     PROJECTION = 'proj',        // OK: proj <point>,<line>
     INTERSECTION = 'inter',     // OK: inter <line>,<line> // TODO: inter <line>,<circle>
-    SYMMETRY = 'sym',
+    SYMMETRY = 'sym',           // OK: sym <point>,<point|line>
+    DIRECTION_POINT = 'dpt',    // OK: dpt <point>,<line>,<distance>,<perpendicular?>
+    VECTOR_POINT = 'vpt',       // OK: vpt <point>,<point>,<scale?>,<starting point?>
     // LINES
     LINE = 'line',              // OK : <point><point> or line <point>,<point>
     PERPENDICULAR = 'perp',     // OK : perp <line>,<point>

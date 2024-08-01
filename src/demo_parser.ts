@@ -73,19 +73,21 @@ X(0,0)->drag=f
         // this.code = 'A(8,3)->tex=@'
 
         this.code = `A(1,2)->drag=grid,tex=A=@/tr/1;3
-        B(2,0)->drag=grid
-        C(6,5)->drag=grid
-        b=bis B,A,C
-        T=sym B,A
-        K=sym B,b
+B(2,0)->drag=grid
+C(6,5)->drag=grid
+b=bis B,A,C
+T=sym B,A
+K=sym B,b
 
-        A1=sym A,Ox
-          A2=sym A,Oy
-        l1=AK
-        l2=AT->ultrathick,blue
-        l3=TC
-        l4=BA2
-        I=inter l3,l4`
+A1=sym A,Ox
+    A2=sym A,Oy
+l1=AK
+l2=AT->ultrathick,blue
+l3=TC
+l4=BA2
+I=inter l3,l4
+X=dpt A2,l3,-2
+Y=vpt A2,K,B,1`
 
         // this.code = `A(1,2)->drag=grid,tex=A=@/tr/1;3`
         draw = new PiParser(
@@ -101,7 +103,7 @@ X(0,0)->drag=f
 
         this.output.innerHTML = Object.keys(result).map((key) => {
             return `<div class="border rounded flex flex-col gap-2">
-            <h2 class="font-semibold text-lg bg-gray-200 p-3">${key}</h2>
+            <h2 class="font-semibold text-lg bg-gray-200 p-3">${result[key].name}</h2>
             <p class="px-3">${escapeHTML(result[key].description)}</p>
             <pre class="px-3 pb-3">${escapeHTML(result[key].code)}</pre>
             </div>`

@@ -16,11 +16,27 @@ export const parser_config: Record<string, {
     build: (values: IParser, figures: Record<string, AbstractFigure>, config: IGraphConfig) => unknown,
     create: string
 }> = {
-    point: {
+    pt: {
         name: 'point',
         description: 'Create a point',
         code: 'A(3,4)',
         parameters: ['drag', 'drag:grid', 'drag:axis', 'drag:x', 'drag:y', 'drag:<figure>'],
+        build: buildPoint,
+        create: 'point'
+    },
+    vpt: {
+        name: 'point from vector',
+        description: 'Create a point from a vector and a starting point',
+        code: 'A=vpt <point>,<point>,<scale?>,<starting point?>',
+        parameters: [],
+        build: buildPoint,
+        create: 'point'
+    },
+    dpt: {
+        name: 'point from direction line',
+        description: 'Create a point from a line and a starting point',
+        code: 'A=vpt <point>,<line>,<distance>,<perpendicular?>',
+        parameters: [],
         build: buildPoint,
         create: 'point'
     },
