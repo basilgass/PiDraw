@@ -629,8 +629,9 @@ export class Parser extends Graph {
                     parameters[parameter] = { value: true, options: [] }
                 }
             } else {
-                const [key, ...values] = parameter.split('=')
-                const options = convertValues(values.join('=').split('/'), {})
+                const [key, ...split] = parameter.split('=')
+                const values = split.join('=').split('/')
+                const options = convertValues(values, {})
 
                 // Special case when key is label or tex
                 let value: IParserValues = options.shift() ?? true

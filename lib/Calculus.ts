@@ -911,22 +911,31 @@ export function computeLine(
         y2 = origin.y
     } else {
         // We have a diagonal line
-        // OP = OA + k * direction => k = (OP - OA)/direction
+        let k_start = 0,
+            k_end = 0
 
-        // TODO: There is a problem with line, half line - must rework the computedLine function
-        const k_start = half_axis ?
-            (direction.x < 0 ? -1 : 1) * padding / direction.x :
-            length ? length : (origin.x - padding) / direction.x
+        // Two cases: direction.x is strictly positive or strictly negative.
+        if (direction.x > 0) {
+            k_start = half_axis ?
+                -padding / direction.x :
+                length ? length : (origin.x - padding) / direction.x
+            k_end = length ?
+                length : (width - origin.x - padding) / direction.x
+        } else if (direction.x < 0) {
+            k_start = half_axis ?
+                -padding / direction.x :
+                length ? length : (width - origin.x - padding) / direction.x
+            k_end = length ?
+                length : (origin.x - padding) / direction.x
+        }
 
+        // The coefficient must be positive
+        k_start = Math.abs(k_start)
+        k_end = Math.abs(k_end)
 
+        // Define the starting and ending points of the line.
         x1 = origin.x - k_start * direction.x
         y1 = origin.y - k_start * direction.y
-
-        const k_end = length ?
-            length : direction.x < 0 ?
-                (width - origin.x - padding) / direction.x :
-                (width - origin.x - padding) / direction.x
-
         x2 = origin.x + k_end * direction.x
         y2 = origin.y + k_end * direction.y
     }
