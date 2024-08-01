@@ -169,7 +169,7 @@ export class Point extends AbstractFigure {
                 return this
             }
 
-            if (isLine(this.#config.projection.axis)) {
+            if (this.#config.projection.axis instanceof Line) {
 
                 const line = this.#config.projection.axis
                 const x0 = line.start.x
