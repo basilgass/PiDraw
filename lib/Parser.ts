@@ -1,4 +1,4 @@
-import { Graph, IDraggableConfig } from "./Graph"
+import { Graph, IDraggableConfig, IDraggableFollow } from "./Graph"
 import { IParser, IParserParameters, PARSER_TYPE, PARSER_COLOR_VALUES, convertValues, IParserConfig, IParserSettings, IParserValues } from "./parser/parser.common"
 import { COORDINATE_SYSTEM, DOMAIN, IGraphConfig, IGraphDisplay, isDOMAIN, XY } from "./pidraw.common"
 import { parser_config } from "./parser/parser.config"
@@ -372,19 +372,20 @@ export class Parser extends Graph {
                 case 'drag':
                     // Actually, only points are draggable
                     if (obj instanceof Point) {
-                        const dragConfig: IDraggableConfig = { follow: [] };
+                        const dragConfigInit: IDraggableFollow[] = []
+                        const dragConfig: IDraggableFollow[] = [];
 
                         // Check the options
                         [options[key].value as string, ...options[key].options].forEach((dragFollow) => {
                             if (['grid', 'Ox', 'Oy'].includes(dragFollow as string)) {
-                                dragConfig.follow?.push(this.follow(dragFollow as string, obj))
+                                dragConfigInit.push(this.follow(dragFollow as string, obj))
                             }
 
                             if (isDOMAIN(dragFollow)) {
                                 const axis = dragFollow.axis ?? 'x'
                                 const delta: DOMAIN = this.toPixels(dragFollow, axis)
 
-                                dragConfig.follow?.push(
+                                dragConfigInit.push(
                                     (x: number, y: number) => {
                                         return {
                                             x: axis === 'x' ? Math.max(delta.min, Math.min(x, delta.max)) : x,
@@ -396,8 +397,7 @@ export class Parser extends Graph {
 
                             if (Object.hasOwn(this.figures, dragFollow as string)) {
                                 const figToFollow = this.figures[dragFollow as string]
-
-                                dragConfig.follow?.push((x: number, y: number) => figToFollow.follow(x, y))
+                                dragConfig.push((x: number, y: number) => figToFollow.follow(x, y))
                             }
                         })
 
@@ -408,7 +408,14 @@ export class Parser extends Graph {
                         obj.asCircle(20)
                             .fill('white/0.8')
 
-                        this.draggable(obj, dragConfig)
+                        this.draggable(obj,
+                            {
+                                follow: [
+                                    ...dragConfigInit,
+                                    ...dragConfig
+                                ]
+                            }
+                        )
                     }
                     break
             }

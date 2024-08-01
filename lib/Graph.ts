@@ -302,8 +302,8 @@ export class Graph {
             }
 
             if (options?.follow?.length) {
+                let xy = { x, y }
                 options.follow.forEach((follow) => {
-                    let xy = { x, y }
                     if (follow instanceof AbstractFigure) {
                         xy = follow.follow(x, y)
                     } else if (typeof follow === 'string') {
