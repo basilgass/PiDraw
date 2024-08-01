@@ -1,6 +1,6 @@
 {
   "name": "pidraw",
-  "version": "0.1.28",
+  "version": "0.1.29",
   "description": "A drawing library using PiMath",
   "type": "module",
   "main": "dist/pidraw.js",
