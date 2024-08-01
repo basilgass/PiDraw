@@ -213,6 +213,18 @@ export class Line extends AbstractFigure {
         return this
     }
 
+    move(pos: number): this
+    move(pos: XY): this
+    move(x: number | XY): this {
+        if (typeof x === 'number') {
+            // Get the normal vector
+            const d = new mathVector(this.normal).setLength(x)
+
+            return this.move(d)
+        }
+
+        return super.move(x)
+    }
     follow(x: number, y: number): XY {
         return this.math.projection({ x, y })
     }

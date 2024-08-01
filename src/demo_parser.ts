@@ -132,7 +132,9 @@ r2=[OT2[->ultrathin,dot`
 P(5,8.6)->drag=c,?
 C=proj P,x1`
         this.code = `f(x)=1/5x^2
-A(5,5)->drag=f/0:6`
+A(5,5)->drag=f/0:6
+O(0,0)
+d=AO.->move=1;2`
         // this.code = `A(1,2)->drag=grid,tex=A=@/tr/1;3`
         draw = new PiParser(
             'root',

@@ -1,7 +1,8 @@
 import { Svg, G, Shape } from "@svgdotjs/svg.js"
-import { IFigureAppearanceConfig, IGraphConfig, XY } from "../pidraw.common"
+import { IFigureAppearanceConfig, IGraphConfig, isXY, XY } from "../pidraw.common"
 import { } from "@svgdotjs/svg.js"
 import { Label } from "../labels/Label"
+import { toPixels } from "../Calculus"
 
 export abstract class AbstractFigure {
     #rootSVG: Svg
@@ -166,7 +167,6 @@ export abstract class AbstractFigure {
     }
     get label() { return this.#label }
     abstract moveLabel(): this
-
     // Update the label of the figure when the figure is updated.
     updateLabel(): this {
         if (!this.#label) { return this }
@@ -179,9 +179,22 @@ export abstract class AbstractFigure {
 
         return this
     }
-
     computeLabel(): string {
         return this.#label?.config.text ?? this.#name
+    }
+
+    move(pos: number): this
+    move(pos: XY): this
+    move(pos: XY | number): this {
+        if (isXY(pos)) {
+            const dx = toPixels(pos.x, this.graphConfig)
+            const dy = toPixels(pos.y, this.graphConfig)
+            this.#shape.translate(dx, -dy)
+        } else if (typeof pos === 'number') {
+            const d = toPixels(pos, this.graphConfig)
+            this.#shape.translate(d, 0)
+        }
+        return this
     }
 
     follow(x: number, y: number): XY {

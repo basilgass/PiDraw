@@ -36,5 +36,7 @@ export declare abstract class AbstractFigure {
     abstract moveLabel(): this;
     updateLabel(): this;
     computeLabel(): string;
+    move(pos: number): this;
+    move(pos: XY): this;
     follow(x: number, y: number): XY;
 }

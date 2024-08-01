@@ -1,4 +1,4 @@
-import { Graph, IDraggableConfig, IDraggableFollow } from "./Graph"
+import { Graph, IDraggableFollow } from "./Graph"
 import { IParser, IParserParameters, PARSER_TYPE, PARSER_COLOR_VALUES, convertValues, IParserConfig, IParserSettings, IParserValues } from "./parser/parser.common"
 import { COORDINATE_SYSTEM, DOMAIN, IGraphConfig, IGraphDisplay, isDOMAIN, XY } from "./pidraw.common"
 import { parser_config } from "./parser/parser.config"
@@ -7,6 +7,7 @@ import { LABEL_POSITION } from "./labels/Label"
 import { Point } from "./figures/Point"
 
 // TODO: intersection of a line and a circle
+// TODO: move a figure using move=x;y
 export class Parser extends Graph {
     #code: IParser[]
     #settings: IParserSettings
@@ -341,6 +342,11 @@ export class Parser extends Graph {
                     break
                 case '?':
                     obj.label?.hide()
+                    break
+
+                // Placement
+                case 'move':
+                    obj.move(options[key].value as XY)
                     break
 
                 // Label and text
