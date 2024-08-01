@@ -5736,7 +5736,7 @@ class qo {
     p(this, me);
     var r;
     const s = document.createElement("DIV");
-    s.style.position = "relative", s.style.width = "100%", s.style.height = "auto", s.style.border = "thin solid black", typeof t == "string" ? (r = document.getElementById(t)) == null || r.appendChild(s) : t.appendChild(s);
+    s.style.position = "relative", s.style.width = "100%", s.style.height = "auto", s.style.border = "thin solid black", s.style.userSelect = "none", typeof t == "string" ? (r = document.getElementById(t)) == null || r.appendChild(s) : t.appendChild(s);
     const n = (e == null ? void 0 : e.ppu) ?? 50;
     return d(this, N, Object.assign({
       width: 800,
