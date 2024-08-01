@@ -563,17 +563,41 @@ export class Parser extends Graph {
 
         const parameters: Record<string, IParserParameters> = {}
 
-        if (data.startsWith('v')) {
+        // Determine the shape of the line
+        // vAB => vector AB
+        // AB. => segment AB
+        // [AB] => segment AB
+        // [AB[ => half line AB
+        // AB[ => half line AB
+        // [AB => half line AB
+        // AB => line AB
+
+        // prefix can be v or [ or null
+        let prefix: string | null = data[0]
+        if (prefix !== 'v' && prefix !== '[') { prefix = null }
+        // suffix can be ., ], [ or null
+        let suffix: string | null = data[data.length - 1]
+        if (suffix !== '.' && suffix !== ']' && suffix !== '[') { suffix = null }
+
+
+        if (prefix === 'v' && suffix === null) {
             data = data.slice(1)
             parameters.shape = { value: 'vector', options: [] }
-        } else if (data.endsWith('.')) {
+        } else if (
+            (prefix === null && suffix === '.') ||
+            (prefix === '[' && suffix === ']')
+        ) {
+            if (prefix === '[') { data = data.slice(1) }
             data = data.slice(0, -1)
             parameters.shape = { value: 'segment', options: [] }
-        } else if (data.startsWith('[')) {
-            data = data.slice(1)
-            parameters.shape = { value: 'half_line', options: [] }
-        } else if (data.endsWith('[')) {
-            data = data.slice(0, -1)
+        } else if (
+            (prefix === '[' && suffix === '[') ||
+            (prefix === null && suffix === '[') ||
+            (prefix === '[' && suffix === null)
+        ) {
+            if (prefix === '[') { data = data.slice(1) }
+            if (suffix === '[') { data = data.slice(0, -1) }
+
             parameters.shape = { value: 'half_line', options: [] }
         } else {
             parameters.shape = { value: 'line', options: [] }
