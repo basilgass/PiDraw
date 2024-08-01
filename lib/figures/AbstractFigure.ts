@@ -95,8 +95,9 @@ export abstract class AbstractFigure {
             this.#appearance.stroke.opacity = opacity === undefined ? 1 : +opacity
             this.#appearance.stroke.width = strokeWidth ?? this.#appearance.stroke.width
         }
-        if (typeof color === 'number' || strokeWidth === undefined) {
-            this.#appearance.stroke.width = color as number
+
+        if (typeof color === 'number' && strokeWidth === undefined) {
+            this.#appearance.stroke.width = color
         }
 
         this.strokeable().forEach((shape) => {
