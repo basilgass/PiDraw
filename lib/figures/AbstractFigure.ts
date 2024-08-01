@@ -1,8 +1,8 @@
-import { Svg, G, Shape } from "@svgdotjs/svg.js"
+import { Svg, G, Shape, Path } from "@svgdotjs/svg.js"
 import { IFigureAppearanceConfig, IGraphConfig, isXY, XY } from "../pidraw.common"
 import { } from "@svgdotjs/svg.js"
 import { Label } from "../labels/Label"
-import { toPixels } from "../Calculus"
+import { createMarker, toPixels } from "../Calculus"
 
 export abstract class AbstractFigure {
     #rootSVG: Svg
@@ -194,6 +194,28 @@ export abstract class AbstractFigure {
             const d = toPixels(pos, this.graphConfig)
             this.#shape.translate(d, 0)
         }
+        return this
+    }
+
+    mark(value?: string | boolean, options?: (string | number)[]): this {
+        const scale = options?.filter(x => typeof x === 'number')[0] ?? 10
+        const shape = options?.filter(x => typeof x === 'string')[0] ?? undefined
+        const marker = createMarker(this.#rootSVG, scale, shape)
+
+        const path = this.#shape as Path
+
+        if (value === 'start') {
+            path.marker('start', marker.start)
+            return this
+        }
+        if (value === 'end') {
+            path.marker('end', marker.end)
+            return this
+        }
+
+        path.marker('start', marker.start)
+        path.marker('end', marker.end)
+
         return this
     }
 

@@ -7,7 +7,6 @@ import { LABEL_POSITION } from "./labels/Label"
 import { Point } from "./figures/Point"
 
 // TODO: intersection of a line and a circle
-// TODO: move a figure using move=x;y
 export class Parser extends Graph {
     #code: IParser[]
     #settings: IParserSettings
@@ -329,6 +328,12 @@ export class Parser extends Graph {
                     break
                 case 'dot':
                     obj.dot()
+                    break
+                case 'mark':
+                    obj.mark(
+                        options[key].value as string,
+                        options[key].options as (number | string)[]
+                    )
                     break
 
                 // Visibility

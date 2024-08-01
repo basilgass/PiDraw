@@ -1017,7 +1017,58 @@ export function cartesianToAngle(origin: XY, handle: XY): number {
 }
 
 
-export function createMarker(svg: Svg, scale: number): { start: Marker, end: Marker } {
+export function createMarker(svg: Svg, scale: number, shape?: string): { start: Marker, end: Marker } {
+
+    if (shape === 'x') {
+        return {
+            start: svg.marker(
+                scale,
+                scale,
+                function (add) {
+                    add.path(`M0,0 L${scale},${scale} M${scale},0 L0,${scale}`)
+
+                    /* eslint-disable */
+                    this.stroke({ color: 'black', width: '1' })
+                    /* eslint-disable */
+                }),
+            end: svg.marker(
+                scale,
+                scale,
+                function (add) {
+                    add.path(`M0,0 L${scale},${scale} M${scale},0 L0,${scale}`)
+
+                    /* eslint-disable */
+                    this.stroke({ color: 'black', width: '1' })
+                    /* eslint-disable */
+                })
+        }
+    }
+
+    if (shape === '|') {
+        return {
+            start: svg.marker(
+                scale,
+                scale,
+                function (add) {
+                    add.path(`M${scale / 2},${scale} L${scale / 2},0`)
+
+                    /* eslint-disable */
+                    this.stroke({ color: 'black', width: '1' })
+                    /* eslint-disable */
+                }),
+            end: svg.marker(
+                scale,
+                scale,
+                function (add) {
+                    add.path(`M${scale / 2},${scale} L${scale / 2},0`)
+
+                    /* eslint-disable */
+                    this.stroke({ color: 'black', width: '1' })
+                    /* eslint-disable */
+                })
+        }
+    }
+
     return {
         start: svg.marker(
             scale * 1.2,
@@ -1026,8 +1077,8 @@ export function createMarker(svg: Svg, scale: number): { start: Marker, end: Mar
                 add.path(`M1,0 L1,${scale}, L${scale * 1.2},${scale / 2} L1,0z`).rotate(180)
             }).ref(0, scale / 2),
         end: svg.marker(
-            scale + 5,
-            scale + 5,
+            scale * 1.2,
+            scale * 1.2,
             function (add) {
                 add.path(`M1,0 L1,${scale}, L${scale * 1.2},${scale / 2} L1,0z`)
             }).ref(scale, scale / 2)
