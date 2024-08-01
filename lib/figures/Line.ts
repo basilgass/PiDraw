@@ -71,8 +71,8 @@ export class Line extends AbstractFigure {
         const d = this.direction
 
         return {
-            x: -d.y,
-            y: d.x
+            x: d.y,
+            y: -d.x
         }
     }
 

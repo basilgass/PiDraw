@@ -89,6 +89,20 @@ I=inter l3,l4
 X=dpt A2,l3,-2
 Y=vpt A2,K,B,1`
 
+        this.parameter = `x=-11:11,y=-11:11,axis,tex`
+        this.code = `x1=line y=0.1->hide
+y1=line x=0.1->hide
+x2=line y=-0.1->hide
+y2=line x=-0.1->hide
+O(0,0)->tex=O/bl
+O1(0,0.1)->hide
+O2(0,-0.1)->hide
+O3(0.1,0)->hide
+O4(-0.1,0)->hide
+c=circ O,10
+P(5,8.6)->drag=c,?
+v=[OP]->dash
+Z=dpt O,v,10,p`
         // this.code = `A(1,2)->drag=grid,tex=A=@/tr/1;3`
         draw = new PiParser(
             'root',

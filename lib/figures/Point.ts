@@ -251,10 +251,11 @@ export class Point extends AbstractFigure {
 
             if (direction instanceof Line) {
                 const d = new mathVector(this.#config.direction.perpendicular ? direction.normal : direction.direction).unit
-
                 const pixels = toPixels(distance, this.graphConfig)
+
                 this.x = point.x + pixels * d.x
                 this.y = point.y + pixels * d.y
+
                 return this
             }
 
