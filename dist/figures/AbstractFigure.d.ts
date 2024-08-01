@@ -38,5 +38,6 @@ export declare abstract class AbstractFigure {
     computeLabel(): string;
     move(pos: number): this;
     move(pos: XY): this;
+    mark(value?: string | boolean, options?: (string | number)[]): this;
     follow(x: number, y: number): XY;
 }

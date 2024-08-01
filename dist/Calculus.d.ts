@@ -69,7 +69,7 @@ export declare function toCoordinates(pixels: XY, config: IGraphConfig): XY;
 export declare function computeLine(origin: XY, direction: XY, width: number, height: number, padding?: number, half_axis?: boolean, length?: number): [XY, XY] | null;
 export declare function polarToCartesian(centerX: number, centerY: number, radius: number, angleInDegrees: number): XY;
 export declare function cartesianToAngle(origin: XY, handle: XY): number;
-export declare function createMarker(svg: Svg, scale: number): {
+export declare function createMarker(svg: Svg, scale: number, shape?: string): {
     start: Marker;
     end: Marker;
 };

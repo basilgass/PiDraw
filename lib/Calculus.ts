@@ -1025,21 +1025,24 @@ export function createMarker(svg: Svg, scale: number, shape?: string): { start: 
                 scale,
                 scale,
                 function (add) {
-                    add.path(`M0,0 L${scale},${scale} M${scale},0 L0,${scale}`)
 
-                    /* eslint-disable */
-                    this.stroke({ color: 'black', width: '1' })
-                    /* eslint-disable */
+                    const p = add.path(`M0,0 L${scale},${scale} M${scale},0 L0,${scale}`)
+
+                    p.stroke({
+                        color: 'black',
+                        width: 1
+                    })
                 }),
             end: svg.marker(
                 scale,
                 scale,
                 function (add) {
-                    add.path(`M0,0 L${scale},${scale} M${scale},0 L0,${scale}`)
+                    const p = add.path(`M0,0 L${scale},${scale} M${scale},0 L0,${scale}`)
 
-                    /* eslint-disable */
-                    this.stroke({ color: 'black', width: '1' })
-                    /* eslint-disable */
+                    p.stroke({
+                        color: 'black',
+                        width: 1
+                    })
                 })
         }
     }
@@ -1050,21 +1053,17 @@ export function createMarker(svg: Svg, scale: number, shape?: string): { start: 
                 scale,
                 scale,
                 function (add) {
-                    add.path(`M${scale / 2},${scale} L${scale / 2},0`)
+                    const p = add.path(`M${scale / 2},${scale} L${scale / 2},0`)
 
-                    /* eslint-disable */
-                    this.stroke({ color: 'black', width: '1' })
-                    /* eslint-disable */
+                    p.stroke({ color: 'black', width: 1 })
                 }),
             end: svg.marker(
                 scale,
                 scale,
                 function (add) {
-                    add.path(`M${scale / 2},${scale} L${scale / 2},0`)
+                    const p = add.path(`M${scale / 2},${scale} L${scale / 2},0`)
 
-                    /* eslint-disable */
-                    this.stroke({ color: 'black', width: '1' })
-                    /* eslint-disable */
+                    p.stroke({ color: 'black', width: 1 })
                 })
         }
     }

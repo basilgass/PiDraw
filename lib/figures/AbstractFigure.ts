@@ -200,7 +200,11 @@ export abstract class AbstractFigure {
     mark(value?: string | boolean, options?: (string | number)[]): this {
         const scale = options?.filter(x => typeof x === 'number')[0] ?? 10
         const shape = options?.filter(x => typeof x === 'string')[0] ?? undefined
-        const marker = createMarker(this.#rootSVG, scale, shape)
+        const marker = createMarker(
+            this.#rootSVG,
+            scale as number,
+            shape as string
+        )
 
         const path = this.#shape as Path
 
