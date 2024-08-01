@@ -90,10 +90,10 @@ X=dpt A2,l3,-2
 Y=vpt A2,K,B,1`
 
         this.parameter = `x=-11:11,y=-11:11,axis,tex`
-        this.code = `x1=line y=0.1->hide
-y1=line x=0.1->hide
-x2=line y=-0.1->hide
-y2=line x=-0.1->hide
+        this.code = `x1=line y=0.1->blue,ultrathick,dot
+y1=line x=0.1->blue,ultrathick,dot
+x2=line y=-0.1->blue,ultrathick,dot
+y2=line x=-0.1->blue,ultrathick,dot
 O(0,0)->tex=O/bl
 O1(0,0.1)->hide
 O2(0,-0.1)->hide
@@ -101,8 +101,36 @@ O3(0.1,0)->hide
 O4(-0.1,0)->hide
 c=circ O,10
 P(5,8.6)->drag=c,?
-v=[OP]->dash
-Z=dpt O,v,10,p`
+v=[OP]
+P3=dpt O,v,10,p->hide
+P2=sym P3,y2
+C1=proj P,x1
+C2=proj P2,x2
+S1=proj P,y1
+S2=proj P2,y2
+cos=[O1C1]->ultrathick,green
+cos2=[O2C2]->ultrathick,green,dash
+sin=[O3S1]->ultrathick,red
+sin2=[O4S2]->ultrathick,red,dash
+v2=[OP2]
+cs=[PC1]->dot,ultrathin
+sn=[PS1]->dot,ultrathin
+cs2=[P2C2]->dot,ultrathin
+sn2=[P2S2]->dot,ultrathin
+X(10,0)->hide
+a=arc X,O,P,2->mark:end,tex=\alpha
+a2=arc X,O,P2,5->mark:end,tex=\frac{\pi}{2}-\alpha/r
+t=line x=10->ultrathin
+T=inter v,t->?
+T2=inter v2,t->?
+tan=[XT]->ultrathick,orange
+tan2=[XT2]->ultrathick,orange,dash
+r=[OT[->ultrathin,dot
+r2=[OT2[->ultrathin,dot`
+
+        this.code = `x1=line y=0.1
+P(5,8.6)->drag=c,?
+C=proj P,x1`
         // this.code = `A(1,2)->drag=grid,tex=A=@/tr/1;3`
         draw = new PiParser(
             'root',
