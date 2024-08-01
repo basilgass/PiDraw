@@ -65,12 +65,6 @@ export function isDOMAIN(obj: unknown): obj is DOMAIN {
     return obj !== null && obj !== undefined && obj.min !== undefined && obj.max !== undefined
 }
 
-export function isLine(obj: unknown): obj is { follow: 'x' | 'y', start: XY, direction: XY } {
-    return obj !== null &&
-        typeof obj === 'object' &&
-        obj.constructor.name.startsWith('Line')
-}
-
 
 export interface DOMAIN {
     axis?: 'x' | 'y',

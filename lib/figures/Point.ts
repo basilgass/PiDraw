@@ -1,5 +1,5 @@
 import { Svg, Shape } from "@svgdotjs/svg.js"
-import { XY, isLine } from "../pidraw.common"
+import { XY } from "../pidraw.common"
 import { AbstractFigure } from "./AbstractFigure"
 import { Line } from "./Line"
 import { mathVector, toCoordinates, toPixels } from "../Calculus"

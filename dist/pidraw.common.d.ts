@@ -55,11 +55,6 @@ export interface XY {
 }
 export declare function isXY(obj: unknown): obj is XY;
 export declare function isDOMAIN(obj: unknown): obj is DOMAIN;
-export declare function isLine(obj: unknown): obj is {
-    follow: 'x' | 'y';
-    start: XY;
-    direction: XY;
-};
 export interface DOMAIN {
     axis?: 'x' | 'y';
     min: number;
