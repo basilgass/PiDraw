@@ -42,6 +42,7 @@ export class Graph {
         wrapper.style.width = '100%'
         wrapper.style.height = 'auto'
         wrapper.style.border = 'thin solid black'
+        wrapper.style.userSelect = 'none'
 
         if (typeof id === 'string') {
             document.getElementById(id)?.appendChild(wrapper)
