@@ -104,7 +104,20 @@ export abstract class AbstractFigure {
         this.strokeable().forEach((shape) => {
             shape.stroke(this.#appearance.stroke)
             shape.opacity(this.#appearance.stroke.opacity)
-        })
+        });
+
+        // Apply the color and width to the markers.
+        [this.#shape.reference('marker-start'), this.#shape.reference('marker-end')]
+            .filter(x => x !== null)
+            .forEach((marker) => {
+                marker.children().forEach((m) => {
+                    m.attr({
+                        fill: this.#appearance.stroke.color,
+                        stroke: this.#appearance.stroke.color,
+                        'stroke-width': this.#appearance.stroke.width
+                    })
+                })
+            })
 
         return this
     }

@@ -7,8 +7,6 @@ import { LABEL_POSITION } from "./labels/Label"
 import { Point } from "./figures/Point"
 
 // TODO: intersection of a line and a circle
-// TODO: apply stroke color should apply color to marker.
-// TODO: include mid marker
 // TODO: prevent creation of too many markers...
 export class Parser extends Graph {
     #code: IParser[]

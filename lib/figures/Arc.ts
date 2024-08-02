@@ -151,17 +151,6 @@ export class Arc extends AbstractFigure {
         }
     }
 
-    mark(enable: boolean): this {
-        if (this.shape instanceof svgPath) {
-            if (enable) {
-                this.shape.marker('end', this.#markers.end)
-            } else {
-                this.shape.marker('end')
-            }
-        }
-        return this
-    }
-
     private _describeSquare(center: XY, start: XY, end: XY): string {
         return [
             "M", start.x, start.y,

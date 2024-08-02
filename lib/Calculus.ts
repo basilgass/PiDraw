@@ -1032,7 +1032,7 @@ export function createMarker(svg: Svg, scale: number, shape?: string): { start: 
                         color: 'black',
                         width: 1
                     })
-                }),
+                }).attr('markerUnits', 'userSpaceOnUse'),
             end: svg.marker(
                 scale,
                 scale,
@@ -1043,7 +1043,7 @@ export function createMarker(svg: Svg, scale: number, shape?: string): { start: 
                         color: 'black',
                         width: 1
                     })
-                })
+                }).attr('markerUnits', 'userSpaceOnUse'),
         }
     }
 
@@ -1056,7 +1056,7 @@ export function createMarker(svg: Svg, scale: number, shape?: string): { start: 
                     const p = add.path(`M${scale / 2},${scale} L${scale / 2},0`)
 
                     p.stroke({ color: 'black', width: 1 })
-                }),
+                }).attr('markerUnits', 'userSpaceOnUse'),
             end: svg.marker(
                 scale,
                 scale,
@@ -1064,7 +1064,7 @@ export function createMarker(svg: Svg, scale: number, shape?: string): { start: 
                     const p = add.path(`M${scale / 2},${scale} L${scale / 2},0`)
 
                     p.stroke({ color: 'black', width: 1 })
-                })
+                }).attr('markerUnits', 'userSpaceOnUse'),
         }
     }
 
@@ -1074,13 +1074,13 @@ export function createMarker(svg: Svg, scale: number, shape?: string): { start: 
             scale * 1.2,
             function (add) {
                 add.path(`M1,0 L1,${scale}, L${scale * 1.2},${scale / 2} L1,0z`).rotate(180)
-            }).ref(0, scale / 2),
+            }).ref(0, scale / 2).attr('markerUnits', 'userSpaceOnUse'),
         end: svg.marker(
             scale * 1.2,
             scale * 1.2,
             function (add) {
                 add.path(`M1,0 L1,${scale}, L${scale * 1.2},${scale / 2} L1,0z`)
-            }).ref(scale, scale / 2)
+            }).ref(scale, scale / 2).attr('markerUnits', 'userSpaceOnUse'),
     }
 }
 
