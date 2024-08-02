@@ -53,7 +53,7 @@ function bn(i) {
 function ys(i) {
   return i.charAt(0).toUpperCase() + i.slice(1);
 }
-function ye(i, t, e, s) {
+function ge(i, t, e, s) {
   return (t == null || e == null) && (s = s || i.bbox(), t == null ? t = s.width / s.height * e : e == null && (e = s.height / s.width * t)), {
     width: t,
     height: e
@@ -75,7 +75,7 @@ const wn = /* @__PURE__ */ new Set(["desc", "metadata", "title"]), yi = (i) => w
   for (const n in s)
     s[n].valueOf() === e[n] && delete s[n];
   Object.keys(s).length ? i.node.setAttribute("data-svgjs", JSON.stringify(s)) : (i.node.removeAttribute("data-svgjs"), i.node.removeAttribute("svgjs:data"));
-}, $i = "http://www.w3.org/2000/svg", _n = "http://www.w3.org/1999/xhtml", ui = "http://www.w3.org/2000/xmlns/", ze = "http://www.w3.org/1999/xlink", C = {
+}, $i = "http://www.w3.org/2000/svg", _n = "http://www.w3.org/1999/xhtml", ui = "http://www.w3.org/2000/xmlns/", Ee = "http://www.w3.org/1999/xlink", C = {
   window: typeof window > "u" ? null : window,
   document: typeof document > "u" ? null : document
 };
@@ -110,7 +110,7 @@ function J(i, t = !1) {
 function j(i, t) {
   return t && (t instanceof C.window.Node || t.ownerDocument && t instanceof t.ownerDocument.defaultView.Node) ? t : _e(i);
 }
-function ct(i) {
+function ut(i) {
   if (!i) return null;
   if (i.instance instanceof Fi) return i.instance;
   if (i.nodeName === "#document-fragment")
@@ -118,7 +118,7 @@ function ct(i) {
   let t = ys(i.nodeName || "Dom");
   return t === "LinearGradient" || t === "RadialGradient" ? t = "Gradient" : te[t] || (t = "Dom"), new te[t](i);
 }
-let li = ct;
+let li = ut;
 function T(i, t = i.name, e = !1) {
   return te[t] = i, e && (te[Ri] = i), gs(Object.getOwnPropertyNames(i.prototype)), i;
 }
@@ -352,14 +352,14 @@ function sr(i) {
   const t = Math.round(i), s = Math.max(0, Math.min(255, t)).toString(16);
   return s.length === 1 ? "0" + s : s;
 }
-function re(i, t) {
+function ne(i, t) {
   for (let e = t.length; e--; )
     if (i[t[e]] == null)
       return !1;
   return !0;
 }
 function nr(i, t) {
-  const e = re(i, "rgb") ? { _a: i.r, _b: i.g, _c: i.b, _d: 0, space: "rgb" } : re(i, "xyz") ? { _a: i.x, _b: i.y, _c: i.z, _d: 0, space: "xyz" } : re(i, "hsl") ? { _a: i.h, _b: i.s, _c: i.l, _d: 0, space: "hsl" } : re(i, "lab") ? { _a: i.l, _b: i.a, _c: i.b, _d: 0, space: "lab" } : re(i, "lch") ? { _a: i.l, _b: i.c, _c: i.h, _d: 0, space: "lch" } : re(i, "cmyk") ? { _a: i.c, _b: i.m, _c: i.y, _d: i.k, space: "cmyk" } : { _a: 0, _b: 0, _c: 0, space: "rgb" };
+  const e = ne(i, "rgb") ? { _a: i.r, _b: i.g, _c: i.b, _d: 0, space: "rgb" } : ne(i, "xyz") ? { _a: i.x, _b: i.y, _c: i.z, _d: 0, space: "xyz" } : ne(i, "hsl") ? { _a: i.h, _b: i.s, _c: i.l, _d: 0, space: "hsl" } : ne(i, "lab") ? { _a: i.l, _b: i.a, _c: i.b, _d: 0, space: "lab" } : ne(i, "lch") ? { _a: i.l, _b: i.c, _c: i.h, _d: 0, space: "lch" } : ne(i, "cmyk") ? { _a: i.c, _b: i.m, _c: i.y, _d: i.k, space: "cmyk" } : { _a: 0, _b: 0, _c: 0, space: "rgb" };
   return e.space = t || e.space, e;
 }
 function rr(i) {
@@ -467,11 +467,11 @@ class E {
       if (this.space === "lab" || this.space === "lch") {
         let { l: b, a: v, b: L } = this;
         if (this.space === "lch") {
-          const { c: Gt, h: Be } = this, qe = Math.PI / 180;
-          v = Gt * Math.cos(qe * Be), L = Gt * Math.sin(qe * Be);
+          const { c: Gt, h: Re } = this, Be = Math.PI / 180;
+          v = Gt * Math.cos(Be * Re), L = Gt * Math.sin(Be * Re);
         }
-        const A = (b + 16) / 116, R = v / 500 + A, ut = A - L / 200, lt = 16 / 116, Lt = 8856e-6, Et = 7.787;
-        t = 0.95047 * (R ** 3 > Lt ? R ** 3 : (R - lt) / Et), e = 1 * (A ** 3 > Lt ? A ** 3 : (A - lt) / Et), s = 1.08883 * (ut ** 3 > Lt ? ut ** 3 : (ut - lt) / Et);
+        const A = (b + 16) / 116, R = v / 500 + A, lt = A - L / 200, ft = 16 / 116, Lt = 8856e-6, Et = 7.787;
+        t = 0.95047 * (R ** 3 > Lt ? R ** 3 : (R - ft) / Et), e = 1 * (A ** 3 > Lt ? A ** 3 : (A - ft) / Et), s = 1.08883 * (lt ** 3 > Lt ? lt ** 3 : (lt - ft) / Et);
       }
       const n = t * 3.2406 + e * -1.5372 + s * -0.4986, r = t * -0.9689 + e * 1.8758 + s * 0.0415, h = t * 0.0557 + e * -0.204 + s * 1.057, a = Math.pow, c = 31308e-7, u = n > c ? 1.055 * a(n, 1 / 2.4) - 0.055 : 12.92 * n, l = r > c ? 1.055 * a(r, 1 / 2.4) - 0.055 : 12.92 * r, f = h > c ? 1.055 * a(h, 1 / 2.4) - 0.055 : 12.92 * h;
       return new E(255 * u, 255 * l, 255 * f);
@@ -517,7 +517,7 @@ class E {
   Constructing colors
   */
 }
-let H = class ks {
+let Y = class ks {
   // Initialize
   constructor(...t) {
     this.init(...t);
@@ -544,9 +544,9 @@ let H = class ks {
   }
 };
 function or(i, t) {
-  return new H(i, t).transformO(this.screenCTM().inverseO());
+  return new Y(i, t).transformO(this.screenCTM().inverseO());
 }
-function oe(i, t, e) {
+function re(i, t, e) {
   return Math.abs(t - i) < 1e-6;
 }
 class y {
@@ -554,16 +554,16 @@ class y {
     this.init(...t);
   }
   static formatTransforms(t) {
-    const e = t.flip === "both" || t.flip === !0, s = t.flip && (e || t.flip === "x") ? -1 : 1, n = t.flip && (e || t.flip === "y") ? -1 : 1, r = t.skew && t.skew.length ? t.skew[0] : isFinite(t.skew) ? t.skew : isFinite(t.skewX) ? t.skewX : 0, h = t.skew && t.skew.length ? t.skew[1] : isFinite(t.skew) ? t.skew : isFinite(t.skewY) ? t.skewY : 0, a = t.scale && t.scale.length ? t.scale[0] * s : isFinite(t.scale) ? t.scale * s : isFinite(t.scaleX) ? t.scaleX * s : s, c = t.scale && t.scale.length ? t.scale[1] * n : isFinite(t.scale) ? t.scale * n : isFinite(t.scaleY) ? t.scaleY * n : n, u = t.shear || 0, l = t.rotate || t.theta || 0, f = new H(
+    const e = t.flip === "both" || t.flip === !0, s = t.flip && (e || t.flip === "x") ? -1 : 1, n = t.flip && (e || t.flip === "y") ? -1 : 1, r = t.skew && t.skew.length ? t.skew[0] : isFinite(t.skew) ? t.skew : isFinite(t.skewX) ? t.skewX : 0, h = t.skew && t.skew.length ? t.skew[1] : isFinite(t.skew) ? t.skew : isFinite(t.skewY) ? t.skewY : 0, a = t.scale && t.scale.length ? t.scale[0] * s : isFinite(t.scale) ? t.scale * s : isFinite(t.scaleX) ? t.scaleX * s : s, c = t.scale && t.scale.length ? t.scale[1] * n : isFinite(t.scale) ? t.scale * n : isFinite(t.scaleY) ? t.scaleY * n : n, u = t.shear || 0, l = t.rotate || t.theta || 0, f = new Y(
       t.origin || t.around || t.ox || t.originX,
       t.oy || t.originY
-    ), m = f.x, b = f.y, v = new H(
+    ), m = f.x, b = f.y, v = new Y(
       t.position || t.px || t.positionX || NaN,
       t.py || t.positionY || NaN
-    ), L = v.x, A = v.y, R = new H(
+    ), L = v.x, A = v.y, R = new Y(
       t.translate || t.tx || t.translateX,
       t.ty || t.translateY
-    ), ut = R.x, lt = R.y, Lt = new H(
+    ), lt = R.x, ft = R.y, Lt = new Y(
       t.relative || t.rx || t.relativeX,
       t.ry || t.relativeY
     ), Et = Lt.x, Gt = Lt.y;
@@ -576,8 +576,8 @@ class y {
       theta: l,
       rx: Et,
       ry: Gt,
-      tx: ut,
-      ty: lt,
+      tx: lt,
+      ty: ft,
       ox: m,
       oy: b,
       px: L,
@@ -609,15 +609,15 @@ class y {
   }
   // Decomposes this matrix into its affine parameters
   decompose(t = 0, e = 0) {
-    const s = this.a, n = this.b, r = this.c, h = this.d, a = this.e, c = this.f, u = s * h - n * r, l = u > 0 ? 1 : -1, f = l * Math.sqrt(s * s + n * n), m = Math.atan2(l * n, l * s), b = 180 / Math.PI * m, v = Math.cos(m), L = Math.sin(m), A = (s * r + n * h) / u, R = r * f / (A * s - n) || h * f / (A * n + s), ut = a - t + t * v * f + e * (A * v * f - L * R), lt = c - e + t * L * f + e * (A * L * f + v * R);
+    const s = this.a, n = this.b, r = this.c, h = this.d, a = this.e, c = this.f, u = s * h - n * r, l = u > 0 ? 1 : -1, f = l * Math.sqrt(s * s + n * n), m = Math.atan2(l * n, l * s), b = 180 / Math.PI * m, v = Math.cos(m), L = Math.sin(m), A = (s * r + n * h) / u, R = r * f / (A * s - n) || h * f / (A * n + s), lt = a - t + t * v * f + e * (A * v * f - L * R), ft = c - e + t * L * f + e * (A * L * f + v * R);
     return {
       // Return the affine parameters
       scaleX: f,
       scaleY: R,
       shear: A,
       rotate: b,
-      translateX: ut,
-      translateY: lt,
+      translateX: lt,
+      translateY: ft,
       originX: t,
       originY: e,
       // Return the matrix parameters
@@ -633,7 +633,7 @@ class y {
   equals(t) {
     if (t === this) return !0;
     const e = new y(t);
-    return oe(this.a, e.a) && oe(this.b, e.b) && oe(this.c, e.c) && oe(this.d, e.d) && oe(this.e, e.e) && oe(this.f, e.f);
+    return re(this.a, e.a) && re(this.b, e.b) && re(this.c, e.c) && re(this.d, e.d) && re(this.e, e.e) && re(this.f, e.f);
   }
   // Flip matrix on x or y, at a given offset
   flip(t, e) {
@@ -727,9 +727,9 @@ class y {
   transform(t) {
     if (y.isMatrixLike(t))
       return new y(t).multiplyO(this);
-    const e = y.formatTransforms(t), s = this, { x: n, y: r } = new H(e.ox, e.oy).transform(s), h = new y().translateO(e.rx, e.ry).lmultiplyO(s).translateO(-n, -r).scaleO(e.scaleX, e.scaleY).skewO(e.skewX, e.skewY).shearO(e.shear).rotateO(e.theta).translateO(n, r);
+    const e = y.formatTransforms(t), s = this, { x: n, y: r } = new Y(e.ox, e.oy).transform(s), h = new y().translateO(e.rx, e.ry).lmultiplyO(s).translateO(-n, -r).scaleO(e.scaleX, e.scaleY).skewO(e.skewX, e.skewY).shearO(e.shear).rotateO(e.theta).translateO(n, r);
     if (isFinite(e.px) || isFinite(e.py)) {
-      const a = new H(n, r).transform(h), c = isFinite(e.px) ? e.px - a.x : 0, u = isFinite(e.py) ? e.py - a.y : 0;
+      const a = new Y(n, r).transform(h), c = isFinite(e.px) ? e.px - a.x : 0, u = isFinite(e.py) ? e.py - a.y : 0;
       h.translateO(c, u);
     }
     return h.translateO(e.tx, e.ty), h;
@@ -798,12 +798,12 @@ function cr(i) {
     return t === C.document;
   }).call(C.document.documentElement, i);
 }
-class Y {
+class W {
   constructor(...t) {
     this.init(...t);
   }
   addOffset() {
-    return this.x += C.window.pageXOffset, this.y += C.window.pageYOffset, new Y(this);
+    return this.x += C.window.pageXOffset, this.y += C.window.pageYOffset, new W(this);
   }
   init(t) {
     const e = [0, 0, 0, 0];
@@ -820,7 +820,7 @@ class Y {
   // Merge rect box with another, return a new instance
   merge(t) {
     const e = Math.min(this.x, t.x), s = Math.min(this.y, t.y), n = Math.max(this.x + this.width, t.x + t.width) - e, r = Math.max(this.y + this.height, t.y + t.height) - s;
-    return new Y(e, s, n, r);
+    return new W(e, s, n, r);
   }
   toArray() {
     return [this.x, this.y, this.width, this.height];
@@ -832,13 +832,13 @@ class Y {
     t instanceof y || (t = new y(t));
     let e = 1 / 0, s = -1 / 0, n = 1 / 0, r = -1 / 0;
     return [
-      new H(this.x, this.y),
-      new H(this.x2, this.y),
-      new H(this.x, this.y2),
-      new H(this.x2, this.y2)
+      new Y(this.x, this.y),
+      new Y(this.x2, this.y),
+      new Y(this.x, this.y2),
+      new Y(this.x2, this.y2)
     ].forEach(function(a) {
       a = a.transform(t), e = Math.min(e, a.x), s = Math.max(s, a.x), n = Math.min(n, a.y), r = Math.max(r, a.y);
-    }), new Y(e, n, s - e, r - n);
+    }), new W(e, n, s - e, r - n);
   }
 }
 function Cs(i, t, e) {
@@ -862,14 +862,14 @@ function ur() {
       );
     }
   });
-  return new Y(e);
+  return new W(e);
 }
 function lr(i) {
   const s = Cs(this, (r) => r.getBoundingClientRect(), (r) => {
     throw new Error(
       `Getting rbox of element "${r.node.nodeName}" is not possible`
     );
-  }), n = new Y(s);
+  }), n = new W(s);
   return i ? n.transform(i.screenCTM().inverseO()) : n.addOffset();
 }
 function fr(i, t) {
@@ -879,7 +879,7 @@ function fr(i, t) {
 _({
   viewbox: {
     viewbox(i, t, e, s) {
-      return i == null ? new Y(this.attr("viewBox")) : this.attr("viewBox", new Y(i, t, e, s));
+      return i == null ? new W(this.attr("viewBox")) : this.attr("viewBox", new W(i, t, e, s));
     },
     zoom(i, t) {
       let { width: e, height: s } = this.attr(["width", "height"]);
@@ -891,15 +891,15 @@ _({
       if (i == null)
         return a;
       let c = a / i;
-      c === 1 / 0 && (c = Number.MAX_SAFE_INTEGER / 100), t = t || new H(e / 2 / r + n.x, s / 2 / h + n.y);
-      const u = new Y(n).transform(
+      c === 1 / 0 && (c = Number.MAX_SAFE_INTEGER / 100), t = t || new Y(e / 2 / r + n.x, s / 2 / h + n.y);
+      const u = new W(n).transform(
         new y({ scale: c, origin: t })
       );
       return this.viewbox(u);
     }
   }
 });
-T(Y, "Box");
+T(W, "Box");
 class ee extends Array {
   constructor(t = [], ...e) {
     if (super(t, ...e), typeof t == "number") return this;
@@ -920,18 +920,18 @@ ee.extend = function(i) {
     return this.each(e, ...s);
   }), t), {}), k([ee], i);
 };
-function xe(i, t) {
+function ye(i, t) {
   return new ee(
     ji((t || C.document).querySelectorAll(i), function(e) {
-      return ct(e);
+      return ut(e);
     })
   );
 }
 function pr(i) {
-  return xe(i, this.node);
+  return ye(i, this.node);
 }
 function mr(i) {
-  return ct(this.node.querySelector(i));
+  return ut(this.node.querySelector(i));
 }
 let gr = 0;
 const Ts = {};
@@ -995,7 +995,7 @@ function xr(i, t, e, s) {
     ...s
   })), n.dispatchEvent(t), t;
 }
-class De extends Fi {
+class ze extends Fi {
   addEventListener() {
   }
   dispatch(t, e, s) {
@@ -1031,7 +1031,7 @@ class De extends Fi {
   removeEventListener() {
   }
 }
-T(De, "EventTarget");
+T(ze, "EventTarget");
 function os() {
 }
 const we = {
@@ -1067,7 +1067,7 @@ const we = {
   // text
   "text-anchor": "start"
 };
-class ge extends Array {
+class me extends Array {
   constructor(...t) {
     super(...t), this.init(...t);
   }
@@ -1164,12 +1164,12 @@ function kr(i, t, e) {
     else {
       if (t == null)
         return t = this.node.getAttribute(i), t == null ? br[i] : rs.test(t) ? parseFloat(t) : t;
-      t = Os.reduce((s, n) => n(i, s, this), t), typeof t == "number" ? t = new w(t) : wr.has(i) && E.isColor(t) ? t = new E(t) : t.constructor === Array && (t = new ge(t)), i === "leading" ? this.leading && this.leading(t) : typeof e == "string" ? this.node.setAttributeNS(e, i, t.toString()) : this.node.setAttribute(i, t.toString()), this.rebuild && (i === "font-size" || i === "x") && this.rebuild();
+      t = Os.reduce((s, n) => n(i, s, this), t), typeof t == "number" ? t = new w(t) : wr.has(i) && E.isColor(t) ? t = new E(t) : t.constructor === Array && (t = new me(t)), i === "leading" ? this.leading && this.leading(t) : typeof e == "string" ? this.node.setAttributeNS(e, i, t.toString()) : this.node.setAttribute(i, t.toString()), this.rebuild && (i === "font-size" || i === "x") && this.rebuild();
     }
   }
   return this;
 }
-class Bt extends De {
+class Bt extends ze {
   constructor(t, e) {
     super(), this.node = t, this.type = t.nodeName, e && t !== e && this.attr(e);
   }
@@ -1185,7 +1185,7 @@ class Bt extends De {
   children() {
     return new ee(
       ji(this.node.children, function(t) {
-        return ct(t);
+        return ut(t);
       })
     );
   }
@@ -1214,11 +1214,11 @@ class Bt extends De {
   }
   // Get first child
   first() {
-    return ct(this.node.firstChild);
+    return ut(this.node.firstChild);
   }
   // Get a element at the given index
   get(t) {
-    return ct(this.node.childNodes[t]);
+    return ut(this.node.childNodes[t]);
   }
   getEventHolder() {
     return this.node;
@@ -1243,7 +1243,7 @@ class Bt extends De {
   }
   // Get the last child
   last() {
-    return ct(this.node.lastChild);
+    return ut(this.node.lastChild);
   }
   // matches the element vs a css selector
   matches(t) {
@@ -1254,11 +1254,11 @@ class Bt extends De {
   parent(t) {
     let e = this;
     if (!e.node.parentNode) return null;
-    if (e = ct(e.node.parentNode), !t) return e;
+    if (e = ut(e.node.parentNode), !t) return e;
     do
       if (typeof t == "string" ? e.matches(t) : e instanceof t)
         return e;
-    while (e = ct(e.node.parentNode));
+    while (e = ut(e.node.parentNode));
     return e;
   }
   // Basically does the same as `add()` but returns the added element instead
@@ -1317,7 +1317,7 @@ class Bt extends De {
       e = e ?? !0, this.writeDataToDom();
       let a = this;
       if (t != null) {
-        if (a = ct(a.node.cloneNode(!0)), e) {
+        if (a = ut(a.node.cloneNode(!0)), e) {
           const c = t(a);
           if (a = c || a, c === !1) return "";
         }
@@ -1413,7 +1413,7 @@ class yt extends Bt {
   }
   // Set element size to given width and height
   size(t, e) {
-    const s = ye(this, t, e);
+    const s = ge(this, t, e);
     return this.width(new w(s.width)).height(new w(s.height));
   }
   // Set width of element
@@ -1522,7 +1522,7 @@ _("Path", {
   },
   // Get point at length
   pointAt: function(i) {
-    return new H(this.node.getPointAtLength(i));
+    return new Y(this.node.getPointAtLength(i));
   }
 });
 _(["Element", "Runner"], {
@@ -1631,9 +1631,9 @@ class Vi extends st {
   }
 }
 T(Vi, "Defs");
-class ot extends yt {
+class ht extends yt {
 }
-T(ot, "Shape");
+T(ht, "Shape");
 function Gi(i) {
   return this.attr("rx", i);
 }
@@ -1669,12 +1669,12 @@ const Ir = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   x: As,
   y: Is
 }, Symbol.toStringTag, { value: "Module" }));
-class si extends ot {
+class si extends ht {
   constructor(t, e = t) {
     super(j("ellipse", t), e);
   }
   size(t, e) {
-    const s = ye(this, t, e);
+    const s = ge(this, t, e);
     return this.rx(new w(s.width).divide(2)).ry(
       new w(s.height).divide(2)
     );
@@ -1713,7 +1713,7 @@ const Mr = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   from: Ds,
   to: Ps
 }, Symbol.toStringTag, { value: "Module" }));
-class Pe extends st {
+class De extends st {
   constructor(t, e) {
     super(
       j(t + "Gradient", typeof t == "string" ? null : t),
@@ -1725,10 +1725,10 @@ class Pe extends st {
     return t === "transform" && (t = "gradientTransform"), super.attr(t, e, s);
   }
   bbox() {
-    return new Y();
+    return new W();
   }
   targets() {
-    return xe("svg [fill*=" + this.id() + "]");
+    return ye("svg [fill*=" + this.id() + "]");
   }
   // Alias string conversion to fill
   toString() {
@@ -1743,7 +1743,7 @@ class Pe extends st {
     return "url(#" + this.id() + ")";
   }
 }
-k(Pe, Mr);
+k(De, Mr);
 _({
   Container: {
     // Create gradient element in defs
@@ -1754,11 +1754,11 @@ _({
   // define gradient
   Defs: {
     gradient: P(function(i, t) {
-      return this.put(new Pe(i)).update(t);
+      return this.put(new De(i)).update(t);
     })
   }
 });
-T(Pe, "Gradient");
+T(De, "Gradient");
 class ve extends st {
   // Initialize node
   constructor(t, e = t) {
@@ -1769,10 +1769,10 @@ class ve extends st {
     return t === "transform" && (t = "patternTransform"), super.attr(t, e, s);
   }
   bbox() {
-    return new Y();
+    return new W();
   }
   targets() {
-    return xe("svg [fill*=" + this.id() + "]");
+    return ye("svg [fill*=" + this.id() + "]");
   }
   // Alias string conversion to fill
   toString() {
@@ -1807,7 +1807,7 @@ _({
   }
 });
 T(ve, "Pattern");
-class ni extends ot {
+class ni extends ht {
   constructor(t, e = t) {
     super(j("image", t), e);
   }
@@ -1825,7 +1825,7 @@ class ni extends ot {
       this
     ), ke(s, "load error", function() {
       Tt(s);
-    }), this.attr("href", s.src = t, ze);
+    }), this.attr("href", s.src = t, Ee);
   }
 }
 _r(function(i, t, e) {
@@ -1842,13 +1842,13 @@ _({
   }
 });
 T(ni, "Image");
-class qt extends ge {
+class qt extends me {
   // Get bounding box of points
   bbox() {
     let t = -1 / 0, e = -1 / 0, s = 1 / 0, n = 1 / 0;
     return this.forEach(function(r) {
       t = Math.max(r[0], t), e = Math.max(r[1], e), s = Math.min(r[0], s), n = Math.min(r[1], n);
-    }), new Y(s, n, t - s, e - n);
+    }), new W(s, n, t - s, e - n);
   }
   // Move point string
   move(t, e) {
@@ -1926,7 +1926,7 @@ const Xi = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   x: Lr,
   y: Er
 }, Symbol.toStringTag, { value: "Module" }));
-let Ce = class extends ot {
+let Ce = class extends ht {
   // Initialize node
   constructor(t, e = t) {
     super(j("line", t), e);
@@ -1948,7 +1948,7 @@ let Ce = class extends ot {
   }
   // Set element size to given width and height
   size(t, e) {
-    const s = ye(this, t, e);
+    const s = ge(this, t, e);
     return this.attr(this.array().size(s.width, s.height).toLine());
   }
 };
@@ -1965,7 +1965,7 @@ _({
   }
 });
 T(Ce, "Line");
-class Ge extends st {
+class Ve extends st {
   // Initialize node
   constructor(t, e = t) {
     super(j("marker", t), e);
@@ -2003,19 +2003,19 @@ _({
   Defs: {
     // Create marker
     marker: P(function(i, t, e) {
-      return this.put(new Ge()).size(i, t).ref(i / 2, t / 2).viewbox(0, 0, i, t).attr("orient", "auto").update(e);
+      return this.put(new Ve()).size(i, t).ref(i / 2, t / 2).viewbox(0, 0, i, t).attr("orient", "auto").update(e);
     })
   },
   marker: {
     // Create and attach markers
     marker(i, t, e, s) {
       let n = ["marker"];
-      return i !== "all" && n.push(i), n = n.join("-"), i = arguments[1] instanceof Ge ? arguments[1] : this.defs().marker(t, e, s), this.attr(n, i);
+      return i !== "all" && n.push(i), n = n.join("-"), i = arguments[1] instanceof Ve ? arguments[1] : this.defs().marker(t, e, s), this.attr(n, i);
     }
   }
 });
-T(Ge, "Marker");
-function ae(i, t) {
+T(Ve, "Marker");
+function he(i, t) {
   return function(e) {
     return e == null ? this[i] : (this[i] = e, t && t.call(this), this);
   };
@@ -2062,7 +2062,7 @@ class xi extends Hi {
     return typeof t != "number" ? s < 1 ? t : e : t + (e - t) * this.ease(s);
   }
 }
-class Ue extends Hi {
+class Ge extends Hi {
   constructor(t) {
     super(), this.stepper = t;
   }
@@ -2077,7 +2077,7 @@ function hs() {
   const i = (this._duration || 500) / 1e3, t = this._overshoot || 0, e = 1e-10, s = Math.PI, n = Math.log(t / 100 + e), r = -n / Math.sqrt(s * s + n * n), h = 3.9 / (r * i);
   this.d = 2 * r * h, this.k = h * h;
 }
-class jr extends Ue {
+class jr extends Ge {
   constructor(t = 500, e = 0) {
     super(), this.duration(t).overshoot(e);
   }
@@ -2091,10 +2091,10 @@ class jr extends Ue {
   }
 }
 k(jr, {
-  duration: ae("_duration", hs),
-  overshoot: ae("_overshoot", hs)
+  duration: he("_duration", hs),
+  overshoot: he("_overshoot", hs)
 });
-class $r extends Ue {
+class $r extends Ge {
   constructor(t = 0.1, e = 0.01, s = 0, n = 1e3) {
     super(), this.p(t).i(e).d(s).windup(n);
   }
@@ -2109,10 +2109,10 @@ class $r extends Ue {
   }
 }
 k($r, {
-  windup: ae("_windup"),
-  p: ae("P"),
-  i: ae("I"),
-  d: ae("D")
+  windup: he("_windup"),
+  p: he("P"),
+  i: he("I"),
+  d: he("D")
 });
 const Fr = {
   M: 2,
@@ -2217,8 +2217,8 @@ function Ur(i, t = !0) {
     pointSeen: !1,
     hasExponent: !1,
     absolute: t,
-    p0: new H(),
-    p: new H()
+    p0: new Y(),
+    p: new Y()
   };
   for (; n.lastToken = s, s = i.charAt(e++); )
     if (!(!n.inSegment && Br(n, s))) {
@@ -2272,10 +2272,10 @@ function Xr(i) {
     t += i[e][0], i[e][1] != null && (t += i[e][1], i[e][2] != null && (t += " ", t += i[e][2], i[e][3] != null && (t += " ", t += i[e][3], t += " ", t += i[e][4], i[e][5] != null && (t += " ", t += i[e][5], t += " ", t += i[e][6], i[e][7] != null && (t += " ", t += i[e][7])))));
   return t + " ";
 }
-class ie extends ge {
+class ie extends me {
   // Get bounding box of path
   bbox() {
-    return zt().path.setAttribute("d", this.toString()), new Y(zt.nodes.path.getBBox());
+    return zt().path.setAttribute("d", this.toString()), new W(zt.nodes.path.getBBox());
   }
   // Move path string
   move(t, e) {
@@ -2304,7 +2304,7 @@ class ie extends ge {
 }
 const js = (i) => {
   const t = typeof i;
-  return t === "number" ? w : t === "string" ? E.isColor(i) ? E : St.test(i) ? Bi.test(i) ? ie : ge : _s.test(i) ? w : ki : Yi.indexOf(i.constructor) > -1 ? i.constructor : Array.isArray(i) ? ge : t === "object" ? Te : ki;
+  return t === "number" ? w : t === "string" ? E.isColor(i) ? E : St.test(i) ? Bi.test(i) ? ie : me : _s.test(i) ? w : ki : Yi.indexOf(i.constructor) > -1 ? i.constructor : Array.isArray(i) ? me : t === "object" ? Te : ki;
 };
 class Ht {
   constructor(t) {
@@ -2358,7 +2358,7 @@ class ki {
     return this.value;
   }
 }
-class je {
+class Pe {
   constructor(...t) {
     this.init(...t);
   }
@@ -2372,7 +2372,7 @@ class je {
       translateY: t[5],
       originX: t[6],
       originY: t[7]
-    }), Object.assign(this, je.defaults, t), this;
+    }), Object.assign(this, Pe.defaults, t), this;
   }
   toArray() {
     const t = this;
@@ -2388,7 +2388,7 @@ class je {
     ];
   }
 }
-je.defaults = {
+Pe.defaults = {
   scaleX: 1,
   scaleY: 1,
   shear: 0,
@@ -2453,7 +2453,7 @@ class Te {
     return t;
   }
 }
-const Yi = [ki, je, Te];
+const Yi = [ki, Pe, Te];
 function Yr(i = []) {
   Yi.push(...[].concat(i));
 }
@@ -2476,7 +2476,7 @@ function Wr() {
     }
   });
 }
-class ne extends ot {
+class xe extends ht {
   // Initialize node
   constructor(t, e = t) {
     super(j("path", t), e);
@@ -2506,7 +2506,7 @@ class ne extends ot {
   }
   // Set element size to given width and height
   size(t, e) {
-    const s = ye(this, t, e);
+    const s = ge(this, t, e);
     return this.attr("d", this.array().size(s.width, s.height));
   }
   // Set width of element
@@ -2522,16 +2522,16 @@ class ne extends ot {
     return t == null ? this.bbox().y : this.move(this.bbox().x, t);
   }
 }
-ne.prototype.MorphArray = ie;
+xe.prototype.MorphArray = ie;
 _({
   Container: {
     // Create a wrapped path element
     path: P(function(i) {
-      return this.put(new ne()).plot(i || new ie());
+      return this.put(new xe()).plot(i || new ie());
     })
   }
 });
-T(ne, "Path");
+T(xe, "Path");
 function Kr() {
   return this._array || (this._array = new qt(this.attr("points")));
 }
@@ -2548,7 +2548,7 @@ function Jr(i) {
   );
 }
 function to(i, t) {
-  const e = ye(this, i, t);
+  const e = ge(this, i, t);
   return this.attr("points", this.array().size(e.width, e.height));
 }
 const $s = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
@@ -2559,7 +2559,7 @@ const $s = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   plot: Jr,
   size: to
 }, Symbol.toStringTag, { value: "Module" }));
-let $e = class extends ot {
+let je = class extends ht {
   // Initialize node
   constructor(t, e = t) {
     super(j("polygon", t), e);
@@ -2569,14 +2569,14 @@ _({
   Container: {
     // Create a wrapped polygon element
     polygon: P(function(i) {
-      return this.put(new $e()).plot(i || new qt());
+      return this.put(new je()).plot(i || new qt());
     })
   }
 });
-k($e, Xi);
-k($e, $s);
-T($e, "Polygon");
-class Fe extends ot {
+k(je, Xi);
+k(je, $s);
+T(je, "Polygon");
+class $e extends ht {
   // Initialize node
   constructor(t, e = t) {
     super(j("polyline", t), e);
@@ -2586,14 +2586,14 @@ _({
   Container: {
     // Create a wrapped polygon element
     polyline: P(function(i) {
-      return this.put(new Fe()).plot(i || new qt());
+      return this.put(new $e()).plot(i || new qt());
     })
   }
 });
-k(Fe, Xi);
-k(Fe, $s);
-T(Fe, "Polyline");
-class ri extends ot {
+k($e, Xi);
+k($e, $s);
+T($e, "Polyline");
+class ri extends ht {
   // Initialize node
   constructor(t, e = t) {
     super(j("rect", t), e);
@@ -2689,7 +2689,7 @@ const M = {
   const i = C.window;
   return (i.performance || i.Date).now();
 };
-class Fs extends De {
+class Fs extends ze {
   // Construct a new timeline on the given element
   constructor(t = io) {
     super(), this._timeSource = t, this.terminate();
@@ -2821,9 +2821,9 @@ _({
     }
   }
 });
-class rt extends De {
+class ot extends ze {
   constructor(t) {
-    super(), this.id = rt.id++, t = t ?? we.duration, t = typeof t == "function" ? new Ue(t) : t, this._element = null, this._timeline = null, this.done = !1, this._queue = [], this._duration = typeof t == "number" && t, this._isDeclarative = t instanceof Ue, this._stepper = this._isDeclarative ? t : new xi(), this._history = {}, this.enabled = !0, this._time = 0, this._lastTime = 0, this._reseted = !0, this.transforms = new y(), this.transformId = 1, this._haveReversed = !1, this._reverse = !1, this._loopsDone = 0, this._swing = !1, this._wait = 0, this._times = 1, this._frameId = null, this._persist = this._isDeclarative ? !0 : null;
+    super(), this.id = ot.id++, t = t ?? we.duration, t = typeof t == "function" ? new Ge(t) : t, this._element = null, this._timeline = null, this.done = !1, this._queue = [], this._duration = typeof t == "number" && t, this._isDeclarative = t instanceof Ge, this._stepper = this._isDeclarative ? t : new xi(), this._history = {}, this.enabled = !0, this._time = 0, this._lastTime = 0, this._reseted = !0, this.transforms = new y(), this.transformId = 1, this._haveReversed = !1, this._reverse = !1, this._loopsDone = 0, this._swing = !1, this._wait = 0, this._times = 1, this._frameId = null, this._persist = this._isDeclarative ? !0 : null;
   }
   static sanitise(t, e, s) {
     let n = 1, r = !1, h = 0;
@@ -2851,7 +2851,7 @@ class rt extends De {
     return this.on("finished", t);
   }
   animate(t, e, s) {
-    const n = rt.sanitise(t, e, s), r = new rt(n.duration);
+    const n = ot.sanitise(t, e, s), r = new ot(n.duration);
     return this._timeline && r.timeline(this._timeline), this._element && r.element(this._element), r.loop(n).schedule(n.delay, n.when);
   }
   clearTransform() {
@@ -3014,17 +3014,17 @@ class rt extends De {
     return !1;
   }
 }
-rt.id = 0;
-class Xe {
+ot.id = 0;
+class Ue {
   constructor(t = new y(), e = -1, s = !0) {
     this.transforms = t, this.id = e, this.done = s;
   }
   clearTransformsFromQueue() {
   }
 }
-k([rt, Xe], {
+k([ot, Ue], {
   mergeWith(i) {
-    return new Xe(
+    return new Ue(
       i.transforms.lmultiply(this.transforms),
       i.id
     );
@@ -3046,7 +3046,7 @@ class no {
   }
   clearBefore(t) {
     const e = this.ids.indexOf(t + 1) || 1;
-    return this.ids.splice(0, e, 0), this.runners.splice(0, e, new Xe()).forEach((s) => s.clearTransformsFromQueue()), this;
+    return this.ids.splice(0, e, 0), this.runners.splice(0, e, new Ue()).forEach((s) => s.clearTransformsFromQueue()), this;
   }
   edit(t, e) {
     const s = this.ids.indexOf(t + 1);
@@ -3080,8 +3080,8 @@ class no {
 _({
   Element: {
     animate(i, t, e) {
-      const s = rt.sanitise(i, t, e), n = this.timeline();
-      return new rt(s.duration).loop(s).element(this).timeline(n.play()).schedule(s.delay, s.when);
+      const s = ot.sanitise(i, t, e), n = this.timeline();
+      return new ot(s.duration).loop(s).element(this).timeline(n.play()).schedule(s.delay, s.when);
     },
     delay(i, t) {
       return this.animate(0, i, t);
@@ -3101,13 +3101,13 @@ _({
     },
     _prepareRunner() {
       this._frameId == null && (this._transformationRunners = new no().add(
-        new Xe(new y(this))
+        new Ue(new y(this))
       ));
     }
   }
 });
 const ro = (i, t) => i.filter((e) => !t.includes(e));
-k(rt, {
+k(ot, {
   attr(i, t) {
     return this.styleAttr("attr", i, t);
   },
@@ -3175,7 +3175,7 @@ k(rt, {
     const s = y.isMatrixLike(i);
     e = i.affine != null ? i.affine : e ?? !s;
     const n = new Ht(this._stepper).type(
-      e ? je : y
+      e ? Pe : y
     );
     let r, h, a, c, u;
     function l() {
@@ -3183,18 +3183,18 @@ k(rt, {
     }
     function f(b) {
       t || this.clearTransform();
-      const { x: v, y: L } = new H(r).transform(
+      const { x: v, y: L } = new Y(r).transform(
         h._currentTransform(this)
       );
       let A = new y({ ...i, origin: [v, L] }), R = this._isDeclarative && a ? a : u;
       if (e) {
         A = A.decompose(v, L), R = R.decompose(v, L);
-        const lt = A.rotate, Lt = R.rotate, Et = [lt - 360, lt, lt + 360], Gt = Et.map((pn) => Math.abs(pn - Lt)), Be = Math.min(...Gt), qe = Gt.indexOf(Be);
-        A.rotate = Et[qe];
+        const ft = A.rotate, Lt = R.rotate, Et = [ft - 360, ft, ft + 360], Gt = Et.map((pn) => Math.abs(pn - Lt)), Re = Math.min(...Gt), Be = Gt.indexOf(Re);
+        A.rotate = Et[Be];
       }
       t && (s || (A.rotate = i.rotate || 0), this._isDeclarative && c && (R.rotate = c)), n.from(R), n.to(A);
-      const ut = n.at(b);
-      return c = ut.rotate, a = new y(ut), this.addTransform(a), h._addRunner(this), n.done();
+      const lt = n.at(b);
+      return c = lt.rotate, a = new y(lt), this.addTransform(a), h._addRunner(this), n.done();
     }
     function m(b) {
       (b.origin || "center").toString() !== (i.origin || "center").toString() && (r = gi(b, h)), i = { ...b, origin: r };
@@ -3308,7 +3308,7 @@ k(rt, {
   },
   // Add animatable viewbox
   viewbox(i, t, e, s) {
-    return this._queueObject("viewbox", new Y(i, t, e, s));
+    return this._queueObject("viewbox", new W(i, t, e, s));
   },
   update(i) {
     return typeof i != "object" ? this.update({
@@ -3318,15 +3318,15 @@ k(rt, {
     }) : (i.opacity != null && this.attr("stop-opacity", i.opacity), i.color != null && this.attr("stop-color", i.color), i.offset != null && this.attr("offset", i.offset), this);
   }
 });
-k(rt, { rx: Gi, ry: Ui, from: Ds, to: Ps });
-T(rt, "Runner");
+k(ot, { rx: Gi, ry: Ui, from: Ds, to: Ps });
+T(ot, "Runner");
 class Wi extends st {
   constructor(t, e = t) {
     super(j("svg", t), e), this.namespace();
   }
   // Creates and returns defs element
   defs() {
-    return this.isRoot() ? ct(this.node.querySelector("defs")) || this.put(new Vi()) : this.root().defs();
+    return this.isRoot() ? ut(this.node.querySelector("defs")) || this.put(new Vi()) : this.root().defs();
   }
   isRoot() {
     return !this.node.parentNode || !(this.node.parentNode instanceof C.window.SVGElement) && this.node.parentNode.nodeName !== "#document-fragment";
@@ -3335,7 +3335,7 @@ class Wi extends st {
   namespace() {
     return this.isRoot() ? this.attr({ xmlns: $i, version: "1.1" }).attr(
       "xmlns:xlink",
-      ze,
+      Ee,
       ui
     ) : this.root().namespace();
   }
@@ -3422,7 +3422,7 @@ const qs = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   x: ao,
   y: co
 }, Symbol.toStringTag, { value: "Module" }));
-class gt extends ot {
+class gt extends ht {
   // Initialize node
   constructor(t, e = t) {
     super(j("text", t), e), this.dom.leading = this.dom.leading ?? new w(1.3), this._rebuild = !0, this._build = !1;
@@ -3464,7 +3464,7 @@ class gt extends ot {
           n === 0 && (s = n + 1);
           continue;
         }
-        n !== s && e[n].nodeType !== 3 && ct(e[n]).dom.newLined === !0 && (t += `
+        n !== s && e[n].nodeType !== 3 && ut(e[n]).dom.newLined === !0 && (t += `
 `), t += e[n].textContent;
       }
       return t;
@@ -3494,7 +3494,7 @@ _({
   }
 });
 T(gt, "Text");
-class oi extends ot {
+class oi extends ht {
   // Initialize node
   constructor(t, e = t) {
     super(j("tspan", t), e), this._build = !1;
@@ -3537,7 +3537,7 @@ _({
   }
 });
 T(oi, "Tspan");
-let Zi = class extends ot {
+let Zi = class extends ht {
   constructor(t, e = t) {
     super(j("circle", t), e);
   }
@@ -3577,7 +3577,7 @@ class vi extends st {
     }), super.remove();
   }
   targets() {
-    return xe("svg [clip-path*=" + this.id() + "]");
+    return ye("svg [clip-path*=" + this.id() + "]");
   }
 }
 _({
@@ -3603,7 +3603,7 @@ _({
   }
 });
 T(vi, "ClipPath");
-class He extends yt {
+class Xe extends yt {
   constructor(t, e = t) {
     super(j("foreignObject", t), e);
   }
@@ -3611,20 +3611,20 @@ class He extends yt {
 _({
   Container: {
     foreignObject: P(function(i, t) {
-      return this.put(new He()).size(i, t);
+      return this.put(new Xe()).size(i, t);
     })
   }
 });
-T(He, "ForeignObject");
+T(Xe, "ForeignObject");
 function bo(i, t) {
   return this.children().forEach((e) => {
     let s;
     try {
-      s = e.node instanceof kn().SVGSVGElement ? new Y(e.attr(["x", "y", "width", "height"])) : e.bbox();
+      s = e.node instanceof kn().SVGSVGElement ? new W(e.attr(["x", "y", "width", "height"])) : e.bbox();
     } catch {
       return;
     }
-    const n = new y(e), r = n.translate(i, t).transform(n.inverse()), h = new H(s.x, s.y).transform(r);
+    const n = new y(e), r = n.translate(i, t).transform(n.inverse()), h = new Y(s.x, s.y).transform(r);
     e.move(h.x, h.y);
   }), this;
 }
@@ -3642,9 +3642,9 @@ function vo(i = 0, t = 0, e = this.bbox()) {
   return this.dmove(s, n);
 }
 function Co(i, t, e = this.bbox()) {
-  const s = ye(this, i, t, e), n = s.width / e.width, r = s.height / e.height;
+  const s = ge(this, i, t, e), n = s.width / e.width, r = s.height / e.height;
   return this.children().forEach((h) => {
-    const a = new H(e).transform(new y(h).inverse());
+    const a = new Y(e).transform(new y(h).inverse());
     h.scale(n, r, a.x, a.y);
   }), this;
 }
@@ -3684,7 +3684,7 @@ _({
   }
 });
 T(hi, "G");
-class Ye extends st {
+class He extends st {
   constructor(t, e = t) {
     super(j("a", t), e);
   }
@@ -3694,15 +3694,15 @@ class Ye extends st {
   }
   // Link url
   to(t) {
-    return this.attr("href", t, ze);
+    return this.attr("href", t, Ee);
   }
 }
-k(Ye, Vs);
+k(He, Vs);
 _({
   Container: {
     // Create a hyperlink element
     link: P(function(i) {
-      return this.put(new Ye()).to(i);
+      return this.put(new He()).to(i);
     })
   },
   Element: {
@@ -3717,7 +3717,7 @@ _({
     },
     linkTo(i) {
       let t = this.linker();
-      return t || (t = new Ye(), this.wrap(t)), typeof i == "function" ? i.call(t, t) : t.to(i), this;
+      return t || (t = new He(), this.wrap(t)), typeof i == "function" ? i.call(t, t) : t.to(i), this;
     },
     linker() {
       const i = this.parent();
@@ -3725,7 +3725,7 @@ _({
     }
   }
 });
-T(Ye, "A");
+T(He, "A");
 class Ci extends st {
   // Initialize node
   constructor(t, e = t) {
@@ -3738,7 +3738,7 @@ class Ci extends st {
     }), super.remove();
   }
   targets() {
-    return xe("svg [mask*=" + this.id() + "]");
+    return ye("svg [mask*=" + this.id() + "]");
   }
 }
 _({
@@ -3851,7 +3851,7 @@ _({
     // Create path for text to run on
     path: P(function(i, t = !0) {
       const e = new Qi();
-      i instanceof ne || (i = this.defs().path(i)), e.attr("href", "#" + i, ze);
+      i instanceof xe || (i = this.defs().path(i)), e.attr("href", "#" + i, Ee);
       let s;
       if (t)
         for (; s = this.node.firstChild; )
@@ -3869,19 +3869,19 @@ _({
       return i instanceof gt || (i = new gt().addTo(this.parent()).text(i)), i.path(this);
     }),
     targets() {
-      return xe("svg textPath").filter((i) => (i.attr("href") || "").includes(this.id()));
+      return ye("svg textPath").filter((i) => (i.attr("href") || "").includes(this.id()));
     }
   }
 });
 Qi.prototype.MorphArray = ie;
 T(Qi, "TextPath");
-class Us extends ot {
+class Us extends ht {
   constructor(t, e = t) {
     super(j("use", t), e);
   }
   // Use element as a reference
   use(t, e) {
-    return this.attr("href", (e || "") + "#" + t, ze);
+    return this.attr("href", (e || "") + "#" + t, Ee);
   }
 }
 _({
@@ -3894,30 +3894,30 @@ _({
 });
 T(Us, "Use");
 const Xs = J;
-k([Wi, Ki, ni, ve, Ge], it("viewbox"));
-k([Ce, Fe, $e, ne], it("marker"));
+k([Wi, Ki, ni, ve, Ve], it("viewbox"));
+k([Ce, $e, je, xe], it("marker"));
 k(gt, it("Text"));
-k(ne, it("Path"));
+k(xe, it("Path"));
 k(Vi, it("Defs"));
 k([gt, oi], it("Tspan"));
-k([ri, si, Pe, rt], it("radius"));
-k(De, it("EventTarget"));
+k([ri, si, De, ot], it("radius"));
+k(ze, it("EventTarget"));
 k(Bt, it("Dom"));
 k(yt, it("Element"));
-k(ot, it("Shape"));
+k(ht, it("Shape"));
 k([st, zs], it("Container"));
-k(Pe, it("Gradient"));
-k(rt, it("Runner"));
+k(De, it("Gradient"));
+k(ot, it("Runner"));
 ee.extend(yn());
 Yr([
   w,
   E,
-  Y,
+  W,
   y,
-  ge,
+  me,
   qt,
   ie,
-  H
+  Y
 ]);
 Wr();
 const as = (i) => (i.changedTouches && (i = i.changedTouches[0]), { x: i.clientX, y: i.clientY });
@@ -3943,7 +3943,7 @@ class Io {
     const { box: e, lastClick: s } = this, n = this.el.point(as(t)), r = n.x - s.x, h = n.y - s.y;
     if (!r && !h) return e;
     const a = e.x + r, c = e.y + h;
-    this.box = new Y(a, c, e.w, e.h), this.lastClick = n, !this.el.dispatch("dragmove", {
+    this.box = new W(a, c, e.w, e.h), this.lastClick = n, !this.el.dispatch("dragmove", {
       event: t,
       handler: this,
       box: this.box
@@ -3967,11 +3967,11 @@ function Nt(i) {
 function Rt(i) {
   return i != null && i.min !== void 0 && i.max !== void 0;
 }
-var Hs = /* @__PURE__ */ ((i) => (i.BACKGROUND = "background", i.GRIDS = "grids", i.AXIS = "axis", i.MAIN = "main", i.PLOTS_BACKGROUND = "plots_BG", i.PLOTS = "plots", i.PLOTS_FOREGROUND = "plots_FG", i.FOREGROUND = "foreground", i.POINTS = "points", i.INTERACTIVE = "interactive", i))(Hs || {}), Ne = /* @__PURE__ */ ((i) => (i.CARTESIAN_2D = "cartesian_2d", i.POLAR = "polar", i))(Ne || {}), ce, Oe, B, et, Kt, Ot, At, Ae, Ie, Ni;
+var Hs = /* @__PURE__ */ ((i) => (i.BACKGROUND = "background", i.GRIDS = "grids", i.AXIS = "axis", i.MAIN = "main", i.PLOTS_BACKGROUND = "plots_BG", i.PLOTS = "plots", i.PLOTS_FOREGROUND = "plots_FG", i.FOREGROUND = "foreground", i.POINTS = "points", i.INTERACTIVE = "interactive", i))(Hs || {}), Ne = /* @__PURE__ */ ((i) => (i.CARTESIAN_2D = "cartesian_2d", i.POLAR = "polar", i))(Ne || {}), ae, Oe, B, et, Kt, Ot, At, Ae, Ie, Ni;
 class Mo {
   constructor(t, e, s) {
     p(this, Ie);
-    p(this, ce);
+    p(this, ae);
     p(this, Oe);
     p(this, B);
     p(this, et);
@@ -3979,7 +3979,7 @@ class Mo {
     p(this, Ot);
     p(this, At);
     p(this, Ae);
-    d(this, ce, t), d(this, Oe, e), d(this, et, Object.assign(
+    d(this, ae, t), d(this, Oe, e), d(this, et, Object.assign(
       {
         text: e,
         asHtml: !1,
@@ -4046,11 +4046,11 @@ class Mo {
       y: isNaN(e.y) ? 0 : e.y
     }, o(this, et).alignement = t, o(this, et).offset = e;
     let s = o(this, Ot), n = o(this, At), r = 0, h = 0;
-    return o(this, B) instanceof He ? (r = o(this, B).node.children[0].clientWidth, h = o(this, B).node.children[0].clientHeight, this.label.width(r), this.label.height(h)) : (r = o(this, B).length(), h = o(this, B).bbox().h), t.includes("l") ? s = s - r / 2 + (t.includes("m") ? -10 : 0) : t.includes("r") ? s = s + r / 2 + (t.includes("m") ? 10 : 0) : t.includes("c") && (s = +s), t.includes("t") ? n = n - h / 2 : t.includes("m") ? n = +n : t.includes("b") && (n = n + h / 2), o(this, B) instanceof He ? o(this, B).center(s + (e.x ?? 0), n - (e.y ?? 0)) : o(this, B).center(s + (e.x ?? 0), n - (e.y ?? 0)), this;
+    return o(this, B) instanceof Xe ? (r = o(this, B).node.children[0].clientWidth, h = o(this, B).node.children[0].clientHeight, this.label.width(r), this.label.height(h)) : (r = o(this, B).length(), h = o(this, B).bbox().h), t.includes("l") ? s = s - r / 2 + (t.includes("m") ? -10 : 0) : t.includes("r") ? s = s + r / 2 + (t.includes("m") ? 10 : 0) : t.includes("c") && (s = +s), t.includes("t") ? n = n - h / 2 : t.includes("m") ? n = +n : t.includes("b") && (n = n + h / 2), o(this, B) instanceof Xe ? o(this, B).center(s + (e.x ?? 0), n - (e.y ?? 0)) : o(this, B).center(s + (e.x ?? 0), n - (e.y ?? 0)), this;
   }
 }
-ce = new WeakMap(), Oe = new WeakMap(), B = new WeakMap(), et = new WeakMap(), Kt = new WeakMap(), Ot = new WeakMap(), At = new WeakMap(), Ae = new WeakMap(), Ie = new WeakSet(), Ni = function() {
-  return o(this, B) && o(this, B).remove(), d(this, B, o(this, et).asHtml ? o(this, ce).foreignObject(1, 1).attr("style", "overflow:visible").add(Xs(`<div style="${o(this, Ae)}">${this.displayName}</div>`, !0)) : o(this, ce).text(this.displayName)), o(this, B).attr("id", `${o(this, Oe)}-label`), o(this, B);
+ae = new WeakMap(), Oe = new WeakMap(), B = new WeakMap(), et = new WeakMap(), Kt = new WeakMap(), Ot = new WeakMap(), At = new WeakMap(), Ae = new WeakMap(), Ie = new WeakSet(), Ni = function() {
+  return o(this, B) && o(this, B).remove(), d(this, B, o(this, et).asHtml ? o(this, ae).foreignObject(1, 1).attr("style", "overflow:visible").add(Xs(`<div style="${o(this, Ae)}">${this.displayName}</div>`, !0)) : o(this, ae).text(this.displayName)), o(this, B).attr("id", `${o(this, Oe)}-label`), o(this, B);
 };
 function Ys(i, t = 10) {
   return +i.toFixed(t);
@@ -4155,7 +4155,7 @@ class ts {
     return { x: this._A.x + e.x * n, y: this._A.y + e.y * n };
   }
 }
-class We {
+class Ye {
   constructor(t, e) {
     tt(this, "_rpn");
     tt(this, "_expression");
@@ -4712,7 +4712,7 @@ function us(i, t) {
       e += 180;
   return e;
 }
-function Re(i, t, e) {
+function Fe(i, t, e) {
   return e === "x" ? {
     start: i.marker(
       t,
@@ -4723,7 +4723,7 @@ function Re(i, t, e) {
           width: 1
         });
       }
-    ),
+    ).attr("markerUnits", "userSpaceOnUse"),
     end: i.marker(
       t,
       t,
@@ -4733,7 +4733,7 @@ function Re(i, t, e) {
           width: 1
         });
       }
-    )
+    ).attr("markerUnits", "userSpaceOnUse")
   } : e === "|" ? {
     start: i.marker(
       t,
@@ -4741,14 +4741,14 @@ function Re(i, t, e) {
       function(s) {
         s.path(`M${t / 2},${t} L${t / 2},0`).stroke({ color: "black", width: 1 });
       }
-    ),
+    ).attr("markerUnits", "userSpaceOnUse"),
     end: i.marker(
       t,
       t,
       function(s) {
         s.path(`M${t / 2},${t} L${t / 2},0`).stroke({ color: "black", width: 1 });
       }
-    )
+    ).attr("markerUnits", "userSpaceOnUse")
   } : {
     start: i.marker(
       t * 1.2,
@@ -4756,28 +4756,28 @@ function Re(i, t, e) {
       function(s) {
         s.path(`M1,0 L1,${t}, L${t * 1.2},${t / 2} L1,0z`).rotate(180);
       }
-    ).ref(0, t / 2),
+    ).ref(0, t / 2).attr("markerUnits", "userSpaceOnUse"),
     end: i.marker(
       t * 1.2,
       t * 1.2,
       function(s) {
         s.path(`M1,0 L1,${t}, L${t * 1.2},${t / 2} L1,0z`);
       }
-    ).ref(t, t / 2)
+    ).ref(t, t / 2).attr("markerUnits", "userSpaceOnUse")
   };
 }
-var Dt, xt, ft, dt, W, ue, Zt, bt;
-class ht {
+var Dt, xt, dt, nt, H, ce, Zt, bt;
+class at {
   constructor(t, e) {
     p(this, Dt);
     p(this, xt);
-    p(this, ft);
     p(this, dt);
-    p(this, W);
-    p(this, ue);
+    p(this, nt);
+    p(this, H);
+    p(this, ce);
     p(this, Zt);
     p(this, bt);
-    d(this, Dt, t), d(this, xt, e), d(this, ue, !1), d(this, Zt, !1), d(this, bt, null), d(this, ft, o(this, Dt).group().attr("id", o(this, xt))), d(this, W, {
+    d(this, Dt, t), d(this, xt, e), d(this, ce, !1), d(this, Zt, !1), d(this, bt, null), d(this, dt, o(this, Dt).group().attr("id", o(this, xt))), d(this, H, {
       stroke: {
         color: "black",
         width: 1,
@@ -4787,10 +4787,10 @@ class ht {
         color: "transparent",
         opacity: 1
       }
-    }), d(this, dt, o(this, ft).path());
+    }), d(this, nt, o(this, dt).path());
   }
   get element() {
-    return o(this, ft);
+    return o(this, dt);
   }
   get name() {
     return o(this, xt);
@@ -4799,25 +4799,25 @@ class ht {
     return o(this, Dt);
   }
   get shape() {
-    return o(this, dt);
+    return o(this, nt);
   }
   set shape(t) {
-    d(this, dt, t);
+    d(this, nt, t);
   }
   get appearance() {
-    return o(this, W);
+    return o(this, H);
   }
   set appearance(t) {
-    d(this, W, t);
+    d(this, H, t);
   }
   get graphConfig() {
     return o(this, Dt).data("config");
   }
   get static() {
-    return o(this, ue);
+    return o(this, ce);
   }
   set static(t) {
-    d(this, ue, t);
+    d(this, ce, t);
   }
   get isDraggable() {
     return o(this, Zt);
@@ -4826,34 +4826,42 @@ class ht {
     d(this, Zt, t);
   }
   hide() {
-    return o(this, ft).hide(), this;
+    return o(this, dt).hide(), this;
   }
   show() {
-    return o(this, ft).show(), this;
+    return o(this, dt).show(), this;
   }
   // Defines the shape as strokeable and fillable.
   strokeable() {
-    return [o(this, dt)];
+    return [o(this, nt)];
   }
   fillable() {
-    return [o(this, dt)];
+    return [o(this, nt)];
   }
   fill(t) {
     if (t !== void 0) {
       const [e, s] = t.split("/");
-      o(this, W).fill.color = e, o(this, W).fill.opacity = s === void 0 ? 1 : +s;
+      o(this, H).fill.color = e, o(this, H).fill.opacity = s === void 0 ? 1 : +s;
     }
     return this.fillable().forEach((e) => {
-      e.fill(o(this, W).fill), e.opacity(o(this, W).fill.opacity);
+      e.fill(o(this, H).fill), e.opacity(o(this, H).fill.opacity);
     }), this;
   }
   stroke(t, e) {
     if (typeof t == "string") {
       const [s, n] = t.split("/");
-      o(this, W).stroke.color = s, o(this, W).stroke.opacity = n === void 0 ? 1 : +n, o(this, W).stroke.width = e ?? o(this, W).stroke.width;
+      o(this, H).stroke.color = s, o(this, H).stroke.opacity = n === void 0 ? 1 : +n, o(this, H).stroke.width = e ?? o(this, H).stroke.width;
     }
-    return typeof t == "number" && e === void 0 && (o(this, W).stroke.width = t), this.strokeable().forEach((s) => {
-      s.stroke(o(this, W).stroke), s.opacity(o(this, W).stroke.opacity);
+    return typeof t == "number" && e === void 0 && (o(this, H).stroke.width = t), this.strokeable().forEach((s) => {
+      s.stroke(o(this, H).stroke), s.opacity(o(this, H).stroke.opacity);
+    }), [o(this, nt).reference("marker-start"), o(this, nt).reference("marker-end")].filter((s) => s !== null).forEach((s) => {
+      s == null || s.children().forEach((n) => {
+        n.attr({
+          fill: o(this, H).stroke.color,
+          stroke: o(this, H).stroke.color,
+          "stroke-width": o(this, H).stroke.width
+        });
+      });
     }), this;
   }
   dash(t) {
@@ -4865,7 +4873,7 @@ class ht {
     return this.dash("3");
   }
   clear(t) {
-    return t ? (o(this, ft).clear(), this) : (o(this, ft).children().forEach((e) => {
+    return t ? (o(this, dt).clear(), this) : (o(this, dt).children().forEach((e) => {
       e.attr("id") !== `${o(this, xt)}-label` && e.remove();
     }), this);
   }
@@ -4875,7 +4883,7 @@ class ht {
   // The position depends on the figure.
   addLabel(t, e, s) {
     return d(this, bt, new Mo(
-      o(this, ft),
+      o(this, dt),
       o(this, xt),
       {
         text: t ?? o(this, xt),
@@ -4900,38 +4908,38 @@ class ht {
   move(t) {
     if (Nt(t)) {
       const e = X(t.x, this.graphConfig), s = X(t.y, this.graphConfig);
-      o(this, dt).translate(e, -s);
+      o(this, nt).translate(e, -s);
     } else if (typeof t == "number") {
       const e = X(t, this.graphConfig);
-      o(this, dt).translate(e, 0);
+      o(this, nt).translate(e, 0);
     }
     return this;
   }
   mark(t, e) {
-    const s = (e == null ? void 0 : e.filter((a) => typeof a == "number")[0]) ?? 10, n = (e == null ? void 0 : e.filter((a) => typeof a == "string")[0]) ?? void 0, r = Re(
+    const s = (e == null ? void 0 : e.filter((a) => typeof a == "number")[0]) ?? 10, n = (e == null ? void 0 : e.filter((a) => typeof a == "string")[0]) ?? void 0, r = Fe(
       o(this, Dt),
       s,
       n
-    ), h = o(this, dt);
+    ), h = o(this, nt);
     return t === "start" ? (h.marker("start", r.start), this) : t === "end" ? (h.marker("end", r.end), this) : (h.marker("start", r.start), h.marker("end", r.end), this);
   }
   follow(t, e) {
     return { x: t, y: e };
   }
 }
-Dt = new WeakMap(), xt = new WeakMap(), ft = new WeakMap(), dt = new WeakMap(), W = new WeakMap(), ue = new WeakMap(), Zt = new WeakMap(), bt = new WeakMap();
-var g, le, fe, Me, Ii;
-class nt extends ht {
+Dt = new WeakMap(), xt = new WeakMap(), dt = new WeakMap(), nt = new WeakMap(), H = new WeakMap(), ce = new WeakMap(), Zt = new WeakMap(), bt = new WeakMap();
+var g, ue, le, Me, Ii;
+class rt extends at {
   constructor(e, s, n) {
     super(e, s);
     p(this, Me);
     p(this, g);
+    p(this, ue);
     p(this, le);
-    p(this, fe);
     return d(this, g, Object.assign(
       { shape: "line" },
       n
-    )), d(this, le, { x: 0, y: 0 }), d(this, fe, { x: this.graphConfig.width, y: this.graphConfig.height }), this.shape = x(this, Me, Ii).call(this), this.computed(), this;
+    )), d(this, ue, { x: 0, y: 0 }), d(this, le, { x: this.graphConfig.width, y: this.graphConfig.height }), this.shape = x(this, Me, Ii).call(this), this.computed(), this;
   }
   get config() {
     return o(this, g);
@@ -4940,16 +4948,16 @@ class nt extends ht {
     d(this, g, e), x(this, Me, Ii).call(this);
   }
   get start() {
-    return o(this, le);
+    return o(this, ue);
   }
   set start(e) {
-    d(this, le, e);
+    d(this, ue, e);
   }
   get end() {
-    return o(this, fe);
+    return o(this, le);
   }
   set end(e) {
-    d(this, fe, e);
+    d(this, le, e);
   }
   get angle() {
     return Math.atan2(-this.direction.y, this.direction.x) * 180 / Math.PI;
@@ -5032,20 +5040,20 @@ class nt extends ht {
     return this.math.projection({ x: e, y: s });
   }
 }
-g = new WeakMap(), le = new WeakMap(), fe = new WeakMap(), Me = new WeakSet(), Ii = function() {
+g = new WeakMap(), ue = new WeakMap(), le = new WeakMap(), Me = new WeakSet(), Ii = function() {
   if (this.element.clear(), this.shape = this.element.line(
     this.start.x,
     this.start.y,
     this.end.x,
     this.end.y
   ), o(this, g).shape === "vector") {
-    const e = Re(this.rootSVG, 10).end;
+    const e = Fe(this.rootSVG, 10).end;
     this.shape.marker("end", e);
   }
   return this.fill().stroke(), this.shape;
 };
 var $, z, It, Yt;
-class O extends ht {
+class O extends at {
   constructor(e, s, n) {
     super(e, s);
     p(this, It);
@@ -5116,7 +5124,7 @@ class O extends ht {
         return this.x = e.x, this.y = this.graphConfig.origin.y, this;
       if (o(this, z).projection.axis === "Oy")
         return this.x = this.graphConfig.origin.x, this.y = e.y, this;
-      if (o(this, z).projection.axis instanceof nt) {
+      if (o(this, z).projection.axis instanceof rt) {
         const s = o(this, z).projection.axis, n = s.start.x, r = s.start.y, h = e.x - n, a = e.y - r, c = s.direction, u = h * c.x + a * c.y, l = c.x * c.x + c.y * c.y;
         this.x = n + u * c.x / l, this.y = r + u * c.y / l;
       }
@@ -5129,7 +5137,7 @@ class O extends ht {
     }
     if (o(this, z).symmetry) {
       const e = o(this, z).symmetry.A, s = o(this, z).symmetry.B;
-      if (s instanceof nt) {
+      if (s instanceof rt) {
         const r = new F(s.direction).normal, a = new F(e, s.start).projection(r);
         this.x = e.x + 2 * a.x, this.y = e.y + 2 * a.y;
       } else if (s === "Ox")
@@ -5147,7 +5155,7 @@ class O extends ht {
         return this.x = e.x + X(n, this.graphConfig), this.y = e.y, this;
       if (s === "Oy")
         return this.x = e.x, this.y = e.y - X(n, this.graphConfig), this;
-      if (s instanceof nt) {
+      if (s instanceof rt) {
         const r = new F(o(this, z).direction.perpendicular ? s.normal : s.direction).unit, h = X(n, this.graphConfig);
         return this.x = e.x + h * r.x, this.y = e.y + h * r.y, this;
       }
@@ -5188,29 +5196,29 @@ $ = new WeakMap(), z = new WeakMap(), It = new WeakSet(), Yt = function() {
   }
   return this.fill().stroke(), this.shape;
 };
-var at, Pt, Ze, Ws;
-class Ke extends ht {
+var ct, Pt, Ke, Ws;
+class We extends at {
   constructor(e, s, n) {
     super(e, s);
-    p(this, Ze);
-    p(this, at);
+    p(this, Ke);
+    p(this, ct);
     p(this, Pt);
-    return d(this, at, Object.assign({
+    return d(this, ct, Object.assign({
       expression: "",
       samples: this.graphConfig.axis.x.x
-    }, n)), this.shape = x(this, Ze, Ws).call(this), d(this, Pt, new We(o(this, at).expression)), this.computed(), this;
+    }, n)), this.shape = x(this, Ke, Ws).call(this), d(this, Pt, new Ye(o(this, ct).expression)), this.computed(), this;
   }
   get config() {
-    return o(this, at);
+    return o(this, ct);
   }
   set config(e) {
-    d(this, at, e), d(this, Pt, new We(o(this, at).expression)), this.computed();
+    d(this, ct, e), d(this, Pt, new Ye(o(this, ct).expression)), this.computed();
   }
   computed() {
-    const e = o(this, at).expression;
+    const e = o(this, ct).expression;
     if (!e || e === "")
       return this;
-    const s = -this.graphConfig.origin.x / this.graphConfig.axis.x.x - 1, n = (this.graphConfig.width - this.graphConfig.origin.x) / this.graphConfig.axis.x.x + 1, r = o(this, at).domain ?? { min: s, max: n }, h = o(this, at).image ?? { min: -1 / 0, max: 1 / 0 }, a = o(this, at).samples ?? this.graphConfig.axis.x.x, c = o(this, Pt), u = [];
+    const s = -this.graphConfig.origin.x / this.graphConfig.axis.x.x - 1, n = (this.graphConfig.width - this.graphConfig.origin.x) / this.graphConfig.axis.x.x + 1, r = o(this, ct).domain ?? { min: s, max: n }, h = o(this, ct).image ?? { min: -1 / 0, max: 1 / 0 }, a = o(this, ct).samples ?? this.graphConfig.axis.x.x, c = o(this, Pt), u = [];
     for (let b = r.min; b < r.max; b += 1 / a) {
       const v = c.evaluate({ x: b });
       if (isNaN(v) || v === 1 / 0 || v === -1 / 0 || v < h.min || v > h.max) {
@@ -5240,11 +5248,11 @@ class Ke extends ht {
     return this.evaluate(n.x);
   }
 }
-at = new WeakMap(), Pt = new WeakMap(), Ze = new WeakSet(), Ws = function() {
+ct = new WeakMap(), Pt = new WeakMap(), Ke = new WeakSet(), Ws = function() {
   return this.element.clear(), this.shape = this.element.path("M0 0"), this.fill().stroke(), this.element.add(this.shape), this.shape;
 };
 var wt, Se, Mi;
-class Eo extends ht {
+class Eo extends at {
   constructor(e, s, n) {
     super(e, s);
     p(this, Se);
@@ -5287,7 +5295,7 @@ wt = new WeakMap(), Se = new WeakSet(), Mi = function() {
   return this.element.clear(), this.shape = this.element.circle(this.radius).center(this.center.x, this.center.y), this.shape.stroke(this.appearance.stroke.color), this.shape.fill(this.appearance.fill), this.shape;
 };
 var I, Vt, Si, Li;
-class zo extends ht {
+class zo extends at {
   constructor(e, s, n) {
     super(e, s);
     p(this, Vt);
@@ -5356,7 +5364,7 @@ I = new WeakMap(), Vt = new WeakSet(), Si = function() {
   return this.shape;
 };
 var q, se, Ks, Ei;
-class Do extends ht {
+class Do extends at {
   constructor(e, s, n) {
     super(e, s);
     p(this, se);
@@ -5423,13 +5431,13 @@ q = new WeakMap(), se = new WeakSet(), Ks = function() {
       throw new Error("Too many lines");
   return h;
 };
-var K, Le, Qe, Zs;
-class Po extends ht {
+var K, Ze, Qe, Zs;
+class Po extends at {
   constructor(e, s, n) {
     super(e, s);
     p(this, Qe);
     p(this, K);
-    p(this, Le);
+    p(this, Ze);
     d(this, K, Object.assign({
       start: { x: 0, y: 0 },
       center: { x: 10, y: 10 },
@@ -5438,7 +5446,7 @@ class Po extends ht {
       morphToSquare: !0,
       sector: !1,
       mark: !1
-    }, n)), d(this, Le, Re(this.rootSVG, 8)), this.config = n;
+    }, n)), d(this, Ze, Fe(this.rootSVG, 8)), this.config = n;
   }
   get config() {
     return o(this, K);
@@ -5488,9 +5496,6 @@ class Po extends ht {
     const { start: e, end: s } = this.getAngles(), n = o(this, K).morphToSquare && this.isSquare ? this.radius / 2 : this.radius, r = cs(this.center.x, this.center.y, n, e), h = cs(this.center.x, this.center.y, n, s);
     return o(this, K).morphToSquare && this.isSquare ? this._describeSquare(this.center, r, h) : this._describeArc(this.center, r, h, n, s - e);
   }
-  mark(e) {
-    return this.shape instanceof ne && (e ? this.shape.marker("end", o(this, Le).end) : this.shape.marker("end")), this;
-  }
   _describeSquare(e, s, n) {
     return [
       "M",
@@ -5522,11 +5527,11 @@ class Po extends ht {
     return o(this, K).sector && (u = u.concat(["L", e.x, e.y, "L", s.x, s.y])), u.join(" ");
   }
 }
-K = new WeakMap(), Le = new WeakMap(), Qe = new WeakSet(), Zs = function() {
+K = new WeakMap(), Ze = new WeakMap(), Qe = new WeakSet(), Zs = function() {
   return this.element.clear(), this.shape = this.element.path("M0 0"), this.fill().stroke(), this.element.add(this.shape), this.shape;
 };
 var pt, jt, Mt, Qs, Js, zi;
-class jo extends ht {
+class jo extends at {
   constructor(e, s, n) {
     super(e, s);
     p(this, Mt);
@@ -5578,7 +5583,7 @@ pt = new WeakMap(), jt = new WeakMap(), Mt = new WeakSet(), Qs = function(e) {
   };
   return this.shape.add(e.x).add(e.y), this.element.add(this.shape), e;
 }, zi = function(e, s, n) {
-  const r = (n == null ? void 0 : n.color) ?? "black", h = (n == null ? void 0 : n.padding) ?? 0, a = (n == null ? void 0 : n.half) ?? !1, c = (n == null ? void 0 : n.length) ?? 0, u = Re(this.rootSVG, 10).end.fill(r), l = Wt(
+  const r = (n == null ? void 0 : n.color) ?? "black", h = (n == null ? void 0 : n.padding) ?? 0, a = (n == null ? void 0 : n.half) ?? !1, c = (n == null ? void 0 : n.length) ?? 0, u = Fe(this.rootSVG, 10).end.fill(r), l = Wt(
     this.graphConfig.origin,
     s,
     this.graphConfig.width,
@@ -5589,18 +5594,18 @@ pt = new WeakMap(), jt = new WeakMap(), Mt = new WeakSet(), Qs = function(e) {
   );
   return l !== null && e.plot(l[0].x, l[0].y, l[1].x, l[1].y), e.stroke({ color: r, width: 1 }).marker("end", u), this.shape.add(e), e;
 };
-var _t, de, Je, tn;
-class $o extends ht {
+var _t, fe, Je, tn;
+class $o extends at {
   constructor(e, s, n) {
     super(e, s);
     p(this, Je);
     p(this, _t);
-    p(this, de);
+    p(this, fe);
     return d(this, _t, Object.assign({
       expressions: { x: "", y: "" }
-    }, n)), d(this, de, {
-      x: new We(o(this, _t).expressions.x),
-      y: new We(o(this, _t).expressions.y)
+    }, n)), d(this, fe, {
+      x: new Ye(o(this, _t).expressions.x),
+      y: new Ye(o(this, _t).expressions.y)
     }), this.shape = x(this, Je, tn).call(this), this.computed(), this;
   }
   get config() {
@@ -5624,18 +5629,18 @@ class $o extends ht {
   evaluate(e) {
     return X(
       {
-        x: o(this, de).x.evaluate({ t: e }),
-        y: o(this, de).y.evaluate({ t: e })
+        x: o(this, fe).x.evaluate({ t: e }),
+        y: o(this, fe).y.evaluate({ t: e })
       },
       this.graphConfig
     );
   }
 }
-_t = new WeakMap(), de = new WeakMap(), Je = new WeakSet(), tn = function() {
+_t = new WeakMap(), fe = new WeakMap(), Je = new WeakSet(), tn = function() {
   return this.element.clear(), this.shape = this.element.path("M0 0"), this.fill().stroke(), this.element.add(this.shape), this.shape;
 };
-var kt, vt, Qt, $t, pe, ti, en;
-class Fo extends ht {
+var kt, vt, Qt, $t, de, ti, en;
+class Fo extends at {
   constructor(e, s, n) {
     super(e, s);
     p(this, ti);
@@ -5643,10 +5648,10 @@ class Fo extends ht {
     p(this, vt);
     p(this, Qt);
     p(this, $t);
-    p(this, pe);
+    p(this, de);
     return d(this, kt, Object.assign({
       size: 10
-    }, n)), this.appearance.fill.color = "black", d(this, vt, o(this, kt).follow.follow(0, 0)), d(this, Qt, { x: 0, y: 0 }), d(this, pe, this.element.line()), d(this, $t, this.element.circle(o(this, kt).size).center(o(this, vt).x, o(this, vt).y)), this.shape = x(this, ti, en).call(this), this.computed(), this.rootSVG.on("mousemove", (r) => {
+    }, n)), this.appearance.fill.color = "black", d(this, vt, o(this, kt).follow.follow(0, 0)), d(this, Qt, { x: 0, y: 0 }), d(this, de, this.element.line()), d(this, $t, this.element.circle(o(this, kt).size).center(o(this, vt).x, o(this, vt).y)), this.shape = x(this, ti, en).call(this), this.computed(), this.rootSVG.on("mousemove", (r) => {
       var c;
       let h = this.rootSVG.node.createSVGPoint();
       h.x = r.clientX, h.y = r.clientY, h = h.matrixTransform((c = this.rootSVG.node.getScreenCTM()) == null ? void 0 : c.inverse());
@@ -5670,7 +5675,7 @@ class Fo extends ht {
       this.graphConfig.width,
       this.graphConfig.height
     );
-    return e === null ? this : (o(this, pe).plot(
+    return e === null ? this : (o(this, de).plot(
       e[0].x,
       e[0].y,
       e[1].x,
@@ -5681,17 +5686,17 @@ class Fo extends ht {
     return this;
   }
   strokeable() {
-    return [o(this, pe)];
+    return [o(this, de)];
   }
   fillable() {
     return [o(this, $t)];
   }
 }
-kt = new WeakMap(), vt = new WeakMap(), Qt = new WeakMap(), $t = new WeakMap(), pe = new WeakMap(), ti = new WeakSet(), en = function() {
+kt = new WeakMap(), vt = new WeakMap(), Qt = new WeakMap(), $t = new WeakMap(), de = new WeakMap(), ti = new WeakSet(), en = function() {
   return this.shape = this.element.group().attr({ id: this.name }), this.fill().stroke(), this.element.add(this.shape), this.shape;
 };
 var mt, ei, sn;
-class Ro extends ht {
+class Ro extends at {
   constructor(e, s, n) {
     super(e, s);
     p(this, ei);
@@ -5742,7 +5747,7 @@ mt = new WeakMap(), ei = new WeakSet(), sn = function() {
   return this.element.clear(), this.shape = this.element.path("M0 0"), this.fill().stroke(), this.element.add(this.shape), this.shape;
 };
 var V, ii, nn;
-class Bo extends ht {
+class Bo extends at {
   constructor(e, s, n) {
     super(e, s);
     p(this, ii);
@@ -5785,16 +5790,16 @@ class Bo extends ht {
 V = new WeakMap(), ii = new WeakSet(), nn = function() {
   return this.shape = this.element.group().attr({ id: this.name }), this.fill().stroke(), this.element.add(this.shape), this.shape;
 };
-var G, U, Z, N, Ct, me, Ee, Di;
+var G, U, Z, N, Ct, pe, Le, Di;
 class qo {
   constructor(t, e) {
-    p(this, Ee);
+    p(this, Le);
     p(this, G);
     p(this, U);
     p(this, Z);
     p(this, N);
     p(this, Ct);
-    p(this, me);
+    p(this, pe);
     var r;
     const s = document.createElement("DIV");
     s.style.position = "relative", s.style.width = "100%", s.style.height = "auto", s.style.border = "thin solid black", s.style.userSelect = "none", typeof t == "string" ? (r = document.getElementById(t)) == null || r.appendChild(s) : t.appendChild(s);
@@ -5808,7 +5813,7 @@ class qo {
         x: { x: n, y: 0 },
         y: { x: 0, y: -n }
       }
-    }, e)), d(this, me, (e == null ? void 0 : e.tex) ?? ((h) => h)), d(this, Ct, Object.assign({
+    }, e)), d(this, pe, (e == null ? void 0 : e.tex) ?? ((h) => h)), d(this, Ct, Object.assign({
       grid: !0,
       subgrid: 0,
       axis: !0
@@ -5820,7 +5825,7 @@ class qo {
       axis: o(this, N).axis
     }), d(this, U, {}), Object.values(Hs).forEach((h) => {
       o(this, U)[h] = o(this, G).group().attr("id", `LAYER_${h}`);
-    }), d(this, Z, {}), x(this, Ee, Di).call(this), this;
+    }), d(this, Z, {}), x(this, Le, Di).call(this), this;
   }
   get rootSVG() {
     return o(this, G);
@@ -5841,7 +5846,7 @@ class qo {
     d(this, Ct, t);
   }
   get toTex() {
-    return o(this, me);
+    return o(this, pe);
   }
   get layers() {
     return o(this, U);
@@ -5872,7 +5877,7 @@ class qo {
     return o(this, U).axis.add(e.element), e;
   }
   marker(t) {
-    return Re(o(this, G), t);
+    return Fe(o(this, G), t);
   }
   toPixels(t, e) {
     return X(t, this.config, e);
@@ -5892,15 +5897,15 @@ class qo {
         return o(this, U).points.add(r.element), o(this, Z)[e] = r, s && r.addLabel(
           e,
           s.html,
-          o(this, me)
+          o(this, pe)
         ), r;
       },
       line: (t, e) => {
-        const s = new nt(o(this, G), e, t);
+        const s = new rt(o(this, G), e, t);
         return o(this, U).main.add(s.element), o(this, Z)[e] = s, s;
       },
       plot: (t, e) => {
-        const s = new Ke(o(this, G), e, t);
+        const s = new We(o(this, G), e, t);
         return o(this, U).plots.add(s.element), o(this, Z)[e] = s, s;
       },
       parametric: (t, e) => {
@@ -5942,7 +5947,7 @@ class qo {
         if ((u = e == null ? void 0 : e.follow) != null && u.length) {
           let l = { x: a, y: c };
           e.follow.forEach((f) => {
-            f instanceof ht ? l = f.follow(a, c) : typeof f == "string" ? l = this.follow(f, r)(a, c) : l = f(a, c), a = l.x, c = l.y;
+            f instanceof at ? l = f.follow(a, c) : typeof f == "string" ? l = this.follow(f, r)(a, c) : l = f(a, c), a = l.x, c = l.y;
           });
         }
         r.pixels.x === a && r.pixels.y === c || (r.pixels = { x: a, y: c }, e != null && e.callback && e.callback(t), this.update([t.name]));
@@ -5962,7 +5967,7 @@ class qo {
       height: o(this, N).height,
       origin: o(this, N).origin,
       axis: o(this, N).axis
-    }), x(this, Ee, Di).call(this), this.update([], !0);
+    }), x(this, Le, Di).call(this), this.update([], !0);
   }
   // Update each figures in the graph
   update(t, e) {
@@ -5978,7 +5983,7 @@ class qo {
     } : (s, n) => ({ x: s, y: n });
   }
 }
-G = new WeakMap(), U = new WeakMap(), Z = new WeakMap(), N = new WeakMap(), Ct = new WeakMap(), me = new WeakMap(), Ee = new WeakSet(), Di = function() {
+G = new WeakMap(), U = new WeakMap(), Z = new WeakMap(), N = new WeakMap(), Ct = new WeakMap(), pe = new WeakMap(), Le = new WeakSet(), Di = function() {
   o(this, U).grids.clear(), o(this, U).axis.clear(), o(this, Ct).subgrid && this.subgrid("SUBGRID", o(this, Ct).subgrid).stroke("purple/0.5", 0.1), o(this, Ct).grid && this.grid("MAINGRID", o(this, N).axis).stroke("lightgray", 1), o(this, Ct).axis && this.coordinate_system(o(this, N).system);
 };
 var S = /* @__PURE__ */ ((i) => (i.UNKNOWN = "unknown", i.POINT = "pt", i.MIDDLE = "mid", i.PROJECTION = "proj", i.INTERSECTION = "inter", i.SYMMETRY = "sym", i.DIRECTION_POINT = "dpt", i.VECTOR_POINT = "vpt", i.LINE = "line", i.PERPENDICULAR = "perp", i.PARALLEL = "para", i.MEDIATOR = "med", i.TANGENT = "tan", i.BISECTOR = "bis", i.CIRCLE = "circ", i.ARC = "arc", i.PLOT = "plot", i.PARAMETRIC = "parametric", i.POLYGON = "poly", i.REGULAR = "reg", i.FOLLOW = "follow", i.FILL_BETWEEN = "fill", i.RIEMANN = "riemann", i))(S || {});
@@ -6059,7 +6064,7 @@ function Go(i, t, e) {
   }
   return null;
 }
-function he(i, t, e) {
+function oe(i, t, e) {
   const s = Q(i.code, t);
   if (i.key === S.LINE && s.length === 2) {
     const [n, r] = s;
@@ -6107,17 +6112,17 @@ function he(i, t, e) {
   }
   if (i.key === S.PERPENDICULAR && s.length === 2) {
     const [n, r] = s;
-    if (n instanceof nt && r instanceof O)
+    if (n instanceof rt && r instanceof O)
       return { perpendicular: { to: n, through: r } };
   }
   if (i.key === S.PARALLEL && s.length === 2) {
     const [n, r] = s;
-    if (n instanceof nt && r instanceof O)
+    if (n instanceof rt && r instanceof O)
       return { parallel: { to: n, through: r } };
   }
   if (i.key === S.BISECTOR && s.length === 2) {
     const [n, r] = s;
-    if (n instanceof nt && r instanceof nt)
+    if (n instanceof rt && r instanceof rt)
       return { bisector: { d1: n, d2: r } };
   }
   if (i.key === S.BISECTOR && s.length === 3) {
@@ -6158,7 +6163,7 @@ function Ho(i, t, e) {
   const s = Q(i.code, t);
   if (i.key === S.FOLLOW && s.length >= 1) {
     const [n, r] = s;
-    if (n instanceof Ke)
+    if (n instanceof We)
       return {
         follow: n,
         tangent: r === "show"
@@ -6170,7 +6175,7 @@ function Yo(i, t, e) {
   const s = Q(i.code, t);
   if (i.key === S.FILL_BETWEEN && s.length >= 2) {
     const [n, r, h, a] = s;
-    if (n instanceof Ke && r instanceof Ke)
+    if (n instanceof We && r instanceof We)
       return {
         expressions: [n, r],
         domain: Rt(h) ? h : { min: NaN, max: NaN },
@@ -6220,22 +6225,22 @@ function Ko(i, t, e) {
   }
   if (i.key === S.PROJECTION && s.length === 2) {
     const n = s[0], r = s[1];
-    if (n instanceof O && (r instanceof nt || r === "Ox" || r === "Oy"))
+    if (n instanceof O && (r instanceof rt || r === "Ox" || r === "Oy"))
       return { projection: { point: n, axis: r } };
   }
   if (i.key === S.INTERSECTION && s.length === 2) {
     const n = s[0], r = s[1];
-    if ((n instanceof nt || n === "Ox" || n === "Oy") && (r instanceof nt || r === "Ox" || r === "Oy"))
+    if ((n instanceof rt || n === "Ox" || n === "Oy") && (r instanceof rt || r === "Ox" || r === "Oy"))
       return { intersection: { A: n, B: r } };
   }
   if (i.key === S.SYMMETRY && s.length === 2) {
     const n = s[0], r = s[1];
-    if (n instanceof O && (r instanceof O || r instanceof nt || r === "Ox" || r === "Oy"))
+    if (n instanceof O && (r instanceof O || r instanceof rt || r === "Ox" || r === "Oy"))
       return { symmetry: { A: n, B: r } };
   }
   if (i.key === S.DIRECTION_POINT && s.length >= 3) {
     const [n, r, h, a] = s;
-    if (n instanceof O && (r instanceof nt || r === "Ox" || r === "Oy") && typeof h == "number")
+    if (n instanceof O && (r instanceof rt || r === "Ox" || r === "Oy") && typeof h == "number")
       return {
         direction: {
           direction: r,
@@ -6340,7 +6345,7 @@ const ps = {
     description: "Create a line, a half line or a segment",
     code: "d=<line> | <line>[ | <line>.",
     parameters: ["dash", "dot"],
-    build: he,
+    build: oe,
     create: "line"
   },
   vector: {
@@ -6348,7 +6353,7 @@ const ps = {
     description: "Create a vector",
     code: "d=v<line>",
     parameters: [],
-    build: he,
+    build: oe,
     create: "line"
   },
   perp: {
@@ -6356,7 +6361,7 @@ const ps = {
     description: "Create the perpendicular of a line from a point",
     code: "d=perp <line>,<point>",
     parameters: [],
-    build: he,
+    build: oe,
     create: "line"
   },
   para: {
@@ -6364,7 +6369,7 @@ const ps = {
     description: "Create a parallel line from a point",
     code: "d=para <line>,<point>",
     parameters: [],
-    build: he,
+    build: oe,
     create: "line"
   },
   med: {
@@ -6372,7 +6377,7 @@ const ps = {
     description: "Create the mediator of two points",
     code: "d=med <point>,<point>",
     parameters: [],
-    build: he,
+    build: oe,
     create: "line"
   },
   // tangent: {
@@ -6386,7 +6391,7 @@ const ps = {
     description: "Create the bisector of an angle",
     code: "d=bis <point>,<point>,<point>",
     parameters: [],
-    build: he,
+    build: oe,
     create: "line"
   },
   circ: {
@@ -6462,7 +6467,7 @@ const ps = {
     create: "riemann"
   }
 };
-var Jt, Ft, D, rn, Pi, on, hn, an, cn, un, ln, fn, dn, Ve;
+var Jt, Ft, D, rn, Pi, on, hn, an, cn, un, ln, fn, dn, qe;
 class ih extends qo {
   constructor(e, s) {
     super(e, {
@@ -6637,7 +6642,7 @@ Pi = function(e) {
   const [s, n] = e.slice(1).split(":");
   return { key: n, value: s === "begin" };
 }, an = function(e) {
-  const s = x(this, D, Ve).call(this, e), n = s.ppu ? parseFloat(s.ppu.value) : 50, r = s.x && Rt(s.x.value) ? s.x.value : { min: -8, max: 8 }, h = s.y && Rt(s.y.value) ? s.y.value : { min: -8, max: 8 }, a = Math.abs(r.max - r.min), c = Math.abs(h.max - h.min), u = a * n, l = c * n, f = {
+  const s = x(this, D, qe).call(this, e), n = s.ppu ? parseFloat(s.ppu.value) : 50, r = s.x && Rt(s.x.value) ? s.x.value : { min: -8, max: 8 }, h = s.y && Rt(s.y.value) ? s.y.value : { min: -8, max: 8 }, a = Math.abs(r.max - r.min), c = Math.abs(h.max - h.min), u = a * n, l = c * n, f = {
     x: -r.min * n,
     y: h.max * n
   }, m = Ne.CARTESIAN_2D, b = {
@@ -6667,7 +6672,7 @@ Pi = function(e) {
   const [s, n] = e.split("->"), r = x(this, D, un).call(this, s);
   return r.parameters = Object.assign(
     r.parameters,
-    x(this, D, Ve).call(this, n)
+    x(this, D, qe).call(this, n)
   ), r;
 }, un = function(e) {
   if (e.match(/^[A-Z][0-9]*\(.*\)$/))
@@ -6690,7 +6695,7 @@ Pi = function(e) {
     parameters: {}
   };
 }, ln = function(e) {
-  const s = e.split("(")[0], n = e.split("(")[1].split(")")[0].split(","), r = x(this, D, Ve).call(this, e.split(")")[1]);
+  const s = e.split("(")[0], n = e.split("(")[1].split(")")[0].split(","), r = x(this, D, qe).call(this, e.split(")")[1]);
   return {
     id: s,
     key: S.POINT,
@@ -6720,7 +6725,7 @@ Pi = function(e) {
     code: n.split(","),
     parameters: {}
   };
-}, Ve = function(e) {
+}, qe = function(e) {
   if (e === void 0)
     return {};
   const s = {};

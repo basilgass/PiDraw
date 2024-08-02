@@ -29,7 +29,6 @@ export declare class Arc extends AbstractFigure {
         end: number;
     };
     getPath(): string;
-    mark(enable: boolean): this;
     private _describeSquare;
     private _describeArc;
 }

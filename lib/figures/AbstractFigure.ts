@@ -110,7 +110,7 @@ export abstract class AbstractFigure {
         [this.#shape.reference('marker-start'), this.#shape.reference('marker-end')]
             .filter(x => x !== null)
             .forEach((marker) => {
-                marker.children().forEach((m) => {
+                marker?.children().forEach((m) => {
                     m.attr({
                         fill: this.#appearance.stroke.color,
                         stroke: this.#appearance.stroke.color,
