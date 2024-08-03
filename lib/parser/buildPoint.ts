@@ -108,12 +108,13 @@ function buildPoint_config(item: IParser, figures: Record<string, AbstractFigure
 
         if (A instanceof Point && B instanceof Point) {
             const point = startingPoint instanceof Point ? startingPoint : A
+            const distance = typeof scale === "number" ? scale : 1
 
             return {
                 direction: {
                     point,
                     direction: { A, B },
-                    distance: (scale as number) ?? 1
+                    distance
                 }
             }
         }

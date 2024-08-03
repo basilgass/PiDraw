@@ -137,6 +137,14 @@ C(6,0)
 O(0,0)
 d=AO.->move=1;2,mark=start/x/20,red
 a=arc C,O,A,1->mark`
+
+        this.code = `A(-2,3)
+B(1,2)
+d=AB
+D(-1,-3)
+C=vpt A,B,2,D->label
+F(-1,5)
+E=dpt F,d,3,p->label`
         // this.code = `A(1,2)->drag=grid,tex=A=@/tr/1;3`
         draw = new PiParser(
             'root',
