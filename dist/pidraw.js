@@ -6257,7 +6257,7 @@ function Ko(i, t, e) {
         direction: {
           point: a instanceof O ? a : n,
           direction: { A: n, B: r },
-          distance: h ?? 1
+          distance: typeof h == "number" ? h : 1
         }
       };
   }
