@@ -25,6 +25,7 @@
   "include": [
     "lib",
     "tests",
+    "vite.config.js"
   ],
   "exclude": [
     "node_modules",

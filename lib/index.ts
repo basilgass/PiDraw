@@ -5,4 +5,4 @@
 // export const PiNum = NumExp
 
 export { Graph as PiGraph } from "./Graph"
-export { Parser as PiParser } from "./Parser"
+export { Parser as PiDraw } from "./Parser"
