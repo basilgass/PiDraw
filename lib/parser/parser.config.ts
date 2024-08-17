@@ -1,3 +1,4 @@
+import { PARSER } from "piparser/lib/PiParserTypes"
 import { AbstractFigure } from "../figures/AbstractFigure"
 import { IGraphConfig } from "../pidraw.common"
 import { buildArc, buildCircle } from "./buildCircle"
@@ -5,7 +6,6 @@ import { buildLine } from "./buildLine"
 import { buildFillBetween, buildFollow, buildParametric, buildPlot, buildRiemann } from "./buildPlot"
 import { buildPoint } from "./buildPoint"
 import { buildPolygon } from "./buildPolygon"
-import { IParser } from "./parser.common"
 
 // TODO: add the build and create parameters to make it easily accessible and extensible.
 export const parser_config: Record<string, {
@@ -13,8 +13,9 @@ export const parser_config: Record<string, {
     description: string,
     code: string,
     parameters: string[]
-    build: (values: IParser, figures: Record<string, AbstractFigure>, config: IGraphConfig) => unknown,
-    create: string
+    build: (values: PARSER, figures: Record<string, AbstractFigure>, config: IGraphConfig) => unknown,
+    create: string,
+    option?: string
 }> = {
     pt: {
         name: 'point',
@@ -80,11 +81,27 @@ export const parser_config: Record<string, {
         build: buildLine,
         create: 'line'
     },
-    vector: {
+    vec: {
         name: 'vector',
         description: 'Create a vector',
         code: 'd=v<line>',
         parameters: [],
+        build: buildLine,
+        create: 'line'
+    },
+    seg: {
+        name: 'segment',
+        description: 'Create a segment through two points',
+        code: 's=<A><B>.',
+        parameters: [],
+        build: buildLine,
+        create: 'line'
+    },
+    ray: {
+        name: 'ray (half line)',
+        description: 'Create a line, a half line or a segment',
+        code: 'd=<line> | <line>[ | <line>.',
+        parameters: ['dash', 'dot'],
         build: buildLine,
         create: 'line'
     },

@@ -1,4 +1,4 @@
-import { loadConfigFromFile } from "vite"
+import { PARSER } from "piparser/lib/PiParserTypes"
 import { AbstractFigure } from "../figures/AbstractFigure"
 import { IFillBetweenConfig } from "../figures/FillBetween"
 import { IFollowConfig } from "../figures/Follow"
@@ -6,15 +6,15 @@ import { IParametricConfig } from "../figures/Parametric"
 import { IPlotConfig, Plot } from "../figures/Plot"
 import { IRiemannConfig } from "../figures/Riemann"
 import { DOMAIN, IGraphConfig, isDOMAIN } from "../pidraw.common"
-import { convertValues, IParser, PARSER_TYPE } from "./parser.common"
+import { convertIdToFigure, PARSER_TYPE } from "./parser.common"
 
-export function buildPlot(item: IParser, figures: Record<string, AbstractFigure>, graphConfig: IGraphConfig): IPlotConfig | null {
-    const code = convertValues(item.code, figures)
+export function buildPlot(item: PARSER, figures: Record<string, AbstractFigure>, graphConfig: IGraphConfig): IPlotConfig | null {
+    const code = convertIdToFigure(item.values, figures)
 
     // console.log(item)
     // console.log(code)
 
-    if (item.key === PARSER_TYPE.PLOT) {
+    if (item.key === PARSER_TYPE.PLOT.toString()) {
         // item.code = [<function>,<domain>,<image>,<@samples>]
         const [f, ...data] = code
 
@@ -44,10 +44,10 @@ export function buildPlot(item: IParser, figures: Record<string, AbstractFigure>
 
 }
 
-export function buildParametric(item: IParser, figures: Record<string, AbstractFigure>, graphConfig: IGraphConfig): IParametricConfig | null {
-    const code = convertValues(item.code, figures)
+export function buildParametric(item: PARSER, figures: Record<string, AbstractFigure>, graphConfig: IGraphConfig): IParametricConfig | null {
+    const code = convertIdToFigure(item.values, figures)
 
-    if (item.key === PARSER_TYPE.PARAMETRIC && code.length === 2) {
+    if (item.key === PARSER_TYPE.PARAMETRIC.toString() && code.length === 2) {
         // item.code = [<function>,<function>]
         const [x, y] = code
         if (typeof x === 'string' && typeof y === 'string') {
@@ -58,10 +58,10 @@ export function buildParametric(item: IParser, figures: Record<string, AbstractF
     return null
 }
 
-export function buildFollow(item: IParser, figures: Record<string, AbstractFigure>, graphConfig: IGraphConfig): IFollowConfig | null {
-    const code = convertValues(item.code, figures)
+export function buildFollow(item: PARSER, figures: Record<string, AbstractFigure>, graphConfig: IGraphConfig): IFollowConfig | null {
+    const code = convertIdToFigure(item.values, figures)
 
-    if (item.key === PARSER_TYPE.FOLLOW && code.length >= 1) {
+    if (item.key === PARSER_TYPE.FOLLOW.toString() && code.length >= 1) {
         // item.code = [<function>,<show tangent ?>]
 
         const [f, showTangent] = code
@@ -78,10 +78,10 @@ export function buildFollow(item: IParser, figures: Record<string, AbstractFigur
 
 }
 
-export function buildFillBetween(item: IParser, figures: Record<string, AbstractFigure>, graphConfig: IGraphConfig): IFillBetweenConfig | null {
-    const code = convertValues(item.code, figures)
+export function buildFillBetween(item: PARSER, figures: Record<string, AbstractFigure>, graphConfig: IGraphConfig): IFillBetweenConfig | null {
+    const code = convertIdToFigure(item.values, figures)
 
-    if (item.key === PARSER_TYPE.FILL_BETWEEN && code.length >= 2) {
+    if (item.key === PARSER_TYPE.FILL_BETWEEN.toString() && code.length >= 2) {
         // item.code = [<function>,<function>,<domain>,<image>]
 
         const [f1, f2, domain, image] = code
@@ -98,10 +98,10 @@ export function buildFillBetween(item: IParser, figures: Record<string, Abstract
     return null
 }
 
-export function buildRiemann(item: IParser, figures: Record<string, AbstractFigure>, graphConfig: IGraphConfig): IRiemannConfig | null {
-    const code = convertValues(item.code, figures)
+export function buildRiemann(item: PARSER, figures: Record<string, AbstractFigure>, graphConfig: IGraphConfig): IRiemannConfig | null {
+    const code = convertIdToFigure(item.values, figures)
 
-    if (item.key === PARSER_TYPE.RIEMANN && code.length >= 2) {
+    if (item.key === PARSER_TYPE.RIEMANN.toString() && code.length >= 2) {
         // item.code = [<function>,<domain>,<number>,<number>]
 
         const [f, domain, rectangles, position] = code

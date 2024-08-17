@@ -1,4 +1,4 @@
-import { PiParser } from '../lib'
+import { PiDraw } from '../lib'
 
 const { createApp, ref } = Vue
 
@@ -90,7 +90,8 @@ X=dpt A2,l3,-2
 Y=vpt A2,K,B,1`
 
         this.parameter = `x=-11:11,y=-11:11,axis,tex`
-        this.code = `x1=line y=0.1->blue,ultrathick,dot
+        this.code = `@begin:static
+x1=line y=0.1->blue,ultrathick,dot
 y1=line x=0.1->blue,ultrathick,dot
 x2=line y=-0.1->blue,ultrathick,dot
 y2=line x=-0.1->blue,ultrathick,dot
@@ -100,6 +101,7 @@ O2(0,-0.1)->hide
 O3(0.1,0)->hide
 O4(-0.1,0)->hide
 c=circ O,10
+@end:static
 P(5,8.6)->drag=c,?
 v=[OP]
 P3=dpt O,v,10,p->hide
@@ -118,8 +120,8 @@ sn=[PS1]->dot,ultrathin
 cs2=[P2C2]->dot,ultrathin
 sn2=[P2S2]->dot,ultrathin
 X(10,0)->hide
-a=arc X,O,P,2->mark:end,tex=\alpha
-a2=arc X,O,P2,5->mark:end,tex=\frac{\pi}{2}-\alpha/r
+a=arc X,O,P,2->mark=end,tex=\\alpha
+a2=arc X,O,P2,5->mark=end,tex=\\frac{\\pi}{2}-\\alpha
 t=line x=10->ultrathin
 T=inter v,t->?
 T2=inter v2,t->?
@@ -128,25 +130,25 @@ tan2=[XT2]->ultrathick,orange,dash
 r=[OT[->ultrathin,dot
 r2=[OT2[->ultrathin,dot`
 
-        this.code = `x1=line y=0.1
-P(5,8.6)->drag=c,?
-C=proj P,x1`
-        this.code = `f(x)=1/5x^2
-A(5,5)->drag=f/0:6
-C(6,0)
-O(0,0)
-d=AO.->move=1;2,mark=start/x/20,red
-a=arc C,O,A,1->mark`
+        //         this.code = `x1=line y=0.1
+        // P(5,8.6)->drag=c,?
+        // C=proj P,x1`
+        //         this.code = `f(x)=1/5x^2
+        // A(5,5)->drag=f/0:6
+        // C(6,0)
+        // O(0,0)
+        // d=AO.->move=1;2,mark=start/x/20,red
+        // a=arc C,O,A,1->mark`
 
-        this.code = `A(-2,3)
-B(1,2)
-d=AB
-D(-1,-3)
-C=vpt A,B,2,D->label
-F(-1,5)
-E=dpt F,d,3,p->label`
+        //         this.code = `A(-2,3)
+        // B(1,2)
+        // d=AB
+        // D(-1,-3)
+        // C=vpt A,B,2,D->label
+        // F(-1,5)
+        // E=dpt F,d,3,p->label`
         // this.code = `A(1,2)->drag=grid,tex=A=@/tr/1;3`
-        draw = new PiParser(
+        draw = new PiDraw(
             'root',
             {
                 tex: (value) => katex.renderToString(`${value}`, { throwOnError: false, displayMode: true }),
@@ -155,7 +157,7 @@ E=dpt F,d,3,p->label`
             }
         )
 
-        const result = PiParser.documentation()
+        const result = PiDraw.documentation()
 
         this.output.innerHTML = Object.keys(result).map((key) => {
             return `<div class="border rounded flex flex-col gap-2">

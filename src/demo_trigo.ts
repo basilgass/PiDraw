@@ -1,13 +1,13 @@
-import { PiParser } from "../lib"
+import { PiDraw } from "../lib"
 
 const { createApp, ref } = Vue
 
 let draw
 createApp({
     mounted() {
-        // const parsedCode = PiParser.parse(this.code)
+        // const parsedCode = PiDraw.parse(this.code)
 
-        draw = new PiParser(
+        draw = new PiDraw(
             'root',
             {
                 parameters: `axis,x=-12:12,y=-20:20,ppu=20`,

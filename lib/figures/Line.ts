@@ -3,7 +3,7 @@ import { XY } from "../pidraw.common"
 import { Svg, Shape, Line as svgLine } from "@svgdotjs/svg.js"
 import { computeLine, createMarker, mathLine, mathVector } from "../Calculus"
 
-export type ILineType = 'segment' | 'half_line' | 'line' | 'vector'
+export type ILineType = 'segment' | 'ray' | 'line' | 'vector'
 export interface ILineConfig {
     through?: { A: XY, B: XY },
     director?: { A: XY, d: XY },
@@ -164,8 +164,8 @@ export class Line extends AbstractFigure {
         }
 
         // If the line is not a segment and not a vector, we need to compute the line
-        // it is designed for the line and half_line
-        if (this.#config.shape === undefined || this.#config.shape === 'line' || this.#config.shape === 'half_line') {
+        // it is designed for the line and ray
+        if (this.#config.shape === undefined || this.#config.shape === 'line' || this.#config.shape === 'ray') {
 
             // Get the start and end points of the line
             const data = computeLine(
@@ -174,11 +174,11 @@ export class Line extends AbstractFigure {
                 this.graphConfig.width,
                 this.graphConfig.height,
                 0,
-                this.#config.shape === 'half_line'
+                this.#config.shape === 'ray'
             )
 
 
-            // (this.#config.shape === 'line' || this.#config.shape === 'half_line') && 
+            // (this.#config.shape === 'line' || this.#config.shape === 'ray') && 
             // If the data is not null, update the start and end points of the line
             if (data !== null) {
                 this.start = data[0]

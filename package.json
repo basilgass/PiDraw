@@ -14,7 +14,7 @@
     "dev": "vite serve",
     "build": "tsc --p ./tsconfig-build.json && vite build",
     "preview": "vite preview",
-    "dependencies-check": "madge --image graph.svg  ./lib/index.ts"
+    "dependency-cruise": "dependency-cruise -T dot -x node_modules -v -- lib/index.ts  | dot -T svg > dependencies.svg"
   },
   "repository": {
     "type": "git",
@@ -34,12 +34,14 @@
   "homepage": "https://github.com/basilgass/PiDraw#readme",
   "dependencies": {
     "@svgdotjs/svg.draggable.js": "^3.0.4",
-    "@svgdotjs/svg.js": "^3.2.4"
+    "@svgdotjs/svg.js": "^3.2.4",
+    "piparser": "^0.0.9"
   },
   "devDependencies": {
     "@eslint/js": "^9.4.0",
     "@types/eslint__js": "^8.42.3",
     "autoprefixer": "^10.4.19",
+    "dependency-cruiser": "^16.3.10",
     "eslint": "^8.57.0",
     "globals": "^15.3.0",
     "postcss": "^8.4.38",

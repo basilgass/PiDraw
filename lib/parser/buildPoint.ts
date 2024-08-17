@@ -1,11 +1,11 @@
-import { mathVector, toPixels } from "../Calculus"
+import { PARSER } from "piparser/lib/PiParserTypes"
 import { AbstractFigure } from "../figures/AbstractFigure"
 import { Line } from "../figures/Line"
 import { IPointConfig, Point } from "../figures/Point"
-import { IGraphConfig, XY } from "../pidraw.common"
-import { convertValues, IParser, PARSER_TYPE } from "./parser.common"
+import { IGraphConfig } from "../pidraw.common"
+import { convertIdToFigure, IParserValues, PARSER_TYPE } from "./parser.common"
 
-export function buildPoint(item: IParser, figures: Record<string, AbstractFigure>, graphConfig: IGraphConfig): IPointConfig | { x: number, y: number } | null {
+export function buildPoint(item: PARSER, figures: Record<string, AbstractFigure>, graphConfig: IGraphConfig): IPointConfig | { x: number, y: number } | null {
 
     let shape = 'circle',
         size = 5
@@ -31,10 +31,10 @@ export function buildPoint(item: IParser, figures: Record<string, AbstractFigure
     return null
 }
 
-function buildPoint_config(item: IParser, figures: Record<string, AbstractFigure>, graphConfig: IGraphConfig): IPointConfig | { x: number, y: number } | null {
-    const code = convertValues(item.code, figures)
+function buildPoint_config(item: PARSER, figures: Record<string, AbstractFigure>, graphConfig: IGraphConfig): IPointConfig | { x: number, y: number } | null {
+    const code: IParserValues[] = convertIdToFigure(item.values, figures)
 
-    if (item.key === PARSER_TYPE.POINT) {
+    if (item.key === PARSER_TYPE.POINT.toString()) {
         // item.code = [<number>,<number>] -> 2d
         // item.code = [<number>,<number>,<number>] -> 3d
         const [x, y] = code as number[]
@@ -43,7 +43,7 @@ function buildPoint_config(item: IParser, figures: Record<string, AbstractFigure
         }
     }
 
-    if (item.key === PARSER_TYPE.MIDDLE && code.length === 2) {
+    if (item.key === PARSER_TYPE.MIDDLE.toString() && code.length === 2) {
         // item.code = [<Point>,<Point>]
         const A = code[0]
         const B = code[1]
@@ -53,7 +53,7 @@ function buildPoint_config(item: IParser, figures: Record<string, AbstractFigure
         }
     }
 
-    if (item.key === PARSER_TYPE.PROJECTION && code.length === 2) {
+    if (item.key === PARSER_TYPE.PROJECTION.toString() && code.length === 2) {
         // item.code = [<Point>,<Point>,<Point>]
         const A = code[0]
         const B = code[1]
@@ -63,7 +63,7 @@ function buildPoint_config(item: IParser, figures: Record<string, AbstractFigure
         }
     }
 
-    if (item.key === PARSER_TYPE.INTERSECTION && code.length === 2) {
+    if (item.key === PARSER_TYPE.INTERSECTION.toString() && code.length === 2) {
         // item.code = [<Line>,<Line>]
         const A = code[0]
         const B = code[1]
@@ -73,7 +73,7 @@ function buildPoint_config(item: IParser, figures: Record<string, AbstractFigure
         }
     }
 
-    if (item.key === PARSER_TYPE.SYMMETRY && code.length === 2) {
+    if (item.key === PARSER_TYPE.SYMMETRY.toString() && code.length === 2) {
         // item.code = [<Point>,<Point|Line>]
         const A = code[0]
         const B = code[1]
@@ -85,7 +85,7 @@ function buildPoint_config(item: IParser, figures: Record<string, AbstractFigure
         }
     }
 
-    if (item.key === PARSER_TYPE.DIRECTION_POINT && code.length >= 3) {
+    if (item.key === PARSER_TYPE.DIRECTION_POINT.toString() && code.length >= 3) {
         const [A, line, distance, perpendicular] = code
 
         if (A instanceof Point &&
@@ -103,7 +103,7 @@ function buildPoint_config(item: IParser, figures: Record<string, AbstractFigure
         }
     }
 
-    if (item.key === PARSER_TYPE.VECTOR_POINT && code.length >= 2) {
+    if (item.key === PARSER_TYPE.VECTOR_POINT.toString() && code.length >= 2) {
         const [A, B, scale, startingPoint] = code
 
         if (A instanceof Point && B instanceof Point) {

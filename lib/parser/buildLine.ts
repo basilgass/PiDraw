@@ -1,33 +1,51 @@
+import { PARSER } from "piparser/lib/PiParserTypes"
 import { toPixels } from "../Calculus"
 import { AbstractFigure } from "../figures/AbstractFigure"
 import { ILineConfig, ILineType, Line } from "../figures/Line"
 import { Point } from "../figures/Point"
 import { IGraphConfig } from "../pidraw.common"
-import { convertValues, IParser, PARSER_TYPE } from "./parser.common"
+import { convertIdToFigure, PARSER_TYPE } from "./parser.common"
 
-export function buildLine(item: IParser, figures: Record<string, AbstractFigure>, graphConfig: IGraphConfig): ILineConfig | null {
-    const code = convertValues(item.code, figures)
+export function buildLine(item: PARSER, figures: Record<string, AbstractFigure>, graphConfig: IGraphConfig): ILineConfig | null {
+    const code = convertIdToFigure(item.values, figures)
 
-    if (item.key === PARSER_TYPE.LINE && code.length === 2) {
+    if (item.key === PARSER_TYPE.LINE.toString() ||
+        item.key === PARSER_TYPE.SEGMENT.toString() ||
+        item.key === PARSER_TYPE.VECTOR.toString() ||
+        item.key === PARSER_TYPE.RAY.toString()
+        && code.length === 2) {
         // item.code = [<point>,<point>] --> A,B
         // item.code = [<point>,<number|string>] --> A,slope
         const [A, B] = code
         if (A instanceof Point && B instanceof Point) {
-            const lineType = item.parameters.shape ? item.parameters.shape.value : 'line'
+            let lineType: ILineType = 'line'
+            switch (item.key) {
+                case PARSER_TYPE.SEGMENT.toString():
+                    lineType = 'segment'
+                    break
+                case PARSER_TYPE.VECTOR.toString():
+                    lineType = 'vector'
+                    break
+                case PARSER_TYPE.RAY.toString():
+                    lineType = 'ray'
+                    break
+
+            }
+
             return {
                 through: { A, B },
-                shape: lineType as ILineType
+                shape: lineType
             }
         }
     }
 
-    if (item.key === PARSER_TYPE.LINE && code.length === 1) {
+    if (item.key === PARSER_TYPE.LINE.toString() && code.length === 1) {
         // item.code = [<equation>] --> 2x-3y=4 or y=2/3x-1 or y=5 or x=3
         const equ = code[0] as string
 
         // It's an horizontal line
         if (equ.startsWith('y=') && !equ.includes('x')) {
-            const value = convertValues([equ.split('=')[1]], figures)[0]
+            const value = convertIdToFigure([equ.split('=')[1]], figures)[0]
 
             const A = toPixels({ x: 0, y: value as number }, graphConfig)
             return {
@@ -38,7 +56,7 @@ export function buildLine(item: IParser, figures: Record<string, AbstractFigure>
 
         // It's an vertical line
         if (equ.startsWith('x=')) {
-            const value = convertValues([equ.split('=')[1]], figures)[0]
+            const value = convertIdToFigure([equ.split('=')[1]], figures)[0]
 
             const A = toPixels({ x: value as number, y: 0 }, graphConfig)
             return {
@@ -71,7 +89,7 @@ export function buildLine(item: IParser, figures: Record<string, AbstractFigure>
         }
     }
 
-    if (item.key === PARSER_TYPE.MEDIATOR && code.length === 2) {
+    if (item.key === PARSER_TYPE.MEDIATOR.toString() && code.length === 2) {
         // item.code = [<point>,<point>]
         const [A, B] = code
         if (A instanceof Point && B instanceof Point) {
@@ -79,7 +97,7 @@ export function buildLine(item: IParser, figures: Record<string, AbstractFigure>
         }
     }
 
-    if (item.key === PARSER_TYPE.PERPENDICULAR && code.length === 2) {
+    if (item.key === PARSER_TYPE.PERPENDICULAR.toString() && code.length === 2) {
         // item.code = [<line>,<point>]
         const [to, through] = code
         if (to instanceof Line && through instanceof Point) {
@@ -87,7 +105,7 @@ export function buildLine(item: IParser, figures: Record<string, AbstractFigure>
         }
     }
 
-    if (item.key === PARSER_TYPE.PARALLEL && code.length === 2) {
+    if (item.key === PARSER_TYPE.PARALLEL.toString() && code.length === 2) {
         // item.code = [<line>,<point>]
         const [to, through] = code
         if (to instanceof Line && through instanceof Point) {
@@ -95,13 +113,14 @@ export function buildLine(item: IParser, figures: Record<string, AbstractFigure>
         }
     }
 
-    if (item.key === PARSER_TYPE.BISECTOR && code.length === 2) {
+    if (item.key === PARSER_TYPE.BISECTOR.toString() && code.length === 2) {
         const [d1, d2] = code
         if (d1 instanceof Line && d2 instanceof Line) {
             return { bisector: { d1, d2 } }
         }
     }
-    if (item.key === PARSER_TYPE.BISECTOR && code.length === 3) {
+
+    if (item.key === PARSER_TYPE.BISECTOR.toString() && code.length === 3) {
         const [B, A, C] = code
         if (A instanceof Point && B instanceof Point && C instanceof Point) {
             return { bisector: { A, B, C } }
@@ -128,8 +147,8 @@ function parsePolynom(polynom: string): { a: number, b: number, c: number } {
             .filter((d) => (!d.includes('x') && !d.includes('y')))[0] ?? '0'
 
     return {
-        a: convertValues([a], {})[0] as number,
-        b: convertValues([b], {})[0] as number,
-        c: convertValues([c], {})[0] as number,
+        a: convertIdToFigure([a], {})[0] as number,
+        b: convertIdToFigure([b], {})[0] as number,
+        c: convertIdToFigure([c], {})[0] as number,
     }
 }

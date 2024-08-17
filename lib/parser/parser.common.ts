@@ -1,5 +1,6 @@
+import { PARSER_VALUES } from "piparser/lib/PiParserTypes"
 import { AbstractFigure } from "../figures/AbstractFigure"
-import { DOMAIN, TeXConverterType, XY } from "../pidraw.common"
+import { TeXConverterType } from "../pidraw.common"
 
 export enum PARSER_TYPE {
     UNKNOWN = 'unknown',        // OK
@@ -13,6 +14,9 @@ export enum PARSER_TYPE {
     VECTOR_POINT = 'vpt',       // OK: vpt <point>,<point>,<scale?>,<starting point?>
     // LINES
     LINE = 'line',              // OK : <point><point> or line <point>,<point>
+    VECTOR = 'vec',
+    SEGMENT = 'seg',
+    RAY = 'ray',
     PERPENDICULAR = 'perp',     // OK : perp <line>,<point>
     PARALLEL = 'para',          // OK : para <line>,<point>
     MEDIATOR = 'med',           // OK : med <point>,<point>
@@ -33,7 +37,7 @@ export enum PARSER_TYPE {
     RIEMANN = 'riemann',        // riemann <function>,<domain>,<number>,<position>
 }
 
-export type IParserValues = (string | number | boolean | XY | DOMAIN | AbstractFigure)
+export type IParserValues = PARSER_VALUES | AbstractFigure
 
 export interface IParserConfig {
     parameters?: string,
@@ -67,62 +71,20 @@ export const PARSER_BOOLEAN_VALUES = [
     'axis', 'grid' // Parameter for the layout
 ]
 
+
+export function convertIdToFigure(options: PARSER_VALUES[], figures: Record<string, AbstractFigure>): IParserValues[] {
+    return options.map((option): IParserValues => {
+        if (typeof option === 'string' && option in figures) {
+            return figures[option]
+        }
+        return option
+    })
+}
+
+
+// List of color values
 export const PARSER_COLOR_VALUES = [
     'black', 'white', 'red', 'green', 'blue', 'cyan', 'magenta', 'yellow',
     'gray', 'grey', 'darkgray', 'darkgrey', 'lightgray', 'lightgrey',
     'brown', 'lime', 'olive', 'orange', 'pink', 'purple', 'teal', 'gold'
 ]
-
-export function convertValues(options: string[], figures: Record<string, AbstractFigure>): IParserValues[] {
-    return options.map((option): IParserValues => {
-        if (option === '') { return false }
-
-        if (figures[option]) {
-            // FIGURE
-            return figures[option]
-        }
-        else if (option.includes(':')) {
-            // DOMAIN: x:2:3
-            const [a, b, c] = option.split(':')
-
-            if (c !== undefined && ['x', 'y'].includes(a)) {
-                return {
-                    axis: a as 'x' | 'y',
-                    min: parseFloat(b),
-                    max: parseFloat(c),
-                }
-            }
-
-            // DOMAIN without axis 2:3
-            return {
-                min: parseFloat(a),
-                max: parseFloat(b)
-            }
-
-        } else if (option.includes(';')) {
-            // COORDINATE: x;y
-            const [x, y] = option.split(';')
-
-            if (!isNaN(+x) && !isNaN(+y)) {
-                return {
-                    x: parseFloat(x),
-                    y: parseFloat(y)
-                }
-            }
-        } else if (!isNaN(+option)) {
-            // A NUMBER
-            return parseFloat(option)
-        } else if (option.startsWith('@')) {
-            // A NUMBER
-            return parseFloat(option.slice(1))
-        } else if (option.includes('/')) {
-            // A RATIO / FRACTION
-            const [numerator, denominator] = option.split('/')
-            if (!isNaN(+numerator) && !isNaN(+denominator) && +denominator !== 0) {
-                return parseFloat(numerator) / parseFloat(denominator)
-            }
-        }
-
-        return option
-    })
-}

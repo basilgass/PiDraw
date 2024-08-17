@@ -1,20 +1,38 @@
 import { Graph, IDraggableFollow } from "./Graph"
-import { IParser, IParserParameters, PARSER_TYPE, PARSER_COLOR_VALUES, convertValues, IParserConfig, IParserSettings, IParserValues } from "./parser/parser.common"
+import { IParserParameters, PARSER_TYPE, IParserConfig, IParserSettings, PARSER_COLOR_VALUES } from "./parser/parser.common"
 import { COORDINATE_SYSTEM, DOMAIN, IGraphConfig, IGraphDisplay, isDOMAIN, XY } from "./pidraw.common"
 import { parser_config } from "./parser/parser.config"
 import { AbstractFigure } from "./figures/AbstractFigure"
 import { LABEL_POSITION } from "./labels/Label"
 import { Point } from "./figures/Point"
+import { PiParse } from "piparser/lib/PiParse"
+import type { PARSER } from "piparser/lib/PiParserTypes"
+
+export const PARSER_PARAMETERS_KEYS = [
+    'ppu', 'x', 'y', 'grid', 'axis', 'label', 'tex', 'points', 'no-points', 'subgrid'
+]
 
 // TODO: intersection of a line and a circle
 // TODO: prevent creation of too many markers...
 export class Parser extends Graph {
-    #code: IParser[]
+    #code: PARSER[]
     #settings: IParserSettings
+    #parser: PiParse
 
     constructor(id: string | HTMLElement, config?: IParserConfig) {
         super(id, {
             tex: config?.tex ?? ((value) => value)
+        })
+
+        // Set the parser
+        this.#parser = new PiParse({
+            formatter: (line: string) => this.#parseKeyCode(line),
+            keys: PARSER_PARAMETERS_KEYS,
+            splitter: {
+                main: '->',
+                parameters: ',',
+                options: '/'
+            }
         })
 
         this.#settings = {}
@@ -41,6 +59,10 @@ export class Parser extends Graph {
         return this.#code
     }
 
+    /**
+     * Refresh the code to display
+     * @param code Code to parse and display
+     */
     public refresh(code: string) {
         // Remove every figures
         this.clear()
@@ -49,6 +71,10 @@ export class Parser extends Graph {
         this.#build(code)
     }
 
+    /**
+     * Refresh the layout
+     * @param code Layout code to parse
+     */
     public refreshLayout(code?: string) {
         // Update the configuration
         const layout = this.#parseLayout(code)
@@ -66,26 +92,31 @@ export class Parser extends Graph {
      * @param input Input code to parse and prepare
      * @returns 
      */
-    #prepare(input: string): IParser[] {
+    #prepare(input: string): PARSER[] {
         // Reset the code.
         // TODO: check if resetting the code with events are correctly removed.
-        const data: IParser[] = []
+        const data: PARSER[] = []
 
-        // Split and filter the inputs
+        // Split at \n => lines: string[]
+        // Filter the inputs
         // - remove empty lines
         // - trim each lines.
         // - skip line starting with '$'
-        const lines = input
+        const lines: string[] = input
             .split('\n')
             .map((line) => line.trim())
             .filter((line) => line.trim() !== '' && !line.startsWith('$'))
 
         // Define the block variables
+        // A block variable is a command that will be applied to the next lines, until the command is cleared.
         const block: Record<string, IParserParameters> = {}
 
         // Loop through each lines
         for (const line of lines) {
+
             // If lines starts with '@', it's a command
+            // Assign the command to the block
+            // Until the command is cleared, the block will be applied to the next lines.
             if (line.startsWith('@')) {
                 const { key, value } = this.#defineCommand(line)
                 block[key] = { value, options: [] }
@@ -93,16 +124,23 @@ export class Parser extends Graph {
             }
 
             // Parse the line
-            const parsedLine = this.#parseLine(line)
+            // Refactor a line for special cases:
+            // - A(3,4) => A=pt 3,4
+            // - d=AB => d=line A,B
+            // - d=AB. or d=[AB] => d=segment A,B
+            // - d=AB[ or d=[AB[ => d=halfline A,B
+            // - d=vAB => d=vec A,B
+            // - p(x)=x^2 => p=plot x^2
+            const parsedLine = this.#parser.parse(line)
 
             // Add the block data to the parameters.
             parsedLine.parameters = Object.assign(
                 parsedLine.parameters,
                 block
             )
+
             data.push(parsedLine)
         }
-
 
         return data
     }
@@ -112,23 +150,23 @@ export class Parser extends Graph {
      */
     #build(input: string) {
         this.#code = this.#prepare(input)
-
         const pConfig = parser_config
+        const graphCreate = this.create
 
         // Loop through each code
         this.#code.forEach((item) => {
             // Determine the id of the figure.
-            let id = item.id
+            let id = item.name
+
             // Make sure the id is unique (if not, add a number)
             let i = 1
             while (Object.hasOwn(this.figures, id)) {
-                id = `${item.id}${i++}`
+                id = `${item.name}${i++}`
             }
-            item.id = id
+            item.name = id
+
 
             let obj: AbstractFigure | undefined
-            const graphCreate = this.create
-
             if (pConfig[item.key]) {
                 const { build, create, parameters } = pConfig[item.key]
 
@@ -141,15 +179,17 @@ export class Parser extends Graph {
                     })
                 }
 
+
                 // Create the object
                 // TODO: make it eslint friendly and ts friendly
                 if (Object.hasOwn(graphCreate, create)) {
                     try {
                         const config = build(item, this.figures, this.config)
+
                         if (config) {
                             /* eslint-disable */
                             // @ts-expect-error: create is string and is not 
-                            obj = this.create[create](config, item.id)
+                            obj = this.create[create](config, item.name)
                             /* eslint-enable */
                         }
                     } catch (e) {
@@ -159,117 +199,6 @@ export class Parser extends Graph {
                     }
                 }
             }
-
-
-            // switch (item.key) {
-            //     case PARSER_TYPE.POINT:
-            //     case PARSER_TYPE.MIDDLE:
-            //     case PARSER_TYPE.PROJECTION:
-            //     case PARSER_TYPE.INTERSECTION:
-            //     case PARSER_TYPE.SYMMETRY:
-            //         {
-            //             // Prepare the point using the config settings
-            //             if (typeof this.#settings.points === 'string' &&
-            //                 item.parameters['*'] === undefined &&
-            //                 item.parameters.o === undefined &&
-            //                 item.parameters.s === undefined
-            //             ) {
-            //                 item.parameters[this.#settings.points] = { value: true, options: [] }
-            //             }
-            //             const config = buildPoint(item, this.figures, this.config)
-
-            //             if (config) {
-            //                 obj = this.create.point(config, item.id)
-            //             }
-
-            //             break
-            //         }
-            //     case PARSER_TYPE.LINE:
-            //     case PARSER_TYPE.MEDIATOR:
-            //     case PARSER_TYPE.PERPENDICULAR:
-            //     case PARSER_TYPE.PARALLEL:
-            //         {
-            //             const config = buildLine(item, this.figures, this.config)
-            //             if (config) {
-            //                 obj = this.create.line(config, item.id)
-            //             }
-            //             break
-            //         }
-            //     case PARSER_TYPE.PLOT:
-            //         {
-            //             const config = buildPlot(item, this.figures, this.config)
-
-            //             if (config && Object.hasOwn(config, 'expression')) {
-            //                 obj = this.create.plot(config as IPlotConfig, item.id)
-            //             }
-            //             break
-            //         }
-            //     case PARSER_TYPE.PARAMETRIC:
-            //         {
-            //             const config = buildPlot(item, this.figures, this.config)
-
-            //             if (config && Object.hasOwn(config, 'expressions')) {
-            //                 obj = this.create.parametric(config as IParametricConfig, item.id)
-            //             }
-            //             break
-            //         }
-            //     case PARSER_TYPE.CIRCLE:
-            //         {
-            //             const config = buildCircle(item, this.figures, this.config)
-            //             if (config) {
-            //                 obj = this.create.circle(config as ICircleConfig, item.id)
-            //             }
-            //             break
-            //         }
-            //     case PARSER_TYPE.ARC:
-            //         {
-            //             const config = buildCircle(item, this.figures, this.config)
-            //             if (config) {
-            //                 obj = this.create.arc(config as IArcConfig, item.id)
-            //             }
-            //             break
-            //         }
-            //     case PARSER_TYPE.POLYGON:
-            //     case PARSER_TYPE.REGULAR:
-            //         {
-            //             const config = buildPolygon(item, this.figures, this.config)
-            //             if (config) {
-            //                 obj = this.create.polygon(config, item.id)
-            //             }
-            //             break
-            //         }
-            //     case PARSER_TYPE.FOLLOW:
-            //         {
-            //             const config = buildFollow(item, this.figures, this.config)
-
-            //             if (config) {
-            //                 obj = this.create.follow(config, item.id)
-            //             }
-            //             break
-            //         }
-            //     case PARSER_TYPE.FILL_BETWEEN:
-            //         {
-            //             const config = buildFillBetween(item, this.figures, this.config)
-
-            //             if (config) {
-            //                 obj = this.create.fillbetween(config, item.id)
-            //             }
-            //             break
-            //         }
-            //     case PARSER_TYPE.RIEMANN:
-            //         {
-            //             const config = buildRiemann(item, this.figures, this.config)
-
-            //             if (config) {
-            //                 obj = this.create.riemann(config, item.id)
-            //             }
-            //             break
-            //         }
-            //     case PARSER_TYPE.UNKNOWN:
-            //         console.log('Unknown:', item)
-            //         break
-            // }
-
 
             if (obj) {
                 // Apply defaults settings to the object
@@ -385,10 +314,11 @@ export class Parser extends Graph {
                     // Actually, only points are draggable
                     if (obj instanceof Point) {
                         const dragConfigInit: IDraggableFollow[] = []
-                        const dragConfig: IDraggableFollow[] = [];
+                        const dragConfig: IDraggableFollow[] = []
 
                         // Check the options
-                        [options[key].value as string, ...options[key].options].forEach((dragFollow) => {
+                        const dragOptions = [options[key].value as string, ...options[key].options]
+                        dragOptions.forEach((dragFollow) => {
                             if (['grid', 'Ox', 'Oy'].includes(dragFollow as string)) {
                                 dragConfigInit.push(this.follow(dragFollow as string, obj))
                             }
@@ -430,7 +360,15 @@ export class Parser extends Graph {
                         )
                     }
                     break
+
+                default: {
+                    // Maybe it's a color
+                    if (PARSER_COLOR_VALUES.includes(key)) {
+                        obj.stroke(key)
+                    }
+                }
             }
+
         })
     }
 
@@ -446,8 +384,9 @@ export class Parser extends Graph {
     }
 
     #parseLayout(code?: string): { config: IGraphConfig, display: IGraphDisplay, settings: IParserSettings } {
-        // Split the code into key and parameters
-        const parameters = this.#parseParameters(code)
+
+        // const parameters = PiParseParameters(code)
+        const parameters = this.#parser.parameters(code ?? '', PARSER_PARAMETERS_KEYS)
 
         // Define the configuration
         const ppu = parameters.ppu ? parseFloat(parameters.ppu.value as string) : 50
@@ -499,23 +438,7 @@ export class Parser extends Graph {
         }
     }
 
-    #parseLine(line: string): IParser {
-        // Split the line into key_code and parameters at '->'
-        const [key_code, parameters_code] = line.split('->')
-
-        const config = this.#parseKeyCode(key_code)
-
-        // Parse the parameters
-        config.parameters = Object.assign(
-            config.parameters,
-            this.#parseParameters(parameters_code)
-        )
-
-        return config
-
-    }
-
-    #parseKeyCode(key_code: string): IParser {
+    #parseKeyCode(key_code: string): string {
 
         // There are 3 possibilities for the key_code:
         // 1. A(3,4) => id='A', key=POINT, code= ['3','4']
@@ -538,49 +461,24 @@ export class Parser extends Graph {
             return this.#parseKeyCodeLine(key_code)
         }
 
-        // Extract the usual key code: <id>=<key> <code>
-        const [id, ...data] = key_code.split('=')
-        const [key, ...code] = data.join('=').split(' ')
-
-
-        if (Object.values(PARSER_TYPE).includes(key as PARSER_TYPE) && code.length > 0) {
-            return {
-                id,
-                key: key as PARSER_TYPE,
-                code: code.join(' ').split(','), // Split the code into an array of strings
-                parameters: {}
-            }
-        }
-
-        // Default to unknown
-        return {
-            id: '',
-            key: PARSER_TYPE.UNKNOWN,
-            code: [code.join(' ')],
-            parameters: {}
-        }
+        return key_code
     }
 
-    #parseKeyCodePoint(key_code: string): IParser {
+    // TO BE MOVED TO BUILD_POINT
+    #parseKeyCodePoint(key_code: string): string {
         // Extract the point (no = sign). The id is before the '(' and the code is between '(' and ')'
         const id = key_code.split('(')[0]
         const code = key_code.split('(')[1].split(')')[0].split(',')
-        const parameters = this.#parseParameters(key_code.split(')')[1])
+        // const parameters = this.#parseParameters(key_code.split(')')[1])
 
-        return {
-            id,
-            key: PARSER_TYPE.POINT,
-            code,
-            parameters
-        }
+        return `${id}=pt ${code[0]},${code[1]}`
     }
 
-    #parseKeyCodeLine(key_code: string): IParser {
+    // TO BE MOVED TO BUILD_LINE
+    #parseKeyCodeLine(key_code: string): string {
         // Extract the line (with = sign). The id is before the '=' and the code is after '='
         const [id, ...datas] = key_code.split('=')
         let data = datas.join('=')
-
-        const parameters: Record<string, IParserParameters> = {}
 
         // Determine the shape of the line
         // vAB => vector AB
@@ -594,21 +492,22 @@ export class Parser extends Graph {
         // prefix can be v or [ or null
         let prefix: string | null = data[0]
         if (prefix !== 'v' && prefix !== '[') { prefix = null }
+
         // suffix can be ., ], [ or null
         let suffix: string | null = data[data.length - 1]
         if (suffix !== '.' && suffix !== ']' && suffix !== '[') { suffix = null }
 
-
+        let shape = 'line'
         if (prefix === 'v' && suffix === null) {
             data = data.slice(1)
-            parameters.shape = { value: 'vector', options: [] }
+            shape = 'vec'
         } else if (
             (prefix === null && suffix === '.') ||
             (prefix === '[' && suffix === ']')
         ) {
             if (prefix === '[') { data = data.slice(1) }
             data = data.slice(0, -1)
-            parameters.shape = { value: 'segment', options: [] }
+            shape = 'seg'
         } else if (
             (prefix === '[' && suffix === '[') ||
             (prefix === null && suffix === '[') ||
@@ -617,22 +516,16 @@ export class Parser extends Graph {
             if (prefix === '[') { data = data.slice(1) }
             if (suffix === '[') { data = data.slice(0, -1) }
 
-            parameters.shape = { value: 'half_line', options: [] }
-        } else {
-            parameters.shape = { value: 'line', options: [] }
+            shape = 'ray'
         }
 
         const code = data.split(/(?=[A-Z])/)
 
-        return {
-            id,
-            key: PARSER_TYPE.LINE,
-            code,
-            parameters
-        }
+        return `${id}=${shape} ${code[0]},${code[1]}`
     }
 
-    #parseKeyCodePlot(key_code: string): IParser {
+    // TO BE MOVED TO BUILD_PLOT
+    #parseKeyCodePlot(key_code: string): string {
         // Extract the plot or parametric function
         const [id_xt, data] = key_code.split('=')
 
@@ -642,57 +535,7 @@ export class Parser extends Graph {
         // Determine the type of the parser (plot or parametric)
         const key = key_code.includes('(x)=') ? PARSER_TYPE.PLOT : PARSER_TYPE.PARAMETRIC
 
-        return {
-            id,
-            key,
-            code: data.split(','),
-            parameters: {}
-        }
-    }
 
-    #parseParameters(parameters_code?: string): Record<string, IParserParameters> {
-        if (parameters_code === undefined) { return {} }
-
-        // Parameters value
-        const parameters: Record<string, IParserParameters> = {}
-
-        // Split the parameters into an array of strings
-        const data = parameters_code.split(',')
-
-        // Each parameter is <key>=<value>/<options>/...
-        // Some parameters are boolean (no = sign)
-        data.forEach((parameter) => {
-            if (!parameter.includes('=')) {
-                // Might be a boolean value or a color
-                const [color,] = parameter.split('/')
-                if (PARSER_COLOR_VALUES.includes(color)) {
-                    parameters.color = { value: parameter, options: [] }
-                } else {
-                    parameters[parameter] = { value: true, options: [] }
-                }
-            } else {
-                const [key, ...split] = parameter.split('=')
-                const values = split.join('=').split('/')
-                const options = convertValues(values, {})
-
-                // Special case when key is label or tex
-                let value: IParserValues = options.shift() ?? true
-
-                if (['label', 'tex'].includes(key)) {
-                    value = values[0] ?? ''
-                }
-
-                // Special case if value is a color and options is of length 1
-                if (PARSER_COLOR_VALUES.includes(value as string) && options.length === 1) {
-                    parameters[key] = { value: `${value as string}/${options[0] as number}`, options: [] }
-                } else {
-                    parameters[key] = { value, options }
-                }
-
-            }
-        })
-
-        // Parse the parameters
-        return parameters
+        return `${id}=${key} ${data}`
     }
 }
