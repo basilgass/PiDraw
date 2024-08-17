@@ -280,7 +280,7 @@ export class Graph {
         }
     }
 
-    draggable(figure: AbstractFigure, options?: IDraggableConfig) {
+    draggable(figure: AbstractFigure, target: AbstractFigure, options?: IDraggableConfig) {
         const dragmove = (e: Event & { detail: { box: Box, handler: unknown } }): void => {
             // Figure as point
             const ptFigure = figure as Point
@@ -324,13 +324,17 @@ export class Graph {
 
             // Set the point coordinate according.
             ptFigure.pixels = { x, y }
+            // For instance, if the target is a point, update the pixels.
+            if (target instanceof Point) {
+                target.pixels = { x, y }
+            }
 
             // Callback at the end, with the point
             if (options?.callback) {
                 options.callback(figure)
             }
 
-            this.update([figure.name])
+            this.update([figure.name, target.name])
         }
 
         // Move the figure to the top layer.

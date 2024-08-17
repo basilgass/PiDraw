@@ -311,54 +311,7 @@ export class Parser extends Graph {
 
                 // Draggable
                 case 'drag':
-                    // Actually, only points are draggable
-                    if (obj instanceof Point) {
-                        const dragConfigInit: IDraggableFollow[] = []
-                        const dragConfig: IDraggableFollow[] = []
-
-                        // Check the options
-                        const dragOptions = [options[key].value as string, ...options[key].options]
-                        dragOptions.forEach((dragFollow) => {
-                            if (['grid', 'Ox', 'Oy'].includes(dragFollow as string)) {
-                                dragConfigInit.push(this.follow(dragFollow as string, obj))
-                            }
-
-                            if (isDOMAIN(dragFollow)) {
-                                const axis = dragFollow.axis ?? 'x'
-                                const delta: DOMAIN = this.toPixels(dragFollow, axis)
-
-                                dragConfigInit.push(
-                                    (x: number, y: number) => {
-                                        return {
-                                            x: axis === 'x' ? Math.max(delta.min, Math.min(x, delta.max)) : x,
-                                            y: axis === 'y' ? Math.max(delta.min, Math.min(y, delta.max)) : y
-                                        }
-                                    }
-                                )
-                            }
-
-                            if (Object.hasOwn(this.figures, dragFollow as string)) {
-                                const figToFollow = this.figures[dragFollow as string]
-                                dragConfig.push((x: number, y: number) => figToFollow.follow(x, y))
-                            }
-                        })
-
-                        // Move the point to the interactive layer
-                        this.layers.interactive.add(obj.element)
-                        // Resize the draggable point
-
-                        obj.asCircle(20)
-                            .fill('white/0.8')
-
-                        this.draggable(obj,
-                            {
-                                follow: [
-                                    ...dragConfigInit,
-                                    ...dragConfig
-                                ]
-                            }
-                        )
-                    }
+                    this.#applyDrag(obj, key, options)
                     break
 
                 default: {
@@ -537,5 +490,70 @@ export class Parser extends Graph {
 
 
         return `${id}=${key} ${data}`
+    }
+
+    #applyDrag(obj: AbstractFigure, key: string, options: Record<string, IParserParameters>) {
+
+        // TODO: making a drag element: create the interactive object
+
+        // Actually, only points are draggable
+        if (obj instanceof Point) {
+            const dragConfigInit: IDraggableFollow[] = []
+            const dragConfig: IDraggableFollow[] = []
+
+            const interactive = new Point(this.rootSVG, obj.name + '_drag', {
+                coordinates: { x: 0, y: 0 }
+            })
+            interactive.pixels = obj.pixels
+            interactive.asCircle(30).fill('white/0.8')
+            this.layers.interactive.add(interactive.element)
+
+            // Check the options
+            // - grid
+            // - Ox
+            // - Oy
+            // - DOMAIN / IMAGE
+            const dragOptions = [options[key].value as string, ...options[key].options]
+            dragOptions.forEach((dragFollow) => {
+                if (['grid', 'Ox', 'Oy'].includes(dragFollow as string)) {
+                    dragConfigInit.push(this.follow(dragFollow as string, obj))
+                }
+
+                if (isDOMAIN(dragFollow)) {
+                    const axis = dragFollow.axis ?? 'x'
+                    const delta: DOMAIN = this.toPixels(dragFollow, axis)
+
+                    dragConfigInit.push(
+                        (x: number, y: number) => {
+                            return {
+                                x: axis === 'x' ? Math.max(delta.min, Math.min(x, delta.max)) : x,
+                                y: axis === 'y' ? Math.max(delta.min, Math.min(y, delta.max)) : y
+                            }
+                        }
+                    )
+                }
+
+                if (Object.hasOwn(this.figures, dragFollow as string)) {
+                    const figToFollow = this.figures[dragFollow as string]
+                    dragConfig.push((x: number, y: number) => figToFollow.follow(x, y))
+                }
+            })
+
+            // Move the point to the interactive layer
+            // this.layers.interactive.add(obj.element)
+            // Resize the draggable point
+            // obj.asCircle(20)
+            //     .fill('white/0.8')
+
+            this.draggable(interactive,
+                obj,
+                {
+                    follow: [
+                        ...dragConfigInit,
+                        ...dragConfig
+                    ]
+                }
+            )
+        }
     }
 }
