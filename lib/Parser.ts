@@ -30,8 +30,8 @@ export class Parser extends Graph {
             keys: PARSER_PARAMETERS_KEYS,
             splitter: {
                 main: '->',
-                parameters: ',',
-                options: '/'
+                entry: ',',
+                parameter: '/'
             }
         })
 

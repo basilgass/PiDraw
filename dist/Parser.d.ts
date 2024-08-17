@@ -1,8 +1,10 @@
 import { Graph } from './Graph';
-import { IParser, IParserConfig } from './parser/parser.common';
+import { IParserConfig } from './parser/parser.common';
 import { IGraphConfig } from './pidraw.common';
 import { AbstractFigure } from './figures/AbstractFigure';
+import { PARSER } from 'piparser/lib/PiParserTypes';
 
+export declare const PARSER_PARAMETERS_KEYS: string[];
 export declare class Parser extends Graph {
     #private;
     constructor(id: string | HTMLElement, config?: IParserConfig);
@@ -11,10 +13,11 @@ export declare class Parser extends Graph {
         description: string;
         code: string;
         parameters: string[];
-        build: (values: IParser, figures: Record<string, AbstractFigure>, config: IGraphConfig) => unknown;
+        build: (values: PARSER, figures: Record<string, AbstractFigure>, config: IGraphConfig) => unknown;
         create: string;
+        option?: string | undefined;
     }>;
-    get code(): IParser[];
+    get code(): PARSER[];
     refresh(code: string): void;
     refreshLayout(code?: string): void;
 }

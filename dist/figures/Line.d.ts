@@ -3,7 +3,7 @@ import { XY } from '../pidraw.common';
 import { Svg } from '@svgdotjs/svg.js';
 import { mathLine } from '../Calculus';
 
-export type ILineType = 'segment' | 'half_line' | 'line' | 'vector';
+export type ILineType = 'segment' | 'ray' | 'line' | 'vector';
 export interface ILineConfig {
     through?: {
         A: XY;

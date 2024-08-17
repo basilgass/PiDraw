@@ -1,5 +1,6 @@
+import { PARSER_VALUES } from 'piparser/lib/PiParserTypes';
 import { AbstractFigure } from '../figures/AbstractFigure';
-import { DOMAIN, TeXConverterType, XY } from '../pidraw.common';
+import { TeXConverterType } from '../pidraw.common';
 
 export declare enum PARSER_TYPE {
     UNKNOWN = "unknown",
@@ -11,6 +12,9 @@ export declare enum PARSER_TYPE {
     DIRECTION_POINT = "dpt",
     VECTOR_POINT = "vpt",
     LINE = "line",
+    VECTOR = "vec",
+    SEGMENT = "seg",
+    RAY = "ray",
     PERPENDICULAR = "perp",
     PARALLEL = "para",
     MEDIATOR = "med",
@@ -26,7 +30,7 @@ export declare enum PARSER_TYPE {
     FILL_BETWEEN = "fill",
     RIEMANN = "riemann"
 }
-export type IParserValues = (string | number | boolean | XY | DOMAIN | AbstractFigure);
+export type IParserValues = PARSER_VALUES | AbstractFigure;
 export interface IParserConfig {
     parameters?: string;
     code?: string;
@@ -48,5 +52,5 @@ export interface IParser {
     parameters: Record<string, IParserParameters>;
 }
 export declare const PARSER_BOOLEAN_VALUES: string[];
+export declare function convertIdToFigure(options: PARSER_VALUES[], figures: Record<string, AbstractFigure>): IParserValues[];
 export declare const PARSER_COLOR_VALUES: string[];
-export declare function convertValues(options: string[], figures: Record<string, AbstractFigure>): IParserValues[];
