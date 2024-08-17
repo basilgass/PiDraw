@@ -58,7 +58,7 @@ export declare class Graph {
         fillbetween: (values: IFillBetweenConfig, name: string) => AbstractFigure;
         riemann: (values: IRiemannConfig, name: string) => AbstractFigure;
     };
-    draggable(figure: AbstractFigure, options?: IDraggableConfig): AbstractFigure;
+    draggable(figure: AbstractFigure, target: AbstractFigure, options?: IDraggableConfig): AbstractFigure;
     clear(): void;
     updateLayout(): void;
     update(except?: string[], forceUpdate?: boolean): void;
