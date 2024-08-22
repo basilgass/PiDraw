@@ -1,6 +1,8 @@
-import { defineConfig } from "vite";
-import { resolve } from "path";
-import dtsPlugin from "vite-plugin-dts";
+/** @type {import('vite').UserConfig} */
+
+import { defineConfig } from "vite"
+import { resolve } from "path"
+import dtsPlugin from "vite-plugin-dts"
 
 export default defineConfig({
 	build: {

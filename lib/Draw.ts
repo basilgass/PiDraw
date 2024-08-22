@@ -14,7 +14,7 @@ export const PARSER_PARAMETERS_KEYS = [
 
 // TODO: intersection of a line and a circle
 // TODO: prevent creation of too many markers...
-export class Parser extends Graph {
+export class Draw extends Graph {
     #code: PARSER[]
     #settings: IParserSettings
     #parser: PiParse
@@ -145,6 +145,15 @@ export class Parser extends Graph {
         return data
     }
 
+    #uniqueName(name: string): string {
+        let newName = name
+        let i = 1
+        while (this.figures[newName]) {
+            newName = `${name}_${i}`
+            i++
+        }
+        return newName
+    }
     /**
      * Build the figures from the code
      */
@@ -156,15 +165,7 @@ export class Parser extends Graph {
         // Loop through each code
         this.#code.forEach((item) => {
             // Determine the id of the figure.
-            let id = item.name
-
-            // Make sure the id is unique (if not, add a number)
-            let i = 1
-            while (Object.hasOwn(this.figures, id)) {
-                id = `${item.name}${i++}`
-            }
-            item.name = id
-
+            item.name = this.#uniqueName(item.name)
 
             let obj: AbstractFigure | undefined
             if (pConfig[item.key]) {

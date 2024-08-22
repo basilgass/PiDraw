@@ -8,15 +8,16 @@ import { buildPoint } from "./buildPoint"
 import { buildPolygon } from "./buildPolygon"
 
 // TODO: add the build and create parameters to make it easily accessible and extensible.
-export const parser_config: Record<string, {
+export interface parser_item {
     name: string,
     description: string,
     code: string,
-    parameters: string[]
+    parameters: string[],
     build: (values: PARSER, figures: Record<string, AbstractFigure>, config: IGraphConfig) => unknown,
     create: string,
     option?: string
-}> = {
+}
+export const parser_config: Record<string, parser_item> = {
     pt: {
         name: 'point',
         description: 'Create a point',

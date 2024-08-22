@@ -3,29 +3,36 @@
     "target": "ES2022",
     "useDefineForClassFields": true,
     "module": "ESNext",
-    "strict": true,
     "lib": [
       "ESNext",
       "DOM",
     ],
     "skipLibCheck": true,
+    /* Bundler mode */
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
+    "moduleDetection": "force",
     "noEmit": true,
-    "noImplicitAny": true,
     "allowJs": true,
     "sourceMap": true,
-    "removeComments": true,
-    "outDir": "dist",
     "declaration": true,
-    "rootDir": "lib",
+    "removeComments": true,
+    /* Linting */
+    "strict": true,
+    "noImplicitAny": true,
+    "noFallthroughCasesInSwitch": true,
+    "strictPropertyInitialization": false,
+    /* Folders */
+    "outDir": "dist",
+    // "rootDir": "lib",
   },
   "include": [
     "lib",
+    "demo",
     "tests",
-    "vite.config.js"
+    "*.config.js",
   ],
   "exclude": [
     "node_modules",

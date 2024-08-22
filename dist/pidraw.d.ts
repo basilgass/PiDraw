@@ -1,2 +1,2 @@
 export { Graph as PiGraph } from './Graph';
-export { Parser as PiDraw } from './Parser';
+export { Draw as Draw } from './Draw';
