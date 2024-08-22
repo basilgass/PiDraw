@@ -200,7 +200,7 @@ export const parser_config: Record<string, parser_item> = {
         build: buildFollow,
         create: 'follow'
     },
-    fillbetween: {
+    fill: {
         name: 'fillbetween',
         description: 'Fill the area between two functions',
         code: 'f=fill <function>,<function?>,<domain?>',

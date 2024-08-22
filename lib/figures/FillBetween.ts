@@ -54,6 +54,7 @@ export class FillBetween extends AbstractFigure {
     constructor(rootSVG: Svg, name: string, values: IFillBetweenConfig) {
         super(rootSVG, name)
 
+        console.log('FILL BETWR');
         // Store the constraints
         this.#config = Object.assign({
             samples: 100

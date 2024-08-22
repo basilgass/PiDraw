@@ -2,7 +2,7 @@ import { PiDraw } from "../lib"
 
 const { createApp, ref } = Vue
 
-let draw
+let draw: PiDraw
 createApp({
     mounted() {
         // const parsedCode = PiDraw.parse(this.code)
@@ -58,14 +58,14 @@ T15(0,-5)->tex=\\scriptsize-\\frac{1}{2}/rm/0.5;0
 T16(0,-7.07)->tex=\\scriptsize-\\frac{\\sqrt{2}}{2}/rm/0.5;0
 T17(0,-8.6)->tex=\\scriptsize-\\frac{\\sqrt{3}}{2}/rm/0.5;0
 T19(0,-10)->tex=\\scriptsize -1/rb/0.5;0
-T(10,10)->hide
+T20(10,10)->hide
 X1(10,5.77)->tex=\\scriptsize \\frac{\\sqrt{3}}{3}/mr/0.5;0
 X2(10,10)->tex=\\scriptsize 1/mr/0.5;0
 X3(10,17.3)->tex=\\scriptsize \\sqrt{3}/mr/0.5;0
 X4(10,-5.77)->tex=\\scriptsize -\\frac{\\sqrt{3}}{3}/mr/0.5;0
 X5(10,-10)->tex=\\scriptsize -1/mr/0.5;0
 X6(10,-17.3)->tex=\\scriptsize -\\sqrt{3}/mr/0.5;0
-t=TP0
+t=T20P0
 @end:static
 P(7.07,7.07)->drag=c
 C=proj P,Ox->hide

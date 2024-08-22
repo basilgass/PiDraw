@@ -1,9 +1,9 @@
-import { Draw } from '../lib'
+import { PiDraw } from '../lib'
 
 const { createApp, ref } = Vue
 
 
-let draw
+let draw: PiDraw
 createApp({
     mounted() {
         // this.code = 'f(x)=sin(x),-pi:2pi'
@@ -20,7 +20,7 @@ r=riemann f,6:9,4->fill=green/0.4
         // d=line y=2/3x-1
         // e=line 2x=3y-4`
         // const parsedCode = PiDraw.parse(this.code)
-        draw = new Draw(
+        draw = new PiDraw(
             'root',
             {
                 tex: (value) => katex.renderToString(value, { throwOnError: false, displayMode: true }),

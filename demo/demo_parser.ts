@@ -2,7 +2,7 @@ import { PiDraw } from '../lib'
 
 const { createApp, ref } = Vue
 
-const escapeHTML = str =>
+const escapeHTML = (str: string) =>
     str.replace(
         /[&<>'"]/g,
         tag =>
@@ -15,7 +15,7 @@ const escapeHTML = str =>
         }[tag] || tag)
     );
 
-let draw
+let draw: PiDraw
 createApp({
     mounted() {
         // this.code = 'f(x)=sin(x),-pi:2pi'
