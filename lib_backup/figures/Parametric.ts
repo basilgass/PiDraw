@@ -1,6 +1,6 @@
 import { Figure, IFigureConfig } from "../Figure"
 import { IPoint, PlotConfig, plotFunction, pluginType } from "../pidraw.interface"
-import { NumExp } from "../../lib/Calculus"
+import { NumExp } from "../../src/Calculus"
 
 import { Path } from "@svgdotjs/svg.js"
 

@@ -1,6 +1,6 @@
 import { Figure, IFigureConfig } from "../Figure"
 import { Path } from "@svgdotjs/svg.js"
-import { distanceAB, numberCorrection } from "../../lib/Calculus"
+import { distanceAB, numberCorrection } from "../../src/Calculus"
 import { IPoint, isPoint } from "../pidraw.interface"
 
 export class Arc extends Figure {

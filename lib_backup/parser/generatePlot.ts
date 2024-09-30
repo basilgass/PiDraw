@@ -1,6 +1,6 @@
 import { Plot } from "../figures/Plot"
 import { Figure } from "../Figure"
-import { NumExp } from "../../lib/Calculus"
+import { NumExp } from "../../src/Calculus"
 import { Parser } from "../Parser"
 
 

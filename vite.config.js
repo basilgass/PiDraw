@@ -6,24 +6,18 @@ import dtsPlugin from "vite-plugin-dts"
 
 export default defineConfig({
 	build: {
-		outDir: "dist",
-		copyPublicDir: false,
 		lib: {
-			entry: resolve(__dirname, "lib/index.ts"),
 			name: "PiDraw",
+			fileName: "pidraw",
+			entry: resolve(__dirname, "src/index.ts"),
 			formats: ["es"],
-			fileName: "pidraw"
 		},
 		emptyOutDir: true,
 	},
 	plugins: [
 		dtsPlugin({ 
-			beforeWriteFile: (filePath, content) => (
-				{
-				filePath: filePath.replace("index.d.ts", "pidraw.d.ts"),
-				content,
-			}),
-			include: ['lib', "es2022"]
+			include: ['src', "es2022"],
+			outDir: "./types"
 		}), // generate .d.ts files for the lib folder
 	],
 	rollupOptions: {

@@ -1,38 +1,24 @@
 {
   "compilerOptions": {
     "target": "ES2022",
-    "useDefineForClassFields": true,
-    "module": "ESNext",
-    "lib": [
-      "ESNext",
-      "DOM",
-    ],
+    "esModuleInterop": true,
     "skipLibCheck": true,
-    /* Bundler mode */
-    "moduleResolution": "bundler",
-    "allowImportingTsExtensions": true,
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "moduleDetection": "force",
-    "noEmit": true,
     "allowJs": true,
-    "sourceMap": true,
-    "declaration": true,
-    "removeComments": true,
-    /* Linting */
+    "isolatedModules": true,
+    "verbatimModuleSyntax": true,
     "strict": true,
+    "noImplicitOverride": true,
     "noImplicitAny": true,
-    "noFallthroughCasesInSwitch": true,
-    "strictPropertyInitialization": false,
-    /* Folders */
-    "outDir": "dist",
-    // "rootDir": "lib",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "lib": ["ESNext","dom"],
+    "useDefineForClassFields": true,
   },
   "include": [
-    "lib",
-    "demo",
+    "src",
     "tests",
     "*.config.js",
+    "demo",
   ],
   "exclude": [
     "node_modules",

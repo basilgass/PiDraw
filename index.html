@@ -28,7 +28,19 @@
 
 	</div>
 
-	<script src="/demo/app.ts" type="module"></script>
+	<script  type="module">
+		const { createApp, ref } = Vue
+
+		createApp({
+			setup() {
+				const message = ref('Hello vue!')
+				return {
+					message
+				}
+			}
+		}).mount('#app')
+
+	</script>
 </body>
 
 </html>

@@ -1,7 +1,7 @@
 // Interfaces, types and helpers
 import { IPoint, PointConfig } from "../pidraw.interface"
 import { AXIS, POINTCONSTRAIN, POINTSHAPE } from "../enums"
-import { mathLine, mathVector } from "../../lib/Calculus"
+import { mathLine, mathVector } from "../../src/Calculus"
 
 // Figure
 import { Figure, IFigureConfig } from "../Figure"

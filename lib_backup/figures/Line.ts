@@ -1,6 +1,6 @@
 import { Figure, IFigureConfig } from "../Figure"
 import { Line as svgLine } from "@svgdotjs/svg.js"
-import { isInfinity, mathLine, mathVector } from "../../lib/Calculus"
+import { isInfinity, mathLine, mathVector } from "../../src/Calculus"
 import { Circle } from "./Circle"
 import { IPoint, LineConfig, isPoint } from "../pidraw.interface"
 import { LINECONSTRUCTION } from "../enums"

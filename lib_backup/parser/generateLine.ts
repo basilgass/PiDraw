@@ -1,5 +1,5 @@
 import { Figure } from "../Figure"
-import { isInfinity } from "../../lib/Calculus"
+import { isInfinity } from "../../src/Calculus"
 import { Parser } from "../Parser"
 import { Point } from "../figures/Point"
 import { LINECONSTRUCTION } from "../enums"

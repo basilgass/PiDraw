@@ -3,7 +3,7 @@ import { Path } from "@svgdotjs/svg.js"
 import { Riemann } from "./PlotPlugins/Riemann"
 import { Follow } from "./PlotPlugins/Follow"
 import { FillBetween } from "./PlotPlugins/FillBetween"
-import { NumExp } from "../../lib/Calculus"
+import { NumExp } from "../../src/Calculus"
 import { IPoint, PlotConfig, plotFunction, pluginType } from "../pidraw.interface"
 
 export class Plot extends Figure {

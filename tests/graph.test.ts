@@ -1,5 +1,5 @@
 import { describe, test, expect } from 'vitest'
-import { Graph } from '../lib/Graph'
+import { Graph } from '../src/Graph'
 
 describe('Graph', () => {
     test.skip('create a graph', () => {

@@ -1,7 +1,7 @@
 import { Figure, IFigureConfig } from "../Figure"
 import { Point } from "./Point"
 import { Polygon as svgPolygon } from "@svgdotjs/svg.js"
-import { distanceAB, mathVector } from "../../lib/Calculus"
+import { distanceAB, mathVector } from "../../src/Calculus"
 
 export class Polygon extends Figure {
     constructor(
