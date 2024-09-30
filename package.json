@@ -3,8 +3,19 @@
   "version": "0.1.36",
   "description": "A drawing library using PiMath",
   "type": "module",
-  "main": "dist/pidraw.js",
-  "types": "dist/pidraw.d.ts",
+  "main": "dist/index.js",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/pidraw.js",
+      "require": "./dist/pidraw.js"
+    },
+    "./types": {
+      "import": "./types/index.d.js",
+      "require": "./types/index.d.js"
+    }
+  },
   "files": [
     "dist",
     "lib"
