@@ -1,7 +1,7 @@
 {
   "name": "pidraw",
   "version": "0.1.37",
-  "description": "A drawing library using PiMath",
+  "description": "A drawing library for teacher :)",
   "type": "module",
   "main": "dist/index.js",
   "module": "dist/index.js",
@@ -12,8 +12,8 @@
       "require": "./dist/pidraw.js"
     },
     "./types": {
-      "import": "./types/index.d.js",
-      "require": "./types/index.d.js"
+      "import": "./types/index.d.ts",
+      "require": "./types/index.d.ts"
     }
   },
   "files": [
