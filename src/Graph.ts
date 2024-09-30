@@ -1,4 +1,4 @@
-import { Box, Marker, SVG, Svg } from "@svgdotjs/svg.js"
+import {Box, Marker, SVG, Svg} from "@svgdotjs/svg.js"
 import '@svgdotjs/svg.draggable.js'
 
 import {
@@ -8,42 +8,44 @@ import {
     type IGraphConstructorConfig,
     type IGraphDisplay,
     type ILayers,
+    isXY,
     LAYER_NAME,
-    type XY,
-    isXY
+    type XY
 } from "./pidraw.common"
-import { type IPointConfig, Point } from "./figures/Point"
-import { type ILineConfig, Line } from "./figures/Line"
-import { type IPlotConfig, Plot } from "./figures/Plot"
-import { createMarker, toPixels } from "./Calculus"
-import { AbstractFigure } from "./figures/AbstractFigure"
-import { Circle, type ICircleConfig } from "./figures/Circle"
-import { Polygon, type IPolygonConfig } from "./figures/Polygon"
-import { Grid } from "./figures/Grid"
-import { Arc, type IArcConfig } from "./figures/Arc"
-import { CoordinateSystem } from "./figures/CoordinateSystem"
-import { type IParametricConfig, Parametric } from "./figures/Parametric"
-import { Follow, type IFollowConfig } from "./figures/Follow"
-import { FillBetween, type IFillBetweenConfig } from "./figures/FillBetween"
-import { type IRiemannConfig, Riemann } from "./figures/Riemann"
+import {type IPointConfig, Point} from "./figures/Point"
+import {type ILineConfig, Line} from "./figures/Line"
+import {type IPlotConfig, Plot} from "./figures/Plot"
+import {createMarker, toPixels} from "./Calculus"
+import {AbstractFigure} from "./figures/AbstractFigure"
+import {Circle, type ICircleConfig} from "./figures/Circle"
+import {type IPolygonConfig, Polygon} from "./figures/Polygon"
+import {Grid} from "./figures/Grid"
+import {Arc, type IArcConfig} from "./figures/Arc"
+import {CoordinateSystem} from "./figures/CoordinateSystem"
+import {type IParametricConfig, Parametric} from "./figures/Parametric"
+import {Follow, type IFollowConfig} from "./figures/Follow"
+import {FillBetween, type IFillBetweenConfig} from "./figures/FillBetween"
+import {type IRiemannConfig, Riemann} from "./figures/Riemann"
+import {Path} from "./figures/Path"
 
 export type IDraggableFollow = ((x: number, y: number) => XY) | AbstractFigure | string
+
 export interface IDraggableConfig {
-    grid?: boolean
     bounds?: {
         x?: DOMAIN
         y?: DOMAIN
     }
-    follow?: (IDraggableFollow)[],
     callback?: (figure: AbstractFigure) => void
+    follow?: (IDraggableFollow)[],
+    grid?: boolean
 }
 
 export class Graph {
-    #rootSVG: Svg
-    #layers: ILayers
-    #figures: Record<string, AbstractFigure>
     #config: IGraphConfig
     #display: IGraphDisplay
+    #figures: Record<string, AbstractFigure>
+    #layers: ILayers
+    #rootSVG: Svg
     #toTex: (value: string) => string
 
     constructor(id: string | HTMLElement, config?: IGraphConstructorConfig) {
@@ -65,11 +67,11 @@ export class Graph {
         this.#config = Object.assign({
             width: 800,
             height: 600,
-            origin: { x: 400, y: 300 },
+            origin: {x: 400, y: 300},
             system: COORDINATE_SYSTEM.CARTESIAN_2D,
             axis: {
-                x: { x: defaultUnit, y: 0 },
-                y: { x: 0, y: -defaultUnit }
+                x: {x: defaultUnit, y: 0},
+                y: {x: 0, y: -defaultUnit}
             }
         }, config)
 
@@ -109,58 +111,20 @@ export class Graph {
         return this
     }
 
-    get rootSVG() { return this.#rootSVG }
-    get figures() { return this.#figures }
-    get config() { return this.#config }
-    set config(value: IGraphConfig) { this.#config = value }
-    get display() { return this.#display }
-    set display(value: IGraphDisplay) { this.#display = value }
-    get toTex() { return this.#toTex }
-    get layers() { return this.#layers }
-
-    #makeLayout(): void {
-        // Remove the grid
-        this.#layers.grids.clear()
-
-        // Remove the axis
-        this.#layers.axis.clear()
-
-        if (this.#display.subgrid) {
-            this.subgrid('SUBGRID', this.#display.subgrid)
-                .stroke('purple/0.5', 0.1)
-        }
-        if (this.#display.grid) {
-            this.grid('MAINGRID', this.#config.axis)
-                .stroke('lightgray', 1)
-        }
-
-        if (this.#display.axis) {
-            this.coordinate_system(this.#config.system)
-        }
-
-    }
-    public grid(name: string, gridConfig: { x: XY, y: XY }): AbstractFigure {
-        // const group = this.#rootSVG.group().attr('id', name)
-
-        const aGrid = new Grid(this.#rootSVG, name, {
-            axis: gridConfig,
-            origin: this.#config.origin,
-            width: this.#config.width,
-            height: this.#config.height,
-            subdivisions: 0
+    public clear() {
+        Object.keys(this.figures).forEach((name) => {
+            this.figures[name].element.remove()
         })
 
-        this.#layers.grids.add(aGrid.element)
-
-        return aGrid
+        this.#figures = {}
     }
 
-    public subgrid(name: string, subdivision: number): AbstractFigure {
-        const subAxis = {
-            x: { x: this.#config.axis.x.x / subdivision, y: this.#config.axis.x.y / subdivision },
-            y: { x: this.#config.axis.y.x / subdivision, y: this.#config.axis.y.y / subdivision }
-        }
-        return this.grid(name, subAxis)
+    get config() {
+        return this.#config
+    }
+
+    set config(value: IGraphConfig) {
+        this.#config = value
     }
 
     public coordinate_system(system: COORDINATE_SYSTEM): AbstractFigure {
@@ -172,15 +136,6 @@ export class Graph {
         this.#layers.axis.add(axis.element)
 
         return axis
-    }
-
-    public marker(scale: number): { start: Marker, end: Marker } {
-        return createMarker(this.#rootSVG, scale)
-    }
-
-
-    public toPixels<T>(pixels: T, axis?: 'x' | 'y' | undefined): T {
-        return toPixels(pixels, this.config, axis)
     }
 
     get create() {
@@ -222,6 +177,11 @@ export class Graph {
                 this.#figures[name] = line
 
                 return line
+            },
+            path: (constraints: string, name: string): Path => {
+                const path = new Path(this.#rootSVG, name, constraints)
+                this.#layers.main.add(path.element)
+                return path
             },
             plot: (constraints: IPlotConfig, name: string): Plot => {
                 const plot = new Plot(this.#rootSVG, name, constraints)
@@ -290,16 +250,24 @@ export class Graph {
         }
     }
 
+    get display() {
+        return this.#display
+    }
+
+    set display(value: IGraphDisplay) {
+        this.#display = value
+    }
+
     draggable(figure: AbstractFigure, target: AbstractFigure, options?: IDraggableConfig) {
         const dragmove = (e: Event & { detail: { box: Box, handler: unknown } }): void => {
             // Figure as point
             const ptFigure = figure as Point
 
             // Get the event details
-            const { box } = e.detail
+            const {box} = e.detail
 
             // Get the bounding box
-            let { x, y } = box
+            let {x, y} = box
 
             // Prevent default behavior
             e.preventDefault()
@@ -313,7 +281,7 @@ export class Graph {
             }
 
             if (options?.follow?.length) {
-                let xy = { x, y }
+                let xy = {x, y}
                 options.follow.forEach((follow) => {
                     if (follow instanceof AbstractFigure) {
                         xy = follow.follow(x, y)
@@ -333,10 +301,10 @@ export class Graph {
             }
 
             // Set the point coordinate according.
-            ptFigure.pixels = { x, y }
+            ptFigure.pixels = {x, y}
             // For instance, if the target is a point, update the pixels.
             if (target instanceof Point) {
-                target.pixels = { x, y }
+                target.pixels = {x, y}
             }
 
             // Callback at the end, with the point
@@ -361,13 +329,94 @@ export class Graph {
         return figure
     }
 
-    public clear() {
-        Object.keys(this.figures).forEach((name) => {
-            this.figures[name].element.remove()
+    get figures() {
+        return this.#figures
+    }
+
+    // Default follow function
+    follow(value: string, obj: AbstractFigure): (x: number, y: number) => XY {
+        if (value === 'Ox') {
+            return (x: number, y: number) => ({x, y: (obj as unknown as XY).y})
+        } else if (value === 'Oy') {
+            return (x: number, y: number) => ({x: (obj as unknown as XY).x, y})
+        } else if (value === 'grid') {
+            return (x: number, y: number) => {
+                const xGrid = this.#config.axis.x.x,
+                    yGrid = this.#config.axis.y.y
+
+                x = Math.round(x / xGrid) * xGrid
+                y = Math.round(y / yGrid) * yGrid
+
+                return {x, y}
+            }
+        }
+
+        return (x: number, y: number) => ({x, y})
+    }
+
+    public grid(name: string, gridConfig: { x: XY, y: XY }): AbstractFigure {
+        // const group = this.#rootSVG.group().attr('id', name)
+
+        const aGrid = new Grid(this.#rootSVG, name, {
+            axis: gridConfig,
+            origin: this.#config.origin,
+            width: this.#config.width,
+            height: this.#config.height,
+            subdivisions: 0
         })
 
-        this.#figures = {}
+        this.#layers.grids.add(aGrid.element)
+
+        return aGrid
     }
+
+    get layers() {
+        return this.#layers
+    }
+
+    public marker(scale: number): { start: Marker, end: Marker } {
+        return createMarker(this.#rootSVG, scale)
+    }
+
+    get rootSVG() {
+        return this.#rootSVG
+    }
+
+    public subgrid(name: string, subdivision: number): AbstractFigure {
+        const subAxis = {
+            x: {x: this.#config.axis.x.x / subdivision, y: this.#config.axis.x.y / subdivision},
+            y: {x: this.#config.axis.y.x / subdivision, y: this.#config.axis.y.y / subdivision}
+        }
+        return this.grid(name, subAxis)
+    }
+
+    public toPixels<T>(pixels: T, axis?: 'x' | 'y' ): T {
+        return toPixels(pixels, this.config, axis)
+    }
+
+    get toTex() {
+        return this.#toTex
+    }
+
+    // Update each figures in the graph
+    public update(except?: string[], forceUpdate?: boolean) {
+
+        if (except === undefined) {
+            except = []
+        }
+
+        // Go through each objects and update them if they are computed.
+        Object.keys(this.figures)
+            .forEach((name) => {
+                if (except.includes(name)) {
+                    this.figures[name].updateLabel()
+                } else {
+                    // Update figure and label
+                    this.figures[name].update(forceUpdate)
+                }
+            })
+    }
+
     // Update the layout of the graph
     public updateLayout() {
         // Update the viewbox
@@ -388,41 +437,25 @@ export class Graph {
         this.update([], true)
     }
 
-    // Update each figures in the graph
-    public update(except?: string[], forceUpdate?: boolean) {
+    #makeLayout(): void {
+        // Remove the grid
+        this.#layers.grids.clear()
 
-        if (except === undefined) { except = [] }
+        // Remove the axis
+        this.#layers.axis.clear()
 
-        // Go through each objects and update them if they are computed.
-        Object.keys(this.figures)
-            .forEach((name) => {
-                if (except.includes(name)) {
-                    this.figures[name].updateLabel()
-                } else {
-                    // Update figure and label
-                    this.figures[name].update(forceUpdate)
-                }
-            })
-    }
-
-    // Default follow function
-    follow(value: string, obj: AbstractFigure): (x: number, y: number) => XY {
-        if (value === 'Ox') {
-            return (x: number, y: number) => ({ x, y: (obj as unknown as XY).y })
-        } else if (value === 'Oy') {
-            return (x: number, y: number) => ({ x: (obj as unknown as XY).x, y })
-        } else if (value === 'grid') {
-            return (x: number, y: number) => {
-                const xGrid = this.#config.axis.x.x,
-                    yGrid = this.#config.axis.y.y
-
-                x = Math.round(x / xGrid) * xGrid
-                y = Math.round(y / yGrid) * yGrid
-
-                return { x, y }
-            }
+        if (this.#display.subgrid) {
+            this.subgrid('SUBGRID', this.#display.subgrid)
+                .stroke('purple/0.5', 0.1)
+        }
+        if (this.#display.grid) {
+            this.grid('MAINGRID', this.#config.axis)
+                .stroke('lightgray', 1)
         }
 
-        return (x: number, y: number) => ({ x, y })
+        if (this.#display.axis) {
+            this.coordinate_system(this.#config.system)
+        }
+
     }
 }

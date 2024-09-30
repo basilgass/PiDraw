@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>PiGraph - Text Dev page</title>
+
+    <!-- SVG -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/svg.js/3.0.13/svg.min.js"></script>
+
+    <!-- KaTex -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.0/dist/katex.min.css"
+        integrity="sha384-Xi8rHCmBmhbuyyhbI88391ZKP2dmfnOl4rT9ZfRI7mLTdk1wblIUnrIq35nqwEvC" crossorigin="anonymous">
+
+    <!-- The loading of KaTeX is deferred to speed up page rendering -->
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.0/dist/katex.min.js"
+        integrity="sha384-X/XCfMm41VSsqRNQgDerQczD69XqmjOOOwYQvr/uuC+j4OPoNhVgjdGFwhvN02Ja"
+        crossorigin="anonymous"></script>
+
+    <!-- adding vue -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+
+    <!-- adding pimath.css  -->
+    <link rel="stylesheet" href="app.css" />
+</head>
+
+<body class="min-h-screen">
+    <div id="app">
+        <h1 class="text-center text-2xl font-semibold my-10">Graph Text Examples</h1>
+        <div class="grid grid-cols-1">
+            <!-- output -->
+            <div id="root" class="w-full max-w-3xl mx-auto"></div>
+
+        </div>
+
+    </div>
+    <script type="module">
+		import { PiGraph } from "../src/index"
+
+		const { createApp, ref } = Vue
+
+		createApp({
+			mounted: () => {
+				const draw = new PiGraph('root', {
+					width: 470,
+					height: 470,
+					display: {
+						axis: false,
+						grid: false
+					}
+				})
+
+				const E = draw.create.path("m 10,10 l450,0 0,450 l-450,0 z", 'E').fill("cyan"),
+					A = draw.create
+						.path("M117.09765999999999 192.28125A118.57143 118.57143 0 0 0 49.158199999999994 299.49609A118.57143 118.57143 0 0 0 167.72852 418.06836A118.57143 118.57143 0 0 0 237.73046999999997 395.19921999999997A118.57143 118.57143 0 0 1 189.15819999999997 299.49609A118.57143 118.57143 0 0 1 190.55272999999994 281.35546999999997A118.57143 118.57143 0 0 1 117.09765999999993 192.28125Z ", "A")
+						.fill('red'),
+					B = draw.create
+						.path("M350.9043 189.06641000000002A118.57143 118.57143 0 0 1 284.36132999999995 278.14258A118.57143 118.57143 0 0 1 286.30078 299.49609A118.57143 118.57143 0 0 1 237.73046999999997 395.20116999999993A118.57143 118.57143 0 0 0 307.72852 418.06836A118.57143 118.57143 0 0 0 426.30078000000003 299.49609A118.57143 118.57143 0 0 0 350.9043 189.06641000000002Z ", "B")
+						.fill('lightgreen'),
+					C = draw.create
+						.path("M233.72852 52.35352A118.57143 118.57143 0 0 0 115.15820000000002 170.92578000000003A118.57143 118.57143 0 0 0 117.09766000000002 192.28125000000006A118.57143 118.57143 0 0 1 167.35547000000003 180.92578000000003A118.57143 118.57143 0 0 1 167.72852 180.92578000000003A118.57143 118.57143 0 0 1 237.73046999999997 203.79492000000005A118.57143 118.57143 0 0 1 307.72852 180.92578000000003A118.57143 118.57143 0 0 1 350.90430000000003 189.06641000000002A118.57143 118.57143 0 0 0 352.30078000000003 170.92578000000003A118.57143 118.57143 0 0 0 233.72852 52.35352000000003Z ", "C")
+						.fill('gold'),
+					AB = draw.create
+						.path("M284.36133 278.14258A118.57143 118.57143 0 0 1 233.72852 289.49609A118.57143 118.57143 0 0 1 190.55469 281.35546999999997A118.57143 118.57143 0 0 0 189.15819999999997 299.49609A118.57143 118.57143 0 0 0 237.72851999999995 395.19921999999997A118.57143 118.57143 0 0 0 286.3007799999999 299.49609A118.57143 118.57143 0 0 0 284.3613299999999 278.14257999999995Z ", "BC")
+						.fill('orange'),
+					BC = draw.create
+						.path("M307.35547 180.92577999999997A118.57143 118.57143 0 0 0 237.72852 203.79296999999997A118.57143 118.57143 0 0 1 284.36133 278.14061999999996A118.57143 118.57143 0 0 0 350.90430000000003 189.06640999999996A118.57143 118.57143 0 0 0 307.72852 180.92577999999997A118.57143 118.57143 0 0 0 307.35547 180.92577999999997Z ", "AB")
+						.fill('pink'),
+					AC = draw.create
+						.path("M167.35547000000003 180.92577999999997A118.57143 118.57143 0 0 0 117.09766000000002 192.28125A118.57143 118.57143 0 0 0 190.55273 281.35352A118.57143 118.57143 0 0 1 237.72852 203.79492A118.57143 118.57143 0 0 0 167.72852 180.92577999999997A118.57143 118.57143 0 0 0 167.35547000000003 180.92577999999997Z ", "AC")
+						.fill('blue'),
+					ABC = draw.create
+						.path("M237.85742 203.58202999999997A118.57143 118.57143 0 0 0 190.68164000000002 281.14453A118.57143 118.57143 0 0 0 233.85742000000005 289.28515999999996A118.57143 118.57143 0 0 0 284.48828000000003 277.93163999999996A118.57143 118.57143 0 0 0 237.85742000000005 203.58202999999997Z ", "ABC")
+						.fill('#25e7b5')
+
+
+			},
+			setup() {
+				return {
+					modify: () => {
+						console.log('modify')
+					},
+					update: () => {
+						console.log('update');
+					},
+					analyseCode: () => {
+						console.log('analyseCode');
+					},
+					changeCaret: () => {
+						console.log('change caret - display current line.');
+					}
+				}
+			}
+		}).mount('#app')
+
+	</script>
+</body>
+
+</html>

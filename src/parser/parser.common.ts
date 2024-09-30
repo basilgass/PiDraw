@@ -35,6 +35,7 @@ export enum PARSER_TYPE {
     FOLLOW = 'follow',          // OK : follow <function>,<tangent?>
     FILL_BETWEEN = 'fill',      // OK : fillbetween <function>,<function?>,<domain?>
     RIEMANN = 'riemann',        // riemann <function>,<domain>,<number>,<position>
+    PATH = "path",              // TODO: allow path given by a string ? Path given by a string
 }
 
 export type IParserValues = PARSER_VALUES | AbstractFigure
