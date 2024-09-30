@@ -27,7 +27,8 @@ export declare enum PARSER_TYPE {
     REGULAR = "reg",// OK: reg <center>,<radius>,<sides>
     FOLLOW = "follow",// OK : follow <function>,<tangent?>
     FILL_BETWEEN = "fill",// OK : fillbetween <function>,<function?>,<domain?>
-    RIEMANN = "riemann"
+    RIEMANN = "riemann",// riemann <function>,<domain>,<number>,<position>
+    PATH = "path"
 }
 export type IParserValues = PARSER_VALUES | AbstractFigure;
 export interface IParserConfig {
