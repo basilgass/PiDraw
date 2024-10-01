@@ -16,14 +16,9 @@
   },
   "include": [
     "src",
+    "dist",
     "tests",
     "*.config.js",
     "demo",
   ],
-  "exclude": [
-    "node_modules",
-    "dist",
-    "lib/**/*.d.ts",
-    "tests/**/*.d.ts"
-  ]
 }

@@ -9,11 +9,8 @@
   "exports": {
     ".": {
       "import": "./dist/pidraw.js",
-      "require": "./dist/pidraw.js"
-    },
-    "./types": {
-      "import": "./dist/index.d.ts",
-      "require": "./dist/index.d.ts"
+      "require": "./dist/pidraw.js",
+      "types": "./dist/index.d.ts"
     }
   },
   "files": [

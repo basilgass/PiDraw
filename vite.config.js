@@ -18,7 +18,7 @@ export default defineConfig({
 	plugins: [
 		dtsPlugin({ 
 			include: ['src', "es2022"],
-			outDir: "dist"
+			outDir: "dist",
 		}), // generate .d.ts files for the src folder
 	],
 	rollupOptions: {
