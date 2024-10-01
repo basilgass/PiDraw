@@ -12,13 +12,14 @@ export default defineConfig({
 			entry: resolve(__dirname, "src/index.ts"),
 			formats: ["es"],
 		},
+		sourcemap: true,
 		emptyOutDir: true,
 	},
 	plugins: [
 		dtsPlugin({ 
 			include: ['src', "es2022"],
-			outDir: "./types"
-		}), // generate .d.ts files for the lib folder
+			outDir: "dist"
+		}), // generate .d.ts files for the src folder
 	],
 	rollupOptions: {
 		external: ["vue"],

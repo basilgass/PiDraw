@@ -3,8 +3,8 @@
   "version": "0.1.39",
   "description": "A drawing library for teacher :)",
   "type": "module",
-  "main": "dist/index.js",
-  "module": "dist/index.js",
+  "main": "dist/pidraw.js",
+  "module": "dist/pidraw.js",
   "types": "dist/index.d.ts",
   "exports": {
     ".": {
@@ -12,13 +12,12 @@
       "require": "./dist/pidraw.js"
     },
     "./types": {
-      "import": "./types/index.d.ts",
-      "require": "./types/index.d.ts"
+      "import": "./dist/index.d.ts",
+      "require": "./dist/index.d.ts"
     }
   },
   "files": [
-    "dist",
-    "lib"
+    "dist"
   ],
   "scripts": {
     "test": "vitest",
