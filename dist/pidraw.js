@@ -6206,7 +6206,7 @@ function lh(i, t, e) {
 }
 function Wt(i, t, e) {
   let s = "circle", n = 5;
-  const r = Object.keys(i.parameters).filter((a) => a.includes("*") || a.includes("s") || a.includes("o"))[0] ?? "o";
+  const r = Object.keys(i.parameters).find((a) => a.includes("*") || a.includes("s") || a.includes("o"));
   switch (r) {
     case "o":
       s = "circle", n = i.parameters[r].value === !0 ? 5 : i.parameters[r].value;

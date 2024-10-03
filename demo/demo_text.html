@@ -46,12 +46,12 @@
 
 				const pos = ['tl', 'tc', 'tr', 'ml', 'mc', 'mr', 'bl', 'bc', 'br']
 
-				// Regulat text label
+				// Regular text label
 				pos.forEach((item, index) => {
 					const pt = draw.create.point(
 						{ x: -3 + 3 * (index % 3), y: 4 - Math.trunc(index / 3) },
 						item,
-						{ html: true }
+						{ html: false }
 					)
 					pt.label?.position(item)
 

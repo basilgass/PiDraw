@@ -12,11 +12,11 @@ export function buildPoint(item: PARSER, figures: Record<string, AbstractFigure>
     // Default values
     let shape = 'circle', size = 5
 
-    const shapeCode: string | null = Object.keys(item.parameters)
-        .filter((key) =>
+    const shapeCode: string | undefined = Object.keys(item.parameters)
+        .find((key) =>
             key.includes('*') ||
             key.includes('s') ||
-            key.includes('o') )[0] ?? 'o'
+            key.includes('o') )
 
     switch (shapeCode) {
         case 'o':
