@@ -1,10 +1,10 @@
-import { type PARSER } from "piparser/lib/PiParserTypes"
-import { toPixels } from "../Calculus"
-import { AbstractFigure } from "../figures/AbstractFigure"
-import { type ILineConfig, type ILineType, Line } from "../figures/Line"
-import { Point } from "../figures/Point"
-import { type IGraphConfig } from "../pidraw.common"
-import { convertIdToFigure, PARSER_TYPE } from "./parser.common"
+import {type PARSER} from "piparser/lib/PiParserTypes"
+import {toNumber, toPixels} from "../Calculus"
+import {AbstractFigure} from "../figures/AbstractFigure"
+import {type ILineConfig, type ILineType, Line} from "../figures/Line"
+import {Point} from "../figures/Point"
+import {type IGraphConfig} from "../pidraw.common"
+import {convertIdToFigure, PARSER_TYPE} from "./parser.common"
 
 export function buildLine(item: PARSER, figures: Record<string, AbstractFigure>, graphConfig: IGraphConfig): ILineConfig | null {
     const code = convertIdToFigure(item.values, figures)
@@ -33,7 +33,7 @@ export function buildLine(item: PARSER, figures: Record<string, AbstractFigure>,
             }
 
             return {
-                through: { A, B },
+                through: {A, B},
                 shape: lineType
             }
         }
@@ -47,9 +47,9 @@ export function buildLine(item: PARSER, figures: Record<string, AbstractFigure>,
         if (equ.startsWith('y=') && !equ.includes('x')) {
             const value = convertIdToFigure([equ.split('=')[1]], figures)[0]
 
-            const A = toPixels({ x: 0, y: value as number }, graphConfig)
+            const A = toPixels({x: 0, y: value as number}, graphConfig)
             return {
-                director: { A, d: { x: 1, y: 0 } },
+                director: {A, d: {x: 1, y: 0}},
                 shape: 'line'
             }
         }
@@ -58,9 +58,9 @@ export function buildLine(item: PARSER, figures: Record<string, AbstractFigure>,
         if (equ.startsWith('x=')) {
             const value = convertIdToFigure([equ.split('=')[1]], figures)[0]
 
-            const A = toPixels({ x: value as number, y: 0 }, graphConfig)
+            const A = toPixels({x: value as number, y: 0}, graphConfig)
             return {
-                director: { A, d: { x: 0, y: 1 } },
+                director: {A, d: {x: 0, y: 1}},
                 shape: 'line'
             }
         }
@@ -71,20 +71,24 @@ export function buildLine(item: PARSER, figures: Record<string, AbstractFigure>,
         const coefficientLeft = parsePolynom(left),
             coefficientRight = parsePolynom(right)
 
-        const coefficient = {
+        const coefficients = {
             a: coefficientLeft.a - coefficientRight.a,
             b: coefficientLeft.b - coefficientRight.b,
             c: coefficientLeft.c - coefficientRight.c
         }
 
-        const A = toPixels({ x: 0, y: -coefficient.c / coefficient.b }, graphConfig)
+        // ax+by+c=0
+        // A=(0, -c/b)
+        // slope = -a/b
+
+        const A = toPixels({x: 0, y: -coefficients.c / coefficients.b}, graphConfig)
         const d = {
-            x: -coefficient.b,
-            y: coefficient.a
+            x: coefficients.b,
+            y: coefficients.a
         }
 
         return {
-            director: { A, d },
+            director: {A, d},
             shape: 'line'
         }
     }
@@ -93,7 +97,7 @@ export function buildLine(item: PARSER, figures: Record<string, AbstractFigure>,
         // item.code = [<point>,<point>]
         const [A, B] = code
         if (A instanceof Point && B instanceof Point) {
-            return { mediator: { A, B } }
+            return {mediator: {A, B}}
         }
     }
 
@@ -101,7 +105,7 @@ export function buildLine(item: PARSER, figures: Record<string, AbstractFigure>,
         // item.code = [<line>,<point>]
         const [to, through] = code
         if (to instanceof Line && through instanceof Point) {
-            return { perpendicular: { to, through } }
+            return {perpendicular: {to, through}}
         }
     }
 
@@ -109,46 +113,54 @@ export function buildLine(item: PARSER, figures: Record<string, AbstractFigure>,
         // item.code = [<line>,<point>]
         const [to, through] = code
         if (to instanceof Line && through instanceof Point) {
-            return { parallel: { to, through } }
+            return {parallel: {to, through}}
         }
     }
 
     if (item.key === PARSER_TYPE.BISECTOR.toString() && code.length === 2) {
         const [d1, d2] = code
         if (d1 instanceof Line && d2 instanceof Line) {
-            return { bisector: { d1, d2 } }
+            return {bisector: {d1, d2}}
         }
     }
 
     if (item.key === PARSER_TYPE.BISECTOR.toString() && code.length === 3) {
         const [B, A, C] = code
         if (A instanceof Point && B instanceof Point && C instanceof Point) {
-            return { bisector: { A, B, C } }
+            return {bisector: {A, B, C}}
         }
     }
     return null
 
 }
 
-function parsePolynom(polynom: string): { a: number, b: number, c: number } {
-    const data = polynom.split(/([+-][0-9./]*[xy]?)/).filter((d) => d.trim() !== '')
+export function parsePolynom(polynom: string): { a: number, b: number, c: number } {
+    const data = polynom.split(/([+-]?[0-9./]*[xy]?)/).filter((d) => d.trim() !== '')
 
-    const a = data
-        .filter((d) => d.includes('x'))
-        .map((d) => {
-            return d === 'x' ? '1' : d.replace('x', '')
-        })[0] ?? '0',
-        b = data
-            .filter((d) => d.includes('y'))
-            .map((d) => {
-                return d === 'y' ? '1' : d.replace('y', '')
-            })[0] ?? '0',
-        c = data
-            .filter((d) => (!d.includes('x') && !d.includes('y')))[0] ?? '0'
+    const a = extractNumberFromMonoms(data, 'x')
+    const b = extractNumberFromMonoms(data, 'y')
+    const c = toNumber(data
+        .filter((d) => (!d.includes('x') && !d.includes('y')))[0] ?? 0)
 
     return {
-        a: convertIdToFigure([a], {})[0] as number,
-        b: convertIdToFigure([b], {})[0] as number,
-        c: convertIdToFigure([c], {})[0] as number,
+        a: +convertIdToFigure([a], {})[0] as number,
+        b: +convertIdToFigure([b], {})[0] as number,
+        c: +convertIdToFigure([c], {})[0] as number,
     }
+}
+
+function extractNumberFromMonoms(data: string[], letter: string): number {
+    return data
+        .filter((d) => d.includes(letter))
+        .map((d) => {
+            // Remove the letter 'x'
+            if (d === letter || d===`+${letter}`) {
+                return 1
+            }
+            if (d === `-${letter}`) {
+                return -1
+            }
+
+            return toNumber(d.replace(letter, ''))
+        })[0] ?? 0
 }

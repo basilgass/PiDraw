@@ -32,7 +32,7 @@ export function buildPlot(item: PARSER, figures: Record<string, AbstractFigure>,
             cfg.image = domains[1]
         }
 
-        const samples = data.filter(d => typeof d === 'number') as number[]
+        const samples = data.filter(d => typeof d === 'number')
         if (samples.length > 0) {
             cfg.samples = samples[0] > 0 ? samples[0] : 10
         }

@@ -1103,3 +1103,17 @@ export function nearestPointToPath(value: XY, path: svgPath, precision = 1): XY 
     }
     return xy
 }
+
+export function toNumber(value: number | string): number{
+
+    if(typeof value === 'number'){return value}
+
+    if(typeof value=== 'string'){
+        if (value.includes('/')) {
+            const [num, den] = value.split('/')
+            return +num / +den
+        }
+    }
+
+    return +value
+}

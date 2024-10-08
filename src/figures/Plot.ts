@@ -75,22 +75,13 @@ export class Plot extends AbstractFigure {
         // Make the numeric expression.
         const expr = this.#numExp
 
-
         // Get the (x;y) points from the function
         // 0 < x < width
         // y = fn(x)
-        const points: XY[] = []
+        let points: XY[]
 
-        for (let x = domain.min; x < domain.max; x += 1 / samples) {
-            const y = expr.evaluate({ x })
 
-            if (isNaN(y) || y === Infinity || y === -Infinity || y < image.min || y > image.max) {
-                const coords = toPixels({ x, y: 0 }, this.graphConfig)
-                points.push({ x: coords.x, y: NaN })
-            } else {
-                points.push(toPixels({ x, y }, this.graphConfig))
-            }
-        }
+        points = this.#calculatePointsCoordinates(domain, samples, expr, image)
 
         // Create the path string from the points.
         let previous: XY = points[0]
@@ -117,6 +108,21 @@ export class Plot extends AbstractFigure {
         shape.plot(path)
 
         return this
+    }
+
+    #calculatePointsCoordinates(domain: DOMAIN, samples: number, expr: NumExp, image: DOMAIN): XY[] {
+        const points:XY[] = []
+        for (let x = domain.min; x < domain.max; x += 1 / samples) {
+            const y = expr.evaluate({x})
+
+            if (isNaN(y) || y === Infinity || y === -Infinity || y < image.min || y > image.max) {
+                const coords = toPixels({x, y: 0}, this.graphConfig)
+                points.push({x: coords.x, y: NaN})
+            } else {
+                points.push(toPixels({x, y}, this.graphConfig))
+            }
+        }
+        return points
     }
 
     moveLabel(): this {

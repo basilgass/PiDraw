@@ -1,7 +1,7 @@
 import {AbstractFigure} from "./AbstractFigure"
 import type {XY} from "../pidraw.common"
 import {Line as svgLine, Shape, Svg} from "@svgdotjs/svg.js"
-import {computeLine, createMarker, mathLine, mathVector} from "../Calculus"
+import {computeLine, createMarker, mathLine, mathVector, toNumber} from "../Calculus"
 
 export type ILineType = 'segment' | 'ray' | 'line' | 'vector'
 
@@ -107,6 +107,37 @@ export class Line extends AbstractFigure {
 
             }
         }
+        // else if (this.#config.equation) {
+        //     // the equation can be something like:
+        //     // y=ax+b
+        //     // y = a
+        //     // x = a
+        //     // ax+by+c=0
+        //     const [left, right] = this.#config.equation.equation.split('=')
+        //     if (left === 'x') {
+        //         // vetical line
+        //         const x = toNumber(right)
+        //         this.start = {x, y: 0}
+        //         direction = {x: 0, y: 1}
+        //     } else if (left === 'y' && !right.includes('y')) {
+        //         // vetical line
+        //         const y = toNumber(right)
+        //         this.start = {x: 0, y}
+        //         direction = {x: 1, y: 0}
+        //     } else if (left === 'y') {
+        //         // we have y=ax+b
+        //         const a = toNumber(right.match(/^[-]?[0-9/]*/g)[0] || 0)
+        //         const b = toNumber(right.match(/[-]?[0-9/]*$/g)
+        //             .filter(x => x !== '')[0] || 0)
+        //
+        //         this.start = {x: 0, y: b}
+        //         direction = {x: 1, y: a}
+        //     } else if (!isNaN(+right)) {
+        //         // we have ax+by+c=0 or ax+by=c
+        //         const a: number = toNumber(this.#config.equation.equation.match(/[+-]?[0-9/]*x/g)[0] || 0)
+        //         const b: number = toNumber(this.#config.equation.equation.match(/[+-]?[0-9/]*x/g)[0] || 0)
+        //     }
+        // }
 
         // If the line is not a segment and not a vector, we need to compute the line
         // it is designed for the line and ray

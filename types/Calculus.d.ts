@@ -1,5 +1,5 @@
-import { Marker, Path as svgPath, Svg } from '@svgdotjs/svg.js';
-import { IGraphConfig, XY } from './pidraw.common';
+import { Marker, Path as svgPath, Svg } from "@svgdotjs/svg.js";
+import { type IGraphConfig, type XY } from "./pidraw.common";
 export declare function numberCorrection(value: number, number_of_digits?: number): number;
 export declare function isInfinity(value: number): boolean;
 export declare function distanceAB(A: XY, B: XY): number;
@@ -36,10 +36,6 @@ export declare class mathLine {
     intersection(value: mathLine): XY | null;
     projection(value: XY): XY;
 }
-/** -----------------------------------------
- * numeric expression and shutting yard for expressions.
- *
- */
 export declare class NumExp {
     constructor(value: string, uniformize?: boolean);
     private _rpn;
@@ -70,21 +66,7 @@ declare enum ShutingyardType {
 export declare function toPixels<T>(coordinates: T, config: IGraphConfig, axis?: 'x' | 'y' | undefined): T;
 export declare function toCoordinates(pixels: XY, config: IGraphConfig): XY;
 export declare function computeLine(origin: XY, direction: XY, width: number, height: number, padding?: number, half_axis?: boolean, length?: number): [XY, XY] | null;
-/**
- * Get coordinate by radius / angle
- * Reference: https://stackoverflow.com/questions/5736398/how-to-calculate-the-svg-path-for-an-arc-of-a-circle
- * @param centerX
- * @param centerY
- * @param radius
- * @param angleInDegrees
- */
 export declare function polarToCartesian(centerX: number, centerY: number, radius: number, angleInDegrees: number): XY;
-/**
- * get the angle from Ox to OP, where O is origin and P is the handle
- * @param {Point} origin
- * @param {Point} handle
- * @returns {number}
- */
 export declare function cartesianToAngle(origin: XY, handle: XY): number;
 export declare function createMarker(svg: Svg, scale: number, shape?: string): {
     start: Marker;
@@ -93,3 +75,4 @@ export declare function createMarker(svg: Svg, scale: number, shape?: string): {
 export declare function nearestPointToPath(value: XY, path: svgPath, precision?: number): XY;
 export declare function toNumber(value: number | string): number;
 export {};
+//# sourceMappingURL=Calculus.d.ts.map
