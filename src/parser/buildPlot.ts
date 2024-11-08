@@ -1,12 +1,12 @@
-import { type PARSER } from "piparser/lib/PiParserTypes"
-import { AbstractFigure } from "../figures/AbstractFigure"
-import { type IFillBetweenConfig } from "../figures/FillBetween"
-import { type IFollowConfig } from "../figures/Follow"
-import { type IParametricConfig } from "../figures/Parametric"
-import { type IPlotConfig, Plot } from "../figures/Plot"
-import { type IRiemannConfig } from "../figures/Riemann"
-import { type DOMAIN, type IGraphConfig, isDOMAIN } from "../pidraw.common"
-import { convertIdToFigure, PARSER_TYPE } from "./parser.common"
+import {type PARSER} from "piparser/lib/PiParserTypes"
+import {AbstractFigure} from "../figures/AbstractFigure"
+import {type IFillBetweenConfig} from "../figures/FillBetween"
+import {type IFollowConfig} from "../figures/Follow"
+import {type IParametricConfig} from "../figures/Parametric"
+import {type IPlotConfig, Plot} from "../figures/Plot"
+import {type IRiemannConfig} from "../figures/Riemann"
+import {type DOMAIN, type IGraphConfig, isDOMAIN} from "../pidraw.common"
+import {convertIdToFigure, PARSER_TYPE} from "./parser.common"
 
 export function buildPlot(item: PARSER, figures: Record<string, AbstractFigure>, graphConfig: IGraphConfig): IPlotConfig | null {
     const code = convertIdToFigure(item.values, figures)
@@ -18,7 +18,7 @@ export function buildPlot(item: PARSER, figures: Record<string, AbstractFigure>,
         // item.code = [<function>,<domain>,<image>,<@samples>]
         const [f, ...data] = code
 
-        const cfg: IPlotConfig = { expression: typeof f === 'number' ? f.toString() : f as string }
+        const cfg: IPlotConfig = {expression: typeof f === 'number' ? f.toString() : f as string}
 
         // data *can* contains: domain, image, samples
         // domain is the first DOMAIN object
@@ -51,7 +51,7 @@ export function buildParametric(item: PARSER, figures: Record<string, AbstractFi
         // item.code = [<function>,<function>]
         const [x, y] = code
         if (typeof x === 'string' && typeof y === 'string') {
-            return { expressions: { x, y } }
+            return {expressions: {x, y}}
         }
     }
 
@@ -82,15 +82,17 @@ export function buildFillBetween(item: PARSER, figures: Record<string, AbstractF
     const code = convertIdToFigure(item.values, figures)
 
     if (item.key === PARSER_TYPE.FILL_BETWEEN.toString() && code.length >= 2) {
-        // item.code = [<function>,<function>,<domain>,<image>]
 
-        const [f1, f2, domain, image] = code
-        if (f1 instanceof Plot && f2 instanceof Plot) {
+        const f1 = code[0]
+        const f2 = code[1] instanceof Plot ? code[1] : null
+        const domain = isDOMAIN(code[1]) ? code[1] : code[2]
+        const image = isDOMAIN(code[1]) ? code[2] : code[3]
 
+        if (f1 instanceof Plot) {
             return {
-                expressions: [f1, f2],
-                domain: isDOMAIN(domain) ? domain : { min: NaN, max: NaN },
-                image: isDOMAIN(image) ? image : { min: NaN, max: NaN }
+                expressions: (f2 instanceof Plot) ? [f1, f2] : [f1],
+                domain: isDOMAIN(domain) ? domain : {min: NaN, max: NaN},
+                image: isDOMAIN(image) ? image : {min: NaN, max: NaN}
             }
         }
     }
@@ -107,7 +109,7 @@ export function buildRiemann(item: PARSER, figures: Record<string, AbstractFigur
         const [f, domain, rectangles, position] = code
         return {
             follow: f as Plot,
-            domain: isDOMAIN(domain) ? domain : { min: NaN, max: NaN },
+            domain: isDOMAIN(domain) ? domain : {min: NaN, max: NaN},
             rectangles: typeof rectangles === "number" ? rectangles : 5,
             position: typeof position === "number" ? position : 0
         }

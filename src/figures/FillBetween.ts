@@ -5,7 +5,7 @@ import { Plot } from "./Plot"
 import { toPixels } from "../Calculus"
 
 export interface IFillBetweenConfig {
-    expressions: [Plot, Plot],
+    expressions: [Plot] | [Plot, Plot],
     domain?: DOMAIN,
     image?: DOMAIN,
 }
@@ -54,7 +54,6 @@ export class FillBetween extends AbstractFigure {
     constructor(rootSVG: Svg, name: string, values: IFillBetweenConfig) {
         super(rootSVG, name)
 
-        console.log('FILL BETWR');
         // Store the constraints
         this.#config = Object.assign({
             samples: 100
@@ -106,13 +105,20 @@ export class FillBetween extends AbstractFigure {
                 return x !== undefined && x >= domain.min && x <= domain.max
             })
             .map(flatten)
-        const path2 = [...(g.shape as Path).array()]
-            .filter((pt) => {
-                const x = pt[1]
-                return x !== undefined && x >= domain.min && x <= domain.max
-            })
-            .map(flatten)
-            .reverse()
+
+        let path2: string[] = []
+        if(g) {
+            // There is a path
+            path2 = [...(g.shape as Path).array()]
+                .filter((pt) => {
+                    const x = pt[1]
+                    return x !== undefined && x >= domain.min && x <= domain.max
+                })
+                .map(flatten)
+                .reverse()
+        }else{
+            path2 = [`m ${domain.min} 0`]
+        }
 
         const shape = this.shape as Path
 

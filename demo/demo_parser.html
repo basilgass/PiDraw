@@ -60,6 +60,8 @@
 		createApp({
 			mounted() {
 				// this.code = 'f(x)=sin(x),-pi:2pi'
+				this.parameter = `x=-11:11,y=-11:11,axis,tex`
+
 				this.code = `A(8,3)->red,w=5,drag=grid,tex=@
 B(-4,-1)->blue,w=10
 M=mid A,B
@@ -80,39 +82,6 @@ d1=BC.
 v1=vCA
 X(0,0)->drag=f
 `
-
-				//         this.code = `A(2,3)
-				// B(5,-1)
-				// d=AB.
-				// C(1,-2)
-				// D(-1,1)
-				// v=vCD
-				// E(1,1)
-				// F(6,3)
-				// h=FE[`
-
-				//         this.code = `f(x)=(-x+2)/(x+1),-10:-1,-3:3,@50->blue
-				// g(x)=(x+2)/(x+1),-1:10->blue
-				// h(x)=1->green,thin
-				// i(x)=-1->green,thin`
-
-				//         this.code = `f(x)=3*(1-x)/((sqrt(x)-1)*(x-4)),0:1
-				// g(x)=3*(1-x)/((sqrt(x)-1)*(x-4)),1.01:3.9
-				// h(x)=3*(1-x)/((sqrt(x)-1)*(x-4)),4.01:10
-				// g=line x=4->red
-				// h=line y=0.05->lime
-				// A(1,2)->tex=(1;2)/bc/0;-1,-white
-				// t(x)=10,-0.1:0.1
-				// X(0,10)->tex=10/cm/-0.4;0,!`
-
-				//         this.code = `a=line x=3
-				// b=line y=-1
-				// c=line 2x-3y=5
-				// d=line y=2/3x-1
-				// e=line 2x=3y-4`
-				// const parsedCode = PiDraw.parse(this.code)
-				// this.code = 'A(8,3)->tex=@'
-
 				this.code = `A(1,2)->drag=grid,tex=A=@/tr/1;3
 B(2,0)->drag=grid
 C(6,5)->drag=grid
@@ -129,8 +98,6 @@ l4=BA2
 I=inter l3,l4
 X=dpt A2,l3,-2
 Y=vpt A2,K,B,1`
-
-				this.parameter = `x=-11:11,y=-11:11,axis,tex`
 				this.code = `@begin:static
 x1=line y=0.1->blue,ultrathick,dot
 y1=line x=0.1->blue,ultrathick,dot
@@ -171,24 +138,12 @@ tan2=[XT2]->ultrathick,orange,dash
 r=[OT[->ultrathin,dot
 r2=[OT2[->ultrathin,dot`
 
-				//         this.code = `x1=line y=0.1
-				// P(5,8.6)->drag=c,?
-				// C=proj P,x1`
-				//         this.code = `f(x)=1/5x^2
-				// A(5,5)->drag=f/0:6
-				// C(6,0)
-				// O(0,0)
-				// d=AO.->move=1;2,mark=start/x/20,red
-				// a=arc C,O,A,1->mark`
-
-				//         this.code = `A(-2,3)
-				// B(1,2)
-				// d=AB
-				// D(-1,-3)
-				// C=vpt A,B,2,D->label
-				// F(-1,5)
-				// E=dpt F,d,3,p->label`
-				// this.code = `A(1,2)->drag=grid,tex=A=@/tr/1;3`
+				this.code = `f(x)=(x-3)(x+2)(x-1)/6
+a=fill f,-2:1->fill=green/0.3
+b=fill f,1:3->fill=red/0.3
+A(-2,0)->tick,tex=a
+B(1,0)->tick,tex=b
+C(3,0)->tick,tex=c`
 				draw = new PiDraw(
 					'root',
 					{
@@ -215,20 +170,7 @@ r2=[OT2[->ultrathin,dot`
 			setup() {
 				const output = ref(null)
 				const parameter = ref('x=-5:10,grid,axis,tex')
-				const code = ref(`A(3,1)->red,w=0.5,drag=grid,tex=\\sin(\\alpha)/mc/0;0.3
-B(-2,-1)->blue/0.4,?,w=0.1,label
-AB=AB.->dash=7,w=5,!,label=hello=world/mc/0;0.3,black/0.1
-f=plot x^2*sin(x)/8->#,w=2,color=orange
-C=circ A,3->w=10,color=green,fill=red/0.3
-p1=perp AB,A
-Px=proj A,x->w=5
-Py=proj A,y->w=5
-Pl=proj Px,AB->w=10
-poly=reg A,2,5
-T(1,1)
-x=PxT
-X=inter x,AB->w=10,red
-`)
+				const code = ref('')
 				const message = ref("no message now")
 				return {
 					code,

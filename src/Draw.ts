@@ -180,7 +180,6 @@ export class Draw extends Graph {
                     })
                 }
 
-
                 // Create the object
                 // TODO: make it eslint friendly and ts friendly
                 if (Object.hasOwn(graphCreate, create)) {
@@ -246,17 +245,24 @@ export class Draw extends Graph {
                 case 'ultrathick':
                     obj.stroke(4)
                     break
-                case 'color':
-                    obj.stroke(options[key].value as string)
+                case 'color': {
+                    const value = options[key].value as string + (options[key].options.length > 0 ? `/${options[key].options[0]}` : '')
+                    obj.stroke(value)
                     break
-                case 'fill':
-                    obj.fill(options[key].value as string)
+                }
+                case 'fill': {
+                    const value = options[key].value as string + (options[key].options.length > 0 ? `/${options[key].options[0]}` : '')
+                    obj.fill(value)
                     break
-                case 'dash':
-                    options[key].value === true ?
-                        obj.dash() :
+                }
+                case 'dash': {
+                    if (options[key].value === true) {
+                        obj.dash()
+                    } else {
                         obj.dash(options[key].value as string)
+                    }
                     break
+                }
                 case 'dot':
                     obj.dot()
                     break
