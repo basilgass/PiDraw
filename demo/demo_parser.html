@@ -138,12 +138,15 @@ tan2=[XT2]->ultrathick,orange,dash
 r=[OT[->ultrathin,dot
 r2=[OT2[->ultrathin,dot`
 
-				this.code = `f(x)=(x-3)(x+2)(x-1)/6
+				setTimeout(()=>{
+					this.code = `f(x)=(x-3)(x+2)(x-1)/6
 a=fill f,-2:1->fill=green/0.3
 b=fill f,1:3->fill=red/0.3
 A(-2,0)->tick,tex=a
 B(1,0)->tick,tex=b
 C(3,0)->tick,tex=c`
+					this.update()
+				}, 1000)
 				draw = new PiDraw(
 					'root',
 					{

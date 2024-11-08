@@ -500,17 +500,13 @@ export class Draw extends Graph {
     }
 
     #applyDrag(obj: AbstractFigure, key: string, options: Record<string, IParserParameters>) {
-
-        // TODO: making a drag element: create the interactive object
-
         // Actually, only points are draggable
         if (obj instanceof Point) {
             const dragConfigInit: IDraggableFollow[] = []
             const dragConfig: IDraggableFollow[] = []
 
-            const interactive = new Point(this.rootSVG, obj.name + '_drag', {
-                coordinates: { x: 0, y: 0 }
-            })
+            const interactive = this.create.point({ x: 0, y: 0 }, obj.name + '_drag')
+
             interactive.pixels = obj.pixels
             interactive.asCircle(30).fill('white/0.8')
             this.layers.interactive.add(interactive.element)
