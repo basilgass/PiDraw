@@ -1,4 +1,4 @@
-import {type Shape, Svg, Path as svgPath} from "@svgdotjs/svg.js"
+import {Path as svgPath, type Shape, Svg} from "@svgdotjs/svg.js"
 import {AbstractFigure} from "./AbstractFigure"
 
 
@@ -31,6 +31,11 @@ export class Path extends AbstractFigure {
 
     moveLabel(): this {
         throw new Error("Method not implemented.")
+    }
+
+    override update(): this {
+        this.computed()
+        return this
     }
 
     #makeShape(): Shape {

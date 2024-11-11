@@ -27,6 +27,7 @@ import {Follow, type IFollowConfig} from "./figures/Follow"
 import {FillBetween, type IFillBetweenConfig} from "./figures/FillBetween"
 import {type IRiemannConfig, Riemann} from "./figures/Riemann"
 import {Path} from "./figures/Path"
+import {Bezier, type IBezierConfig} from "./figures/Bezier"
 
 export type IDraggableFollow = ((x: number, y: number) => XY) | AbstractFigure | string
 
@@ -38,6 +39,7 @@ export interface IDraggableConfig {
     callback?: (figure: AbstractFigure) => void
     follow?: (IDraggableFollow)[],
     grid?: boolean
+    target?: AbstractFigure,
 }
 
 export class Graph {
@@ -181,7 +183,16 @@ export class Graph {
             path: (constraints: string, name: string): Path => {
                 const path = new Path(this.#rootSVG, name, constraints)
                 this.#layers.main.add(path.element)
+                this.#figures[name] = path
+
                 return path
+            },
+            bezier: (constraints: IBezierConfig, name: string): Bezier => {
+                const bezier = new Bezier(this.#rootSVG, name, constraints)
+                this.#layers.main.add(bezier.element)
+                this.#figures[name] = bezier
+
+                return bezier
             },
             plot: (constraints: IPlotConfig, name: string): Plot => {
                 const plot = new Plot(this.#rootSVG, name, constraints)
@@ -258,7 +269,8 @@ export class Graph {
         this.#display = value
     }
 
-    draggable(figure: AbstractFigure, target: AbstractFigure, options?: IDraggableConfig) {
+    draggable(figure: AbstractFigure, options?: IDraggableConfig) {
+        const target = options?.target??null
         const dragmove = (e: Event & { detail: { box: Box, handler: unknown } }): void => {
             // Figure as point
             const ptFigure = figure as Point
@@ -302,6 +314,7 @@ export class Graph {
 
             // Set the point coordinate according.
             ptFigure.pixels = {x, y}
+
             // For instance, if the target is a point, update the pixels.
             if (target instanceof Point) {
                 target.pixels = {x, y}
@@ -312,7 +325,11 @@ export class Graph {
                 options.callback(figure)
             }
 
-            this.update([figure.name, target.name])
+            const updateException = [figure.name]
+            if (target) {
+                updateException.push(target.name)
+            }
+            this.update(updateException)
         }
 
         // Move the figure to the top layer.
@@ -336,9 +353,9 @@ export class Graph {
     // Default follow function
     follow(value: string, obj: AbstractFigure): (x: number, y: number) => XY {
         if (value === 'Ox') {
-            return (x: number, y: number) => ({x, y: (obj as unknown as XY).y})
+            return (x: number) => ({x, y: (obj as unknown as XY).y})
         } else if (value === 'Oy') {
-            return (x: number, y: number) => ({x: (obj as unknown as XY).x, y})
+            return (_: number, y: number) => ({x: (obj as unknown as XY).x, y})
         } else if (value === 'grid') {
             return (x: number, y: number) => {
                 const xGrid = this.#config.axis.x.x,
@@ -390,7 +407,7 @@ export class Graph {
         return this.grid(name, subAxis)
     }
 
-    public toPixels<T>(pixels: T, axis?: 'x' | 'y' ): T {
+    public toPixels<T>(pixels: T, axis?: 'x' | 'y'): T {
         return toPixels(pixels, this.config, axis)
     }
 

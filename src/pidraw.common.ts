@@ -1,51 +1,53 @@
-import { G, Text as svgLabel, ForeignObject as svgHTML } from "@svgdotjs/svg.js"
+import {ForeignObject as svgHTML, G, Text as svgLabel} from "@svgdotjs/svg.js"
 
 export type TeXConverterType = (value: string) => string
+
 export interface IGraphConfig {
-    width: number,
-    height: number,
-    origin: XY,
-    system: COORDINATE_SYSTEM,
     axis: {
         x: XY,
         y: XY
     }
+    height: number,
+    origin: XY,
+    system: COORDINATE_SYSTEM,
+    width: number,
 }
 
 export interface IGraphDisplay {
+    axis?: boolean | { x: boolean | number | IAxisConfig, y: boolean | number | IAxisConfig },
     grid?: boolean,
     subgrid?: number,
-    axis?: boolean | { x: boolean | number | IAxisConfig, y: boolean | number | IAxisConfig },
 }
+
 export interface IGraphConstructorConfig {
-    width?: number,
-    height?: number,
-    origin?: XY,
-    system?: COORDINATE_SYSTEM,
-    ppu?: number,
     axis?: {
         x: XY,
         y: XY
     },
     display?: IGraphDisplay,
+    height?: number,
+    origin?: XY,
+    ppu?: number,
+    system?: COORDINATE_SYSTEM,
     tex?: TeXConverterType
+    width?: number,
 }
 
 export interface IAxisConfig {
     color?: string,
-    padding?: number,
     half?: boolean,
     length?: number
+    padding?: number,
 }
 
 export interface IFigureAppearanceConfig {
+    fill: {
+        color: string,
+        opacity: number
+    },
     stroke: {
         color: string,
         width: number,
-        opacity: number
-    },
-    fill: {
-        color: string,
         opacity: number
     },
 }
@@ -68,8 +70,8 @@ export function isDOMAIN(obj: unknown): obj is DOMAIN {
 
 export interface DOMAIN {
     axis?: 'x' | 'y',
-    min: number,
     max: number
+    min: number,
 }
 
 export enum LAYER_NAME {
@@ -127,4 +129,11 @@ export enum POLYGON_CONSTRAINT {
     REGULAR = 'regular',
     STAR = 'star'
 }
+
 export type LabelType = svgLabel | svgHTML | null
+
+export enum BEZIERCONTROL {
+    SMOOTH = 'smooth',
+    VERTICAL = 'vertical',
+    HORIZONTAL = 'horizontal',
+}

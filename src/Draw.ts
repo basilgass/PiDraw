@@ -1,12 +1,18 @@
-import { Graph, type IDraggableFollow } from "./Graph"
-import {type IParserParameters, PARSER_TYPE, type IParserConfig, type IParserSettings, PARSER_COLOR_VALUES } from "./parser/parser.common"
-import { COORDINATE_SYSTEM, type DOMAIN, type IGraphConfig, type IGraphDisplay, isDOMAIN, type XY } from "./pidraw.common"
-import { parser_config } from "./parser/parser.config"
-import { AbstractFigure } from "./figures/AbstractFigure"
-import {type LABEL_POSITION } from "./labels/Label"
-import { Point } from "./figures/Point"
-import { PiParse } from "piparser/lib/PiParse"
-import type { PARSER } from "piparser/lib/PiParserTypes"
+import {Graph, type IDraggableFollow} from "./Graph"
+import {
+    type IParserConfig,
+    type IParserParameters,
+    type IParserSettings,
+    PARSER_COLOR_VALUES,
+    PARSER_TYPE
+} from "./parser/parser.common"
+import {COORDINATE_SYSTEM, type DOMAIN, type IGraphConfig, type IGraphDisplay, isDOMAIN, type XY} from "./pidraw.common"
+import {parser_config} from "./parser/parser.config"
+import {AbstractFigure} from "./figures/AbstractFigure"
+import {type LABEL_POSITION} from "./labels/Label"
+import {Point} from "./figures/Point"
+import {PiParse} from "piparser/lib/PiParse"
+import type {PARSER} from "piparser/lib/PiParserTypes"
 
 export const PARSER_PARAMETERS_KEYS = [
     'ppu', 'x', 'y', 'grid', 'axis', 'label', 'tex', 'points', 'no-points', 'subgrid'
@@ -16,8 +22,8 @@ export const PARSER_PARAMETERS_KEYS = [
 // TODO: prevent creation of too many markers...
 export class Draw extends Graph {
     #code: PARSER[]
-    #settings: IParserSettings
     #parser: PiParse
+    #settings: IParserSettings
 
     constructor(id: string | HTMLElement, config?: IParserConfig) {
         super(id, {
@@ -87,143 +93,65 @@ export class Draw extends Graph {
         this.updateLayout()
     }
 
-    /**
-     * Prepare the code to load
-     * @param input Input code to parse and prepare
-     * @returns 
-     */
-    #prepare(input: string): PARSER[] {
-        // Reset the code.
-        // TODO: check if resetting the code with events are correctly removed.
-        const data: PARSER[] = []
+    #applyDrag(obj: AbstractFigure, key: string, options: Record<string, IParserParameters>) {
+        // Actually, only points are draggable
+        if (obj instanceof Point) {
+            const dragConfigInit: IDraggableFollow[] = []
+            const dragConfig: IDraggableFollow[] = []
 
-        // Split at \n => lines: string[]
-        // Filter the inputs
-        // - remove empty lines
-        // - trim each lines.
-        // - skip line starting with '$'
-        const lines: string[] = input
-            .split('\n')
-            .map((line) => line.trim())
-            .filter((line) => line.trim() !== '' && !line.startsWith('$'))
+            const interactive = this.create.point({ x: 0, y: 0 }, obj.name + '_drag')
 
-        // Define the block variables
-        // A block variable is a command that will be applied to the next lines, until the command is cleared.
-        const block: Record<string, IParserParameters> = {}
+            interactive.pixels = obj.pixels
+            interactive.asCircle(30).fill('white/0.8')
+            this.layers.interactive.add(interactive.element)
 
-        // Loop through each lines
-        for (const line of lines) {
-
-            // If lines starts with '@', it's a command
-            // Assign the command to the block
-            // Until the command is cleared, the block will be applied to the next lines.
-            if (line.startsWith('@')) {
-                const { key, value } = this.#defineCommand(line)
-                block[key] = { value, options: [] }
-                continue
-            }
-
-            // Parse the line
-            // Refactor a line for special cases:
-            // - A(3,4) => A=pt 3,4
-            // - d=AB => d=line A,B
-            // - d=AB. or d=[AB] => d=segment A,B
-            // - d=AB[ or d=[AB[ => d=halfline A,B
-            // - d=vAB => d=vec A,B
-            // - p(x)=x^2 => p=plot x^2
-            const parsedLine = this.#parser.parse(line)
-
-            // Add the block data to the parameters.
-            parsedLine.parameters = Object.assign(
-                parsedLine.parameters,
-                block
-            )
-
-            data.push(parsedLine)
-        }
-
-        return data
-    }
-
-    #uniqueName(name: string): string {
-        let newName = name
-        let i = 1
-        while (this.figures[newName]) {
-            newName = `${name}_${i}`
-            i++
-        }
-        return newName
-    }
-    /**
-     * Build the figures from the code
-     */
-    #build(input: string) {
-        this.#code = this.#prepare(input)
-        const pConfig = parser_config
-        const graphCreate = this.create
-
-        // Loop through each code
-        this.#code.forEach((item) => {
-            // Determine the id of the figure.
-            item.name = this.#uniqueName(item.name)
-
-            let obj: AbstractFigure | undefined
-            if (pConfig[item.key]) {
-                const { build, create, parameters } = pConfig[item.key]
-
-                // if <parameters> is not empty, it means the figure has specific parameters
-                // Check if they are defined in the item.parameters
-                if (parameters && parameters.length > 0 && Object.keys(item.parameters).length === 0) {
-                    const keys = Object.keys(item.parameters).filter(key => parameters.includes(key))
-                    keys.forEach((parameter) => {
-                        item.parameters[parameter] = { value: true, options: [] }
-                    })
+            // Check the options
+            // - grid
+            // - Ox
+            // - Oy
+            // - DOMAIN / IMAGE
+            const dragOptions = [options[key].value as string, ...options[key].options]
+            dragOptions.forEach((dragFollow) => {
+                if (['grid', 'Ox', 'Oy'].includes(dragFollow as string)) {
+                    dragConfigInit.push(this.follow(dragFollow as string, obj))
                 }
 
-                // Create the object
-                // TODO: make it eslint friendly and ts friendly
-                if (Object.hasOwn(graphCreate, create)) {
-                    try {
-                        const config = build(item, this.figures, this.config)
+                if (isDOMAIN(dragFollow)) {
+                    const axis = dragFollow.axis ?? 'x'
+                    const delta: DOMAIN = this.toPixels(dragFollow, axis)
 
-                        if (config) {
-                            /* eslint-disable */
-                            // @ts-expect-error: create is string and is not 
-                            obj = this.create[create](config, item.name)
-                            /* eslint-enable */
+                    dragConfigInit.push(
+                        (x: number, y: number) => {
+                            return {
+                                x: axis === 'x' ? Math.max(delta.min, Math.min(x, delta.max)) : x,
+                                y: axis === 'y' ? Math.max(delta.min, Math.min(y, delta.max)) : y
+                            }
                         }
-                    } catch (e) {
-                        // TODO: the build*** function should return an error message
-                        console.log(e)
-
-                    }
-                }
-            }
-
-            if (obj) {
-                // Apply defaults settings to the object
-                if (this.#settings.label &&
-                    obj instanceof Point &&
-                    item.parameters.label === undefined && item.parameters.tex === undefined
-                ) {
-                    item.parameters.label = { value: true, options: [] }
-                }
-                if (this.#settings.tex &&
-                    obj instanceof Point &&
-                    item.parameters.label === undefined && item.parameters.tex === undefined
-                ) {
-                    item.parameters.tex = { value: true, options: [] }
+                    )
                 }
 
-                if (obj instanceof Point && this.#settings.points === false) {
-                    item.parameters['!'] = { value: true, options: [] }
+                if (Object.hasOwn(this.figures, dragFollow as string)) {
+                    const figToFollow = this.figures[dragFollow as string]
+                    dragConfig.push((x: number, y: number) => figToFollow.follow(x, y))
                 }
+            })
 
-                this.#applyOptions(item.parameters, obj)
-            }
-        })
+            // Move the point to the interactive layer
+            // this.layers.interactive.add(obj.element)
+            // Resize the draggable point
+            // obj.asCircle(20)
+            //     .fill('white/0.8')
 
-
+            this.draggable(interactive,
+                {
+                    target: obj,
+                    follow: [
+                        ...dragConfigInit,
+                        ...dragConfig
+                    ]
+                }
+            )
+        }
     }
 
     #applyOptions(options: Record<string, IParserParameters>, obj: AbstractFigure) {
@@ -332,6 +260,78 @@ export class Draw extends Graph {
         })
     }
 
+    /**
+     * Build the figures from the code
+     */
+    #build(input: string) {
+        this.#code = this.#prepare(input)
+        const pConfig = parser_config
+        const graphCreate = this.create
+
+        // Loop through each code
+        this.#code.forEach((item) => {
+            // Determine the id of the figure.
+            item.name = this.#uniqueName(item.name)
+
+            let obj: AbstractFigure | undefined
+            if (pConfig[item.key]) {
+                const { build, create, parameters } = pConfig[item.key]
+
+                // if <parameters> is not empty, it means the figure has specific parameters
+                // Check if they are defined in the item.parameters
+                if (parameters && parameters.length > 0 && Object.keys(item.parameters).length === 0) {
+                    const keys = Object.keys(item.parameters).filter(key => parameters.includes(key))
+                    keys.forEach((parameter) => {
+                        item.parameters[parameter] = { value: true, options: [] }
+                    })
+                }
+
+                // Create the object
+                // TODO: make it eslint friendly and ts friendly
+                if (Object.hasOwn(graphCreate, create)) {
+                    try {
+                        const config = build(item, this.figures, this.config)
+
+                        if (config) {
+                            /* eslint-disable */
+                            // @ts-expect-error: create is string and is not 
+                            obj = this.create[create](config, item.name)
+                            /* eslint-enable */
+                        }
+                    } catch (e) {
+                        // TODO: the build*** function should return an error message
+                        console.log(e)
+
+                    }
+                }
+            }
+
+            if (obj) {
+                // Apply defaults settings to the object
+                if (this.#settings.label &&
+                    obj instanceof Point &&
+                    item.parameters.label === undefined && item.parameters.tex === undefined
+                ) {
+                    item.parameters.label = { value: true, options: [] }
+                }
+                if (this.#settings.tex &&
+                    obj instanceof Point &&
+                    item.parameters.label === undefined && item.parameters.tex === undefined
+                ) {
+                    item.parameters.tex = { value: true, options: [] }
+                }
+
+                if (obj instanceof Point && this.#settings.points === false) {
+                    item.parameters['!'] = { value: true, options: [] }
+                }
+
+                this.#applyOptions(item.parameters, obj)
+            }
+        })
+
+
+    }
+
     #defineCommand(command: string): { key: string, value: boolean } {
         // A command is: @<begin|end>:<key>
 
@@ -343,61 +343,6 @@ export class Draw extends Graph {
 
     }
 
-    #parseLayout(code?: string): { config: IGraphConfig, display: IGraphDisplay, settings: IParserSettings } {
-
-        // const parameters = PiParseParameters(code)
-        const parameters = this.#parser.parameters(code ?? '', PARSER_PARAMETERS_KEYS)
-
-        // Define the configuration
-        const ppu = parameters.ppu ? parseFloat(parameters.ppu.value as string) : 50
-        const xDomain = parameters.x && isDOMAIN(parameters.x.value) ? parameters.x.value : { min: -8, max: 8 }
-        const yDomain = parameters.y && isDOMAIN(parameters.y.value) ? parameters.y.value : { min: -8, max: 8 }
-        const dx = Math.abs(xDomain.max - xDomain.min)
-        const dy = Math.abs(yDomain.max - yDomain.min)
-
-
-        const width = dx * ppu
-        const height = dy * ppu
-        const origin = {
-            x: -xDomain.min * ppu,
-            y: yDomain.max * ppu
-        }
-
-        const system = COORDINATE_SYSTEM.CARTESIAN_2D
-        const axisConfig = {
-            x: { x: ppu, y: 0 },
-            y: { x: 0, y: -ppu }
-        }
-
-        // Display options
-        const grid = parameters.grid ? true : false
-        const axis = parameters.axis ? true : false
-        const subgrid = parameters.subgrid ? parseFloat(parameters.subgrid.value as string) : 0
-
-        // Parser specific settings
-        const settings: IParserSettings = {
-            label: parameters.label ? true : false,
-            tex: parameters.tex ? true : false,
-            points: parameters['no-points'] ? false : parameters.points ? parameters.points.value as 'o' | '*' | 's' : 'o'
-        }
-
-        return {
-            config: {
-                width,
-                height,
-                origin,
-                system,
-                axis: axisConfig,
-            },
-            display: {
-                grid,
-                subgrid,
-                axis
-            },
-            settings
-        }
-    }
-
     #parseKeyCode(key_code: string): string {
 
         // There are 3 possibilities for the key_code:
@@ -406,12 +351,12 @@ export class Draw extends Graph {
         // 3. d=<key> <code> => id='d', key='<key>' code
 
         // Extract the point (no = sign). The id is before the '(' and the code is between '(' and ')'
-        if (key_code.match(/^[A-Z][0-9]*\(.*\)$/)) {
+        if (/^[A-Z][0-9]*\(.*\)$/.exec(key_code)) {
             return this.#parseKeyCodePoint(key_code)
         }
 
         // Extract the plot or parametric function
-        if (key_code.match(/^[a-z][0-9]*\([x|t]\)/)) {
+        if (/^[a-z][0-9]*\([x|t]\)/.exec(key_code)) {
             return this.#parseKeyCodePlot(key_code)
         }
 
@@ -422,16 +367,6 @@ export class Draw extends Graph {
         }
 
         return key_code
-    }
-
-    // TO BE MOVED TO BUILD_POINT
-    #parseKeyCodePoint(key_code: string): string {
-        // Extract the point (no = sign). The id is before the '(' and the code is between '(' and ')'
-        const id = key_code.split('(')[0]
-        const code = key_code.split('(')[1].split(')')[0].split(',')
-        // const parameters = this.#parseParameters(key_code.split(')')[1])
-
-        return `${id}=pt ${code[0]},${code[1]}`
     }
 
     // TO BE MOVED TO BUILD_LINE
@@ -499,64 +434,136 @@ export class Draw extends Graph {
         return `${id}=${key} ${data}`
     }
 
-    #applyDrag(obj: AbstractFigure, key: string, options: Record<string, IParserParameters>) {
-        // Actually, only points are draggable
-        if (obj instanceof Point) {
-            const dragConfigInit: IDraggableFollow[] = []
-            const dragConfig: IDraggableFollow[] = []
+    // TO BE MOVED TO BUILD_POINT
+    #parseKeyCodePoint(key_code: string): string {
+        // Extract the point (no = sign). The id is before the '(' and the code is between '(' and ')'
+        const id = key_code.split('(')[0]
+        const code = key_code.split('(')[1].split(')')[0].split(',')
+        // const parameters = this.#parseParameters(key_code.split(')')[1])
 
-            const interactive = this.create.point({ x: 0, y: 0 }, obj.name + '_drag')
+        return `${id}=pt ${code[0]},${code[1]}`
+    }
 
-            interactive.pixels = obj.pixels
-            interactive.asCircle(30).fill('white/0.8')
-            this.layers.interactive.add(interactive.element)
+    #parseLayout(code?: string): { config: IGraphConfig, display: IGraphDisplay, settings: IParserSettings } {
 
-            // Check the options
-            // - grid
-            // - Ox
-            // - Oy
-            // - DOMAIN / IMAGE
-            const dragOptions = [options[key].value as string, ...options[key].options]
-            dragOptions.forEach((dragFollow) => {
-                if (['grid', 'Ox', 'Oy'].includes(dragFollow as string)) {
-                    dragConfigInit.push(this.follow(dragFollow as string, obj))
-                }
+        // const parameters = PiParseParameters(code)
+        const parameters = this.#parser.parameters(code ?? '', PARSER_PARAMETERS_KEYS)
 
-                if (isDOMAIN(dragFollow)) {
-                    const axis = dragFollow.axis ?? 'x'
-                    const delta: DOMAIN = this.toPixels(dragFollow, axis)
+        // Define the configuration
+        const ppu = parameters.ppu ? parseFloat(parameters.ppu.value as string) : 50
+        const xDomain = parameters.x && isDOMAIN(parameters.x.value) ? parameters.x.value : { min: -8, max: 8 }
+        const yDomain = parameters.y && isDOMAIN(parameters.y.value) ? parameters.y.value : { min: -8, max: 8 }
+        const dx = Math.abs(xDomain.max - xDomain.min)
+        const dy = Math.abs(yDomain.max - yDomain.min)
 
-                    dragConfigInit.push(
-                        (x: number, y: number) => {
-                            return {
-                                x: axis === 'x' ? Math.max(delta.min, Math.min(x, delta.max)) : x,
-                                y: axis === 'y' ? Math.max(delta.min, Math.min(y, delta.max)) : y
-                            }
-                        }
-                    )
-                }
 
-                if (Object.hasOwn(this.figures, dragFollow as string)) {
-                    const figToFollow = this.figures[dragFollow as string]
-                    dragConfig.push((x: number, y: number) => figToFollow.follow(x, y))
-                }
-            })
-
-            // Move the point to the interactive layer
-            // this.layers.interactive.add(obj.element)
-            // Resize the draggable point
-            // obj.asCircle(20)
-            //     .fill('white/0.8')
-
-            this.draggable(interactive,
-                obj,
-                {
-                    follow: [
-                        ...dragConfigInit,
-                        ...dragConfig
-                    ]
-                }
-            )
+        const width = dx * ppu
+        const height = dy * ppu
+        const origin = {
+            x: -xDomain.min * ppu,
+            y: yDomain.max * ppu
         }
+
+        const system = COORDINATE_SYSTEM.CARTESIAN_2D
+        const axisConfig = {
+            x: { x: ppu, y: 0 },
+            y: { x: 0, y: -ppu }
+        }
+
+        // Display options
+        const grid = parameters.grid ? true : false
+        const axis = parameters.axis ? true : false
+        const subgrid = parameters.subgrid ? parseFloat(parameters.subgrid.value as string) : 0
+
+        // Parser specific settings
+        const settings: IParserSettings = {
+            label: parameters.label ? true : false,
+            tex: parameters.tex ? true : false,
+            points: parameters['no-points'] ? false : parameters.points ? parameters.points.value as 'o' | '*' | 's' : 'o'
+        }
+
+        return {
+            config: {
+                width,
+                height,
+                origin,
+                system,
+                axis: axisConfig,
+            },
+            display: {
+                grid,
+                subgrid,
+                axis
+            },
+            settings
+        }
+    }
+
+    /**
+     * Prepare the code to load
+     * @param input Input code to parse and prepare
+     * @returns 
+     */
+    #prepare(input: string): PARSER[] {
+        // Reset the code.
+        // TODO: check if resetting the code with events are correctly removed.
+        const data: PARSER[] = []
+
+        // Split at \n => lines: string[]
+        // Filter the inputs
+        // - remove empty lines
+        // - trim each lines.
+        // - skip line starting with '$'
+        const lines: string[] = input
+            .split('\n')
+            .map((line) => line.trim())
+            .filter((line) => line.trim() !== '' && !line.startsWith('$'))
+
+        // Define the block variables
+        // A block variable is a command that will be applied to the next lines, until the command is cleared.
+        const block: Record<string, IParserParameters> = {}
+
+        // Loop through each lines
+        for (const line of lines) {
+
+            // If lines starts with '@', it's a command
+            // Assign the command to the block
+            // Until the command is cleared, the block will be applied to the next lines.
+            if (line.startsWith('@')) {
+                const { key, value } = this.#defineCommand(line)
+                block[key] = { value, options: [] }
+                continue
+            }
+
+            // Parse the line
+            // Refactor a line for special cases:
+            // - A(3,4) => A=pt 3,4
+            // - d=AB => d=line A,B
+            // - d=AB. or d=[AB] => d=segment A,B
+            // - d=AB[ or d=[AB[ => d=halfline A,B
+            // - d=vAB => d=vec A,B
+            // - p(x)=x^2 => p=plot x^2
+            const parsedLine = this.#parser.parse(line)
+
+            // Add the block data to the parameters.
+            parsedLine.parameters = Object.assign(
+                parsedLine.parameters,
+                block
+            )
+
+            data.push(parsedLine)
+        }
+
+        return data
+    }
+
+    #uniqueName(name: string): string {
+        let newName = name
+        let i = 1
+        while (this.figures[newName]) {
+            newName = `${name}_${i}`
+            i++
+        }
+        return newName
     }
 }
