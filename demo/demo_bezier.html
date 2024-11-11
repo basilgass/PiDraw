@@ -61,13 +61,24 @@
 		draw.draggable(D, { follow: ['grid'] })
 
 		const p = draw.create.bezier({
-			points: [A,B,C,D]
+			points: [
+				{point: A},
+				{
+					point: B,
+				controls: {type: BEZIERCONTROL.HORIZONTAL}
+				},
+				{point: C},
+				{
+					point: D,
+					controls: {type: BEZIERCONTROL.VERTICAL, ratio: 0.8}
+				}
+			]
 		}, 'bezier')
 
-		p.setControlType('B', BEZIERCONTROL.HORIZONTAL)
-			.setControlType('D', BEZIERCONTROL.VERTICAL)
-			.setControlRatio('D', 0.8)
-			.update()
+		// p.setControlType('B', BEZIERCONTROL.HORIZONTAL)
+		// 	.setControlType('D', BEZIERCONTROL.VERTICAL)
+		// 	.setControlRatio('D', 0.8)
+		// 	.update()
 
 	}
 

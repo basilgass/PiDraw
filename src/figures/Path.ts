@@ -33,11 +33,6 @@ export class Path extends AbstractFigure {
         throw new Error("Method not implemented.")
     }
 
-    override update(): this {
-        this.computed()
-        return this
-    }
-
     #makeShape(): Shape {
         this.clear()
 

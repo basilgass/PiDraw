@@ -1,21 +1,22 @@
-import { type PARSER } from "piparser/lib/PiParserTypes"
-import { AbstractFigure } from "../figures/AbstractFigure"
-import { type IGraphConfig } from "../pidraw.common"
-import { buildArc, buildCircle } from "./buildCircle"
-import { buildLine } from "./buildLine"
-import { buildFillBetween, buildFollow, buildParametric, buildPlot, buildRiemann } from "./buildPlot"
-import { buildPoint } from "./buildPoint"
-import { buildPolygon } from "./buildPolygon"
+import {type PARSER} from "piparser/lib/PiParserTypes"
+import {AbstractFigure} from "../figures/AbstractFigure"
+import {type IGraphConfig} from "../pidraw.common"
+import {buildArc, buildCircle} from "./buildCircle"
+import {buildLine} from "./buildLine"
+import {buildFillBetween, buildFollow, buildParametric, buildPlot, buildRiemann} from "./buildPlot"
+import {buildPoint} from "./buildPoint"
+import {buildPolygon} from "./buildPolygon"
+import {buildBezier} from "./buildBezier"
 
 // TODO: add the build and create parameters to make it easily accessible and extensible.
 export interface parser_item {
-    name: string,
-    description: string,
-    code: string,
-    parameters: string[],
     build: (values: PARSER, figures: Record<string, AbstractFigure>, config: IGraphConfig) => unknown,
+    code: string,
     create: string,
+    description: string,
+    name: string,
     option?: string
+    parameters: string[],
 }
 export const parser_config: Record<string, parser_item> = {
     pt: {
@@ -175,6 +176,14 @@ export const parser_config: Record<string, parser_item> = {
         parameters: [],
         build: buildParametric,
         create: 'parametric'
+    },
+    bezier: {
+        name: 'bezier',
+        description: 'bezier curve through points',
+        code: 'b=bezier A,B,C,D/<CONTROL: H,V,S>/<ratio>',
+        parameters: [],
+        build: buildBezier,
+        create: 'bezier'
     },
     poly: {
         name: 'polygon',

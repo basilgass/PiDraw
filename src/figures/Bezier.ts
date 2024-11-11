@@ -7,14 +7,15 @@ interface IBezierControlPointInterface extends XY {
     point?: XY
 }
 
-export interface IBezierPointInterface extends XY {
+interface pointWithName extends XY {name: string}
+export interface IBezierPointInterface {
     controls: {
         type: BEZIERCONTROL,
         ratio: number,
         left: IBezierControlPointInterface | null,
         right: IBezierControlPointInterface | null
     },
-    name?: string,
+    point: pointWithName,
 }
 
 export interface IBezierConfig {
@@ -64,7 +65,7 @@ export class Bezier extends AbstractFigure {
     }
 
     getPointByName(name: string): IBezierPointInterface | undefined {
-        return this.#points.find(x => x.name === name)
+        return this.#points.find(x => x.point.name === name)
     }
 
     override moveLabel(): this {
@@ -111,13 +112,10 @@ export class Bezier extends AbstractFigure {
         return this
     }
 
-    override update(): this {
-        this.computed()
-        return this
-    }
-
     #makeShape(): Shape {
-        this.shape = this.rootSVG.path("")
+        this.element.clear()
+
+        this.shape = this.element.path("")
 
         // Apply the stroke and fill.
         this.fill().stroke()

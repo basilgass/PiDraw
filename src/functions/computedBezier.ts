@@ -11,13 +11,15 @@ import {type IBezierPointInterface} from "../figures/Bezier"
 import {BEZIERCONTROL} from "../pidraw.common"
 
 export type bezierCommandType = (bPoint: IBezierPointInterface, i: number, a: IBezierPointInterface[]) => string
+
 export function computeBezierPath(points: IBezierPointInterface[]) {
     // build the d attributes by looping over the points
-    return points.reduce((acc, point, i, a) => i === 0
-            // if first point
-            ? `M ${point.x},${point.y}`
-            // else
-            : `${acc} ${bezierCommand(point, i, a)}`
+    return points.reduce((acc, bezierPoint, i, a) =>
+            i === 0 ?
+                // if first point
+                `M ${bezierPoint.point.x},${bezierPoint.point.y}` :
+                // else
+                `${acc} ${bezierCommand(bezierPoint, i, a)}`
         , '')
 }
 
@@ -26,8 +28,8 @@ export function computeBezierPath(points: IBezierPointInterface[]) {
 //     - pointB (array) [x,y]: coordinates
 // O:  - (object) { length: l, angle: a }: properties of the line
 function bezierLine(pointA: IBezierPointInterface, pointB: IBezierPointInterface) {
-    const lengthX = pointB.x - pointA.x
-    const lengthY = pointB.y - pointA.y
+    const lengthX = pointB.point.x - pointA.point.x
+    const lengthY = pointB.point.y - pointA.point.y
 
     return {
         length: Math.sqrt(Math.pow(lengthX, 2) + Math.pow(lengthY, 2)),
@@ -48,7 +50,7 @@ function bezierControlPoint(current: IBezierPointInterface, previous: IBezierPoi
     const p = previous ?? current
     const n = next ?? current
     // The smoothing ratio
-    const smoothing = current.controls?.ratio ?? 0.2
+    const smoothing = current.controls.ratio ?? 0.2
     // Properties of the opposed-line
     const o = bezierLine(p, n)
     // If is end-control-point, add PI to the angle to go backward
@@ -56,15 +58,15 @@ function bezierControlPoint(current: IBezierPointInterface, previous: IBezierPoi
     const length = o.length * smoothing
 
     // If the current control type is vertical or horizontal, adapt the angle
-    if (current.controls?.type === BEZIERCONTROL.VERTICAL) {
+    if (current.controls.type === BEZIERCONTROL.VERTICAL) {
         angle = Math.PI / 2 + (reverse ? Math.PI : 0)
-    } else if (current.controls?.type === BEZIERCONTROL.HORIZONTAL) {
+    } else if (current.controls.type === BEZIERCONTROL.HORIZONTAL) {
         angle = 0 + (reverse ? Math.PI : 0)
     }
 
     // The control point position is relative to the current point
-    const x = current.x + Math.cos(angle) * length
-    const y = current.y + Math.sin(angle) * length
+    const x = current.point.x + Math.cos(angle) * length
+    const y = current.point.y + Math.sin(angle) * length
     return [x, y]
 }
 
@@ -80,5 +82,5 @@ function bezierCommand(bPoint: IBezierPointInterface, i: number, a: IBezierPoint
     const [cpsX, cpsY] = bezierControlPoint(a[i - 1], a[i - 2], bPoint)
     // end control point
     const [cpeX, cpeY] = bezierControlPoint(bPoint, a[i - 1], a[i + 1], true)
-    return `C ${cpsX},${cpsY} ${cpeX},${cpeY} ${bPoint.x},${bPoint.y}`
+    return `C ${cpsX},${cpsY} ${cpeX},${cpeY} ${bPoint.point.x},${bPoint.point.y}`
 }
