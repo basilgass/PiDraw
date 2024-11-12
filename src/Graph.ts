@@ -270,7 +270,6 @@ export class Graph {
     }
 
     draggable(figure: AbstractFigure, options?: IDraggableConfig) {
-        const target = options?.target??null
         const dragmove = (e: Event & { detail: { box: Box, handler: unknown } }): void => {
             // Figure as point
             const ptFigure = figure as Point
@@ -316,6 +315,7 @@ export class Graph {
             ptFigure.pixels = {x, y}
 
             // For instance, if the target is a point, update the pixels.
+            const target = options?.target??null
             if (target instanceof Point) {
                 target.pixels = {x, y}
             }
@@ -329,6 +329,7 @@ export class Graph {
             if (target) {
                 updateException.push(target.name)
             }
+
             this.update(updateException)
         }
 
@@ -422,13 +423,23 @@ export class Graph {
             except = []
         }
 
+        // Add all figures with a "_drag" in the exception.
+        Object.keys(this.figures)
+            .forEach((name) => {
+                const dragName = `${name}_drag`
+
+                if(dragName in this.figures){
+                    except.push(name, dragName)
+                }
+
+            })
+
         // Go through each objects and update them if they are computed.
         Object.keys(this.figures)
             .forEach((name) => {
                 if (except.includes(name)) {
                     this.figures[name].updateLabel()
                 } else {
-                    // Update figure and label
                     this.figures[name].update(forceUpdate)
                 }
             })

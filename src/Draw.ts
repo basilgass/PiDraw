@@ -141,7 +141,6 @@ export class Draw extends Graph {
             // Resize the draggable point
             // obj.asCircle(20)
             //     .fill('white/0.8')
-
             this.draggable(interactive,
                 {
                     target: obj,

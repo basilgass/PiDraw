@@ -1,14 +1,11 @@
-import { Svg, Shape } from "@svgdotjs/svg.js"
-import type { XY } from "../pidraw.common"
-import { AbstractFigure } from "./AbstractFigure"
-import { Line } from "./Line"
-import { mathVector, toCoordinates, toPixels } from "../Calculus"
+import {Shape, Svg} from "@svgdotjs/svg.js"
+import type {XY} from "../pidraw.common"
+import {AbstractFigure} from "./AbstractFigure"
+import {Line} from "./Line"
+import {mathVector, toCoordinates, toPixels} from "../Calculus"
 
 export type ILine = Line | 'Ox' | 'Oy'
 export interface IPointConfig {
-    shape?: 'circle' | 'square' | 'crosshair'
-    size?: number,
-    pixels?: XY,
     coordinates?: XY,
     direction?: {
         point: XY,
@@ -16,31 +13,19 @@ export interface IPointConfig {
         distance: number,
         perpendicular?: boolean
     }
-    middle?: { A: XY, B: XY },
     intersection?: { A: ILine, B: ILine },
+    middle?: { A: XY, B: XY },
+    pixels?: XY,
     projection?: { axis: ILine, point: XY },
+    shape?: 'circle' | 'square' | 'crosshair'
+    size?: number,
     symmetry?: { A: XY, B: XY | ILine }
 }
 
 export class Point extends AbstractFigure {
+    #config: IPointConfig
     // Coordinates of the point in pixels
     #pixels: XY
-
-    #config: IPointConfig
-
-    get config() { return this.#config }
-    set config(value: IPointConfig) {
-        this.#config = value
-        this.#makeShape()
-    }
-
-    get size() {
-        return this.#config.size as unknown as number
-    }
-    set size(value: number) {
-        this.#config.size = value
-        this.#makeShape()
-    }
 
     constructor(rootSVG: Svg, name: string, values: IPointConfig) {
         super(rootSVG, name)
@@ -67,40 +52,13 @@ export class Point extends AbstractFigure {
         return this
     }
 
-    get pixels() { return this.#pixels }
-    set pixels(value: XY) {
-        this.#pixels = value
-        this.shape.center(this.#pixels.x, this.#pixels.y)
-    }
-
-    // Used to store the original coordinates of the point
-    get coordinates(): XY {
-        return toCoordinates(this.#pixels, this.graphConfig)
-    }
-
-    get x() { return this.#pixels.x }
-    set x(value: number) {
-        this.#pixels.x = value
-        this.shape.center(value, this.#pixels.y)
-    }
-    get y() { return this.#pixels.y }
-    set y(value: number) {
-        this.#pixels.y = value
-        this.shape.center(this.#pixels.x, value)
-    }
-
     asCircle(size?: number): this {
         this.config.shape = 'circle'
         this.config.size = size ?? 2
         this.#makeShape()
         return this
     }
-    asSquare(size?: number): this {
-        this.config.shape = 'square'
-        this.config.size = size ?? 10
-        this.#makeShape()
-        return this
-    }
+
     asCrosshair(size?: number): this {
         this.config.shape = 'crosshair'
         this.config.size = size ?? 10
@@ -108,32 +66,21 @@ export class Point extends AbstractFigure {
         return this
     }
 
-    #makeShape(): Shape {
-        this.clear()
+    asSquare(size?: number): this {
+        this.config.shape = 'square'
+        this.config.size = size ?? 10
+        this.#makeShape()
+        return this
+    }
 
-        switch (this.config.shape) {
-            case 'circle':
-                this.shape = this.element.circle(this.size)
-                    .center(this.#pixels.x, this.#pixels.y)
-                break
-            case 'square':
-                this.shape = this.element.rect(this.size, this.size)
-                    .center(this.#pixels.x, this.#pixels.y)
-                break
-            case 'crosshair':
-                {
-                    const diagonal_size = this.size / Math.sqrt(2)
-                    this.shape = this.element.path(
-                        `M ${-diagonal_size} ${diagonal_size} L ${diagonal_size} ${-diagonal_size} M ${-diagonal_size} ${-diagonal_size} L ${diagonal_size} ${diagonal_size}`
-                    ).center(this.#pixels.x, this.#pixels.y)
-                    break
-                }
+    override computeLabel(): string {
+        if (this.label?.config.text.includes('@')) {
+            const coords = toCoordinates(this.#pixels, this.graphConfig)
+
+            return this.label.config.text.replace('@', `(${coords.x};${coords.y})`)
         }
 
-        // Apply the stroke and fill.
-        this.fill().stroke()
-
-        return this.shape
+        return this.label?.config.text ?? this.name
     }
 
     computed(): this {
@@ -204,7 +151,7 @@ export class Point extends AbstractFigure {
 
             if (B instanceof Line) {
                 // Symmetry with a line
-                const d = new mathVector(B.direction)      // direction vector of the line 
+                const d = new mathVector(B.direction)      // direction vector of the line
                 const n = d.normal   // normal vector to the line
                 const BA = new mathVector(A, B.start) // vector BA
 
@@ -271,6 +218,18 @@ export class Point extends AbstractFigure {
         return this
     }
 
+    get config() { return this.#config }
+
+    set config(value: IPointConfig) {
+        this.#config = value
+        this.#makeShape()
+    }
+
+    // Used to store the original coordinates of the point
+    get coordinates(): XY {
+        return toCoordinates(this.#pixels, this.graphConfig)
+    }
+
     moveLabel(): this {
         if (this.label) {
             this.label.move(this.x, this.y)
@@ -279,13 +238,61 @@ export class Point extends AbstractFigure {
         return this
     }
 
-    override computeLabel(): string {
-        if (this.label?.config.text.includes('@')) {
-            const coords = toCoordinates(this.#pixels, this.graphConfig)
+    get pixels() { return this.#pixels }
 
-            return this.label.config.text.replace('@', `(${coords.x};${coords.y})`)
+    set pixels(value: XY) {
+        this.#pixels = value
+        this.shape.center(this.#pixels.x, this.#pixels.y)
+    }
+
+    get size() {
+        return this.#config.size as unknown as number
+    }
+
+    set size(value: number) {
+        this.#config.size = value
+        this.#makeShape()
+    }
+
+    get x() { return this.#pixels.x }
+
+    set x(value: number) {
+        this.#pixels.x = value
+        this.shape.center(value, this.#pixels.y)
+    }
+
+    get y() { return this.#pixels.y }
+
+    set y(value: number) {
+        this.#pixels.y = value
+        this.shape.center(this.#pixels.x, value)
+    }
+
+    #makeShape(): Shape {
+        this.clear()
+
+        switch (this.config.shape) {
+            case 'circle':
+                this.shape = this.element.circle(this.size)
+                    .center(this.#pixels.x, this.#pixels.y)
+                break
+            case 'square':
+                this.shape = this.element.rect(this.size, this.size)
+                    .center(this.#pixels.x, this.#pixels.y)
+                break
+            case 'crosshair':
+                {
+                    const diagonal_size = this.size / Math.sqrt(2)
+                    this.shape = this.element.path(
+                        `M ${-diagonal_size} ${diagonal_size} L ${diagonal_size} ${-diagonal_size} M ${-diagonal_size} ${-diagonal_size} L ${diagonal_size} ${diagonal_size}`
+                    ).center(this.#pixels.x, this.#pixels.y)
+                    break
+                }
         }
 
-        return this.label?.config.text ?? this.name
+        // Apply the stroke and fill.
+        this.fill().stroke()
+
+        return this.shape
     }
 }

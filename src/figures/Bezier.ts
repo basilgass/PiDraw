@@ -7,7 +7,10 @@ interface IBezierControlPointInterface extends XY {
     point?: XY
 }
 
-interface pointWithName extends XY {name: string}
+interface pointWithName extends XY {
+    name: string
+}
+
 export interface IBezierPointInterface {
     controls: {
         type: BEZIERCONTROL,
@@ -88,16 +91,16 @@ export class Bezier extends AbstractFigure {
             right: null
         }
 
-        this.#points = values.map(pt => {
-            pt.controls = Object.assign({}, defaultControl, pt.controls)
-            return pt as unknown as IBezierPointInterface
+        this.#points = values
+        this.#points.forEach(value => {
+            value.controls = Object.assign({}, defaultControl, value.controls)
         })
     }
 
     setControlRatio(name: string, ratio: number): this {
         const pt = this.getPointByName(name)
 
-        if(pt){
+        if (pt) {
             pt.controls.ratio = ratio
         }
         return this
@@ -106,7 +109,7 @@ export class Bezier extends AbstractFigure {
     setControlType(name: string, type: BEZIERCONTROL): this {
         const pt = this.getPointByName(name)
 
-        if(pt){
+        if (pt) {
             pt.controls.type = type
         }
         return this
