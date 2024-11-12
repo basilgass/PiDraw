@@ -173,12 +173,12 @@ export class Draw extends Graph {
                     obj.stroke(4)
                     break
                 case 'color': {
-                    const value = options[key].value as string + (options[key].options.length > 0 ? `/${options[key].options[0]}` : '')
+                    const value = options[key].value as string + (options[key].options.length > 0 ? `/${options[key].options[0] as string}` : '')
                     obj.stroke(value)
                     break
                 }
                 case 'fill': {
-                    const value = options[key].value as string + (options[key].options.length > 0 ? `/${options[key].options[0]}` : '')
+                    const value = options[key].value as string + (options[key].options.length > 0 ? `/${options[key].options[0] as string}` : '')
                     obj.fill(value)
                     break
                 }

@@ -62,11 +62,6 @@ export class Bezier extends AbstractFigure {
         this.#config = value
     }
 
-    fromPoints(points: XY[]) {
-        // Calculate the points to make a smooth path.
-        throw new Error('Method not implemented')
-    }
-
     getPointByName(name: string): IBezierPointInterface | undefined {
         return this.#points.find(x => x.point.name === name)
     }

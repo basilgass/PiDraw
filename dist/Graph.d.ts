@@ -1,19 +1,18 @@
-import { Marker, Svg } from "@svgdotjs/svg.js";
-import '@svgdotjs/svg.draggable.js';
-import { COORDINATE_SYSTEM, type DOMAIN, type IGraphConfig, type IGraphConstructorConfig, type IGraphDisplay, type ILayers, type XY } from "./pidraw.common";
-import { type IPointConfig, Point } from "./figures/Point";
-import { type ILineConfig, Line } from "./figures/Line";
-import { type IPlotConfig, Plot } from "./figures/Plot";
-import { AbstractFigure } from "./figures/AbstractFigure";
-import { Circle, type ICircleConfig } from "./figures/Circle";
-import { type IPolygonConfig, Polygon } from "./figures/Polygon";
-import { Arc, type IArcConfig } from "./figures/Arc";
-import { type IParametricConfig, Parametric } from "./figures/Parametric";
-import { type IFollowConfig } from "./figures/Follow";
-import { type IFillBetweenConfig } from "./figures/FillBetween";
-import { type IRiemannConfig } from "./figures/Riemann";
-import { Path } from "./figures/Path";
-import { Bezier, type IBezierConfig } from "./figures/Bezier";
+import { Marker, Svg } from '@svgdotjs/svg.js';
+import { COORDINATE_SYSTEM, DOMAIN, IGraphConfig, IGraphConstructorConfig, IGraphDisplay, ILayers, XY } from './pidraw.common';
+import { IPointConfig, Point } from './figures/Point';
+import { ILineConfig, Line } from './figures/Line';
+import { IPlotConfig, Plot } from './figures/Plot';
+import { AbstractFigure } from './figures/AbstractFigure';
+import { Circle, ICircleConfig } from './figures/Circle';
+import { IPolygonConfig, Polygon } from './figures/Polygon';
+import { Arc, IArcConfig } from './figures/Arc';
+import { IParametricConfig, Parametric } from './figures/Parametric';
+import { IFollowConfig } from './figures/Follow';
+import { IFillBetweenConfig } from './figures/FillBetween';
+import { IRiemannConfig } from './figures/Riemann';
+import { Path } from './figures/Path';
+import { Bezier, IBezierConfig } from './figures/Bezier';
 export type IDraggableFollow = ((x: number, y: number) => XY) | AbstractFigure | string;
 export interface IDraggableConfig {
     bounds?: {
@@ -69,4 +68,3 @@ export declare class Graph {
     update(except?: string[], forceUpdate?: boolean): void;
     updateLayout(): void;
 }
-//# sourceMappingURL=Graph.d.ts.map
