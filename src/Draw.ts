@@ -202,9 +202,16 @@ export class Draw extends Graph {
 
                 // Visibility
                 case 'hide':
-                case '!':
-                    // TODO: Allow to hide the object, but not the label.
                     obj.hide()
+                    break
+                case '!':
+                    // Hide all elements, except the label
+                    obj.element.children().forEach((child) => {
+                        if (child.attr('id') !== `${obj.name}-label`) {
+                            child.hide()
+                        }
+                    })
+                    // obj.label?.show()
                     break
                 case '#':
                 case 'static':
