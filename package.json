@@ -1,6 +1,6 @@
 {
   "name": "pidraw",
-  "version": "0.1.45",
+  "version": "0.1.46",
   "description": "A drawing library for teacher :)",
   "type": "module",
   "main": "dist/pidraw.js",
