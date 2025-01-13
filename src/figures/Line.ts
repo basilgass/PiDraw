@@ -1,7 +1,7 @@
 import {AbstractFigure} from "./AbstractFigure"
 import type {XY} from "../pidraw.common"
 import {Line as svgLine, Shape, Svg} from "@svgdotjs/svg.js"
-import {computeLine, createMarker, mathLine, mathVector, toNumber} from "../Calculus"
+import {computeLine, createMarker, mathLine, mathVector} from "../Calculus"
 
 export type ILineType = 'segment' | 'ray' | 'line' | 'vector'
 
@@ -45,6 +45,51 @@ export class Line extends AbstractFigure {
 
     get angle(): number {
         return Math.atan2(-this.direction.y, this.direction.x) * 180 / Math.PI
+    }
+
+    get config() {
+        return this.#config
+    }
+
+    set config(value: ILineConfig) {
+        this.#config = value
+        this.#makeShape()
+    }
+
+    get direction(): XY {
+        return {
+            x: this.end.x - this.start.x,
+            y: this.end.y - this.start.y
+        }
+    }
+
+    get end() {
+        return this.#end
+    }
+
+    set end(value: XY) {
+        this.#end = value
+    }
+
+    get math(): mathLine {
+        return new mathLine(this.start, this.end)
+    }
+
+    get normal(): XY {
+        const d = this.direction
+
+        return {
+            x: d.y,
+            y: -d.x
+        }
+    }
+
+    get start() {
+        return this.#start
+    }
+
+    set start(value: XY) {
+        this.#start = value
     }
 
     computed(): this {
@@ -169,36 +214,8 @@ export class Line extends AbstractFigure {
         return this
     }
 
-    get config() {
-        return this.#config
-    }
-
-    set config(value: ILineConfig) {
-        this.#config = value
-        this.#makeShape()
-    }
-
-    get direction(): XY {
-        return {
-            x: this.end.x - this.start.x,
-            y: this.end.y - this.start.y
-        }
-    }
-
-    get end() {
-        return this.#end
-    }
-
-    set end(value: XY) {
-        this.#end = value
-    }
-
     override follow(x: number, y: number): XY {
         return this.math.projection({x, y})
-    }
-
-    get math(): mathLine {
-        return new mathLine(this.start, this.end)
     }
 
     override move(x: number | XY): this {
@@ -231,28 +248,11 @@ export class Line extends AbstractFigure {
             }
 
             this.label.move(x, y)
-            this.label.rotate(angle)
-            this.label.position()
+            // this.label.rotate(angle)
+            this.label.position(undefined, undefined, angle)
         }
 
         return this
-    }
-
-    get normal(): XY {
-        const d = this.direction
-
-        return {
-            x: d.y,
-            y: -d.x
-        }
-    }
-
-    get start() {
-        return this.#start
-    }
-
-    set start(value: XY) {
-        this.#start = value
     }
 
     #makeShape(): Shape {

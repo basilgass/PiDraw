@@ -57,12 +57,12 @@ export class Draw extends Graph {
         return this
     }
 
-    static documentation() {
-        return parser_config
-    }
-
     get code() {
         return this.#code
+    }
+
+    static documentation() {
+        return parser_config
     }
 
     /**
@@ -99,7 +99,7 @@ export class Draw extends Graph {
             const dragConfigInit: IDraggableFollow[] = []
             const dragConfig: IDraggableFollow[] = []
 
-            const interactive = this.create.point({ x: 0, y: 0 }, obj.name + '_drag')
+            const interactive = this.create.point({x: 0, y: 0}, obj.name + '_drag')
 
             interactive.pixels = obj.pixels
             interactive.asCircle(30).fill('white/0.8')
@@ -203,6 +203,7 @@ export class Draw extends Graph {
                 // Visibility
                 case 'hide':
                 case '!':
+                    // TODO: Allow to hide the object, but not the label.
                     obj.hide()
                     break
                 case '#':
@@ -228,16 +229,20 @@ export class Draw extends Graph {
                     )
 
                     if (obj.label) {
-                        const alignement = options[key].options[0] === false ? 'br' : options[key].options[0] as LABEL_POSITION
-                        const offsetAsUnits = options[key].options[1] as XY | undefined ?? { x: 0, y: 0 }
+                        const alignement = (options[key].options[0] === false || options[key].options[0] === true) ? 'br' : options[key].options[0] as LABEL_POSITION
+
+                        const offsetAsUnits = options[key].options[1] as XY | undefined ?? {x: 0, y: 0}
                         const offset = {
                             x: offsetAsUnits.x * this.config.axis.x.x,
                             y: -offsetAsUnits.y * this.config.axis.y.y
                         }
 
+                        const rotate = options[key].options[2] as number | undefined
+
                         obj.label.position(
                             alignement,
-                            offset
+                            offset,
+                            rotate
                         )
                     }
 
@@ -274,14 +279,14 @@ export class Draw extends Graph {
 
             let obj: AbstractFigure | undefined
             if (pConfig[item.key]) {
-                const { build, create, parameters } = pConfig[item.key]
+                const {build, create, parameters} = pConfig[item.key]
 
                 // if <parameters> is not empty, it means the figure has specific parameters
                 // Check if they are defined in the item.parameters
                 if (parameters && parameters.length > 0 && Object.keys(item.parameters).length === 0) {
                     const keys = Object.keys(item.parameters).filter(key => parameters.includes(key))
                     keys.forEach((parameter) => {
-                        item.parameters[parameter] = { value: true, options: [] }
+                        item.parameters[parameter] = {value: true, options: []}
                     })
                 }
 
@@ -311,17 +316,17 @@ export class Draw extends Graph {
                     obj instanceof Point &&
                     item.parameters.label === undefined && item.parameters.tex === undefined
                 ) {
-                    item.parameters.label = { value: true, options: [] }
+                    item.parameters.label = {value: true, options: []}
                 }
                 if (this.#settings.tex &&
                     obj instanceof Point &&
                     item.parameters.label === undefined && item.parameters.tex === undefined
                 ) {
-                    item.parameters.tex = { value: true, options: [] }
+                    item.parameters.tex = {value: true, options: []}
                 }
 
                 if (obj instanceof Point && this.#settings.points === false) {
-                    item.parameters['!'] = { value: true, options: [] }
+                    item.parameters['!'] = {value: true, options: []}
                 }
 
                 this.#applyOptions(item.parameters, obj)
@@ -338,7 +343,7 @@ export class Draw extends Graph {
         const [value, key] = command.slice(1).split(':')
 
         // Return the key and value
-        return { key, value: value === 'begin' }
+        return {key, value: value === 'begin'}
 
     }
 
@@ -385,11 +390,15 @@ export class Draw extends Graph {
 
         // prefix can be v or [ or null
         let prefix: string | null = data[0]
-        if (prefix !== 'v' && prefix !== '[') { prefix = null }
+        if (prefix !== 'v' && prefix !== '[') {
+            prefix = null
+        }
 
         // suffix can be ., ], [ or null
         let suffix: string | null = data[data.length - 1]
-        if (suffix !== '.' && suffix !== ']' && suffix !== '[') { suffix = null }
+        if (suffix !== '.' && suffix !== ']' && suffix !== '[') {
+            suffix = null
+        }
 
         let shape = 'line'
         if (prefix === 'v' && suffix === null) {
@@ -399,7 +408,9 @@ export class Draw extends Graph {
             (prefix === null && suffix === '.') ||
             (prefix === '[' && suffix === ']')
         ) {
-            if (prefix === '[') { data = data.slice(1) }
+            if (prefix === '[') {
+                data = data.slice(1)
+            }
             data = data.slice(0, -1)
             shape = 'seg'
         } else if (
@@ -407,8 +418,12 @@ export class Draw extends Graph {
             (prefix === null && suffix === '[') ||
             (prefix === '[' && suffix === null)
         ) {
-            if (prefix === '[') { data = data.slice(1) }
-            if (suffix === '[') { data = data.slice(0, -1) }
+            if (prefix === '[') {
+                data = data.slice(1)
+            }
+            if (suffix === '[') {
+                data = data.slice(0, -1)
+            }
 
             shape = 'ray'
         }
@@ -450,8 +465,8 @@ export class Draw extends Graph {
 
         // Define the configuration
         const ppu = parameters.ppu ? parseFloat(parameters.ppu.value as string) : 50
-        const xDomain = parameters.x && isDOMAIN(parameters.x.value) ? parameters.x.value : { min: -8, max: 8 }
-        const yDomain = parameters.y && isDOMAIN(parameters.y.value) ? parameters.y.value : { min: -8, max: 8 }
+        const xDomain = parameters.x && isDOMAIN(parameters.x.value) ? parameters.x.value : {min: -8, max: 8}
+        const yDomain = parameters.y && isDOMAIN(parameters.y.value) ? parameters.y.value : {min: -8, max: 8}
         const dx = Math.abs(xDomain.max - xDomain.min)
         const dy = Math.abs(yDomain.max - yDomain.min)
 
@@ -465,8 +480,8 @@ export class Draw extends Graph {
 
         const system = COORDINATE_SYSTEM.CARTESIAN_2D
         const axisConfig = {
-            x: { x: ppu, y: 0 },
-            y: { x: 0, y: -ppu }
+            x: {x: ppu, y: 0},
+            y: {x: 0, y: -ppu}
         }
 
         // Display options
@@ -501,7 +516,7 @@ export class Draw extends Graph {
     /**
      * Prepare the code to load
      * @param input Input code to parse and prepare
-     * @returns 
+     * @returns
      */
     #prepare(input: string): PARSER[] {
         // Reset the code.
@@ -529,8 +544,8 @@ export class Draw extends Graph {
             // Assign the command to the block
             // Until the command is cleared, the block will be applied to the next lines.
             if (line.startsWith('@')) {
-                const { key, value } = this.#defineCommand(line)
-                block[key] = { value, options: [] }
+                const {key, value} = this.#defineCommand(line)
+                block[key] = {value, options: []}
                 continue
             }
 

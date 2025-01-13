@@ -1,5 +1,5 @@
-import { G, Text as svgLabel, ForeignObject as svgHTML, SVG } from "@svgdotjs/svg.js"
-import type { XY } from "../pidraw.common"
+import {ForeignObject as svgHTML, G, SVG, Text as svgLabel} from "@svgdotjs/svg.js"
+import type {XY} from "../pidraw.common"
 
 type LabelType = svgLabel | svgHTML
 export type LABEL_POSITION = 'tl' | 'tc' | 'tr' | 'ml' | 'mc' | 'mr' | 'bl' | 'bc' | 'br'
@@ -8,6 +8,7 @@ export interface ILabelConfig {
     asHtml: boolean,
     alignement: LABEL_POSITION,
     offset: XY,
+    rotate?: number,
     texConverter: (value: string) => string
 }
 export class Label {
@@ -19,15 +20,6 @@ export class Label {
     #x: number
     #y: number
     #style: string
-
-    get config() { return this.#config }
-    get x() { return this.#x }
-    set x(value: number) { this.#x = value }
-    get y() { return this.#y }
-    set y(value: number) { this.#y = value }
-    get asHtml() { return this.#config.asHtml }
-    get shape() { return this.#shape }
-    get alignement() { return this.#config.alignement }
 
     constructor(rootG: G, name: string, config: ILabelConfig) {
         // The parent group : the figure which the label is attached to.
@@ -44,6 +36,7 @@ export class Label {
                 asHtml: false,
                 alignement: 'br',
                 offset: { x: 0, y: 0 },
+                rotate: undefined,
                 texConverter: (value: string) => value
             },
             config
@@ -63,21 +56,21 @@ export class Label {
         this.#shape = this.#makeLabel()
     }
 
-    #makeLabel(): svgLabel | svgHTML {
-        // Remove the existing label.
-        if (this.#shape) { this.#shape.remove() }
+    get config() { return this.#config }
 
-        // Create a new label.
-        this.#shape = this.#config.asHtml ?
-            this.#element.foreignObject(1, 1)
-                .attr('style', "overflow:visible")
-                .add(SVG(`<div style="${this.#style}">${this.displayName}</div>`, true)) :
-            this.#element.text(this.displayName)
+    get x() { return this.#x }
 
-        this.#shape.attr('id', `${this.#name}-label`)
+    set x(value: number) { this.#x = value }
 
-        return this.#shape
-    }
+    get y() { return this.#y }
+
+    set y(value: number) { this.#y = value }
+
+    get asHtml() { return this.#config.asHtml }
+
+    get shape() { return this.#shape }
+
+    get alignement() { return this.#config.alignement }
 
     // Get the label of the figure.
     get label(): LabelType { return this.#shape }
@@ -89,15 +82,16 @@ export class Label {
         return this.#displayName
     }
 
-
     hide() {
         this.#shape.hide()
         return this
     }
+
     show() {
         this.#shape.show()
         return this
     }
+
     // Set the label of the figure.
     setLabel(text?: string): this {
         // Default label is the name of the figure.
@@ -115,6 +109,7 @@ export class Label {
         this.position()
         return this
     }
+
     rotate(angle: number): this {
         this.#shape.transform({
             rotate: angle,
@@ -123,9 +118,10 @@ export class Label {
         return this
     }
 
-    position(alignement?: LABEL_POSITION, offset?: XY): this {
+    position(alignement?: LABEL_POSITION, offset?: XY, rotate?: number): this {
         if (alignement === undefined) { alignement = this.#config.alignement }
         if (offset === undefined) { offset = this.#config.offset }
+        if (rotate === undefined) { rotate = this.#config.rotate }
 
         // Make sure the offset is correct (NaN value must be zero.)
         offset = {
@@ -136,8 +132,8 @@ export class Label {
         // Set the alignement and offset
         this.#config.alignement = alignement
         this.#config.offset = offset
+        this.#config.rotate = rotate
 
-        // TODO: label placement / alignement to optimize !
         // Current object position
         let x = this.#x,
             y = this.#y
@@ -177,7 +173,28 @@ export class Label {
         } else {
             this.#shape.center(x + (offset.x ?? 0), y - (offset.y ?? 0))
         }
+
+        if(rotate !== 0 && rotate !== undefined) {
+            // console.log('APPLY', rotate)
+            this.rotate(rotate)
+        }
         return this
+    }
+
+    #makeLabel(): svgLabel | svgHTML {
+        // Remove the existing label.
+        if (this.#shape) { this.#shape.remove() }
+
+        // Create a new label.
+        this.#shape = this.#config.asHtml ?
+            this.#element.foreignObject(1, 1)
+                .attr('style', "overflow:visible")
+                .add(SVG(`<div style="${this.#style}">${this.displayName}</div>`, true)) :
+            this.#element.text(this.displayName)
+
+        this.#shape.attr('id', `${this.#name}-label`)
+
+        return this.#shape
     }
 
 }
