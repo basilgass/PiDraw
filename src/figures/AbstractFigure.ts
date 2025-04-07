@@ -1,8 +1,7 @@
-import { Svg, G, Shape, Path } from "@svgdotjs/svg.js"
-import {type IFigureAppearanceConfig, type IGraphConfig, isXY, type XY } from "../pidraw.common"
-import { } from "@svgdotjs/svg.js"
-import { Label } from "../labels/Label"
-import { createMarker, toPixels } from "../Calculus"
+import {G, Path, Shape, Svg} from "@svgdotjs/svg.js"
+import {type IFigureAppearanceConfig, type IGraphConfig, isXY, type XY} from "../pidraw.common"
+import {Label} from "../labels/Label"
+import {createMarker, toPixels} from "../Calculus"
 
 export abstract class AbstractFigure {
     #rootSVG: Svg
@@ -13,9 +12,6 @@ export abstract class AbstractFigure {
     #static: boolean
     #isDraggable: boolean
     #label: Label | null
-
-    // abstract #makeShape(): Shape
-    abstract computed(): this
 
     constructor(rootSVG: Svg, name: string) {
         this.#rootSVG = rootSVG
@@ -41,22 +37,39 @@ export abstract class AbstractFigure {
     }
 
     get element() { return this.#element }
+
     get name() { return this.#name }
+
     get rootSVG() { return this.#rootSVG }
+
     get shape() { return this.#shape }
+
     set shape(value: Shape) { this.#shape = value }
+
     get appearance() { return this.#appearance }
+
     set appearance(value) { this.#appearance = value }
+
     get graphConfig() { return this.#rootSVG.data('config') as IGraphConfig }
+
     get static() { return this.#static }
+
     set static(value: boolean) { this.#static = value }
+
     get isDraggable() { return this.#isDraggable }
+
     set isDraggable(value: boolean) { this.#isDraggable = value }
+
+    get label() { return this.#label }
+
+    // abstract #makeShape(): Shape
+    abstract computed(): this
 
     hide() {
         this.#element.hide()
         return this
     }
+
     show() {
         this.#element.show()
         return this
@@ -66,6 +79,7 @@ export abstract class AbstractFigure {
     strokeable(): Shape[] {
         return [this.#shape]
     }
+
     fillable(): Shape[] {
         return [this.#shape]
     }
@@ -86,9 +100,13 @@ export abstract class AbstractFigure {
     }
 
     stroke(): this
+
     stroke(color: string): this
+
     stroke(strokeWidth: number): this
+
     stroke(color: string, strokeWidth: number): this
+
     stroke(color?: string | number, strokeWidth?: number): this {
         if (typeof color === 'string') {
             const [colorName, opacity] = color.split('/')
@@ -110,7 +128,7 @@ export abstract class AbstractFigure {
         [this.#shape.reference('marker-start'), this.#shape.reference('marker-end')]
             .filter(x => x !== null)
             .forEach((marker) => {
-                marker?.children().forEach((m) => {
+                marker.children().forEach((m) => {
                     m.attr({
                         fill: this.#appearance.stroke.color,
                         stroke: this.#appearance.stroke.color,
@@ -128,6 +146,7 @@ export abstract class AbstractFigure {
         })
         return this
     }
+
     dot(): this {
         return this.dash((3).toString())
     }
@@ -161,7 +180,6 @@ export abstract class AbstractFigure {
         return this
     }
 
-
     // The position depends on the figure.
     addLabel(text?: string, asHtml?: boolean, texConverter?: (value: string) => string): Label {
         this.#label = new Label(
@@ -178,7 +196,7 @@ export abstract class AbstractFigure {
         this.updateLabel()
         return this.#label
     }
-    get label() { return this.#label }
+
     abstract moveLabel(): this
     // Update the label of the figure when the figure is updated.
     updateLabel(): this {
@@ -210,13 +228,25 @@ export abstract class AbstractFigure {
         return this
     }
 
+    scale(value: XY | number): this {
+        if(typeof value === 'number') {
+            return this.scale({
+                x: value,
+                y: value
+            })
+        }
+
+        this.#shape.scale(value.x, value.y)
+        return this
+    }
+
     mark(value?: string | boolean, options?: (string | number)[]): this {
         const scale = options?.filter(x => typeof x === 'number')[0] ?? 10
         const shape = options?.filter(x => typeof x === 'string')[0] ?? undefined
         const marker = createMarker(
             this.#rootSVG,
-            scale as number,
-            shape as string
+            scale,
+            shape
         )
 
         const path = this.#shape as Path

@@ -225,6 +225,9 @@ export class Draw extends Graph {
                 case 'move':
                     obj.move(options[key].value as XY)
                     break
+                case 'scale':
+                    obj.scale(options[key].value as XY)
+                    break
 
                 // Label and text
                 case 'label':
