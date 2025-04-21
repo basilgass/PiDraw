@@ -1,4 +1,4 @@
-import type {PARSER_VALUES} from "piparser/lib/PiParserTypes"
+import type {PARSER_VALUES} from "piparser"
 import {AbstractFigure} from "../figures/AbstractFigure"
 import type {TeXConverterType} from "../pidraw.common"
 

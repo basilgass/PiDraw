@@ -1,4 +1,4 @@
-import { type PARSER } from "piparser/lib/PiParserTypes";
+import { type PARSER } from "piparser";
 import { AbstractFigure } from "../figures/AbstractFigure";
 import { type ILineConfig } from "../figures/Line";
 import { type IGraphConfig } from "../pidraw.common";

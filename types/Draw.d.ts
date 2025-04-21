@@ -1,6 +1,6 @@
 import { Graph } from "./Graph";
 import { type IParserConfig } from "./parser/parser.common";
-import type { PARSER } from "piparser/lib/PiParserTypes";
+import type { PARSER } from "piparser";
 export declare const PARSER_PARAMETERS_KEYS: string[];
 export declare class Draw extends Graph {
     #private;

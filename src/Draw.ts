@@ -11,8 +11,8 @@ import {parser_config} from "./parser/parser.config"
 import {AbstractFigure} from "./figures/AbstractFigure"
 import {type LABEL_POSITION} from "./labels/Label"
 import {Point} from "./figures/Point"
-import {PiParse} from "piparser/lib/PiParse"
-import type {PARSER} from "piparser/lib/PiParserTypes"
+import type {PARSER} from "piparser"
+import {PiParse} from "piparser"
 
 export const PARSER_PARAMETERS_KEYS = [
     'ppu', 'x', 'y', 'grid', 'axis', 'label', 'tex', 'points', 'no-points', 'subgrid'

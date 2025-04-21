@@ -1,4 +1,4 @@
-import {type PARSER} from "piparser/lib/PiParserTypes"
+import {type PARSER} from "piparser"
 import {AbstractFigure} from "../figures/AbstractFigure"
 import {type IArcConfig} from "../figures/Arc"
 import {type ICircleConfig} from "../figures/Circle"

@@ -354,12 +354,9 @@ export class Graph {
 
         // Make the figure draggable
         figure.isDraggable = true
-        /* eslint-disable */
         figure.shape
-            // @ts-expect-error: draggable does not exist on Shape
             .draggable()
             .on('dragmove', dragmove as EventListener)
-        /* eslint-enable */
         return figure
     }
 

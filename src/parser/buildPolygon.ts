@@ -1,9 +1,9 @@
-import type { PARSER } from "piparser/lib/PiParserTypes"
-import { AbstractFigure } from "../figures/AbstractFigure"
-import { Point } from "../figures/Point"
-import type { IPolygonConfig } from "../figures/Polygon"
-import type { IGraphConfig, XY } from "../pidraw.common"
-import { convertIdToFigure, PARSER_TYPE } from "./parser.common"
+import type {PARSER} from "piparser"
+import {AbstractFigure} from "../figures/AbstractFigure"
+import {Point} from "../figures/Point"
+import type {IPolygonConfig} from "../figures/Polygon"
+import type {IGraphConfig, XY} from "../pidraw.common"
+import {convertIdToFigure, PARSER_TYPE} from "./parser.common"
 
 export function buildPolygon(item: PARSER, figures: Record<string, AbstractFigure>, graphConfig: IGraphConfig): IPolygonConfig | null {
     const code = convertIdToFigure(item.values, figures)

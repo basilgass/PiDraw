@@ -1,4 +1,4 @@
-import { PARSER } from 'piparser/lib/PiParserTypes';
+import { PARSER } from 'piparser';
 import { AbstractFigure } from '../figures/AbstractFigure';
 import { IGraphConfig } from '../pidraw.common';
 import { IBezierConfig } from '../figures/Bezier';

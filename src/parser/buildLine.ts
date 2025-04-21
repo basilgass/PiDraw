@@ -1,4 +1,4 @@
-import {type PARSER} from "piparser/lib/PiParserTypes"
+import {type PARSER} from "piparser"
 import {toNumber, toPixels} from "../Calculus"
 import {AbstractFigure} from "../figures/AbstractFigure"
 import {type ILineConfig, type ILineType, Line} from "../figures/Line"
@@ -143,9 +143,9 @@ export function parsePolynom(polynom: string): { a: number, b: number, c: number
         .filter((d) => (!d.includes('x') && !d.includes('y')))[0] ?? 0)
 
     return {
-        a: +convertIdToFigure([a], {})[0] as number,
-        b: +convertIdToFigure([b], {})[0] as number,
-        c: +convertIdToFigure([c], {})[0] as number,
+        a: +convertIdToFigure([a], {})[0],
+        b: +convertIdToFigure([b], {})[0],
+        c: +convertIdToFigure([c], {})[0],
     }
 }
 

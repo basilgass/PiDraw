@@ -1,4 +1,4 @@
-import {type PARSER} from "piparser/lib/PiParserTypes"
+import {type PARSER} from "piparser"
 import {AbstractFigure} from "../figures/AbstractFigure"
 import {type IFillBetweenConfig} from "../figures/FillBetween"
 import {type IFollowConfig} from "../figures/Follow"
@@ -24,7 +24,7 @@ export function buildPlot(item: PARSER, figures: Record<string, AbstractFigure>,
         // domain is the first DOMAIN object
         // image is the second DOMAIN object
         // samples is number
-        const domains = data.filter((x) => isDOMAIN(x)) as DOMAIN[]
+        const domains = data.filter((x) => isDOMAIN(x))
         if (domains.length > 0) {
             cfg.domain = domains[0]
         }

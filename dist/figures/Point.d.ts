@@ -2,6 +2,7 @@ import { Svg } from '@svgdotjs/svg.js';
 import { XY } from '../pidraw.common';
 import { AbstractFigure } from './AbstractFigure';
 import { Line } from './Line';
+import { Circle } from './Circle';
 export type ILine = Line | 'Ox' | 'Oy';
 export interface IPointConfig {
     coordinates?: XY;
@@ -17,6 +18,11 @@ export interface IPointConfig {
     intersection?: {
         A: ILine;
         B: ILine;
+    };
+    circle_intersection?: {
+        A: Circle;
+        B: Line;
+        index: number;
     };
     middle?: {
         A: XY;
@@ -37,15 +43,9 @@ export interface IPointConfig {
 export declare class Point extends AbstractFigure {
     #private;
     constructor(rootSVG: Svg, name: string, values: IPointConfig);
-    asCircle(size?: number): this;
-    asCrosshair(size?: number): this;
-    asSquare(size?: number): this;
-    computeLabel(): string;
-    computed(): this;
     get config(): IPointConfig;
     set config(value: IPointConfig);
     get coordinates(): XY;
-    moveLabel(): this;
     get pixels(): XY;
     set pixels(value: XY);
     get size(): number;
@@ -54,4 +54,10 @@ export declare class Point extends AbstractFigure {
     set x(value: number);
     get y(): number;
     set y(value: number);
+    asCircle(size?: number): this;
+    asCrosshair(size?: number): this;
+    asSquare(size?: number): this;
+    computeLabel(): string;
+    computed(): this;
+    moveLabel(): this;
 }
