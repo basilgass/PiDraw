@@ -1,8 +1,8 @@
-import { Svg, Circle as svgCircle } from "@svgdotjs/svg.js"
-import { AbstractFigure } from "./AbstractFigure"
-import type { XY } from "../pidraw.common"
-import { Shape } from "@svgdotjs/svg.js"
-import { distanceAB, toPixels } from "../Calculus"
+import {Circle as svgCircle, Shape, Svg} from "@svgdotjs/svg.js"
+import {AbstractFigure} from "./AbstractFigure"
+import type {XY} from "../pidraw.common"
+import {distanceAB, toPixels} from "../Calculus"
+import type {Line} from "./Line"
 
 export interface ICircleConfig {
     center: XY,
@@ -12,21 +12,6 @@ export interface ICircleConfig {
 export class Circle extends AbstractFigure {
     #config: ICircleConfig
 
-    get config() { return this.#config }
-    set config(value: ICircleConfig) {
-        this.#config = value
-        this.#makeShape()
-    }
-
-    get center() { return this.#config.center }
-    get radius(): number {
-        if (typeof this.#config.radius === 'number') {
-            return toPixels(this.#config.radius, this.graphConfig)
-        }
-
-        return distanceAB(this.center, this.#config.radius)
-    }
-
     constructor(rootSVG: Svg, name: string, values: ICircleConfig) {
         super(rootSVG, name)
 
@@ -34,7 +19,7 @@ export class Circle extends AbstractFigure {
         this.#config = Object.assign({
             figures: [],
             property: 'fixed',
-            center: { x: 0, y: 0 },
+            center: {x: 0, y: 0},
             radius: 1,
         }, values)
 
@@ -43,15 +28,25 @@ export class Circle extends AbstractFigure {
 
     }
 
-    #makeShape(): Shape {
-        this.element.clear()
+    get config() {
+        return this.#config
+    }
 
-        this.shape = this.element.circle(this.radius)
-            .center(this.center.x, this.center.y)
+    set config(value: ICircleConfig) {
+        this.#config = value
+        this.#makeShape()
+    }
 
-        this.shape.stroke(this.appearance.stroke.color)
-        this.shape.fill(this.appearance.fill)
-        return this.shape
+    get center() {
+        return this.#config.center
+    }
+
+    get radius(): number {
+        if (typeof this.#config.radius === 'number') {
+            return toPixels(this.#config.radius, this.graphConfig)
+        }
+
+        return distanceAB(this.center, this.#config.radius)
     }
 
     computed(): this {
@@ -81,6 +76,60 @@ export class Circle extends AbstractFigure {
         x = dx / d * r + this.center.x
         y = dy / d * r + this.center.y
 
-        return { x, y }
+        return {x, y}
+    }
+
+    intersectionWithLine(line: Line, segment?: boolean): XY[] | null {
+        const {x: cx, y: cy} = this.center
+        const {x: x1, y: y1} = line.start
+        const {x: x2, y: y2} = line.end
+
+        const dx = x2 - x1
+        const dy = y2 - y1
+
+        const fx = x1 - cx
+        const fy = y1 - cy
+
+        const a = dx * dx + dy * dy
+        const b = 2 * (dx * fx + dy * fy)
+        const c = fx * fx + fy * fy - this.radius * this.radius
+
+        const discriminant = b * b - 4 * a * c
+
+        if (discriminant < 0) {
+            return null
+        }
+
+        const results: XY[] = []
+        const sqrtDiscriminant = Math.sqrt(discriminant)
+
+        const t1 = (-b - sqrtDiscriminant) / (2 * a)
+        const t2 = (-b + sqrtDiscriminant) / (2 * a)
+
+        for (const t of [t1, t2]) {
+            // Si on ne regarde que le segment.
+            if (segment && (t < 0 || t > 1)) {
+                continue
+            }
+
+            results.push({
+                x: x1 + t * dx,
+                y: y1 + t * dy
+            })
+
+        }
+
+        return results
+    }
+
+    #makeShape(): Shape {
+        this.element.clear()
+
+        this.shape = this.element.circle(this.radius)
+            .center(this.center.x, this.center.y)
+
+        this.shape.stroke(this.appearance.stroke.color)
+        this.shape.fill(this.appearance.fill)
+        return this.shape
     }
 }

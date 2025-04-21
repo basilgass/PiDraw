@@ -4,6 +4,7 @@ import {Line} from "../figures/Line"
 import {type IPointConfig, Point} from "../figures/Point"
 import {type IGraphConfig} from "../pidraw.common"
 import {convertIdToFigure, type IParserValues, PARSER_TYPE} from "./parser.common"
+import {Circle} from "../figures/Circle"
 
 export function buildPoint(item: PARSER, figures: Record<string, AbstractFigure>, graphConfig: IGraphConfig): IPointConfig | {
     x: number,
@@ -16,7 +17,7 @@ export function buildPoint(item: PARSER, figures: Record<string, AbstractFigure>
         .find((key) =>
             key.includes('*') ||
             key.includes('s') ||
-            key.includes('o') )
+            key.includes('o'))
 
     switch (shapeCode) {
         case 'o':
@@ -77,13 +78,23 @@ function buildPoint_config(item: PARSER, figures: Record<string, AbstractFigure>
         }
     }
 
-    if (item.key === PARSER_TYPE.INTERSECTION.toString() && code.length === 2) {
-        // item.code = [<Line>,<Line>]
+    if (item.key === PARSER_TYPE.INTERSECTION.toString() && code.length >= 2) {
+        // item.code = [<Line>|<Circle>,<Line>|<Circle>]
         const A = code[0]
         const B = code[1]
+        const C = code.length > 2 ? code[2] : undefined
 
         if ((A instanceof Line || A === 'Ox' || A === 'Oy') && (B instanceof Line || B === 'Ox' || B === 'Oy')) {
             return {intersection: {A, B}}
+        }
+
+        if (A instanceof Circle && B instanceof Line) {
+            return {
+                circle_intersection: {
+                    A, B,
+                    index: C === undefined ? 0 : +C
+                }
+            }
         }
     }
 

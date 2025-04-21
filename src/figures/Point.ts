@@ -3,8 +3,10 @@ import type {XY} from "../pidraw.common"
 import {AbstractFigure} from "./AbstractFigure"
 import {Line} from "./Line"
 import {mathVector, toCoordinates, toPixels} from "../Calculus"
+import type {Circle} from "./Circle"
 
 export type ILine = Line | 'Ox' | 'Oy'
+
 export interface IPointConfig {
     coordinates?: XY,
     direction?: {
@@ -13,7 +15,8 @@ export interface IPointConfig {
         distance: number,
         perpendicular?: boolean
     }
-    intersection?: { A: ILine, B: ILine },
+    intersection?: { A: ILine, B: ILine},
+    circle_intersection?: {A: Circle, B: Line, index: number}
     middle?: { A: XY, B: XY },
     pixels?: XY,
     projection?: { axis: ILine, point: XY },
@@ -21,6 +24,7 @@ export interface IPointConfig {
     size?: number,
     symmetry?: { A: XY, B: XY | ILine }
 }
+
 
 export class Point extends AbstractFigure {
     #config: IPointConfig
@@ -31,7 +35,7 @@ export class Point extends AbstractFigure {
         super(rootSVG, name)
 
         // Default values
-        this.#pixels = { x: NaN, y: NaN }
+        this.#pixels = {x: NaN, y: NaN}
 
         // Default config
         this.#config = Object.assign(
@@ -50,6 +54,56 @@ export class Point extends AbstractFigure {
         // update the label
 
         return this
+    }
+
+    get config() {
+        return this.#config
+    }
+
+    set config(value: IPointConfig) {
+        this.#config = value
+        this.#makeShape()
+    }
+
+    // Used to store the original coordinates of the point
+    get coordinates(): XY {
+        return toCoordinates(this.#pixels, this.graphConfig)
+    }
+
+    get pixels() {
+        return this.#pixels
+    }
+
+    set pixels(value: XY) {
+        this.#pixels = value
+        this.shape.center(this.#pixels.x, this.#pixels.y)
+    }
+
+    get size() {
+        return this.#config.size as unknown as number
+    }
+
+    set size(value: number) {
+        this.#config.size = value
+        this.#makeShape()
+    }
+
+    get x() {
+        return this.#pixels.x
+    }
+
+    set x(value: number) {
+        this.#pixels.x = value
+        this.shape.center(value, this.#pixels.y)
+    }
+
+    get y() {
+        return this.#pixels.y
+    }
+
+    set y(value: number) {
+        this.#pixels.y = value
+        this.shape.center(this.#pixels.x, value)
     }
 
     asCircle(size?: number): this {
@@ -133,15 +187,31 @@ export class Point extends AbstractFigure {
         }
 
         if (this.#config.intersection) {
-            const line1 = this.#config.intersection.A as Line
-            const line2 = this.#config.intersection.B as Line
-            // Get the intersection of two lines.
-            const coord = line1.math
-                .intersection(line2.math)
+                const line1 = this.#config.intersection.A as Line
+                const line2 = this.#config.intersection.B as Line
+                // Get the intersection of two lines.
+                const coord = line1.math
+                    .intersection(line2.math)
 
-            if (coord === null) { return this }
+                if (coord === null) {
+                    return this
+                }
 
-            this.pixels = coord
+                this.pixels = coord
+        }
+
+        if (this.#config.circle_intersection) {
+            const circle = this.#config.circle_intersection.A
+            const line = this.#config.circle_intersection.B
+            const index = this.#config.circle_intersection.index
+
+            const coord = circle.intersectionWithLine(line)
+
+            if(coord===null) {
+                return this
+            }
+
+            this.pixels = coord[index]
         }
 
         if (this.#config.symmetry) {
@@ -182,7 +252,7 @@ export class Point extends AbstractFigure {
         }
 
         if (this.#config.direction) {
-            const { point, direction, distance } = this.#config.direction
+            const {point, direction, distance} = this.#config.direction
 
             if (direction === 'Ox') {
                 this.x = point.x + toPixels(distance, this.graphConfig)
@@ -218,54 +288,12 @@ export class Point extends AbstractFigure {
         return this
     }
 
-    get config() { return this.#config }
-
-    set config(value: IPointConfig) {
-        this.#config = value
-        this.#makeShape()
-    }
-
-    // Used to store the original coordinates of the point
-    get coordinates(): XY {
-        return toCoordinates(this.#pixels, this.graphConfig)
-    }
-
     moveLabel(): this {
         if (this.label) {
             this.label.move(this.x, this.y)
         }
 
         return this
-    }
-
-    get pixels() { return this.#pixels }
-
-    set pixels(value: XY) {
-        this.#pixels = value
-        this.shape.center(this.#pixels.x, this.#pixels.y)
-    }
-
-    get size() {
-        return this.#config.size as unknown as number
-    }
-
-    set size(value: number) {
-        this.#config.size = value
-        this.#makeShape()
-    }
-
-    get x() { return this.#pixels.x }
-
-    set x(value: number) {
-        this.#pixels.x = value
-        this.shape.center(value, this.#pixels.y)
-    }
-
-    get y() { return this.#pixels.y }
-
-    set y(value: number) {
-        this.#pixels.y = value
-        this.shape.center(this.#pixels.x, value)
     }
 
     #makeShape(): Shape {
@@ -280,14 +308,13 @@ export class Point extends AbstractFigure {
                 this.shape = this.element.rect(this.size, this.size)
                     .center(this.#pixels.x, this.#pixels.y)
                 break
-            case 'crosshair':
-                {
-                    const diagonal_size = this.size / Math.sqrt(2)
-                    this.shape = this.element.path(
-                        `M ${-diagonal_size} ${diagonal_size} L ${diagonal_size} ${-diagonal_size} M ${-diagonal_size} ${-diagonal_size} L ${diagonal_size} ${diagonal_size}`
-                    ).center(this.#pixels.x, this.#pixels.y)
-                    break
-                }
+            case 'crosshair': {
+                const diagonal_size = this.size / Math.sqrt(2)
+                this.shape = this.element.path(
+                    `M ${-diagonal_size} ${diagonal_size} L ${diagonal_size} ${-diagonal_size} M ${-diagonal_size} ${-diagonal_size} L ${diagonal_size} ${diagonal_size}`
+                ).center(this.#pixels.x, this.#pixels.y)
+                break
+            }
         }
 
         // Apply the stroke and fill.

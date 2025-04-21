@@ -287,8 +287,10 @@ export class Draw extends Graph {
             // Determine the id of the figure.
             item.name = this.#uniqueName(item.name)
 
-            let obj: AbstractFigure | undefined
+            let obj: AbstractFigure | AbstractFigure[] | undefined
+
             if (pConfig[item.key]) {
+                // On récupère le constructeur (build), la clé du parser (create) et les paramètres (parameters)
                 const {build, create, parameters} = pConfig[item.key]
 
                 // if <parameters> is not empty, it means the figure has specific parameters
@@ -304,6 +306,7 @@ export class Draw extends Graph {
                 // TODO: make it eslint friendly and ts friendly
                 if (Object.hasOwn(graphCreate, create)) {
                     try {
+                        // Permet de récupérer la configuration en fonction des données du code.
                         const config = build(item, this.figures, this.config)
 
                         if (config) {
@@ -315,35 +318,51 @@ export class Draw extends Graph {
                     } catch (e) {
                         // TODO: the build*** function should return an error message
                         console.log(e)
-
                     }
                 }
             }
 
-            if (obj) {
-                // Apply defaults settings to the object
-                if (this.#settings.label &&
-                    obj instanceof Point &&
-                    item.parameters.label === undefined && item.parameters.tex === undefined
-                ) {
-                    item.parameters.label = {value: true, options: []}
-                }
-                if (this.#settings.tex &&
-                    obj instanceof Point &&
-                    item.parameters.label === undefined && item.parameters.tex === undefined
-                ) {
-                    item.parameters.tex = {value: true, options: []}
-                }
-
-                if (obj instanceof Point && this.#settings.points === false) {
-                    item.parameters['!'] = {value: true, options: []}
-                }
-
-                this.#applyOptions(item.parameters, obj)
+            // L'objet n'existe pas - on quitte.
+            if (obj === undefined) {
+                return
             }
+
+            // On transforme l'objet en array s'il ne l'est pas.
+            if (obj && !Array.isArray(obj)) {
+                obj = [obj]
+            }
+
+            // Pour chaque objet créé, on applique les options.
+                obj.forEach(o => {
+                    this.#buildOptions(o, item)
+                })
         })
 
 
+    }
+
+    #buildOptions(obj: AbstractFigure, item: PARSER) {
+
+        // Apply defaults settings to the object
+        if (this.#settings.label &&
+            obj instanceof Point &&
+            item.parameters.label === undefined && item.parameters.tex === undefined
+        ) {
+            item.parameters.label = {value: true, options: []}
+        }
+
+        if (this.#settings.tex &&
+            obj instanceof Point &&
+            item.parameters.label === undefined && item.parameters.tex === undefined
+        ) {
+            item.parameters.tex = {value: true, options: []}
+        }
+
+        if (obj instanceof Point && this.#settings.points === false) {
+            item.parameters['!'] = {value: true, options: []}
+        }
+
+        this.#applyOptions(item.parameters, obj)
     }
 
     #defineCommand(command: string): { key: string, value: boolean } {

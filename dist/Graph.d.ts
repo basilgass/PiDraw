@@ -27,10 +27,8 @@ export interface IDraggableConfig {
 export declare class Graph {
     #private;
     constructor(id: string | HTMLElement, config?: IGraphConstructorConfig);
-    clear(): void;
     get config(): IGraphConfig;
     set config(value: IGraphConfig);
-    coordinate_system(system: COORDINATE_SYSTEM): AbstractFigure;
     get create(): {
         point: (coordinates: XY | IPointConfig, name: string, label?: {
             html: boolean;
@@ -49,22 +47,24 @@ export declare class Graph {
     };
     get display(): IGraphDisplay;
     set display(value: IGraphDisplay);
-    draggable(figure: AbstractFigure, options?: IDraggableConfig): AbstractFigure;
     get figures(): Record<string, AbstractFigure>;
+    get layers(): ILayers;
+    get rootSVG(): Svg;
+    get toTex(): (value: string) => string;
+    clear(): void;
+    coordinate_system(system: COORDINATE_SYSTEM): AbstractFigure;
+    draggable(figure: AbstractFigure, options?: IDraggableConfig): AbstractFigure;
     follow(value: string, obj: AbstractFigure): (x: number, y: number) => XY;
     grid(name: string, gridConfig: {
         x: XY;
         y: XY;
     }): AbstractFigure;
-    get layers(): ILayers;
     marker(scale: number): {
         start: Marker;
         end: Marker;
     };
-    get rootSVG(): Svg;
     subgrid(name: string, subdivision: number): AbstractFigure;
     toPixels<T>(pixels: T, axis?: 'x' | 'y'): T;
-    get toTex(): (value: string) => string;
     update(except?: string[], forceUpdate?: boolean): void;
     updateLayout(): void;
 }

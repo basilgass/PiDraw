@@ -113,14 +113,6 @@ export class Graph {
         return this
     }
 
-    public clear() {
-        Object.keys(this.figures).forEach((name) => {
-            this.figures[name].element.remove()
-        })
-
-        this.#figures = {}
-    }
-
     get config() {
         return this.#config
     }
@@ -129,34 +121,23 @@ export class Graph {
         this.#config = value
     }
 
-    public coordinate_system(system: COORDINATE_SYSTEM): AbstractFigure {
-        const axis = new CoordinateSystem(
-            this.#rootSVG,
-            'COORDINATE_SYSTEM',
-            system)
-
-        this.#layers.axis.add(axis.element)
-
-        return axis
-    }
-
     get create() {
         return {
-            point: (coordinates: XY | IPointConfig, name: string, label?: { html: boolean }): Point => {
-                let value: IPointConfig = {}
+            point: (coordinates: XY | IPointConfig, name: string, label?: { html: boolean }): Point=> {
+                let config: IPointConfig = {}
 
                 if (isXY(coordinates)) {
-                    value = {
+                    config = {
                         coordinates,
                     }
                 } else {
-                    value = coordinates
+                    config = coordinates
                 }
 
                 const pt = new Point(
                     this.#rootSVG,
                     name,
-                    value
+                    config
                 )
 
                 this.#layers.points.add(pt.element)
@@ -172,7 +153,7 @@ export class Graph {
                 }
                 return pt
             },
-            line: (constraints: ILineConfig, name: string): Line => {
+            line: (constraints: ILineConfig, name: string): Line  => {
                 const line = new Line(this.#rootSVG, name, constraints)
 
                 this.#layers.main.add(line.element)
@@ -269,6 +250,41 @@ export class Graph {
         this.#display = value
     }
 
+    get figures() {
+        return this.#figures
+    }
+
+    get layers() {
+        return this.#layers
+    }
+
+    get rootSVG() {
+        return this.#rootSVG
+    }
+
+    get toTex() {
+        return this.#toTex
+    }
+
+    public clear() {
+        Object.keys(this.figures).forEach((name) => {
+            this.figures[name].element.remove()
+        })
+
+        this.#figures = {}
+    }
+
+    public coordinate_system(system: COORDINATE_SYSTEM): AbstractFigure {
+        const axis = new CoordinateSystem(
+            this.#rootSVG,
+            'COORDINATE_SYSTEM',
+            system)
+
+        this.#layers.axis.add(axis.element)
+
+        return axis
+    }
+
     draggable(figure: AbstractFigure, options?: IDraggableConfig) {
         const dragmove = (e: Event & { detail: { box: Box, handler: unknown } }): void => {
             // Figure as point
@@ -347,10 +363,6 @@ export class Graph {
         return figure
     }
 
-    get figures() {
-        return this.#figures
-    }
-
     // Default follow function
     follow(value: string, obj: AbstractFigure): (x: number, y: number) => XY {
         if (value === 'Ox') {
@@ -388,16 +400,8 @@ export class Graph {
         return aGrid
     }
 
-    get layers() {
-        return this.#layers
-    }
-
     public marker(scale: number): { start: Marker, end: Marker } {
         return createMarker(this.#rootSVG, scale)
-    }
-
-    get rootSVG() {
-        return this.#rootSVG
     }
 
     public subgrid(name: string, subdivision: number): AbstractFigure {
@@ -410,10 +414,6 @@ export class Graph {
 
     public toPixels<T>(pixels: T, axis?: 'x' | 'y'): T {
         return toPixels(pixels, this.config, axis)
-    }
-
-    get toTex() {
-        return this.#toTex
     }
 
     // Update each figures in the graph

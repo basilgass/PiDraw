@@ -1,6 +1,6 @@
-import type { PARSER_VALUES } from "piparser/lib/PiParserTypes"
-import { AbstractFigure } from "../figures/AbstractFigure"
-import type { TeXConverterType } from "../pidraw.common"
+import type {PARSER_VALUES} from "piparser/lib/PiParserTypes"
+import {AbstractFigure} from "../figures/AbstractFigure"
+import type {TeXConverterType} from "../pidraw.common"
 
 export enum PARSER_TYPE {
     UNKNOWN = 'unknown',        // OK
