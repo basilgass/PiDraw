@@ -1,6 +1,6 @@
-import { Svg } from "@svgdotjs/svg.js";
-import { AbstractFigure } from "./AbstractFigure";
-import type { XY } from "../pidraw.common";
+import { Svg } from '@svgdotjs/svg.js';
+import { AbstractFigure } from './AbstractFigure';
+import { XY } from '../pidraw.common';
 interface IGridConfig {
     axis: {
         x: XY;
@@ -24,4 +24,3 @@ export declare class Grid extends AbstractFigure {
     moveLabel(): this;
 }
 export {};
-//# sourceMappingURL=Grid.d.ts.map

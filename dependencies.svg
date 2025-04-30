@@ -24,15 +24,15 @@
 <path fill="#ffffff" stroke="black" stroke-width="2" d="M157,-682C157,-682 427,-682 427,-682 433,-682 439,-688 439,-694 439,-694 439,-872 439,-872 439,-878 433,-884 427,-884 427,-884 157,-884 157,-884 151,-884 145,-878 145,-872 145,-872 145,-694 145,-694 145,-688 151,-682 157,-682"/>
 <text text-anchor="middle" x="292" y="-872.8" font-family="Helvetica,sans-Serif" font-weight="bold" font-size="9.00">parser</text>
 </g>
-<g id="clust4" class="cluster">
-<title>cluster_src/labels</title>
-<path fill="#ffffff" stroke="black" stroke-width="2" d="M676.5,-1052C676.5,-1052 722.5,-1052 722.5,-1052 728.5,-1052 734.5,-1058 734.5,-1064 734.5,-1064 734.5,-1092 734.5,-1092 734.5,-1098 728.5,-1104 722.5,-1104 722.5,-1104 676.5,-1104 676.5,-1104 670.5,-1104 664.5,-1098 664.5,-1092 664.5,-1092 664.5,-1064 664.5,-1064 664.5,-1058 670.5,-1052 676.5,-1052"/>
-<text text-anchor="middle" x="699.5" y="-1092.8" font-family="Helvetica,sans-Serif" font-weight="bold" font-size="9.00">labels</text>
-</g>
 <g id="clust3" class="cluster">
 <title>cluster_src/functions</title>
 <path fill="#ffffff" stroke="black" stroke-width="2" d="M657,-252C657,-252 742,-252 742,-252 748,-252 754,-258 754,-264 754,-264 754,-292 754,-292 754,-298 748,-304 742,-304 742,-304 657,-304 657,-304 651,-304 645,-298 645,-292 645,-292 645,-264 645,-264 645,-258 651,-252 657,-252"/>
 <text text-anchor="middle" x="699.5" y="-292.8" font-family="Helvetica,sans-Serif" font-weight="bold" font-size="9.00">functions</text>
+</g>
+<g id="clust4" class="cluster">
+<title>cluster_src/labels</title>
+<path fill="#ffffff" stroke="black" stroke-width="2" d="M676.5,-1052C676.5,-1052 722.5,-1052 722.5,-1052 728.5,-1052 734.5,-1058 734.5,-1064 734.5,-1064 734.5,-1092 734.5,-1092 734.5,-1098 728.5,-1104 722.5,-1104 722.5,-1104 676.5,-1104 676.5,-1104 670.5,-1104 664.5,-1098 664.5,-1092 664.5,-1092 664.5,-1064 664.5,-1064 664.5,-1058 670.5,-1052 676.5,-1052"/>
+<text text-anchor="middle" x="699.5" y="-1092.8" font-family="Helvetica,sans-Serif" font-weight="bold" font-size="9.00">labels</text>
 </g>
 <!-- src/Calculus.ts -->
 <g id="node1" class="node">

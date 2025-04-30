@@ -11,8 +11,7 @@ import {parser_config} from "./parser/parser.config"
 import {AbstractFigure} from "./figures/AbstractFigure"
 import {type LABEL_POSITION} from "./labels/Label"
 import {Point} from "./figures/Point"
-import type {PARSER} from "piparser"
-import {PiParse} from "piparser"
+import {type PARSER, PiParse} from "piparser"
 
 export const PARSER_PARAMETERS_KEYS = [
     'ppu', 'x', 'y', 'grid', 'axis', 'label', 'tex', 'points', 'no-points', 'subgrid'
@@ -231,9 +230,23 @@ export class Draw extends Graph {
 
                 // Label and text
                 case 'label':
-                case 'tex':
+                case 'tex': {
+
+                    let value = obj.name // default value
+
+                    if (typeof options[key].value === "string") {
+                        value = options[key].value // custom value
+                    }
+
+                    // Convert to indice for TeX label
+                    // [a-zA-Z][0-9] is converted to [a-zA-Z]_[0-9]
+                    if (key === 'tex' && value.length === 2 && !isNaN(+value[1])) {
+                        value = value[0] + "_" + value[1]
+                    }
+
+                    // Create the label
                     obj.addLabel(
-                        options[key].value === true ? obj.name : options[key].value as string,
+                        value,
                         key === 'tex',
                         this.toTex
                     )
@@ -257,6 +270,7 @@ export class Draw extends Graph {
                     }
 
                     break
+                }
 
                 // Draggable
                 case 'drag':
@@ -279,19 +293,19 @@ export class Draw extends Graph {
      */
     #build(input: string) {
         this.#code = this.#prepare(input)
+
         const pConfig = parser_config
-        const graphCreate = this.create
 
         // Loop through each code
         this.#code.forEach((item) => {
             // Determine the id of the figure.
             item.name = this.#uniqueName(item.name)
 
-            let obj: AbstractFigure | AbstractFigure[] | undefined
+            let obj: AbstractFigure | undefined
 
-            if (pConfig[item.key]) {
+            if (Object.hasOwn(pConfig, item.key)) {
                 // On récupère le constructeur (build), la clé du parser (create) et les paramètres (parameters)
-                const {build, create, parameters} = pConfig[item.key]
+                const {build, parameters} = pConfig[item.key]
 
                 // if <parameters> is not empty, it means the figure has specific parameters
                 // Check if they are defined in the item.parameters
@@ -303,39 +317,69 @@ export class Draw extends Graph {
                 }
 
                 // Create the object
-                // TODO: make it eslint friendly and ts friendly
-                if (Object.hasOwn(graphCreate, create)) {
-                    try {
-                        // Permet de récupérer la configuration en fonction des données du code.
-                        const config = build(item, this.figures, this.config)
+                let buildResult = build(item, this.figures, this.config)
 
-                        if (config) {
-                            /* eslint-disable */
-                            // @ts-expect-error: create is string and is not 
-                            obj = this.create[create](config, item.name)
-                            /* eslint-enable */
-                        }
-                    } catch (e) {
-                        // TODO: the build*** function should return an error message
-                        console.log(e)
+                if (buildResult) {
+                    if (!Array.isArray(buildResult)) {
+                        buildResult = [buildResult]
                     }
+
+                    buildResult.forEach((build, index) => {
+                        try {
+                            const {config, create} = build
+
+                            if (config && create) {
+                                /* eslint-disable */
+                                // @ts-expect-error: create is string and is not
+                                obj = this.create[create](config, item.name + (buildResult.length > 1 ? `${index + 1}` : ''))
+                                /* eslint-enable */
+                            }
+                        } catch (e) {
+                            console.error(e)
+                        }
+
+                        // Load the options.
+                        if (obj) {
+                            this.#buildOptions(obj, item)
+                        }
+                    })
+
                 }
-            }
 
-            // L'objet n'existe pas - on quitte.
-            if (obj === undefined) {
-                return
-            }
 
-            // On transforme l'objet en array s'il ne l'est pas.
-            if (obj && !Array.isArray(obj)) {
-                obj = [obj]
+                // TODO: make it eslint friendly and ts friendly
+                // if (Object.hasOwn(graphCreate, create)) {
+                //     try {
+                //         // Permet de récupérer la configuration en fonction des données du code.
+                //         const {config, create} = build(item, this.figures, this.config)
+                //
+                //         if (config) {
+                //             /* eslint-disable */
+                //             // @ts-expect-error: create is string and is not
+                //             obj = this.create[create](config, item.name)
+                //             /* eslint-enable */
+                //         }
+                //     } catch (e) {
+                //         // TODO: the build*** function should return an error message
+                //         console.log(e)
+                //     }
+                // }
             }
-
-            // Pour chaque objet créé, on applique les options.
-                obj.forEach(o => {
-                    this.#buildOptions(o, item)
-                })
+            //
+            // // L'objet n'existe pas - on quitte.
+            // if (obj === undefined) {
+            //     return
+            // }
+            //
+            // // On transforme l'objet en array s'il ne l'est pas.
+            // if (obj && !Array.isArray(obj)) {
+            //     obj = [obj]
+            // }
+            //
+            // // Pour chaque objet créé, on applique les options.
+            // obj.forEach(o => {
+            //     this.#buildOptions(o, item)
+            // })
         })
 
 

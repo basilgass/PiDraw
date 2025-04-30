@@ -1,6 +1,6 @@
-import { Svg } from "@svgdotjs/svg.js";
-import { AbstractFigure } from "./AbstractFigure";
-import type { DOMAIN, XY } from "../pidraw.common";
+import { Svg } from '@svgdotjs/svg.js';
+import { AbstractFigure } from './AbstractFigure';
+import { DOMAIN, XY } from '../pidraw.common';
 export interface IPlotConfig {
     expression: string;
     domain?: DOMAIN;
@@ -17,4 +17,3 @@ export declare class Plot extends AbstractFigure {
     evaluate(x: number, asCoordinates?: boolean): XY;
     follow(x: number, y: number): XY;
 }
-//# sourceMappingURL=Plot.d.ts.map

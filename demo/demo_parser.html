@@ -60,7 +60,7 @@
 		createApp({
 			mounted() {
 				// this.code = 'f(x)=sin(x),-pi:2pi'
-				this.parameter = `x=-11:11,y=-11:11,axis,tex`
+				this.parameter = `x=-11:11,y=-11:11,axis,grid`
 
 				this.code = `A(8,3)->red,w=5,drag=grid,tex=@
 B(-4,-1)->blue,w=10
@@ -150,7 +150,10 @@ l3=CD.`
 c=circ A,4
 B(1,1)
 l=AB
-x=inter c,l`
+X=inter c,l->tex
+P(-3,4)
+d1=PX1
+d2=PX2`
 // 				setTimeout(()=>{
 // 					this.code = `f(x)=(x-3)(x+2)(x-1)/6
 // a=fill f,-2:1->fill=green/0.3

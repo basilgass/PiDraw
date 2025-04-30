@@ -1,4 +1,5 @@
 import {ForeignObject as svgHTML, G, Text as svgLabel} from "@svgdotjs/svg.js"
+import type {parser_config} from "./parser/parser.config"
 
 export type TeXConverterType = (value: string) => string
 
@@ -136,4 +137,10 @@ export enum BEZIERCONTROL {
     SMOOTH = 'smooth',
     VERTICAL = 'vertical',
     HORIZONTAL = 'horizontal',
+}
+
+
+export interface buildInterface<T> {
+    create: keyof typeof parser_config,
+    config: T
 }

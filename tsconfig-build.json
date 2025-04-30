@@ -30,6 +30,6 @@
   },
   /* Include only the src folder */
   "include": [
-    "src",
+    "src"
   ]
 }

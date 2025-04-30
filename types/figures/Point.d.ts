@@ -1,8 +1,8 @@
-import { Svg } from "@svgdotjs/svg.js";
-import type { XY } from "../pidraw.common";
-import { AbstractFigure } from "./AbstractFigure";
-import { Line } from "./Line";
-import type { Circle } from "./Circle";
+import { Svg } from '@svgdotjs/svg.js';
+import { XY } from '../pidraw.common';
+import { AbstractFigure } from './AbstractFigure';
+import { Line } from './Line';
+import { Circle } from './Circle';
 export type ILine = Line | 'Ox' | 'Oy';
 export interface IPointConfig {
     coordinates?: XY;
@@ -61,4 +61,3 @@ export declare class Point extends AbstractFigure {
     computed(): this;
     moveLabel(): this;
 }
-//# sourceMappingURL=Point.d.ts.map

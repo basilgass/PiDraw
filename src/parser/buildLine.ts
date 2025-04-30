@@ -3,10 +3,12 @@ import {toNumber, toPixels} from "../Calculus"
 import {AbstractFigure} from "../figures/AbstractFigure"
 import {type ILineConfig, type ILineType, Line} from "../figures/Line"
 import {Point} from "../figures/Point"
-import {type IGraphConfig} from "../pidraw.common"
+import {type buildInterface, type IGraphConfig} from "../pidraw.common"
 import {convertIdToFigure, PARSER_TYPE} from "./parser.common"
 
-export function buildLine(item: PARSER, figures: Record<string, AbstractFigure>, graphConfig: IGraphConfig): ILineConfig | null {
+const create = 'line'
+
+export function buildLine(item: PARSER, figures: Record<string, AbstractFigure>, graphConfig: IGraphConfig): buildInterface<ILineConfig> | null {
     const code = convertIdToFigure(item.values, figures)
 
     if (item.key === PARSER_TYPE.LINE.toString() ||
@@ -33,8 +35,12 @@ export function buildLine(item: PARSER, figures: Record<string, AbstractFigure>,
             }
 
             return {
-                through: {A, B},
-                shape: lineType
+                create,
+                config: {
+                    through: {A, B},
+                    shape: lineType
+                }
+
             }
         }
     }
@@ -49,8 +55,12 @@ export function buildLine(item: PARSER, figures: Record<string, AbstractFigure>,
 
             const A = toPixels({x: 0, y: value as number}, graphConfig)
             return {
-                director: {A, d: {x: 1, y: 0}},
-                shape: 'line'
+                create,
+                config: {
+                    director: {A, d: {x: 1, y: 0}},
+                    shape: 'line'
+                }
+
             }
         }
 
@@ -60,8 +70,12 @@ export function buildLine(item: PARSER, figures: Record<string, AbstractFigure>,
 
             const A = toPixels({x: value as number, y: 0}, graphConfig)
             return {
-                director: {A, d: {x: 0, y: 1}},
-                shape: 'line'
+                create,
+                config: {
+                    director: {A, d: {x: 0, y: 1}},
+                    shape: 'line'
+                }
+
             }
         }
 
@@ -88,8 +102,12 @@ export function buildLine(item: PARSER, figures: Record<string, AbstractFigure>,
         }
 
         return {
-            director: {A, d},
-            shape: 'line'
+            create,
+            config: {
+                director: {A, d},
+                shape: 'line'
+            }
+
         }
     }
 
@@ -97,7 +115,10 @@ export function buildLine(item: PARSER, figures: Record<string, AbstractFigure>,
         // item.code = [<point>,<point>]
         const [A, B] = code
         if (A instanceof Point && B instanceof Point) {
-            return {mediator: {A, B}}
+            return {
+                create,
+                config: {mediator: {A, B}}
+            }
         }
     }
 
@@ -105,7 +126,10 @@ export function buildLine(item: PARSER, figures: Record<string, AbstractFigure>,
         // item.code = [<line>,<point>]
         const [to, through] = code
         if (to instanceof Line && through instanceof Point) {
-            return {perpendicular: {to, through}}
+            return {
+                create,
+                config: {perpendicular: {to, through}}
+            }
         }
     }
 
@@ -113,21 +137,30 @@ export function buildLine(item: PARSER, figures: Record<string, AbstractFigure>,
         // item.code = [<line>,<point>]
         const [to, through] = code
         if (to instanceof Line && through instanceof Point) {
-            return {parallel: {to, through}}
+            return {
+                create,
+                config: {parallel: {to, through}}
+            }
         }
     }
 
     if (item.key === PARSER_TYPE.BISECTOR.toString() && code.length === 2) {
         const [d1, d2] = code
         if (d1 instanceof Line && d2 instanceof Line) {
-            return {bisector: {d1, d2}}
+            return {
+                create,
+                config: {bisector: {d1, d2}}
+            }
         }
     }
 
     if (item.key === PARSER_TYPE.BISECTOR.toString() && code.length === 3) {
         const [B, A, C] = code
         if (A instanceof Point && B instanceof Point && C instanceof Point) {
-            return {bisector: {A, B, C}}
+            return {
+                create,
+                config: {bisector: {A, B, C}}
+            }
         }
     }
     return null
@@ -154,7 +187,7 @@ function extractNumberFromMonoms(data: string[], letter: string): number {
         .filter((d) => d.includes(letter))
         .map((d) => {
             // Remove the letter 'x'
-            if (d === letter || d===`+${letter}`) {
+            if (d === letter || d === `+${letter}`) {
                 return 1
             }
             if (d === `-${letter}`) {

@@ -1,4 +1,4 @@
-import { ForeignObject as svgHTML, G, Text as svgLabel } from "@svgdotjs/svg.js";
+import { ForeignObject as svgHTML, G, Text as svgLabel } from '@svgdotjs/svg.js';
 export type TeXConverterType = (value: string) => string;
 export interface IGraphConfig {
     axis: {
@@ -95,12 +95,12 @@ export declare enum POINTCONSTRAINT {
     COORDINATES = "coordinates"
 }
 export declare enum LINECONSTRAINT {
-    FIXED = "fixed",
-    PARALLEL = "parallel",
-    PERPENDICULAR = "perpendicular",
-    TANGENT = "tangent",
-    MEDIATOR = "mediator",
-    SLOPE = "slope",
+    FIXED = "fixed",// two points
+    PARALLEL = "parallel",// a point and a vector
+    PERPENDICULAR = "perpendicular",// a point and a vector
+    TANGENT = "tangent",// a point and a circle
+    MEDIATOR = "mediator",// two points
+    SLOPE = "slope",// a point and a slope
     BISECTOR = "bisector"
 }
 export declare enum POLYGON_CONSTRAINT {
@@ -114,4 +114,3 @@ export declare enum BEZIERCONTROL {
     VERTICAL = "vertical",
     HORIZONTAL = "horizontal"
 }
-//# sourceMappingURL=pidraw.common.d.ts.map

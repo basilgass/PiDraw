@@ -1,5 +1,5 @@
-import { Svg } from "@svgdotjs/svg.js";
-import { AbstractFigure } from "./AbstractFigure";
+import { Svg } from '@svgdotjs/svg.js';
+import { AbstractFigure } from './AbstractFigure';
 export declare class Path extends AbstractFigure {
     #private;
     constructor(rootSVG: Svg, name: string, path?: string);
@@ -8,4 +8,3 @@ export declare class Path extends AbstractFigure {
     set d(path: string);
     moveLabel(): this;
 }
-//# sourceMappingURL=Path.d.ts.map

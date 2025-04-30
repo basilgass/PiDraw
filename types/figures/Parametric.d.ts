@@ -1,6 +1,6 @@
-import { Svg } from "@svgdotjs/svg.js";
-import { AbstractFigure } from "./AbstractFigure";
-import type { DOMAIN, XY } from "../pidraw.common";
+import { Svg } from '@svgdotjs/svg.js';
+import { AbstractFigure } from './AbstractFigure';
+import { DOMAIN, XY } from '../pidraw.common';
 export interface IParametricConfig {
     expressions: {
         x: string;
@@ -18,4 +18,3 @@ export declare class Parametric extends AbstractFigure {
     moveLabel(): this;
     evaluate(t: number): XY;
 }
-//# sourceMappingURL=Parametric.d.ts.map

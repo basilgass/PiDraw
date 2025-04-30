@@ -1,6 +1,6 @@
-import { Svg, Shape } from "@svgdotjs/svg.js";
-import { AbstractFigure } from "./AbstractFigure";
-import { Plot } from "./Plot";
+import { Svg, Shape } from '@svgdotjs/svg.js';
+import { AbstractFigure } from './AbstractFigure';
+import { Plot } from './Plot';
 export interface IFollowConfig {
     follow: Plot;
     tangent?: boolean;
@@ -16,4 +16,3 @@ export declare class Follow extends AbstractFigure {
     strokeable(): Shape[];
     fillable(): Shape[];
 }
-//# sourceMappingURL=Follow.d.ts.map

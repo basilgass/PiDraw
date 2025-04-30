@@ -5,14 +5,16 @@
   "type": "module",
   "main": "dist/pidraw.js",
   "module": "dist/pidraw.js",
-  "types": "dist/index.d.ts",
+  "types": "types/index.d.ts",
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
       "import": "./dist/pidraw.js",
       "require": "./dist/pidraw.js"
     }
   },
+  "files": [
+    "dist", "types"
+  ],
   "scripts": {
     "test": "vitest",
     "dev": "vite serve",
@@ -39,8 +41,7 @@
   "dependencies": {
     "@svgdotjs/svg.draggable.js": "^3.0.6",
     "@svgdotjs/svg.js": "^3.2.4",
-    "pidraw": "^0.1.46",
-    "piparser": "^0.0.16"
+    "piparser": "^0.1.1"
   },
   "devDependencies": {
     "@eslint/js": "^9.25.1",

@@ -1,6 +1,6 @@
-import { Svg } from "@svgdotjs/svg.js";
-import { AbstractFigure } from "./AbstractFigure";
-import { type XY } from "../pidraw.common";
+import { Svg } from '@svgdotjs/svg.js';
+import { AbstractFigure } from './AbstractFigure';
+import { XY } from '../pidraw.common';
 export interface IPolygonConfig {
     vertices?: XY[];
     regular?: {
@@ -25,4 +25,3 @@ export declare class Polygon extends AbstractFigure {
     update(): this;
     moveLabel(): this;
 }
-//# sourceMappingURL=Polygon.d.ts.map

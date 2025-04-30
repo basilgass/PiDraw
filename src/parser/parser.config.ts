@@ -1,18 +1,18 @@
 import {type PARSER} from "piparser"
 import {AbstractFigure} from "../figures/AbstractFigure"
-import {type IGraphConfig} from "../pidraw.common"
+import {type buildInterface, type IGraphConfig} from "../pidraw.common"
 import {buildArc, buildCircle} from "./buildCircle"
 import {buildLine} from "./buildLine"
 import {buildFillBetween, buildFollow, buildParametric, buildPlot, buildRiemann} from "./buildPlot"
 import {buildPoint} from "./buildPoint"
 import {buildPolygon} from "./buildPolygon"
 import {buildBezier} from "./buildBezier"
+import {buildIntersection} from "./buildIntersection"
 
 // TODO: add the build and create parameters to make it easily accessible and extensible.
 export interface parser_item {
-    build: (values: PARSER, figures: Record<string, AbstractFigure>, config: IGraphConfig) => unknown,
+    build: (values: PARSER, figures: Record<string, AbstractFigure>, config: IGraphConfig) => buildInterface<unknown> | buildInterface<unknown>[] | null,
     code: string,
-    create: string,
     description: string,
     name: string,
     option?: string
@@ -25,7 +25,6 @@ export const parser_config: Record<string, parser_item> = {
         code: 'A(3,4)',
         parameters: ['drag', 'drag:grid', 'drag:axis', 'drag:x', 'drag:y', 'drag:<figure>'],
         build: buildPoint,
-        create: 'point'
     },
     vpt: {
         name: 'point from vector',
@@ -33,7 +32,6 @@ export const parser_config: Record<string, parser_item> = {
         code: 'A=vpt <point>,<point>,<scale?>,<starting point?>',
         parameters: [],
         build: buildPoint,
-        create: 'point'
     },
     dpt: {
         name: 'point from direction line',
@@ -41,7 +39,6 @@ export const parser_config: Record<string, parser_item> = {
         code: 'A=vpt <point>,<line>,<distance>,<perpendicular?>',
         parameters: [],
         build: buildPoint,
-        create: 'point'
     },
     mid: {
         name: 'mid',
@@ -49,7 +46,6 @@ export const parser_config: Record<string, parser_item> = {
         code: 'A=mid <point>,<point>',
         parameters: [],
         build: buildPoint,
-        create: 'point'
     },
     proj: {
         name: 'projection',
@@ -57,15 +53,13 @@ export const parser_config: Record<string, parser_item> = {
         code: 'A=proj <point>,<line>',
         parameters: [],
         build: buildPoint,
-        create: 'point'
     },
     inter: {
         name: 'intersection',
         description: 'Create the intersection of two lines',
-        code: 'A=inter <line>,<line>',
+        code: 'A=inter <line|circle>,<line|circle>',
         parameters: [],
-        build: buildPoint,
-        create: 'point'
+        build: buildIntersection,
     },
     sym: {
         name: 'symmetry',
@@ -73,7 +67,6 @@ export const parser_config: Record<string, parser_item> = {
         code: 'A=sym <point>,<point|line>',
         parameters: [],
         build: buildPoint,
-        create: 'point'
     },
     line: {
         name: 'line',
@@ -81,7 +74,6 @@ export const parser_config: Record<string, parser_item> = {
         code: 'd=<line> | <line>[ | <line>.',
         parameters: ['dash', 'dot'],
         build: buildLine,
-        create: 'line'
     },
     vec: {
         name: 'vector',
@@ -89,7 +81,6 @@ export const parser_config: Record<string, parser_item> = {
         code: 'd=v<line>',
         parameters: [],
         build: buildLine,
-        create: 'line'
     },
     seg: {
         name: 'segment',
@@ -97,7 +88,6 @@ export const parser_config: Record<string, parser_item> = {
         code: 's=<A><B>.',
         parameters: [],
         build: buildLine,
-        create: 'line'
     },
     ray: {
         name: 'ray (half line)',
@@ -105,7 +95,6 @@ export const parser_config: Record<string, parser_item> = {
         code: 'd=<line> | <line>[ | <line>.',
         parameters: ['dash', 'dot'],
         build: buildLine,
-        create: 'line'
     },
     perp: {
         name: 'perpendicular',
@@ -113,7 +102,6 @@ export const parser_config: Record<string, parser_item> = {
         code: 'd=perp <line>,<point>',
         parameters: [],
         build: buildLine,
-        create: 'line'
     },
     para: {
         name: 'parallel',
@@ -121,7 +109,6 @@ export const parser_config: Record<string, parser_item> = {
         code: 'd=para <line>,<point>',
         parameters: [],
         build: buildLine,
-        create: 'line'
     },
     med: {
         name: 'mediator',
@@ -129,7 +116,6 @@ export const parser_config: Record<string, parser_item> = {
         code: 'd=med <point>,<point>',
         parameters: [],
         build: buildLine,
-        create: 'line'
     },
     // tangent: {
     // name: 'tangent',
@@ -151,7 +137,6 @@ export const parser_config: Record<string, parser_item> = {
         code: 'c=circ <point>,<radius>',
         parameters: [],
         build: buildCircle,
-        create: 'circle'
     },
     arc: {
         name: 'arc',
@@ -159,7 +144,6 @@ export const parser_config: Record<string, parser_item> = {
         code: 'c=arc <point>,<point>,<point>[,<number>]',
         parameters: [],
         build: buildArc,
-        create: 'arc'
     },
     plot: {
         name: 'plot',
@@ -167,7 +151,6 @@ export const parser_config: Record<string, parser_item> = {
         code: 'f(x)=[f=plot ]<function>[@<number>,<domain>,<image>]',
         parameters: [],
         build: buildPlot,
-        create: 'plot'
     },
     parametric: {
         name: 'parametric',
@@ -175,7 +158,6 @@ export const parser_config: Record<string, parser_item> = {
         code: 'f(t)=[f=parametric ]<function_x>,<function_y>[,<domain>]',
         parameters: [],
         build: buildParametric,
-        create: 'parametric'
     },
     bezier: {
         name: 'bezier',
@@ -183,7 +165,6 @@ export const parser_config: Record<string, parser_item> = {
         code: 'b=bezier A,B,C,D/<CONTROL: H,V,S>/<ratio>',
         parameters: [],
         build: buildBezier,
-        create: 'bezier'
     },
     poly: {
         name: 'polygon',
@@ -191,7 +172,6 @@ export const parser_config: Record<string, parser_item> = {
         code: 'p=poly <point>,<point>,<point>,...',
         parameters: [],
         build: buildPolygon,
-        create: 'polygon'
     },
     reg: {
         name: 'regular',
@@ -199,7 +179,6 @@ export const parser_config: Record<string, parser_item> = {
         code: 'p=reg <center>,<radius>,<sides>',
         parameters: [],
         build: buildPolygon,
-        create: 'polygon'
     },
     follow: {
         name: 'follow',
@@ -207,7 +186,6 @@ export const parser_config: Record<string, parser_item> = {
         code: 'f=follow <function>,<tangent?>',
         parameters: [],
         build: buildFollow,
-        create: 'follow'
     },
     fill: {
         name: 'fillbetween',
@@ -215,7 +193,6 @@ export const parser_config: Record<string, parser_item> = {
         code: 'f=fill <function>,<function?>,<domain?>',
         parameters: [],
         build: buildFillBetween,
-        create: 'fillbetween'
     },
     riemann: {
         name: 'riemann',
@@ -223,6 +200,5 @@ export const parser_config: Record<string, parser_item> = {
         code: 'f=riemann <function>,<domain>,<number>,<position>',
         parameters: [],
         build: buildRiemann,
-        create: 'riemann'
     }
 }
