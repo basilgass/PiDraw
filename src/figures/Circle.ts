@@ -122,6 +122,46 @@ export class Circle extends AbstractFigure {
         return results
     }
 
+    intersectionWithCircle(circle: Circle): XY[] | null {
+        const {x: x0, y: y0} = this.center
+        const {x: x1, y: y1} = circle.center
+        const r0 = this.radius
+        const r1 = circle.radius
+
+        const dx = x1 - x0
+        const dy = y1 - y0
+        const d = Math.hypot(dx, dy)
+
+        // Pas d'intersection ou cercles identiques
+        if (d > r0 + r1 || d < Math.abs(r0 - r1) || d === 0) {
+            return null
+        }
+
+        // a = distance du centre de c1 au point P (sur la ligne entre les centres)
+        const a = (r0 * r0 - r1 * r1 + d * d) / (2 * d)
+
+        // h = hauteur depuis ce point jusqu'aux points d'intersection
+        const h = Math.sqrt(r0 * r0 - a * a)
+
+        // Point P, sur la ligne entre les centres, à distance a de C1
+        const px = x0 + a * dx / d
+        const py = y0 + a * dy / d
+
+        // Points d'intersection (de part et d'autre perpendiculairement)
+        const rx = -dy * (h / d)
+        const ry = dx * (h / d)
+
+        const i1: XY = {x: px + rx, y: py + ry}
+        const i2: XY = {x: px - rx, y: py - ry}
+
+        // Si les deux points sont les mêmes (tangence), on retourne un seul
+        if (Math.abs(h) < 1e-10) {
+            return [i1]
+        }
+
+        return [i1, i2]
+    }
+
     #makeShape(): Shape {
         this.element.clear()
 

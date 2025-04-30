@@ -54,7 +54,6 @@ function buildPoint_config(item: PARSER, figures: Record<string, AbstractFigure>
         // item.code = [<Line>|<Circle>,<Line>|<Circle>]
         const A = code[0]
         const B = code[1]
-        const C = code.length > 2 ? code[2] : undefined
 
         if ((A instanceof Line || A === 'Ox' || A === 'Oy') && (B instanceof Line || B === 'Ox' || B === 'Oy')) {
             return [
@@ -67,13 +66,30 @@ function buildPoint_config(item: PARSER, figures: Record<string, AbstractFigure>
         if (A instanceof Circle && B instanceof Line) {
             return [
                 {
-                    circle_intersection: {
+                    intersectionWithCircle: {
                         A, B,
                         index: 0
                     }
                 },
                 {
-                    circle_intersection: {
+                    intersectionWithCircle: {
+                        A, B,
+                        index: 1
+                    }
+                }
+            ]
+        }
+
+        if (A instanceof Circle && B instanceof Circle) {
+            return [
+                {
+                    intersectionBetweenCircles: {
+                        A, B,
+                        index: 0
+                    }
+                },
+                {
+                    intersectionBetweenCircles: {
                         A, B,
                         index: 1
                     }

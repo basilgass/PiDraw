@@ -16,7 +16,8 @@ export interface IPointConfig {
         perpendicular?: boolean
     }
     intersection?: { A: ILine, B: ILine},
-    circle_intersection?: {A: Circle, B: Line, index: number}
+    intersectionWithCircle?: {A: Circle, B: Line, index: number},
+    intersectionBetweenCircles?: {A: Circle, B: Circle, index: number},
     middle?: { A: XY, B: XY },
     pixels?: XY,
     projection?: { axis: ILine, point: XY },
@@ -200,17 +201,34 @@ export class Point extends AbstractFigure {
                 this.pixels = coord
         }
 
-        if (this.#config.circle_intersection) {
-            const circle = this.#config.circle_intersection.A
-            const line = this.#config.circle_intersection.B
-            const index = this.#config.circle_intersection.index
+        if (this.#config.intersectionWithCircle) {
+            const circle = this.#config.intersectionWithCircle.A
+            const line = this.#config.intersectionWithCircle.B
+            const index = this.#config.intersectionWithCircle.index
 
             const coord = circle.intersectionWithLine(line)
 
             if(coord===null) {
+                this.pixels = {x: NaN, y: NaN}
                 return this
             }
 
+            this.pixels = coord[index]
+        }
+
+        if (this.#config.intersectionBetweenCircles) {
+            const circle1 = this.#config.intersectionBetweenCircles.A
+            const circle2 = this.#config.intersectionBetweenCircles.B
+            const index = this.#config.intersectionBetweenCircles.index
+
+            const coord = circle1.intersectionWithCircle(circle2)
+
+            if(coord===null) {
+                this.pixels = {x: NaN, y: NaN}
+                return this
+            }
+
+            this.show()
             this.pixels = coord[index]
         }
 
