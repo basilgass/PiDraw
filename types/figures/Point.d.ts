@@ -19,9 +19,14 @@ export interface IPointConfig {
         A: ILine;
         B: ILine;
     };
-    circle_intersection?: {
+    intersectionWithCircle?: {
         A: Circle;
         B: Line;
+        index: number;
+    };
+    intersectionBetweenCircles?: {
+        A: Circle;
+        B: Circle;
         index: number;
     };
     middle?: {

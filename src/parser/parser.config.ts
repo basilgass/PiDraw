@@ -128,8 +128,7 @@ export const parser_config: Record<string, parser_item> = {
         description: 'Create the bisector of an angle',
         code: 'd=bis <point>,<point>,<point>',
         parameters: [],
-        build: buildLine,
-        create: 'line'
+        build: buildLine
     },
     circ: {
         name: 'circle',

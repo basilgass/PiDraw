@@ -17,4 +17,5 @@ export declare class Circle extends AbstractFigure {
     moveLabel(): this;
     follow(x: number, y: number): XY;
     intersectionWithLine(line: Line, segment?: boolean): XY[] | null;
+    intersectionWithCircle(circle: Circle): XY[] | null;
 }

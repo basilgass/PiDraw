@@ -1,10 +1,9 @@
 import { PARSER } from 'piparser';
 import { AbstractFigure } from '../figures/AbstractFigure';
-import { IGraphConfig } from '../pidraw.common';
+import { buildInterface, IGraphConfig } from '../pidraw.common';
 export interface parser_item {
-    build: (values: PARSER, figures: Record<string, AbstractFigure>, config: IGraphConfig) => unknown;
+    build: (values: PARSER, figures: Record<string, AbstractFigure>, config: IGraphConfig) => buildInterface<unknown> | buildInterface<unknown>[] | null;
     code: string;
-    create: string;
     description: string;
     name: string;
     option?: string;
