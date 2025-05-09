@@ -1,5 +1,5 @@
 import {G, Path, Shape, Svg} from "@svgdotjs/svg.js"
-import {type IFigureAppearanceConfig, type IGraphConfig, isXY, type XY} from "../pidraw.common"
+import {type IFigureAnimation, type IFigureAppearanceConfig, type IGraphConfig, isXY, type XY} from "../pidraw.common"
 import {Label} from "../labels/Label"
 import {createMarker, toPixels} from "../Calculus"
 
@@ -13,11 +13,14 @@ export abstract class AbstractFigure {
     #isDraggable: boolean
     #label: Label | null
 
+    #animate: IFigureAnimation | null
+
     constructor(rootSVG: Svg, name: string) {
         this.#rootSVG = rootSVG
         this.#name = name
         this.#static = false
         this.#isDraggable = false
+        this.#animate = null
 
         this.#label = null
         this.#element = this.#rootSVG.group().attr('id', this.#name)
@@ -36,31 +39,65 @@ export abstract class AbstractFigure {
         this.#shape = this.#element.path()
     }
 
-    get element() { return this.#element }
+    get element() {
+        return this.#element
+    }
 
-    get name() { return this.#name }
+    get name() {
+        return this.#name
+    }
 
-    get rootSVG() { return this.#rootSVG }
+    get rootSVG() {
+        return this.#rootSVG
+    }
 
-    get shape() { return this.#shape }
+    get shape() {
+        return this.#shape
+    }
 
-    set shape(value: Shape) { this.#shape = value }
+    set shape(value: Shape) {
+        this.#shape = value
+    }
 
-    get appearance() { return this.#appearance }
+    get appearance() {
+        return this.#appearance
+    }
 
-    set appearance(value) { this.#appearance = value }
+    set appearance(value) {
+        this.#appearance = value
+    }
 
-    get graphConfig() { return this.#rootSVG.data('config') as IGraphConfig }
+    get graphConfig() {
+        return this.#rootSVG.data('config') as IGraphConfig
+    }
 
-    get static() { return this.#static }
+    get static() {
+        return this.#static
+    }
 
-    set static(value: boolean) { this.#static = value }
+    set static(value: boolean) {
+        this.#static = value
+    }
 
-    get isDraggable() { return this.#isDraggable }
+    get isDraggable() {
+        return this.#isDraggable
+    }
 
-    set isDraggable(value: boolean) { this.#isDraggable = value }
+    set isDraggable(value: boolean) {
+        this.#isDraggable = value
+    }
 
-    get label() { return this.#label }
+    get label() {
+        return this.#label
+    }
+
+    get animate(){
+        return this.#animate
+    }
+
+    set animate(value){
+        this.#animate = value
+    }
 
     // abstract #makeShape(): Shape
     abstract computed(): this
@@ -142,7 +179,7 @@ export abstract class AbstractFigure {
 
     dash(dasharray?: string): this {
         this.strokeable().forEach((shape) => {
-            shape.stroke({ dasharray: dasharray ?? (this.graphConfig.axis.x.x / 2).toString() })
+            shape.stroke({dasharray: dasharray ?? (this.graphConfig.axis.x.x / 2).toString()})
         })
         return this
     }
@@ -160,7 +197,9 @@ export abstract class AbstractFigure {
 
         // Remove everything but the label.
         this.#element.children().forEach((child) => {
-            if (child.attr('id') !== `${this.#name}-label`) { child.remove() }
+            if (child.attr('id') !== `${this.#name}-label`) {
+                child.remove()
+            }
         })
         return this
     }
@@ -189,7 +228,7 @@ export abstract class AbstractFigure {
                 text: text ?? this.#name,
                 asHtml: asHtml ?? false,
                 alignement: 'br',
-                offset: { x: 0, y: 0 },
+                offset: {x: 0, y: 0},
                 texConverter: texConverter ?? ((value: string) => value)
             })
 
@@ -198,9 +237,12 @@ export abstract class AbstractFigure {
     }
 
     abstract moveLabel(): this
+
     // Update the label of the figure when the figure is updated.
     updateLabel(): this {
-        if (!this.#label) { return this }
+        if (!this.#label) {
+            return this
+        }
 
         // if the label is dynamic, update it.
         this.#label.setLabel(this.computeLabel())
@@ -210,6 +252,7 @@ export abstract class AbstractFigure {
 
         return this
     }
+
     computeLabel(): string {
         return this.#label?.config.text ?? this.#name
     }
@@ -229,7 +272,7 @@ export abstract class AbstractFigure {
     }
 
     scale(value: XY | number): this {
-        if(typeof value === 'number') {
+        if (typeof value === 'number') {
             return this.scale({
                 x: value,
                 y: value
@@ -267,6 +310,6 @@ export abstract class AbstractFigure {
     }
 
     follow(x: number, y: number): XY {
-        return { x, y }
+        return {x, y}
     }
 }

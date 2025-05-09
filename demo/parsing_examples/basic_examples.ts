@@ -138,5 +138,13 @@ b=fill f,1:3->fill=red/0.3
 A(-2,0)->tick,tex=a
 B(1,0)->tick,tex=b
 C(3,0)->tick,tex=c`
+    },{
+    name: 'animation',
+        code: `A(1,2)
+B(7,6)
+d=AB.
+X(1,2)->red,w=10,animate=B,duration=3,loop
+Y(1,2)->green,w=10,animate=B,duration=5,loop=reverse
+p=perp d,X`
     }
 ]

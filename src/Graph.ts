@@ -28,6 +28,7 @@ import {FillBetween, type IFillBetweenConfig} from "./figures/FillBetween"
 import {type IRiemannConfig, Riemann} from "./figures/Riemann"
 import {Path} from "./figures/Path"
 import {Bezier, type IBezierConfig} from "./figures/Bezier"
+import {Animate} from "./Animate"
 
 export type IDraggableFollow = ((x: number, y: number) => XY) | AbstractFigure | string
 
@@ -49,6 +50,8 @@ export class Graph {
     #layers: ILayers
     #rootSVG: Svg
     #toTex: (value: string) => string
+
+    #Animate: Animate | null = null
 
     constructor(id: string | HTMLElement, config?: IGraphConstructorConfig) {
         const wrapper = document.createElement('DIV')
@@ -266,6 +269,14 @@ export class Graph {
         return this.#toTex
     }
 
+    get animation(): Animate{
+        if(!this.#Animate){
+            this.#Animate = new Animate(this)
+        }
+
+        return this.#Animate
+    }
+
     public clear() {
         Object.keys(this.figures).forEach((name) => {
             this.figures[name].element.remove()
@@ -416,9 +427,7 @@ export class Graph {
     // Update each figures in the graph
     public update(except?: string[], forceUpdate?: boolean) {
 
-        if (except === undefined) {
-            except = []
-        }
+        except ??= []
 
         // Add all figures with a "_drag" in the exception.
         Object.keys(this.figures)
@@ -431,7 +440,7 @@ export class Graph {
 
             })
 
-        // Go through each objects and update them if they are computed.
+        // Go through each object and update them if they are computed.
         Object.keys(this.figures)
             .forEach((name) => {
                 if (except.includes(name)) {

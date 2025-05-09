@@ -198,8 +198,6 @@ export class Line extends AbstractFigure {
                 this.#config.shape === 'ray'
             )
 
-
-            // (this.#config.shape === 'line' || this.#config.shape === 'ray') &&
             // If the data is not null, update the start and end points of the line
             if (data !== null) {
                 this.start = data[0]
@@ -215,7 +213,27 @@ export class Line extends AbstractFigure {
     }
 
     override follow(x: number, y: number): XY {
-        return this.math.projection({x, y})
+
+        const xy = this.math.projection({x, y})
+
+        // If the line is a line, return
+        if (this.#config.shape === 'line') {
+            return xy
+        }
+
+        // If the line is a ray, make sure the point is on the line
+        const {x: x1, y: y1} = this.start
+        const {x: x2, y: y2} = this.end
+
+        const dx = x2 - x1
+        const dy = y2 - y1
+
+        const t = Math.max(0, Math.min(1, ((x - x1) * dx + (y - y1) * dy) / (dx * dx + dy * dy)))
+
+        return {
+            x: x1 + t * dx,
+            y: y1 + t * dy
+        }
     }
 
     override move(x: number | XY): this {

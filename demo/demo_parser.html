@@ -45,7 +45,16 @@
                     @input="update"></textarea>
         </div>
         <!-- output -->
-        <div id="root" class="col-span-2"></div>
+        <div>
+            <div id="root" class="col-span-2"></div>
+            <div v-show="showAnimation" class="flex gap-3 mt-3">
+
+                <button class="bg-white hover:bg-gray-200 transition-colors border rounded px-4 py-2" @click="animation('start')">start</button>
+                <button class="bg-white hover:bg-gray-200 transition-colors border rounded px-4 py-2" @click="animation('pause')">pause</button>
+                <button class="bg-white hover:bg-gray-200 transition-colors border rounded px-4 py-2" @click="animation('continue')">continue</button>
+                <button class="bg-white hover:bg-gray-200 transition-colors border rounded px-4 py-2" @click="animation('stop')">stop</button>
+            </div>
+        </div>
     </div>
 
     <div>
@@ -87,7 +96,6 @@
 
     import {basic_examples} from "./parsing_examples/basic_examples";
 
-    console.log(basic_examples)
     const {createApp, ref} = Vue
 
     let draw
@@ -105,6 +113,8 @@
                     code: this.code
                 }
             )
+
+            this.showAnimation = draw.animation.canBeAnimated() ?? false
 
             // Extract only the parameters.
             // const parameters = result.map((item) => item.parameters)
@@ -124,14 +134,17 @@
                 basic_examples,
                 parameter,
                 documentation: PiDraw.documentation(),
+                showAnimation: ref(false),
                 modify: () => {
                 },
-                update: (newCode) => {
-                    if(newCode){
+                update: (event, newCode) => {
+                    if (newCode) {
                         code.value = newCode
                     }
 
                     draw.refresh(code.value)
+
+                    this.showAnimation = draw.animation.canBeAnimated()
                 },
                 updateLayout: () => {
                     draw.refreshLayout(parameter.value)
@@ -141,7 +154,18 @@
                 },
                 changeCaret: () => {
                     console.log('change caret - display current line.');
-                }
+                },
+                animation: (value)=>{
+                    if(value==='start'){
+                        draw.animation.start()
+                    } else if(value==='pause'){
+                        draw.animation.pause()
+                    } else if(value==='continue'){
+                        draw.animation.resume()
+                    } else if(value==='stop'){
+                        draw.animation.cancel()
+                    }
+                },
             }
         }
     }).mount('#app')

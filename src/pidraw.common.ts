@@ -1,5 +1,7 @@
 import {ForeignObject as svgHTML, G, Text as svgLabel} from "@svgdotjs/svg.js"
 import type {parser_config} from "./parser/parser.config"
+import type {Point} from "./figures/Point"
+import type {LOOP_STYLE} from "./Animate"
 
 export type TeXConverterType = (value: string) => string
 
@@ -53,6 +55,14 @@ export interface IFigureAppearanceConfig {
     },
 }
 
+export interface IFigureAnimation {
+    target: Point | XY | null,
+    duration: number, // in seconds
+    easing: 'linear' | 'inOut', // linear | inOut
+    delay: number, // in seconds
+    loop: LOOP_STYLE,
+    callback?: () => void
+}
 export interface XY {
     x: number,
     y: number

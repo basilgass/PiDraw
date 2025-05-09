@@ -6,12 +6,21 @@ import {
     PARSER_COLOR_VALUES,
     PARSER_TYPE
 } from "./parser/parser.common"
-import {COORDINATE_SYSTEM, type DOMAIN, type IGraphConfig, type IGraphDisplay, isDOMAIN, type XY} from "./pidraw.common"
+import {
+    COORDINATE_SYSTEM,
+    type DOMAIN,
+    type IFigureAnimation,
+    type IGraphConfig,
+    type IGraphDisplay,
+    isDOMAIN,
+    type XY
+} from "./pidraw.common"
 import {parser_config} from "./parser/parser.config"
 import {AbstractFigure} from "./figures/AbstractFigure"
 import {type LABEL_POSITION} from "./labels/Label"
 import {Point} from "./figures/Point"
 import {type PARSER, PiParse} from "piparser"
+import {getLoopStyle, LOOP_STYLE} from "./Animate"
 
 export const PARSER_PARAMETERS_KEYS = [
     'ppu', 'x', 'y', 'grid', 'axis', 'label', 'tex', 'points', 'no-points', 'subgrid'
@@ -135,11 +144,6 @@ export class Draw extends Graph {
                 }
             })
 
-            // Move the point to the interactive layer
-            // this.layers.interactive.add(obj.element)
-            // Resize the draggable point
-            // obj.asCircle(20)
-            //     .fill('white/0.8')
             this.draggable(interactive,
                 {
                     target: obj,
@@ -153,6 +157,7 @@ export class Draw extends Graph {
     }
 
     #applyOptions(options: Record<string, IParserParameters>, obj: AbstractFigure) {
+
         Object.keys(options).forEach((key) => {
             switch (key) {
                 // Appearance
@@ -277,6 +282,41 @@ export class Draw extends Graph {
                     this.#applyDrag(obj, key, options)
                     break
 
+                // Animation
+                case 'animate': {
+                    const animate: IFigureAnimation = {
+                        target: null,
+                        duration: 2,
+                        delay: 0,
+                        easing: 'linear',
+                        loop: LOOP_STYLE.NONE,
+                    }
+
+                    const toTarget = options[key].value as string
+                    if (Object.hasOwn(this.figures, toTarget) && this.figures[toTarget] instanceof Point) {
+                        animate.target = this.figures[toTarget]
+                    }
+
+                    if (Object.hasOwn(options, 'duration')) {
+                        animate.duration = options.duration.value as number
+                    }
+
+                    if (Object.hasOwn(options, 'delay')) {
+                        animate.delay = options.delay.value as number
+                    }
+
+                    if (Object.hasOwn(options, 'easing')) {
+                        animate.easing = options.easing.value as 'linear' | 'inOut'
+                    }
+
+                    if (Object.hasOwn(options, 'loop')) {
+                        animate.loop = getLoopStyle(options.loop.value as string | number | boolean)
+                    }
+                    obj.animate = animate
+
+                    break
+                }
+
                 default: {
                     // Maybe it's a color
                     if (PARSER_COLOR_VALUES.includes(key)) {
@@ -382,11 +422,11 @@ export class Draw extends Graph {
             // })
         })
 
-
     }
 
     #buildOptions(obj: AbstractFigure, item: PARSER) {
-
+        // TODO: make a global reset function for everything
+        // Reset the animation flag
         // Apply defaults settings to the object
         if (this.#settings.label &&
             obj instanceof Point &&
