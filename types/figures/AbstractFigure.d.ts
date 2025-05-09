@@ -1,5 +1,5 @@
 import { G, Shape, Svg } from '@svgdotjs/svg.js';
-import { IFigureAppearanceConfig, IGraphConfig, XY } from '../pidraw.common';
+import { IFigureAnimation, IFigureAppearanceConfig, IGraphConfig, XY } from '../pidraw.common';
 import { Label } from '../labels/Label';
 export declare abstract class AbstractFigure {
     #private;
@@ -17,6 +17,8 @@ export declare abstract class AbstractFigure {
     get isDraggable(): boolean;
     set isDraggable(value: boolean);
     get label(): Label | null;
+    get animate(): IFigureAnimation | null;
+    set animate(value: IFigureAnimation | null);
     abstract computed(): this;
     hide(): this;
     show(): this;
