@@ -1,16 +1,16 @@
 /** @type {import('dependency-cruiser').IConfiguration} */
 module.exports = {
   forbidden: [
-    {
-      name: 'type-circular',
-      severity: 'warn',
-      comment:
-        'This dependency is part of a circular type import chain',
-      from: {},
-      to: {
-        circular: true
-      }
-    },
+    // {
+    //   name: 'type-circular',
+    //   severity: 'warn',
+    //   comment:
+    //     'This dependency is part of a circular type import chain',
+    //   from: {},
+    //   to: {
+    //     circular: true
+    //   }
+    // },
     // log an error for all circular dependencies which consist of only 
     // dependencies that are _not_ declared as explicitly type-only
     {

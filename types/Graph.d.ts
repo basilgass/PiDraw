@@ -13,6 +13,7 @@ import { IFillBetweenConfig } from './figures/FillBetween';
 import { IRiemannConfig } from './figures/Riemann';
 import { Path } from './figures/Path';
 import { Bezier, IBezierConfig } from './figures/Bezier';
+import { Animate } from './Animate';
 export type IDraggableFollow = ((x: number, y: number) => XY) | AbstractFigure | string;
 export interface IDraggableConfig {
     bounds?: {
@@ -51,6 +52,7 @@ export declare class Graph {
     get layers(): ILayers;
     get rootSVG(): Svg;
     get toTex(): (value: string) => string;
+    get animation(): Animate;
     clear(): void;
     coordinate_system(system: COORDINATE_SYSTEM): AbstractFigure;
     draggable(figure: AbstractFigure, options?: IDraggableConfig): AbstractFigure;
