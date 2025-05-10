@@ -285,16 +285,26 @@ export class Draw extends Graph {
                 // Animation
                 case 'animate': {
                     const animate: IFigureAnimation = {
-                        target: null,
+                        from: null,
+                        to: null,
                         duration: 2,
                         delay: 0,
                         easing: 'linear',
                         loop: LOOP_STYLE.NONE,
                     }
 
-                    const toTarget = options[key].value as string
-                    if (Object.hasOwn(this.figures, toTarget) && this.figures[toTarget] instanceof Point) {
-                        animate.target = this.figures[toTarget]
+                    if (Object.hasOwn(options, 'from')) {
+                        const fromFigure = options.from.value as unknown as string
+                        if (Object.hasOwn(this.figures, fromFigure) && this.figures[fromFigure] instanceof Point) {
+                            animate.from = this.figures[fromFigure]
+                        }
+                    }
+
+                    if (Object.hasOwn(options, 'to')) {
+                        const toFigure = options.to.value as unknown as string
+                        if (Object.hasOwn(this.figures, toFigure) && this.figures[toFigure] instanceof Point) {
+                            animate.to = this.figures[toFigure]
+                        }
                     }
 
                     if (Object.hasOwn(options, 'duration')) {
@@ -312,6 +322,7 @@ export class Draw extends Graph {
                     if (Object.hasOwn(options, 'loop')) {
                         animate.loop = getLoopStyle(options.loop.value as string | number | boolean)
                     }
+
                     obj.animate = animate
 
                     break

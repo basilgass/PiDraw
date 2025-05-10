@@ -52,7 +52,8 @@ export interface IFigureAppearanceConfig {
     };
 }
 export interface IFigureAnimation {
-    target: Point | XY | null;
+    from: Point | XY | null;
+    to: Point | XY | null;
     duration: number;
     easing: 'linear' | 'inOut';
     delay: number;

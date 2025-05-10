@@ -56,7 +56,8 @@ export interface IFigureAppearanceConfig {
 }
 
 export interface IFigureAnimation {
-    target: Point | XY | null,
+    from: Point | XY | null,
+    to: Point | XY | null,
     duration: number, // in seconds
     easing: 'linear' | 'inOut', // linear | inOut
     delay: number, // in seconds

@@ -119,14 +119,18 @@ export class Animate {
             if (isXY(figure) && figure.animate !== null) {
                 const animate = figure.animate as unknown as IFigureAnimation
                 const point = figure as Point
-                const target = animate.target as Point
+
+                console.log(animate)
+                
+                const from = animate.from as Point
+                const to = animate.to as Point
 
                 this.#animations.set(
                     figure.name,
                     {
                         point,
-                        from: {x: +point.pixels.x, y: +point.pixels.y},
-                        to: {x: +target.pixels.x, y: +target.pixels.y},
+                        from: {x: +from.pixels.x, y: +from.pixels.y},
+                        to: {x: +to.pixels.x, y: +to.pixels.y},
                         duration: animate.duration * 1000,  // ms
                         ease: (t: number) => t, // TODO: Add easing function
                         loop: animate.loop,

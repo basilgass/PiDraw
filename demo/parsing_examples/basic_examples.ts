@@ -143,8 +143,8 @@ C(3,0)->tick,tex=c`
         code: `A(1,2)
 B(7,6)
 d=AB.
-X(1,2)->red,w=10,animate=B,duration=3,loop
-Y(1,2)->green,w=10,animate=B,duration=5,loop=reverse
+X(1,2)->red,w=10,animate,from=A,to=B,duration=3,loop
+Y(1,2)->green,w=10,animate,from=A,to=B,duration=5,loop=reverse
 p=perp d,X`
     }
 ]
