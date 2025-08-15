@@ -15,7 +15,7 @@ import {
 import {type IPointConfig, Point} from "./figures/Point"
 import {type ILineConfig, Line} from "./figures/Line"
 import {type IPlotConfig, Plot} from "./figures/Plot"
-import {createMarker, toPixels} from "./Calculus"
+import {createMarker, toCoordinates as pixelsToCoordinates, toPixels as coordToPixels} from "./Calculus"
 import {AbstractFigure} from "./figures/AbstractFigure"
 import {Circle, type ICircleConfig} from "./figures/Circle"
 import {type IPolygonConfig, Polygon} from "./figures/Polygon"
@@ -421,7 +421,11 @@ export class Graph {
     }
 
     public toPixels<T>(pixels: T, axis?: 'x' | 'y'): T {
-        return toPixels(pixels, this.config, axis)
+        return coordToPixels(pixels, this.config, axis)
+    }
+
+    public toCoordinates<T>(pixels: T, axis?: 'x' | 'y'): T {
+        return pixelsToCoordinates(pixels, this.config, axis)
     }
 
     // Update each figures in the graph

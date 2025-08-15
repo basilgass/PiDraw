@@ -8,6 +8,7 @@
   "types": "types/index.d.ts",
   "exports": {
     ".": {
+      "types": "./types/index.d.ts",
       "import": "./dist/pidraw.js",
       "require": "./dist/pidraw.js"
     }
@@ -47,6 +48,7 @@
   "devDependencies": {
     "@eslint/js": "^9.25.1",
     "@types/eslint__js": "^8.42.3",
+    "@types/glob": "^8.1.0",
     "autoprefixer": "^10.4.21",
     "dependency-cruiser": "^16.10.1",
     "eslint": "^9.25.1",

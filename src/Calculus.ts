@@ -2,8 +2,8 @@
  * The calculus class is intended to replace PiMath and avoid using "fractions" and work directly with number.
  */
 
-import { Marker, Path as svgPath, Svg } from "@svgdotjs/svg.js"
-import { type DOMAIN, type IGraphConfig,type XY, isDOMAIN, isXY } from "./pidraw.common"
+import {Marker, Path as svgPath, Svg} from "@svgdotjs/svg.js"
+import {type IGraphConfig, isDOMAIN, isXY, type XY} from "./pidraw.common"
 
 export function numberCorrection(value: number, number_of_digits = 10): number {
     return +value.toFixed(number_of_digits)
@@ -114,7 +114,7 @@ export class mathVector {
 
 export class mathLine {
     constructor(A: XY, B: XY | mathVector) {
-        this._A = { x: 0, y: 0 }
+        this._A = {x: 0, y: 0}
         this._director = new mathVector(0, 0)
 
         if (B instanceof mathVector) {
@@ -201,7 +201,7 @@ export class mathLine {
         if (x === Number.POSITIVE_INFINITY || x === Number.NEGATIVE_INFINITY) {
             return null
         }
-        return { x, y }
+        return {x, y}
     }
 
     projection(value: XY): XY {
@@ -214,7 +214,7 @@ export class mathLine {
 
         const k = mathVector.scalarProduct(d, p) / mathVector.scalarProduct(d, d)
 
-        return { x: this._A.x + d.x * k, y: this._A.y + d.y * k }
+        return {x: this._A.x + d.x * k, y: this._A.y + d.y * k}
     }
 }
 
@@ -253,7 +253,7 @@ export class NumExp {
 
     get isValid(): boolean {
         try {
-            this.evaluate({ x: 0 })
+            this.evaluate({x: 0})
             this._isValid = true
         } catch {
             this._isValid = false
@@ -427,7 +427,10 @@ enum ShutingyardMode {
     NUMERIC = 'numeric'
 }
 
-interface Token { token: string, tokenType: ShutingyardType }
+interface Token {
+    token: string,
+    tokenType: ShutingyardType
+}
 
 class Shutingyard {
     readonly _mode: ShutingyardMode
@@ -462,51 +465,51 @@ class Shutingyard {
     tokenConfigInitialization(): tokenType {
         if (this._mode === ShutingyardMode.NUMERIC) {
             this._tokenConfig = {
-                '^': { precedence: 4, associative: 'right', type: ShutingyardType.OPERATION },
-                '*': { precedence: 3, associative: 'left', type: ShutingyardType.OPERATION },
-                '/': { precedence: 3, associative: 'left', type: ShutingyardType.OPERATION },
-                '+': { precedence: 2, associative: 'left', type: ShutingyardType.OPERATION },
-                '-': { precedence: 2, associative: 'left', type: ShutingyardType.OPERATION },
-                '%': { precedence: 3, associative: 'right', type: ShutingyardType.OPERATION },
-                'sin': { precedence: 4, associative: 'right', type: ShutingyardType.FUNCTION },
-                'cos': { precedence: 4, associative: 'right', type: ShutingyardType.FUNCTION },
-                'tan': { precedence: 4, associative: 'right', type: ShutingyardType.FUNCTION },
-                'asin': { precedence: 4, associative: 'right', type: ShutingyardType.FUNCTION },
-                'acos': { precedence: 4, associative: 'right', type: ShutingyardType.FUNCTION },
-                'atan': { precedence: 4, associative: 'right', type: ShutingyardType.FUNCTION },
-                'sqrt': { precedence: 4, associative: 'right', type: ShutingyardType.FUNCTION },
-                'nthrt': { precedence: 4, associative: 'right', type: ShutingyardType.FUNCTION },
-                'ln': { precedence: 4, associative: 'right', type: ShutingyardType.FUNCTION },
-                'log': { precedence: 4, associative: 'right', type: ShutingyardType.FUNCTION },
-                'abs': { precedence: 4, associative: 'right', type: ShutingyardType.FUNCTION },
+                '^': {precedence: 4, associative: 'right', type: ShutingyardType.OPERATION},
+                '*': {precedence: 3, associative: 'left', type: ShutingyardType.OPERATION},
+                '/': {precedence: 3, associative: 'left', type: ShutingyardType.OPERATION},
+                '+': {precedence: 2, associative: 'left', type: ShutingyardType.OPERATION},
+                '-': {precedence: 2, associative: 'left', type: ShutingyardType.OPERATION},
+                '%': {precedence: 3, associative: 'right', type: ShutingyardType.OPERATION},
+                'sin': {precedence: 4, associative: 'right', type: ShutingyardType.FUNCTION},
+                'cos': {precedence: 4, associative: 'right', type: ShutingyardType.FUNCTION},
+                'tan': {precedence: 4, associative: 'right', type: ShutingyardType.FUNCTION},
+                'asin': {precedence: 4, associative: 'right', type: ShutingyardType.FUNCTION},
+                'acos': {precedence: 4, associative: 'right', type: ShutingyardType.FUNCTION},
+                'atan': {precedence: 4, associative: 'right', type: ShutingyardType.FUNCTION},
+                'sqrt': {precedence: 4, associative: 'right', type: ShutingyardType.FUNCTION},
+                'nthrt': {precedence: 4, associative: 'right', type: ShutingyardType.FUNCTION},
+                'ln': {precedence: 4, associative: 'right', type: ShutingyardType.FUNCTION},
+                'log': {precedence: 4, associative: 'right', type: ShutingyardType.FUNCTION},
+                'abs': {precedence: 4, associative: 'right', type: ShutingyardType.FUNCTION},
             }
             this._uniformize = false
         } else if (this._mode === ShutingyardMode.EXPRESSION) {
             this._tokenConfig = {
-                '^': { precedence: 4, associative: 'right', type: ShutingyardType.OPERATION },
-                '*': { precedence: 3, associative: 'left', type: ShutingyardType.OPERATION },
-                '/': { precedence: 3, associative: 'left', type: ShutingyardType.OPERATION },
-                '+': { precedence: 2, associative: 'left', type: ShutingyardType.OPERATION },
-                '-': { precedence: 2, associative: 'left', type: ShutingyardType.OPERATION },
-                '%': { precedence: 3, associative: 'right', type: ShutingyardType.OPERATION },
-                'sin': { precedence: 4, associative: 'right', type: ShutingyardType.FUNCTION },
-                'cos': { precedence: 4, associative: 'right', type: ShutingyardType.FUNCTION },
-                'tan': { precedence: 4, associative: 'right', type: ShutingyardType.FUNCTION },
-                'asin': { precedence: 4, associative: 'right', type: ShutingyardType.FUNCTION },
-                'acos': { precedence: 4, associative: 'right', type: ShutingyardType.FUNCTION },
-                'atan': { precedence: 4, associative: 'right', type: ShutingyardType.FUNCTION },
-                'sqrt': { precedence: 4, associative: 'right', type: ShutingyardType.FUNCTION },
-                'nthrt': { precedence: 4, associative: 'right', type: ShutingyardType.FUNCTION },
-                'abs': { precedence: 4, associative: 'right', type: ShutingyardType.FUNCTION },
+                '^': {precedence: 4, associative: 'right', type: ShutingyardType.OPERATION},
+                '*': {precedence: 3, associative: 'left', type: ShutingyardType.OPERATION},
+                '/': {precedence: 3, associative: 'left', type: ShutingyardType.OPERATION},
+                '+': {precedence: 2, associative: 'left', type: ShutingyardType.OPERATION},
+                '-': {precedence: 2, associative: 'left', type: ShutingyardType.OPERATION},
+                '%': {precedence: 3, associative: 'right', type: ShutingyardType.OPERATION},
+                'sin': {precedence: 4, associative: 'right', type: ShutingyardType.FUNCTION},
+                'cos': {precedence: 4, associative: 'right', type: ShutingyardType.FUNCTION},
+                'tan': {precedence: 4, associative: 'right', type: ShutingyardType.FUNCTION},
+                'asin': {precedence: 4, associative: 'right', type: ShutingyardType.FUNCTION},
+                'acos': {precedence: 4, associative: 'right', type: ShutingyardType.FUNCTION},
+                'atan': {precedence: 4, associative: 'right', type: ShutingyardType.FUNCTION},
+                'sqrt': {precedence: 4, associative: 'right', type: ShutingyardType.FUNCTION},
+                'nthrt': {precedence: 4, associative: 'right', type: ShutingyardType.FUNCTION},
+                'abs': {precedence: 4, associative: 'right', type: ShutingyardType.FUNCTION},
             }
             this._uniformize = true
         } else {
             this._tokenConfig = {
-                '^': { precedence: 4, associative: 'right', type: ShutingyardType.OPERATION },
-                '*': { precedence: 3, associative: 'left', type: ShutingyardType.OPERATION },
-                '/': { precedence: 3, associative: 'left', type: ShutingyardType.OPERATION },
-                '+': { precedence: 2, associative: 'left', type: ShutingyardType.OPERATION },
-                '-': { precedence: 2, associative: 'left', type: ShutingyardType.OPERATION },
+                '^': {precedence: 4, associative: 'right', type: ShutingyardType.OPERATION},
+                '*': {precedence: 3, associative: 'left', type: ShutingyardType.OPERATION},
+                '/': {precedence: 3, associative: 'left', type: ShutingyardType.OPERATION},
+                '+': {precedence: 2, associative: 'left', type: ShutingyardType.OPERATION},
+                '-': {precedence: 2, associative: 'left', type: ShutingyardType.OPERATION},
             }
             this._uniformize = true
         }
@@ -561,14 +564,14 @@ class Shutingyard {
 
             if (token === '') {
                 // No function found ! Might be a coefficient !
-                if (expr[start].match(/[0-9]/)) {
-                    const k = expr.substring(start).match(/^([0-9.]+)/)
+                if (/[0-9]/.exec(expr[start])) {
+                    const k = /^([0-9.]+)/.exec(expr.substring(start))
                     if (k) {
                         token = k[0]
                     }
                     tokenType = ShutingyardType.COEFFICIENT
-                } else if (expr[start].match(/[a-zA-Z]/)) {
-                    const variable = expr.substring(start).match(/^([a-zA-Z]+)/)
+                } else if (/[a-zA-Z]/.exec(expr[start])) {
+                    const variable = /^([a-zA-Z]+)/.exec(expr.substring(start))
                     if (variable) {
                         token = variable[0]
                         tokenType = ShutingyardType.VARIABLE
@@ -646,7 +649,9 @@ class Shutingyard {
             }
 
             // The function token are solved.
-            if (i >= expr.length) { break }
+            if (i >= expr.length) {
+                break
+            }
 
             crtToken = expr[i]
             nextToken = expr[i + 1]
@@ -654,19 +659,19 @@ class Shutingyard {
             if (crtToken.match(/[a-zA-Z]/g)) {
                 // Current element is a letter.
                 // if the next element is a letter, a number or an opening parentheses, add the multiplication sign.
-                if (nextToken.match(/[a-zA-Z\d(]/)) {
+                if (/[a-zA-Z\d(]/.exec(nextToken)) {
                     normalizedExpr += '*'
                 }
-            } else if (crtToken.match(/\d/)) {
+            } else if (/\d/.exec(crtToken)) {
                 // Current element is a number.
                 // if the next element is a letter or a parentheses, add the multiplication sign.
-                if (nextToken.match(/[a-zA-Z(]/)) {
+                if (/[a-zA-Z(]/.exec(nextToken)) {
                     normalizedExpr += '*'
                 }
             } else if (crtToken === ')') {
                 // Current element is a closing parentheses.
                 // if the next element is a letter, a number or an opening parentheses, add the multiplication sign
-                if (nextToken.match(/[a-zA-Z\d(]/)) {
+                if (/[a-zA-Z\d(]/.exec(nextToken)) {
                     normalizedExpr += '*'
                 }
             }
@@ -688,7 +693,9 @@ class Shutingyard {
     parse(expr: string, uniformize?: boolean): this {
 
         // Normalize the input if required.
-        if (uniformize ?? this._uniformize) { expr = this.normalize(expr) }
+        if (uniformize ?? this._uniformize) {
+            expr = this.normalize(expr)
+        }
 
         let securityLoopLvl1 = 50
         let securityLoopLvl2
@@ -715,7 +722,7 @@ class Shutingyard {
                 case ShutingyardType.COEFFICIENT:
                 case ShutingyardType.VARIABLE:
                 case ShutingyardType.CONSTANT:
-                    outQueue.push({ token, tokenType })
+                    outQueue.push({token, tokenType})
                     break
 
                 case ShutingyardType.OPERATION:
@@ -727,13 +734,13 @@ class Shutingyard {
 
                         //while there is an operator token o2, at the top of the operator stack and
                         while (opTop.token in this._tokenConfig && (
-                            //either o1 is left-associative and its precedence is less than or equal to that of o2,
-                            (this._tokenConfig[token].associative === 'left' && this._tokenConfig[token].precedence <= this._tokenConfig[opTop.token].precedence)
-                            ||
-                            //or o1 is right associative, and has precedence less than that of o2,
-                            (this._tokenConfig[token].associative === 'right' && this._tokenConfig[token].precedence < this._tokenConfig[opTop.token].precedence)
-                        )
-                        ) {
+                                //either o1 is left-associative and its precedence is less than or equal to that of o2,
+                                (this._tokenConfig[token].associative === 'left' && this._tokenConfig[token].precedence <= this._tokenConfig[opTop.token].precedence)
+                                ||
+                                //or o1 is right associative, and has precedence less than that of o2,
+                                (this._tokenConfig[token].associative === 'right' && this._tokenConfig[token].precedence < this._tokenConfig[opTop.token].precedence)
+                            )
+                            ) {
 
                             /* Security exit ! */
                             securityLoopLvl2--
@@ -743,7 +750,7 @@ class Shutingyard {
                             }
 
                             // Add the operation to the queue
-                            outQueue.push(opStack.pop() ?? { token: '', tokenType: ShutingyardType.OPERATION })
+                            outQueue.push(opStack.pop() ?? {token: '', tokenType: ShutingyardType.OPERATION})
 
                             // Get the next operation on top of the Stack.
                             if (opStack.length === 0) {
@@ -753,7 +760,7 @@ class Shutingyard {
                         }
                     }
                     //at the end of iteration push o1 onto the operator stack
-                    opStack.push({ token, tokenType })
+                    opStack.push({token, tokenType})
                     break
                 case ShutingyardType.FUNCTION_ARGUMENT:
                     securityLoopLvl2 = +securityLoopLvl2_default
@@ -764,14 +771,14 @@ class Shutingyard {
                             break
                         }
 
-                        outQueue.push((opStack.pop()) ?? { token, tokenType })
+                        outQueue.push((opStack.pop()) ?? {token, tokenType})
                     }
                     break
                 case ShutingyardType.LEFT_PARENTHESIS:
-                    opStack.push({ token, tokenType })
+                    opStack.push({token, tokenType})
                     // Add an empty value if next element is negative.
                     if (expr[tokenPos] === '-') {
-                        outQueue.push({ token: '0', tokenType: ShutingyardType.COEFFICIENT })
+                        outQueue.push({token: '0', tokenType: ShutingyardType.COEFFICIENT})
                     }
                     break
                 case ShutingyardType.RIGHT_PARENTHESIS:
@@ -784,14 +791,14 @@ class Shutingyard {
                             break
                         }
 
-                        outQueue.push((opStack.pop()) ?? { token, tokenType })
+                        outQueue.push((opStack.pop()) ?? {token, tokenType})
                     }
 
                     //Pop the left parenthesis from the stack, but not onto the output queue.
                     opStack.pop()
                     break
                 case ShutingyardType.FUNCTION:
-                    opStack.push({ token, tokenType })
+                    opStack.push({token, tokenType})
                     break
                 default:
                     // In theory, everything should be handled.
@@ -805,7 +812,7 @@ class Shutingyard {
     }
 }
 
-export function toPixels<T>(coordinates: T, config: IGraphConfig, axis?: 'x' | 'y' | undefined): T {
+export function toPixels<T>(coordinates: T, config: IGraphConfig, axis?: 'x' | 'y'): T {
     // It's a number
     if (typeof coordinates === 'number') {
         if (axis === 'y') {
@@ -825,8 +832,8 @@ export function toPixels<T>(coordinates: T, config: IGraphConfig, axis?: 'x' | '
 
         } else {
             min = config.origin.x +
-                coordinates.min * config.axis.x.x,
-                max = config.origin.x +
+                coordinates.min * config.axis.x.x
+            max = config.origin.x +
                 coordinates.max * config.axis.x.x
         }
 
@@ -852,11 +859,48 @@ export function toPixels<T>(coordinates: T, config: IGraphConfig, axis?: 'x' | '
     return coordinates
 }
 
-export function toCoordinates(pixels: XY, config: IGraphConfig): XY {
-    return {
-        x: (pixels.x - config.origin.x) / config.axis.x.x,
-        y: (pixels.y - config.origin.y) / config.axis.y.y
+export function toCoordinates<T>(pixels: T, config: IGraphConfig, axis?: 'x' | 'y'): T {
+
+    // It's a number
+    if (typeof pixels === 'number') {
+        if (axis === 'y') {
+            return pixels / config.axis.y.y as T
+        }
+        return pixels / config.axis.x.x as T
     }
+
+    // It's a domain
+    if (isDOMAIN(pixels)) {
+        let min, max
+        if (axis === 'y') {
+            min = config.origin.y +
+                pixels.min / config.axis.y.y
+            max = config.origin.y +
+                pixels.max / config.axis.y.y
+
+        } else {
+            min = config.origin.x +
+                pixels.min / config.axis.x.x
+            max = config.origin.x +
+                pixels.max / config.axis.x.x
+        }
+
+        return {
+            min: Math.min(min, max),
+            max: Math.max(min, max)
+        } as T
+    }
+
+    // It's a point
+    if (isXY(pixels)) {
+        return {
+            x: (pixels.x - config.origin.x) / config.axis.x.x,
+            y: (pixels.y - config.origin.y) / config.axis.y.y
+        } as T
+    }
+
+
+    return pixels
 }
 
 export function computeLine(
@@ -950,11 +994,8 @@ export function computeLine(
         return null
     }
 
-    return [{ x: x1, y: y1 }, { x: x2, y: y2 }]
+    return [{x: x1, y: y1}, {x: x2, y: y2}]
 }
-
-
-
 
 
 /**
@@ -1055,7 +1096,7 @@ export function createMarker(svg: Svg, scale: number, shape?: string): { start: 
                 function (add) {
                     const p = add.path(`M${scale / 2},${scale} L${scale / 2},0`)
 
-                    p.stroke({ color: 'black', width: 1 })
+                    p.stroke({color: 'black', width: 1})
                 }).attr('markerUnits', 'userSpaceOnUse'),
             end: svg.marker(
                 scale,
@@ -1063,7 +1104,7 @@ export function createMarker(svg: Svg, scale: number, shape?: string): { start: 
                 function (add) {
                     const p = add.path(`M${scale / 2},${scale} L${scale / 2},0`)
 
-                    p.stroke({ color: 'black', width: 1 })
+                    p.stroke({color: 'black', width: 1})
                 }).attr('markerUnits', 'userSpaceOnUse'),
         }
     }
@@ -1093,10 +1134,10 @@ export function nearestPointToPath(value: XY, path: svgPath, precision = 1): XY 
     }
 
     for (let t = precision; t < path.length(); t += precision) {
-        const { x, y } = path.pointAt(t)
+        const {x, y} = path.pointAt(t)
 
         // Check if the distance with the current value is less than the previous one.
-        if (distance(value, { x, y }) < distance(value, xy)) {
+        if (distance(value, {x, y}) < distance(value, xy)) {
             xy.x = x
             xy.y = y
         }
@@ -1104,11 +1145,13 @@ export function nearestPointToPath(value: XY, path: svgPath, precision = 1): XY 
     return xy
 }
 
-export function toNumber(value: number | string): number{
+export function toNumber(value: number | string): number {
 
-    if(typeof value === 'number'){return value}
+    if (typeof value === 'number') {
+        return value
+    }
 
-    if(typeof value=== 'string'){
+    if (typeof value === 'string') {
         if (value.includes('/')) {
             const [num, den] = value.split('/')
             return +num / +den

@@ -10,6 +10,7 @@ import {buildBezier} from "./buildBezier"
 import {buildIntersection} from "./buildIntersection"
 
 // TODO: add the build and create parameters to make it easily accessible and extensible.
+// TODO: ajouter l'ellipse
 export interface parser_item {
     build: (values: PARSER, figures: Record<string, AbstractFigure>, config: IGraphConfig) => buildInterface<unknown> | buildInterface<unknown>[] | null,
     code: string,
