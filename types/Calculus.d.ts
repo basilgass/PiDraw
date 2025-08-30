@@ -67,8 +67,8 @@ declare enum ShutingyardType {
     FUNCTION_ARGUMENT = "function-argument",
     MONOM = "monom"
 }
-export declare function toPixels<T>(coordinates: T, config: IGraphConfig, axis?: 'x' | 'y' | undefined): T;
-export declare function toCoordinates(pixels: XY, config: IGraphConfig): XY;
+export declare function toPixels<T>(coordinates: T, config: IGraphConfig, axis?: 'x' | 'y'): T;
+export declare function toCoordinates<T>(pixels: T, config: IGraphConfig, axis?: 'x' | 'y'): T;
 export declare function computeLine(origin: XY, direction: XY, width: number, height: number, padding?: number, half_axis?: boolean, length?: number): [XY, XY] | null;
 /**
  * Get coordinate by radius / angle

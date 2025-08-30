@@ -67,6 +67,7 @@ export declare class Graph {
     };
     subgrid(name: string, subdivision: number): AbstractFigure;
     toPixels<T>(pixels: T, axis?: 'x' | 'y'): T;
+    toCoordinates<T>(pixels: T, axis?: 'x' | 'y'): T;
     update(except?: string[], forceUpdate?: boolean): void;
     updateLayout(): void;
 }
