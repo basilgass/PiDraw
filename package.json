@@ -13,6 +13,7 @@
       "require": "./dist/pidraw.js"
     }
   },
+  "./types/index.d.ts": "./types/index.d.ts",
   "files": [
     "dist",
     "types"

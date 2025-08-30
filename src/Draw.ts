@@ -23,7 +23,9 @@ import {type PARSER, PiParse} from "piparser"
 import {getLoopStyle, LOOP_STYLE} from "./Animate"
 
 export const PARSER_PARAMETERS_KEYS = [
-    'ppu', 'x', 'y', 'grid', 'axis', 'label', 'tex', 'points', 'no-points', 'subgrid'
+    'ppu', 'x', 'y', 'unitX', 'unitY',
+    'grid', 'axis', 'subgrid',
+    'label', 'tex', 'points', 'no-points'
 ]
 
 // TODO: intersection of a line and a circle
@@ -594,6 +596,9 @@ export class Draw extends Graph {
         const dx = Math.abs(xDomain.max - xDomain.min)
         const dy = Math.abs(yDomain.max - yDomain.min)
 
+        const unitX = parameters.unitX ? parseFloat(parameters.unitX.value as string) : 1
+        const unitY = parameters.unitY ? parseFloat(parameters.unitY.value as string) : 1
+
 
         const width = dx * ppu
         const height = dy * ppu
@@ -604,8 +609,8 @@ export class Draw extends Graph {
 
         const system = COORDINATE_SYSTEM.CARTESIAN_2D
         const axisConfig = {
-            x: {x: ppu, y: 0},
-            y: {x: 0, y: -ppu}
+            x: {x: ppu*unitX, y: 0},
+            y: {x: 0, y: -ppu*unitY}
         }
 
         // Display options

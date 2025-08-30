@@ -3,212 +3,243 @@
 
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta content="width=device-width, initial-scale=1" name="viewport">
     <title>PiGraph - Dev page</title>
 
     <!-- SVG -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/svg.js/3.0.13/svg.min.js"></script>
 
     <!-- KaTex -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.0/dist/katex.min.css"
-        integrity="sha384-Xi8rHCmBmhbuyyhbI88391ZKP2dmfnOl4rT9ZfRI7mLTdk1wblIUnrIq35nqwEvC" crossorigin="anonymous">
+    <link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/katex@0.16.0/dist/katex.min.css"
+          integrity="sha384-Xi8rHCmBmhbuyyhbI88391ZKP2dmfnOl4rT9ZfRI7mLTdk1wblIUnrIq35nqwEvC" rel="stylesheet">
 
     <!-- The loading of KaTeX is deferred to speed up page rendering -->
-    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.0/dist/katex.min.js"
-        integrity="sha384-X/XCfMm41VSsqRNQgDerQczD69XqmjOOOwYQvr/uuC+j4OPoNhVgjdGFwhvN02Ja"
-        crossorigin="anonymous"></script>
+    <script crossorigin="anonymous"
+            integrity="sha384-X/XCfMm41VSsqRNQgDerQczD69XqmjOOOwYQvr/uuC+j4OPoNhVgjdGFwhvN02Ja"
+            src="https://cdn.jsdelivr.net/npm/katex@0.16.0/dist/katex.min.js"></script>
 
     <!-- adding vue -->
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
 
     <!-- adding pimath.css  -->
-    <link rel="stylesheet" href="app.css" />
+    <link href="app.css" rel="stylesheet"/>
 </head>
 
 <body class="min-h-screen">
-    <div id="app">
-        <h1 class="text-center text-2xl font-semibold my-10">Graph builder</h1>
-        <div class="grid grid-cols-1">
-            <!-- output -->
-            <div id="root" class="w-full max-w-3xl mx-auto"></div>
-            <!-- input -->
-            <!-- <div class="flex flex-col">
-                <div class="font-thin">Paramètres (xMin,xMax,yMin,yMax)</div>
-                <input v-model="params" @input="modify" class="px-2 py-3 mb-5 border rounded">
+<div id="app">
+    <h1 class="text-center text-2xl font-semibold my-10">Graph builder</h1>
+    <div class="grid grid-cols-1">
+        <!-- output -->
+        <div @mousemove="onMouseMove" class="w-full max-w-3xl mx-auto" id="root"></div>
+        <!-- input -->
+        <!-- <div class="flex flex-col">
+            <div class="font-thin">Paramètres (xMin,xMax,yMin,yMax)</div>
+            <input v-model="params" @input="modify" class="px-2 py-3 mb-5 border rounded">
 
-                <div class="font-thin">Code</div>
-                <textarea v-model="code" id="construct" rows="20" class="border mx-3 md:mx-0 py-2 px-3 rounded"
-                    @input="update" @keyup="changeCaret"></textarea>
-                <button @click="analyseCode">Montrer les clés trouvées</button>
-            </div> -->
+            <div class="font-thin">Code</div>
+            <textarea v-model="code" id="construct" rows="20" class="border mx-3 md:mx-0 py-2 px-3 rounded"
+                @input="update" @keyup="changeCaret"></textarea>
+            <button @click="analyseCode">Montrer les clés trouvées</button>
+        </div> -->
 
-        </div>
-        <div class="px-3 max-w-3xl mx-auto mt-10">
-            <h2 class="text-lg mb-4">Documentation</h2>
-
-            {{ message }}
-            <!-- description -->
-            <div class="px-3 md:px-0">
-                <table class="w-full table">
-                    <tbody>
-                        <!-- <template v-for="(help, key) of helper">
-                            <tr class="border-b border-t">
-                                <td class="font-mono" x-text="`${key} ${help.parameters}`"></td>
-                                <td class="font-thin" x-text="help.description"></td>
-                            </tr>
-                        </template> -->
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <div class="text-center font-xs text-gray-300 mt-20 mb-5">Made with love (and some coffee) by B. Gass</div>
     </div>
-    <script type="module">
-		import { PiGraph } from '../src/index'
+    <div>{{ mouseX}}, {{mouseY}} --- {{pixels}}</div>
+    <div class="px-3 max-w-3xl mx-auto mt-10">
+        <h2 class="text-lg mb-4">Documentation</h2>
+
+        {{ message }}
+        <!-- description -->
+        <div class="px-3 md:px-0">
+            <table class="w-full table">
+                <tbody>
+                <!-- <template v-for="(help, key) of helper">
+                    <tr class="border-b border-t">
+                        <td class="font-mono" x-text="`${key} ${help.parameters}`"></td>
+                        <td class="font-thin" x-text="help.description"></td>
+                    </tr>
+                </template> -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="text-center font-xs text-gray-300 mt-20 mb-5">Made with love (and some coffee) by B. Gass</div>
+</div>
+<script defer type="module">
+    import {PiGraph} from '../src/index'
 
 
-		const { createApp, ref } = Vue
-
-		createApp({
-			mounted: () => {
-				const draw = new PiGraph('root')
-				// for (let i = 0; i < 4; i++) {
-				//     for (let j = 0; j < 4; j++) {
-				//         draw.create.point({ x: i, y: j }, `helper_${i}-${j}`)
-				//             .asCircle().stroke('red', 2)
-				//     }
-				// }
-				const pt = draw.create.point({ x: 1, y: -2 }, 'A')
-				const pt2 = draw.create.point({ x: 2, y: 3 }, 'B').asCircle(20)
-				draw.draggable(pt2, { follow: ['grid'] })
-
-				const pt_middle = draw.create.point({
-					middle: { A: pt, B: pt2 }
-				}, 'MIDDLE').asCrosshair()
-
-				const projY = draw.create.point({
-					projection: { axis: 'Oy', point: pt2 }
-				}, 'C')
-
-				const projX = draw.create.point({
-					projection: { axis: 'Ox', point: pt2 }
-				}, 'D')
-
-				const line = draw.create.line({
-					through: { A: pt, B: pt2 },
-				}, 'AB')
+    const {createApp, ref, computed} = Vue
 
 
-				const parallel = draw.create.line({
-					parallel: { to: line, through: projX }
-				}, 'AB2').stroke('green', 2)
+    function getCoord(draw) {
+        return draw?.toCoordinates({x: mouseX, y: mouseY}) ?? ''
+    }
 
-				const perp = draw.create.line({
-					perpendicular: { to: line, through: projY }
-				}, 'AB3').stroke('red', 2)
+    const draw = new PiGraph('root')
 
-				const med = draw.create.line({
-					mediator: { A: pt, B: pt2 }
-				}, 'AB4').stroke('purple', 2)
+    createApp({
+        mounted: () => {
+            console.log(draw)
+            // for (let i = 0; i < 4; i++) {
+            //     for (let j = 0; j < 4; j++) {
+            //         draw.create.point({ x: i, y: j }, `helper_${i}-${j}`)
+            //             .asCircle().stroke('red', 2)
+            //     }
+            // }
+            const pt = draw.create.point({x: 1, y: -2}, 'A')
+            const pt2 = draw.create.point({x: 2, y: 3}, 'B').asCircle(20)
+            draw.draggable(pt2, {follow: ['grid']})
 
+            const pt_middle = draw.create.point({
+                middle: {A: pt, B: pt2}
+            }, 'MIDDLE').asCrosshair()
 
-				const perp_parallel_intersection = draw.create.point({
-					intersection: { A: perp, B: parallel },
-				}, 'E').asSquare(20).stroke('blue', 2)
-				pt.asCrosshair(10).stroke('blue', 2)
+            const projY = draw.create.point({
+                projection: {axis: 'Oy', point: pt2}
+            }, 'C')
 
-				const fx = draw.create.plot({
-					expression: 'x^2*sin(x)/8',
-					samples: 500
-				}, 'fx')
-					.stroke('orange', 2)
+            const projX = draw.create.point({
+                projection: {axis: 'Ox', point: pt2}
+            }, 'D')
 
-				const Pplot = draw.create.point(
-					{ x: 0, y: 0 }
-					, 'Pplot'
-				).asSquare(20).fill('red')
-				draw.draggable(Pplot, { follow: [fx] })
-
-
-				const c1 = draw.create.circle(
-					{
-						radius: 2,
-						center: pt2
-					},
-					'c1')
-
-				const c2 = draw.create.circle({
-					center: pt,
-					radius: pt2
-				}, 'c2')
-
-				const c3 = draw.create.circle({
-					center: pt,
-					radius: 3
-				}, 'c3')
-
-				const pCircle = draw.create.point({
-					x: -2, y: -2
-				}, 'pC').asCircle(10)
-				draw.draggable(pCircle, { follow: [c3] })
-
-				const pProjLine = draw.create.point({
-					projection: { axis: parallel, point: pt }
-				}, 'pL').asSquare(40).fill('pink')
+            const line = draw.create.line({
+                through: {A: pt, B: pt2},
+            }, 'AB')
 
 
-				const poly = draw.create.polygon({
-					vertices: [pt, projX, pt2, projY],
-				}, 'poly').fill('green/0.3').stroke('black', 2)
+            const parallel = draw.create.line({
+                parallel: {to: line, through: projX}
+            }, 'AB2').stroke('green', 2)
 
-				const regularPolygon = draw.create.polygon(
-					{
-						regular: {
-							center: pt,
-							sides: 7,
-							radius: pt2
-						}
-					},
-					'rpoly')
+            const perp = draw.create.line({
+                perpendicular: {to: line, through: projY}
+            }, 'AB3').stroke('red', 2)
 
-				const arc = draw.create.arc({
-					center: pt,
-					start: pt2,
-					end: pCircle,
-					radius: 2
-				}, 'arc')
-				arc.mark(true)
-				arc.addLabel('angle', true)
-				// arc.label?.position('tl')
-				// pt.coordinates = { x: 2, y: 3 }
+            const med = draw.create.line({
+                mediator: {A: pt, B: pt2}
+            }, 'AB4').stroke('purple', 2)
 
-			},
-			setup() {
-				const code = ref('')
-				const params = ref('')
 
-				const message = ref("no message now")
-				return {
-					code,
-					params,
-					message,
-					modify: () => {
-						console.log('modify', params.value);
-					},
-					update: () => {
-						console.log('- update - ')
-						console.log(code.value);
-					},
-					analyseCode: () => {
-						console.log('analyseCode');
-					},
-					changeCaret: () => {
-						console.log('change caret - display current line.');
-					}
-				}
-			}
-		}).mount('#app')
+            const perp_parallel_intersection = draw.create.point({
+                intersection: {A: perp, B: parallel},
+            }, 'E').asSquare(20).stroke('blue', 2)
+            pt.asCrosshair(10).stroke('blue', 2)
+
+            const fx = draw.create.plot({
+                expression: 'x^2*sin(x)/8',
+                samples: 500
+            }, 'fx')
+                .stroke('orange', 2)
+
+            const Pplot = draw.create.point(
+                {x: 0, y: 0}
+                , 'Pplot'
+            ).asSquare(20).fill('red')
+            draw.draggable(Pplot, {follow: [fx]})
+
+
+            const c1 = draw.create.circle(
+                {
+                    radius: 2,
+                    center: pt2
+                },
+                'c1')
+
+            const c2 = draw.create.circle({
+                center: pt,
+                radius: pt2
+            }, 'c2')
+
+            const c3 = draw.create.circle({
+                center: pt,
+                radius: 3
+            }, 'c3')
+
+            const pCircle = draw.create.point({
+                x: -2, y: -2
+            }, 'pC').asCircle(10)
+            draw.draggable(pCircle, {follow: [c3]})
+
+            const pProjLine = draw.create.point({
+                projection: {axis: parallel, point: pt}
+            }, 'pL').asSquare(40).fill('pink')
+
+
+            const poly = draw.create.polygon({
+                vertices: [pt, projX, pt2, projY],
+            }, 'poly').fill('green/0.3').stroke('black', 2)
+
+            const regularPolygon = draw.create.polygon(
+                {
+                    regular: {
+                        center: pt,
+                        sides: 7,
+                        radius: pt2
+                    }
+                },
+                'rpoly')
+
+            const arc = draw.create.arc({
+                center: pt,
+                start: pt2,
+                end: pCircle,
+                radius: 2
+            }, 'arc')
+            arc.mark(true)
+            arc.addLabel('angle', true)
+            // arc.label?.position('tl')
+            // pt.coordinates = { x: 2, y: 3 }
+
+            draw.updateLayout()
+            draw.update()
+            console.log(draw.figures)
+        },
+        setup() {
+            const code = ref('')
+            const params = ref('')
+            const mouseX = ref(0)
+            const mouseY = ref(0)
+
+            // const pixels = ref({x: 0, y: 0})
+            const pixels = computed(() => {
+                console.log(draw.rootSVG.width, draw.rootSVG.height);
+                return draw?.toCoordinates({x: mouseX.value, y: mouseY.value}) ?? ''
+            })
+
+            function onMouseUp(event) {
+                console.log(event)
+            }
+
+            function onMouseMove(event) {
+                mouseX.value = event.offsetX
+                mouseY.value = event.offsetY
+            }
+
+            const message = ref("no message now")
+            return {
+                code,
+                params,
+                message,
+                mouseX, mouseY, pixels,
+                onMouseUp,
+                onMouseMove,
+                modify: () => {
+                    console.log('modify', params.value);
+                },
+                update: () => {
+                    console.log('- update - ')
+                    console.log(code.value);
+                },
+                analyseCode: () => {
+                    console.log('analyseCode');
+                },
+                changeCaret: () => {
+                    console.log('change caret - display current line.');
+                }
+            }
+        }
+    }).mount('#app')
 </script>
 </body>
 
