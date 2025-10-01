@@ -1,7 +1,15 @@
-import { Path as svgPath, Svg, Marker } from "@svgdotjs/svg.js"
-import { AbstractFigure } from "./AbstractFigure"
-import type { XY } from "../pidraw.common"
-import { cartesianToAngle, createMarker, distanceAB, mathVector, numberCorrection, polarToCartesian, toPixels } from "../Calculus"
+import {type Marker, Path as svgPath, Svg} from "@svgdotjs/svg.js"
+import {AbstractFigure} from "./AbstractFigure"
+import type {XY} from "../pidraw.common"
+import {
+    cartesianToAngle,
+    createMarker,
+    distanceAB,
+    mathVector,
+    numberCorrection,
+    polarToCartesian,
+    toPixels
+} from "../Calculus"
 
 export interface IArcConfig {
     start: XY,
@@ -16,25 +24,6 @@ export interface IArcConfig {
 export class Arc extends AbstractFigure {
     #config: IArcConfig
     #markers: { start: Marker, end: Marker }
-
-    get config() { return this.#config }
-    set config(value: IArcConfig) {
-        this.#config = value
-        this.#makeShape()
-        this.computed()
-    }
-
-    get center() { return this.#config.center }
-    get start() { return this.#config.start }
-    get end() { return this.#config.end }
-    get radius() {
-        if (typeof this.#config.radius === 'number') {
-            return toPixels(this.#config.radius, this.graphConfig)
-        }
-
-        return distanceAB(this.center, this.#config.radius ?? this.#config.start)
-    }
-
 
     constructor(rootSVG: Svg, name: string, values: IArcConfig) {
         super(rootSVG, name)
@@ -54,19 +43,40 @@ export class Arc extends AbstractFigure {
         // Store the config -> it triggers makeShape and computed.
         this.config = values
     }
-    #makeShape() {
-        this.element.clear()
 
-        // Create the path
-        this.shape = this.element.path('M0 0')
+    get config() { return this.#config }
 
-        // Apply the stroke and fill.
-        this.fill().stroke()
+    set config(value: IArcConfig) {
+        this.#config = value
+        this.#makeShape()
+        this.computed()
+    }
 
-        // Add the shape to the group.
-        this.element.add(this.shape)
+    get center() { return this.#config.center }
 
-        return this.shape
+    get start() { return this.#config.start }
+
+    get end() { return this.#config.end }
+
+    get radius() {
+        if (typeof this.#config.radius === 'number') {
+            return toPixels(this.#config.radius, this.graphConfig)
+        }
+
+        return distanceAB(this.center, this.#config.radius ?? this.#config.start)
+    }
+
+    get angle(): number {
+        const { start, end } = this.getAngles()
+        if (end - start < 0) {
+            return 360 + end - start
+        }
+
+        return end - start
+    }
+
+    get isSquare(): boolean {
+        return numberCorrection((this.start.x - this.center.x) * (this.end.x - this.center.x) + (this.start.y - this.center.y) * (this.end.y - this.center.y)) === 0
     }
 
     computed(): this {
@@ -74,6 +84,7 @@ export class Arc extends AbstractFigure {
         path.plot(this.getPath())
         return this
     }
+
     moveLabel(): this {
         // No label - no need to continue
         if (!this.label) { return this }
@@ -112,19 +123,6 @@ export class Arc extends AbstractFigure {
         return this
     }
 
-    get angle(): number {
-        const { start, end } = this.getAngles()
-        if (end - start < 0) {
-            return 360 + end - start
-        }
-
-        return end - start
-    }
-
-    get isSquare(): boolean {
-        return numberCorrection((this.start.x - this.center.x) * (this.end.x - this.center.x) + (this.start.y - this.center.y) * (this.end.y - this.center.y)) === 0
-    }
-
     /**
      * Calculate the start and end angle of an arc
      * @returns {{startAngle: number, endAngle: number}}
@@ -149,6 +147,21 @@ export class Arc extends AbstractFigure {
         } else {
             return this._describeArc(this.center, startXY, endXY, radius, end - start)
         }
+    }
+
+    #makeShape() {
+        this.element.clear()
+
+        // Create the path
+        this.shape = this.element.path('M0 0')
+
+        // Apply the stroke and fill.
+        this.fill().stroke()
+
+        // Add the shape to the group.
+        this.element.add(this.shape)
+
+        return this.shape
     }
 
     private _describeSquare(center: XY, start: XY, end: XY): string {

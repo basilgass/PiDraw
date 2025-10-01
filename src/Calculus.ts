@@ -2,7 +2,7 @@
  * The calculus class is intended to replace PiMath and avoid using "fractions" and work directly with number.
  */
 
-import {Marker, Path as svgPath, Svg} from "@svgdotjs/svg.js"
+import type {Marker, Path as svgPath, Svg} from "@svgdotjs/svg.js"
 import {type IGraphConfig, isDOMAIN, isXY, type XY} from "./pidraw.common"
 
 export function numberCorrection(value: number, number_of_digits = 10): number {
@@ -1058,6 +1058,17 @@ export function cartesianToAngle(origin: XY, handle: XY): number {
 }
 
 
+function markerAttr(scale: number){
+    return {
+        viewBox: `0 0 ${scale} ${scale}`,
+        refX: scale / 2,
+        refY: scale / 2,
+        markerWidth: scale,
+        markerHeight: scale,
+        orient: 'auto',
+        markerUnits: 'strokeWidth'
+    }
+}
 export function createMarker(svg: Svg, scale: number, shape?: string): { start: Marker, end: Marker } {
 
     if (shape === 'x') {
@@ -1073,7 +1084,7 @@ export function createMarker(svg: Svg, scale: number, shape?: string): { start: 
                         color: 'black',
                         width: 1
                     })
-                }).attr('markerUnits', 'userSpaceOnUse'),
+                }).attr(markerAttr(scale)),
             end: svg.marker(
                 scale,
                 scale,
@@ -1084,7 +1095,7 @@ export function createMarker(svg: Svg, scale: number, shape?: string): { start: 
                         color: 'black',
                         width: 1
                     })
-                }).attr('markerUnits', 'userSpaceOnUse'),
+                }).attr(markerAttr(scale)),
         }
     }
 
@@ -1097,7 +1108,7 @@ export function createMarker(svg: Svg, scale: number, shape?: string): { start: 
                     const p = add.path(`M${scale / 2},${scale} L${scale / 2},0`)
 
                     p.stroke({color: 'black', width: 1})
-                }).attr('markerUnits', 'userSpaceOnUse'),
+                }).attr(markerAttr(scale)),
             end: svg.marker(
                 scale,
                 scale,
@@ -1105,7 +1116,7 @@ export function createMarker(svg: Svg, scale: number, shape?: string): { start: 
                     const p = add.path(`M${scale / 2},${scale} L${scale / 2},0`)
 
                     p.stroke({color: 'black', width: 1})
-                }).attr('markerUnits', 'userSpaceOnUse'),
+                }).attr(markerAttr(scale)),
         }
     }
 
@@ -1115,13 +1126,13 @@ export function createMarker(svg: Svg, scale: number, shape?: string): { start: 
             scale * 1.2,
             function (add) {
                 add.path(`M1,0 L1,${scale}, L${scale * 1.2},${scale / 2} L1,0z`).rotate(180)
-            }).ref(0, scale / 2).attr('markerUnits', 'userSpaceOnUse'),
+            }).ref(0, scale / 2).attr(markerAttr(scale)),
         end: svg.marker(
             scale * 1.2,
             scale * 1.2,
             function (add) {
                 add.path(`M1,0 L1,${scale}, L${scale * 1.2},${scale / 2} L1,0z`)
-            }).ref(scale, scale / 2).attr('markerUnits', 'userSpaceOnUse'),
+            }).ref(scale, scale / 2).attr(markerAttr(scale)),
     }
 }
 
