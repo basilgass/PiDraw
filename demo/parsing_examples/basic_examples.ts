@@ -146,5 +146,11 @@ d=AB.
 X(1,2)->red,w=10,animate,from=A,to=B,duration=3,loop
 Y(1,2)->green,w=10,animate,from=A,to=B,duration=5,loop=reverse
 p=perp d,X`
+    },
+    {
+        name: 'vectors and markers',
+        code: `A(-2,2)
+B(3,4)
+v=vAB`
     }
 ]

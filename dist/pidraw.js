@@ -4786,7 +4786,7 @@ function pi(i, t, e) {
       function(s) {
         s.path(`M1,0 L1,${t}, L${t * 1.2},${t / 2} L1,0z`);
       }
-    ).ref(t, t / 2).attr(be(t, { refX: 0, refY: t / 2 }))
+    ).ref(t, t / 2).attr(be(t, { refX: t, refY: t / 2 }))
   };
 }
 function zn(i) {
