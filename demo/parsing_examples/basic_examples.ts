@@ -151,6 +151,8 @@ p=perp d,X`
         name: 'vectors and markers',
         code: `A(-2,2)
 B(3,4)
-v=vAB`
+C(6,-4)
+v=vAB
+b=bezier A,B,C->mark=both/20,red`
     }
 ]

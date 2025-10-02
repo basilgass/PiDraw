@@ -1,15 +1,7 @@
-import {type Marker, Path as svgPath, Svg} from "@svgdotjs/svg.js"
+import {Path as svgPath, Svg} from "@svgdotjs/svg.js"
 import {AbstractFigure} from "./AbstractFigure"
 import type {XY} from "../pidraw.common"
-import {
-    cartesianToAngle,
-    createMarker,
-    distanceAB,
-    mathVector,
-    numberCorrection,
-    polarToCartesian,
-    toPixels
-} from "../Calculus"
+import {cartesianToAngle, distanceAB, mathVector, numberCorrection, polarToCartesian, toPixels} from "../Calculus"
 
 export interface IArcConfig {
     start: XY,
@@ -23,7 +15,6 @@ export interface IArcConfig {
 
 export class Arc extends AbstractFigure {
     #config: IArcConfig
-    #markers: { start: Marker, end: Marker }
 
     constructor(rootSVG: Svg, name: string, values: IArcConfig) {
         super(rootSVG, name)
@@ -37,8 +28,6 @@ export class Arc extends AbstractFigure {
             sector: false,
             mark: false
         }, values)
-
-        this.#markers = createMarker(this.rootSVG, 8)
 
         // Store the config -> it triggers makeShape and computed.
         this.config = values

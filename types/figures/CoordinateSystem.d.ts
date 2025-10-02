@@ -1,4 +1,4 @@
-import { Svg, Line as svgLine } from '@svgdotjs/svg.js';
+import { Line as svgLine, Svg } from '@svgdotjs/svg.js';
 import { COORDINATE_SYSTEM, IAxisConfig, XY } from '../pidraw.common';
 import { AbstractFigure } from './AbstractFigure';
 export interface ICoordinateSystem {
@@ -11,11 +11,11 @@ export interface ICoordinateSystem {
 }
 export declare class CoordinateSystem extends AbstractFigure {
     #private;
+    constructor(rootSVG: Svg, name: string, values: COORDINATE_SYSTEM | ICoordinateSystem);
     get config(): ICoordinateSystem;
     set config(value: ICoordinateSystem);
     get xAxis(): svgLine;
     get yAxis(): svgLine;
-    constructor(rootSVG: Svg, name: string, values: COORDINATE_SYSTEM | ICoordinateSystem);
     computed(): this;
     moveLabel(): this;
 }

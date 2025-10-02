@@ -189,6 +189,7 @@ export abstract class AbstractFigure {
     }
 
     clear(all?: boolean): this {
+
         // Clear the figure
         if (all) {
             this.#element.clear()
@@ -201,6 +202,7 @@ export abstract class AbstractFigure {
                 child.remove()
             }
         })
+
         return this
     }
 
@@ -284,8 +286,9 @@ export abstract class AbstractFigure {
     }
 
     mark(value?: string | boolean, options?: (string | number)[]): this {
-        const scale = options?.filter(x => typeof x === 'number')[0] ?? 10
-        const shape = options?.filter(x => typeof x === 'string')[0] ?? undefined
+        const scale = options?.find(x => typeof x === 'number') ?? 10
+        const shape = options?.find(x => typeof x === 'string') ?? '->'
+
         const marker = createMarker(
             this.#rootSVG,
             scale,
@@ -295,16 +298,16 @@ export abstract class AbstractFigure {
         const path = this.#shape as Path
 
         if (value === 'start') {
-            path.marker('start', marker.start)
+            path.marker('start', marker)
             return this
         }
         if (value === 'end') {
-            path.marker('end', marker.end)
+            path.marker('end', marker)
             return this
         }
 
-        path.marker('start', marker.start)
-        path.marker('end', marker.end)
+        path.marker('start', marker)
+        path.marker('end', marker)
 
         return this
     }

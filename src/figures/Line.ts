@@ -284,7 +284,7 @@ export class Line extends AbstractFigure {
 
         // Apply the style
         if (this.#config.shape === 'vector') {
-            const marker = createMarker(this.rootSVG, 10).end
+            const marker = createMarker(this.rootSVG, 10)
             const line = this.shape as svgLine
             line.marker('end', marker)
         }

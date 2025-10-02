@@ -1,7 +1,7 @@
-import { Marker, Svg, Line as svgLine } from "@svgdotjs/svg.js"
-import { COORDINATE_SYSTEM, type IAxisConfig, type XY } from "../pidraw.common"
-import { AbstractFigure } from "./AbstractFigure"
-import { computeLine, createMarker } from "../Calculus"
+import {Line as svgLine, Marker, Svg} from "@svgdotjs/svg.js"
+import {COORDINATE_SYSTEM, type IAxisConfig, type XY} from "../pidraw.common"
+import {AbstractFigure} from "./AbstractFigure"
+import {computeLine, createMarker} from "../Calculus"
 
 export interface ICoordinateSystem {
     x: { direction: XY } & IAxisConfig,
@@ -11,15 +11,6 @@ export interface ICoordinateSystem {
 export class CoordinateSystem extends AbstractFigure {
     #config: ICoordinateSystem
     #axis: { x: svgLine, y: svgLine }
-
-    get config() { return this.#config }
-    set config(value: ICoordinateSystem) {
-        this.#config = value
-        this.computed()
-    }
-
-    get xAxis() { return this.#axis.x }
-    get yAxis() { return this.#axis.y }
 
     constructor(rootSVG: Svg, name: string, values: COORDINATE_SYSTEM | ICoordinateSystem) {
         super(rootSVG, name)
@@ -39,6 +30,29 @@ export class CoordinateSystem extends AbstractFigure {
         this.computed()
 
         return this
+    }
+
+    get config() { return this.#config }
+
+    set config(value: ICoordinateSystem) {
+        this.#config = value
+        this.computed()
+    }
+
+    get xAxis() { return this.#axis.x }
+
+    get yAxis() { return this.#axis.y }
+
+    computed(): this {
+        // Loop through each axis and update the position, length, ...
+        this.#updateAxis(this.#axis.x, this.#config.x.direction, this.#config.x)
+        this.#updateAxis(this.#axis.y, this.#config.y.direction, this.#config.y)
+
+        return this
+    }
+
+    moveLabel(): this {
+        throw new Error("Method not implemented.")
     }
 
     #defaultConfig(coordinateSystem: COORDINATE_SYSTEM): ICoordinateSystem {
@@ -88,16 +102,6 @@ export class CoordinateSystem extends AbstractFigure {
 
         return axis
     }
-    computed(): this {
-        // Loop through each axis and update the position, length, ...
-        this.#updateAxis(this.#axis.x, this.#config.x.direction, this.#config.x)
-        this.#updateAxis(this.#axis.y, this.#config.y.direction, this.#config.y)
-
-        return this
-    }
-    moveLabel(): this {
-        throw new Error("Method not implemented.")
-    }
 
     #updateAxis(axis: svgLine, direction: XY, config?: IAxisConfig): svgLine {
         const color = config?.color ?? 'black'
@@ -105,7 +109,7 @@ export class CoordinateSystem extends AbstractFigure {
         const half_axis = config?.half ?? false
         const length = config?.length ?? 0
 
-        const arrow: Marker = createMarker(this.rootSVG, 10).end
+        const arrow: Marker = createMarker(this.rootSVG, 10)
             .fill(color)
 
         // origin: XY, direction: XY, graph: { width: number, height: number }, padding = 0, half_axis = false, length?: number

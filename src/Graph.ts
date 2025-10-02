@@ -1,4 +1,4 @@
-import {Box, Marker, SVG, Svg} from "@svgdotjs/svg.js"
+import {Box, SVG, Svg} from "@svgdotjs/svg.js"
 import '@svgdotjs/svg.draggable.js'
 
 import {
@@ -15,7 +15,7 @@ import {
 import {type IPointConfig, Point} from "./figures/Point"
 import {type ILineConfig, Line} from "./figures/Line"
 import {type IPlotConfig, Plot} from "./figures/Plot"
-import {createMarker, toCoordinates as pixelsToCoordinates, toPixels as coordToPixels} from "./Calculus"
+import {toCoordinates as pixelsToCoordinates, toPixels as coordToPixels} from "./Calculus"
 import {AbstractFigure} from "./figures/AbstractFigure"
 import {Circle, type ICircleConfig} from "./figures/Circle"
 import {type IPolygonConfig, Polygon} from "./figures/Polygon"
@@ -283,6 +283,9 @@ export class Graph {
         })
 
         this.#figures = {}
+
+        // clear the defs
+        this.#rootSVG.defs().clear()
     }
 
     public coordinate_system(system: COORDINATE_SYSTEM): AbstractFigure {
@@ -408,10 +411,6 @@ export class Graph {
         return aGrid
     }
 
-    public marker(scale: number): { start: Marker, end: Marker } {
-        return createMarker(this.#rootSVG, scale)
-    }
-
     public subgrid(name: string, subdivision: number): AbstractFigure {
         const subAxis = {
             x: {x: this.#config.axis.x.x / subdivision, y: this.#config.axis.x.y / subdivision},
@@ -495,5 +494,7 @@ export class Graph {
             this.coordinate_system(this.#config.system)
         }
 
+        // clear the defs
+        this.#rootSVG.defs().clear()
     }
 }

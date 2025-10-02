@@ -86,10 +86,7 @@ export declare function polarToCartesian(centerX: number, centerY: number, radiu
  * @returns {number}
  */
 export declare function cartesianToAngle(origin: XY, handle: XY): number;
-export declare function createMarker(svg: Svg, scale: number, shape?: string): {
-    start: Marker;
-    end: Marker;
-};
+export declare function createMarker(svg: Svg, scale: number, shape?: string): Marker;
 export declare function nearestPointToPath(value: XY, path: svgPath, precision?: number): XY;
 export declare function toNumber(value: number | string): number;
 export {};

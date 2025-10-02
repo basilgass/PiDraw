@@ -1058,82 +1058,50 @@ export function cartesianToAngle(origin: XY, handle: XY): number {
 }
 
 
-function markerAttr(scale: number, ref?: {refX: number, refY: number}){
+function markerAttr(scale: number, ref?: { refX: number, refY: number }) {
 
     return {
         viewBox: `0 0 ${scale} ${scale}`,
         ...(ref ?? {refX: scale / 2, refY: scale / 2}),
         markerWidth: scale,
         markerHeight: scale,
-        orient: 'auto',
+        orient: 'auto-start-reverse',
         markerUnits: 'userSpaceOnUse'
     }
 }
-export function createMarker(svg: Svg, scale: number, shape?: string): { start: Marker, end: Marker } {
+
+export function createMarker(svg: Svg, scale: number, shape?: string): Marker {
 
     if (shape === 'x') {
-        return {
-            start: svg.marker(
-                scale,
-                scale,
-                function (add) {
-
-                    const p = add.path(`M0,0 L${scale},${scale} M${scale},0 L0,${scale}`)
-
-                    p.stroke({
-                        color: 'black',
-                        width: 1
-                    })
-                }).attr(markerAttr(scale)),
-            end: svg.marker(
-                scale,
-                scale,
-                function (add) {
-                    const p = add.path(`M0,0 L${scale},${scale} M${scale},0 L0,${scale}`)
-
-                    p.stroke({
-                        color: 'black',
-                        width: 1
-                    })
-                }).attr(markerAttr(scale)),
-        }
+        return svg.marker(
+            scale,
+            scale,
+            function (add) {
+                const p = add.path(`M0,0 L${scale},${scale} M${scale},0 L0,${scale}`)
+                p.stroke({
+                    color: 'black',
+                    width: 1
+                })
+            }).attr(markerAttr(scale))
     }
 
     if (shape === '|') {
-        return {
-            start: svg.marker(
-                scale,
-                scale,
-                function (add) {
-                    const p = add.path(`M${scale / 2},${scale} L${scale / 2},0`)
-
-                    p.stroke({color: 'black', width: 1})
-                }).attr(markerAttr(scale)),
-            end: svg.marker(
-                scale,
-                scale,
-                function (add) {
-                    const p = add.path(`M${scale / 2},${scale} L${scale / 2},0`)
-
-                    p.stroke({color: 'black', width: 1})
-                }).attr(markerAttr(scale)),
-        }
+        return svg.marker(
+            scale,
+            scale,
+            function (add) {
+                const p = add.path(`M${scale / 2},${scale} L${scale / 2},0`)
+                p.stroke({color: 'black', width: 1})
+            }).attr(markerAttr(scale))
     }
 
-    return {
-        start: svg.marker(
-            scale * 1.2,
-            scale * 1.2,
-            function (add) {
-                add.path(`M1,0 L1,${scale}, L${scale * 1.2},${scale / 2} L1,0z`).rotate(180)
-            }).ref(0, scale / 2).attr(markerAttr(scale, {refX: 0, refY: scale/2})),
-        end: svg.marker(
-            scale * 1.2,
-            scale * 1.2,
-            function (add) {
-                add.path(`M1,0 L1,${scale}, L${scale * 1.2},${scale / 2} L1,0z`)
-            }).ref(scale, scale / 2).attr(markerAttr(scale, {refX: scale, refY: scale/2})),
-    }
+    return svg.marker(
+        scale * 1.2,
+        scale * 1.2,
+        function (add) {
+            const p = add.path(`M1,0 L1,${scale}, L${scale * 1.2},${scale / 2} L1,0z`)
+            p.stroke({color: 'black', width: 1})
+        }).attr(markerAttr(scale, {refX: scale, refY: scale / 2}))
 }
 
 //TODO: optimize the neearesPointToPath function

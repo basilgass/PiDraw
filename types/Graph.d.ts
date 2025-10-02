@@ -1,4 +1,4 @@
-import { Marker, Svg } from '@svgdotjs/svg.js';
+import { Svg } from '@svgdotjs/svg.js';
 import { COORDINATE_SYSTEM, DOMAIN, IGraphConfig, IGraphConstructorConfig, IGraphDisplay, ILayers, XY } from './pidraw.common';
 import { IPointConfig, Point } from './figures/Point';
 import { ILineConfig, Line } from './figures/Line';
@@ -61,10 +61,6 @@ export declare class Graph {
         x: XY;
         y: XY;
     }): AbstractFigure;
-    marker(scale: number): {
-        start: Marker;
-        end: Marker;
-    };
     subgrid(name: string, subdivision: number): AbstractFigure;
     toPixels<T>(pixels: T, axis?: 'x' | 'y'): T;
     toCoordinates<T>(pixels: T, axis?: 'x' | 'y'): T;
