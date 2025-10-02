@@ -1078,10 +1078,7 @@ export function createMarker(svg: Svg, scale: number, shape?: string): Marker {
             scale,
             function (add) {
                 const p = add.path(`M0,0 L${scale},${scale} M${scale},0 L0,${scale}`)
-                p.stroke({
-                    color: 'black',
-                    width: 1
-                })
+                p.stroke({color: 'black', width: 1})
             }).attr(markerAttr(scale))
     }
 
