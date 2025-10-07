@@ -9,9 +9,9 @@ export interface IPlotConfig {
 }
 export declare class Plot extends AbstractFigure {
     #private;
+    constructor(rootSVG: Svg, name: string, values: IPlotConfig);
     get config(): IPlotConfig;
     set config(value: IPlotConfig);
-    constructor(rootSVG: Svg, name: string, values: IPlotConfig);
     computed(): this;
     moveLabel(): this;
     evaluate(x: number, asCoordinates?: boolean): XY;

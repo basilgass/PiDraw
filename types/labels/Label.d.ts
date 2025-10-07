@@ -22,6 +22,8 @@ export declare class Label {
     get shape(): LabelType;
     get alignement(): LABEL_POSITION;
     get label(): LabelType;
+    get auto_rotate(): boolean;
+    set auto_rotate(value: boolean);
     get displayName(): string;
     hide(): this;
     show(): this;

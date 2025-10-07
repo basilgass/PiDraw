@@ -65,5 +65,6 @@ export declare class Graph {
     toPixels<T>(pixels: T, axis?: 'x' | 'y'): T;
     toCoordinates<T>(pixels: T, axis?: 'x' | 'y'): T;
     update(except?: string[], forceUpdate?: boolean): void;
+    updateLabels(except: string[], forceUpdate?: boolean): void;
     updateLayout(): void;
 }
