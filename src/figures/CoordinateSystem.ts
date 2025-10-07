@@ -47,7 +47,6 @@ export class CoordinateSystem extends AbstractFigure {
         // Loop through each axis and update the position, length, ...
         this.#updateAxis(this.#axis.x, this.#config.x.direction, this.#config.x)
         this.#updateAxis(this.#axis.y, this.#config.y.direction, this.#config.y)
-
         return this
     }
 
@@ -109,7 +108,7 @@ export class CoordinateSystem extends AbstractFigure {
         const half_axis = config?.half ?? false
         const length = config?.length ?? 0
 
-        const arrow: Marker = createMarker(this.rootSVG, 10)
+        const arrow: Marker = createMarker(this.rootSVG, `axis-${direction.x}-${direction.y}`, 10)
             .fill(color)
 
         // origin: XY, direction: XY, graph: { width: number, height: number }, padding = 0, half_axis = false, length?: number

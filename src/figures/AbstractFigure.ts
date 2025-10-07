@@ -291,6 +291,7 @@ export abstract class AbstractFigure {
 
         const marker = createMarker(
             this.#rootSVG,
+            this.name,
             scale,
             shape
         )

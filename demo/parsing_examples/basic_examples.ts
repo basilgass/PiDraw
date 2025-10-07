@@ -154,5 +154,12 @@ B(3,4)
 C(6,-4)
 v=vAB
 b=bezier A,B,C->mark=both/20,red`
+    },
+    {
+        name: 'tan function plot (vertical asymptotes test)',
+        code: `f(x)=tan(x)
+A(2,3)
+B(8,6)
+d=AB.->tex=abc`
     }
 ]

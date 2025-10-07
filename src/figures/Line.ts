@@ -253,21 +253,23 @@ export class Line extends AbstractFigure {
         }
 
         // If it's a segment, place it at the middle of the segment
-        if (this.#config.shape === 'segment') {
+        if (this.#config.shape === 'segment' || this.#config.shape === 'vector') {
             const x = (this.start.x + this.end.x) / 2
             const y = (this.start.y + this.end.y) / 2
 
-            let angle = -this.angle
-            if (angle > 90) {
-                angle = angle - 180
-            }
-            if (angle < -90) {
-                angle = angle + 180
-            }
-
             this.label.move(x, y)
-            // this.label.rotate(angle)
-            this.label.position(undefined, undefined, angle)
+
+            if (this.label.auto_rotate) {
+                let angle = -this.angle
+                if (angle > 90) {
+                    angle = angle - 180
+                }
+                if (angle < -90) {
+                    angle = angle + 180
+                }
+
+                this.label.position(undefined, undefined, angle)
+            }
         }
 
         return this
@@ -284,7 +286,7 @@ export class Line extends AbstractFigure {
 
         // Apply the style
         if (this.#config.shape === 'vector') {
-            const marker = createMarker(this.rootSVG, 10)
+            const marker = createMarker(this.rootSVG, this.name, 10)
             const line = this.shape as svgLine
             line.marker('end', marker)
         }

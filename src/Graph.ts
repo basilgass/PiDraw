@@ -283,9 +283,6 @@ export class Graph {
         })
 
         this.#figures = {}
-
-        // clear the defs
-        this.#rootSVG.defs().clear()
     }
 
     public coordinate_system(system: COORDINATE_SYSTEM): AbstractFigure {
@@ -429,7 +426,6 @@ export class Graph {
 
     // Update each figures in the graph
     public update(except?: string[], forceUpdate?: boolean) {
-
         except ??= []
 
         // Add all figures with a "_drag" in the exception.
@@ -444,6 +440,10 @@ export class Graph {
             })
 
         // Go through each object and update them if they are computed.
+        this.updateLabels(except, forceUpdate)
+    }
+
+    public updateLabels(except: string[], forceUpdate?: boolean){
         Object.keys(this.figures)
             .forEach((name) => {
                 if (except.includes(name)) {
@@ -481,6 +481,7 @@ export class Graph {
         // Remove the axis
         this.#layers.axis.clear()
 
+        // Load the grid
         if (this.#display.subgrid) {
             this.subgrid('SUBGRID', this.#display.subgrid)
                 .stroke('purple/0.5', 0.1)
@@ -490,11 +491,11 @@ export class Graph {
                 .stroke('lightgray', 1)
         }
 
+        // Load the axis
         if (this.#display.axis) {
             this.coordinate_system(this.#config.system)
         }
 
-        // clear the defs
-        this.#rootSVG.defs().clear()
+
     }
 }

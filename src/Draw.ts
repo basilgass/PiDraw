@@ -267,12 +267,14 @@ export class Draw extends Graph {
                             y: -offsetAsUnits.y * this.config.axis.y.y
                         }
 
-                        const rotate = options[key].options[2] as number | undefined
+                        const rotate = options[key].options[2] as number | boolean | undefined
+
+                        obj.label.auto_rotate = rotate===true
 
                         obj.label.position(
                             alignement,
                             offset,
-                            rotate
+                            typeof rotate === "number" ? rotate : 0
                         )
                     }
 
@@ -435,6 +437,9 @@ export class Draw extends Graph {
             // })
         })
 
+        // Redraw the labels a second time (for aligneemnt)
+        //REFACTOR: optimisation du update pour ne pas faire deux fois la maj des labels.
+        this.updateLabels([])
     }
 
     #buildOptions(obj: AbstractFigure, item: PARSER) {

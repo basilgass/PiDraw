@@ -1,8 +1,7 @@
-import { Svg } from "@svgdotjs/svg.js"
-import { AbstractFigure } from "./AbstractFigure"
-import type { DOMAIN, XY } from "../pidraw.common"
-import { NumExp, toPixels, toCoordinates } from "../Calculus"
-import { Path } from "@svgdotjs/svg.js"
+import {Path, Svg} from "@svgdotjs/svg.js"
+import {AbstractFigure} from "./AbstractFigure"
+import type {DOMAIN, XY} from "../pidraw.common"
+import {NumExp, toCoordinates, toPixels} from "../Calculus"
 
 export interface IPlotConfig {
     expression: string,
@@ -14,14 +13,6 @@ export interface IPlotConfig {
 export class Plot extends AbstractFigure {
     #config: IPlotConfig
     #numExp: NumExp
-    get config() { return this.#config }
-    set config(value: IPlotConfig) {
-        this.#config = value
-
-        this.#numExp = new NumExp(this.#config.expression)
-
-        this.computed()
-    }
 
     constructor(rootSVG: Svg, name: string, values: IPlotConfig) {
         super(rootSVG, name)
@@ -42,6 +33,102 @@ export class Plot extends AbstractFigure {
         return this
     }
 
+    get config() {
+        return this.#config
+    }
+
+    set config(value: IPlotConfig) {
+        this.#config = value
+
+        this.#numExp = new NumExp(this.#config.expression)
+
+        this.computed()
+    }
+
+    computed(): this {
+        // Get the mathematical function from the config
+        const fn: string = this.#config.expression
+
+        if (!fn || fn === '') {
+            return this
+        }
+
+        // Get the domain from the config
+        const minX = -this.graphConfig.origin.x / this.graphConfig.axis.x.x - 1
+        const maxX = (this.graphConfig.width - this.graphConfig.origin.x) / this.graphConfig.axis.x.x + 1
+        const domain = (this.#config.domain ?? {min: minX, max: maxX})
+        const image = (this.#config.image ?? {min: -Infinity, max: Infinity})
+
+        // Get the samples from the config
+        const samples = (this.#config.samples ?? this.graphConfig.axis.x.x)
+
+        // Make the numeric expression.
+        const expr = this.#numExp
+
+        // Get the (x;y) points from the function
+        // 0 < x < width
+        // y = fn(x)
+        const points: XY[] = this.#calculatePointsCoordinates(domain, samples, expr, image)
+
+        // Create the path string from the points.
+        let previous: XY = points[0]
+        const outsideGraphY = 1000000
+        const path = points
+            .map(({x, y}, index) => {
+                // Determine the path command
+                let cmd = index === 0 ? 'M' : 'L'
+
+                if(index>0) {
+                    if (isNaN(y)) {
+                        // If the y value is not defined, move the cursor to the next point.
+                        cmd = 'M'
+                        y = previous.y>0 ? outsideGraphY: -outsideGraphY
+                    } else if(
+                        (previous.y < 0 && y > this.graphConfig.height) ||
+                        (y < 0 && previous.y > this.graphConfig.height)
+                    ){
+                        // the previous point and the current point are on both side of the graph. Assume it's an asymptote
+                        cmd = 'M'
+                    }
+                }
+
+                // Set the current point as the previous point
+                previous = {x, y}
+
+                return `${cmd} ${x} ${y}`
+            }).join(' ')
+
+        // Update the path
+        const shape = this.shape as Path
+        shape.plot(path)
+
+        return this
+    }
+
+    moveLabel(): this {
+        return this
+    }
+
+    evaluate(x: number, asCoordinates?: boolean): XY {
+        if (asCoordinates === true) {
+            return {x, y: this.#numExp.evaluate({x})}
+        }
+
+        return toPixels(
+            {x, y: this.#numExp.evaluate({x})}
+            , this.graphConfig)
+    }
+
+    override follow(x: number, y: number): XY {
+
+        /**
+         * TODO: implement the nearestPointToPath function
+         * return nearestPointToPath( { x, y }, fig.shape as svgPath, 1 )
+         */
+        const pt = toCoordinates({x, y}, this.graphConfig)
+        return this.evaluate(pt.x)
+    }
+
     #makeShape() {
         this.element.clear()
 
@@ -57,61 +144,8 @@ export class Plot extends AbstractFigure {
         return this.shape
     }
 
-    computed(): this {
-        // Get the mathematical function from the config
-        const fn: string = this.#config.expression
-
-        if (!fn || fn === '') { return this }
-
-        // Get the domain from the config
-        const minX = -this.graphConfig.origin.x / this.graphConfig.axis.x.x - 1
-        const maxX = (this.graphConfig.width - this.graphConfig.origin.x) / this.graphConfig.axis.x.x + 1
-        const domain = (this.#config.domain ?? { min: minX, max: maxX })
-        const image = (this.#config.image ?? { min: -Infinity, max: Infinity })
-
-        // Get the samples from the config
-        const samples = (this.#config.samples ?? this.graphConfig.axis.x.x)
-
-        // Make the numeric expression.
-        const expr = this.#numExp
-
-        // Get the (x;y) points from the function
-        // 0 < x < width
-        // y = fn(x)
-        let points: XY[]
-
-
-        points = this.#calculatePointsCoordinates(domain, samples, expr, image)
-
-        // Create the path string from the points.
-        let previous: XY = points[0]
-        const path = points.map(({ x, y }, index) => {
-            // Determine the path command
-            let cmd = index === 0 ? 'M' : 'L'
-
-            if (isNaN(y)) {
-                // If the y value is not defined, move the cursor to the next point.
-                cmd = 'M'
-                y = -123456789
-            } else if (previous.y === -123456789) {
-                // If the previous value was not defined, move the cursor to the next point.
-                cmd = 'M'
-            }
-            // Set the current point as the previous point
-            previous = { x, y }
-
-            return `${cmd} ${x} ${y}`
-        }).join(' ')
-
-        // Update the path
-        const shape = this.shape as Path
-        shape.plot(path)
-
-        return this
-    }
-
     #calculatePointsCoordinates(domain: DOMAIN, samples: number, expr: NumExp, image: DOMAIN): XY[] {
-        const points:XY[] = []
+        const points: XY[] = []
         for (let x = domain.min; x < domain.max; x += 1 / samples) {
             const y = expr.evaluate({x})
 
@@ -123,29 +157,5 @@ export class Plot extends AbstractFigure {
             }
         }
         return points
-    }
-
-    moveLabel(): this {
-        return this
-    }
-
-    evaluate(x: number, asCoordinates?: boolean): XY {
-        if (asCoordinates === true) {
-            return { x, y: this.#numExp.evaluate({ x }) }
-        }
-
-        return toPixels(
-            { x, y: this.#numExp.evaluate({ x }) }
-            , this.graphConfig)
-    }
-
-    override follow(x: number, y: number): XY {
-
-        /**
-         * TODO: implement the nearestPointToPath function
-         * return nearestPointToPath( { x, y }, fig.shape as svgPath, 1 )
-         */
-        const pt = toCoordinates({ x, y }, this.graphConfig)
-        return this.evaluate(pt.x)
     }
 }

@@ -20,6 +20,7 @@ export class Label {
     #x: number
     #y: number
     #style: string
+    #auto_rotate = false
 
     constructor(rootG: G, name: string, config: ILabelConfig) {
         // The parent group : the figure which the label is attached to.
@@ -36,7 +37,7 @@ export class Label {
                 asHtml: false,
                 alignement: 'br',
                 offset: { x: 0, y: 0 },
-                rotate: undefined,
+                rotate: 0,
                 texConverter: (value: string) => value
             },
             config
@@ -74,6 +75,14 @@ export class Label {
 
     // Get the label of the figure.
     get label(): LabelType { return this.#shape }
+
+    get auto_rotate(): boolean {
+        return this.#auto_rotate
+    }
+
+    set auto_rotate(value: boolean) {
+        this.#auto_rotate = value
+    }
 
     get displayName() {
         if (this.#config.asHtml) {
@@ -119,9 +128,9 @@ export class Label {
     }
 
     position(alignement?: LABEL_POSITION, offset?: XY, rotate?: number): this {
-        if (alignement === undefined) { alignement = this.#config.alignement }
-        if (offset === undefined) { offset = this.#config.offset }
-        if (rotate === undefined) { rotate = this.#config.rotate }
+        alignement ??= this.#config.alignement
+        offset ??= this.#config.offset
+        rotate ??= this.#config.rotate
 
         // Make sure the offset is correct (NaN value must be zero.)
         offset = {
@@ -175,7 +184,6 @@ export class Label {
         }
 
         if(rotate !== 0 && rotate !== undefined) {
-            // console.log('APPLY', rotate)
             this.rotate(rotate)
         }
         return this
