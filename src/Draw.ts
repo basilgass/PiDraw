@@ -10,6 +10,7 @@ import {
     COORDINATE_SYSTEM,
     type DOMAIN,
     type IFigureAnimation,
+    type IGraphAxisType,
     type IGraphConfig,
     type IGraphDisplay,
     isDOMAIN,
@@ -649,7 +650,7 @@ export class Draw extends Graph {
                 axis: axisConfig,
             },
             display: {
-                grid,
+                grid: grid as IGraphAxisType,
                 subgrid,
                 axis
             },
