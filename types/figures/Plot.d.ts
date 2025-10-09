@@ -2,7 +2,8 @@ import { Svg } from '@svgdotjs/svg.js';
 import { AbstractFigure } from './AbstractFigure';
 import { DOMAIN, XY } from '../pidraw.common';
 export interface IPlotConfig {
-    expression: string;
+    expression: string | null;
+    quadratic?: XY[];
     domain?: DOMAIN;
     image?: DOMAIN;
     samples?: number;

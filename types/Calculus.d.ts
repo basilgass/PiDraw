@@ -89,4 +89,5 @@ export declare function cartesianToAngle(origin: XY, handle: XY): number;
 export declare function createMarker(svg: Svg, id: string, scale: number, shape?: string): Marker;
 export declare function nearestPointToPath(value: XY, path: svgPath, precision?: number): XY;
 export declare function toNumber(value: number | string): number;
+export declare function quadraticThroughABC(A: XY, B: XY, C: XY): string;
 export {};
