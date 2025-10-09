@@ -18,7 +18,7 @@ export interface IGraphConfig {
 
 export interface IGraphDisplay {
     axis?: boolean | { x: boolean | number | IAxisConfig, y: boolean | number | IAxisConfig },
-    grid?: boolean,
+    grid?: boolean | { x: boolean | number | IAxisConfig, y: boolean | number | IAxisConfig },
     subgrid?: number,
 }
 

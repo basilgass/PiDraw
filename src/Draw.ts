@@ -619,7 +619,17 @@ export class Draw extends Graph {
         }
 
         // Display options
-        const grid = parameters.grid ? true : false
+        // REFACTOR: make the types much more robust.
+        let grid = Object.hasOwn(parameters, 'grid')
+            ? parameters.grid.value
+            : false
+
+        if(typeof grid==='string' && grid.includes('pi')){
+            const numerator = grid==='pi' ? 1 : +grid.split('pi')[0]
+            const denominator =(parameters.grid.options.length && Number.isSafeInteger(+parameters.grid.options[0])) ? parameters.grid.options[0] as number : 2
+            grid = {x: numerator * Math.PI / denominator, y: 1}
+        }
+
         const axis = parameters.axis ? true : false
         const subgrid = parameters.subgrid ? parseFloat(parameters.subgrid.value as string) : 0
 

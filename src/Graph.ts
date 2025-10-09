@@ -487,8 +487,25 @@ export class Graph {
                 .stroke('purple/0.5', 0.1)
         }
         if (this.#display.grid) {
-            this.grid('MAINGRID', this.#config.axis)
-                .stroke('lightgray', 1)
+            if(this.#display.grid===true){
+                this.grid('MAINGRID', this.#config.axis)
+                    .stroke('lightgray', 1)
+            } else {
+                const {x, y} = this.#display.grid as XY
+                if (x !== undefined && y !== undefined) {
+                    this.grid('MAINGRID', {
+                        x: {
+                            x: this.#config.axis.x.x * x,
+                            y: this.#config.axis.x.y * y,
+                        },
+                        y: {
+                            x: this.#config.axis.y.x * x,
+                            y: this.#config.axis.y.y * y,
+                        }
+                    })
+                        .stroke('lightgray', 1)
+                }
+            }
         }
 
         // Load the axis
