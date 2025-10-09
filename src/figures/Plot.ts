@@ -1,10 +1,12 @@
 import {Path, Svg} from "@svgdotjs/svg.js"
 import {AbstractFigure} from "./AbstractFigure"
 import type {DOMAIN, XY} from "../pidraw.common"
-import {NumExp, toCoordinates, toPixels} from "../Calculus"
+import {NumExp, quadraticThroughABC, toCoordinates, toPixels} from "../Calculus"
+import {Point} from "./Point"
 
 export interface IPlotConfig {
-    expression: string,
+    expression: string | null,
+    quadratic?: XY[],
     domain?: DOMAIN,
     image?: DOMAIN,
     samples?: number
@@ -13,6 +15,7 @@ export interface IPlotConfig {
 export class Plot extends AbstractFigure {
     #config: IPlotConfig
     #numExp: NumExp
+    #fx: string
 
     constructor(rootSVG: Svg, name: string, values: IPlotConfig) {
         super(rootSVG, name)
@@ -26,7 +29,8 @@ export class Plot extends AbstractFigure {
         // Generate the base shape
         this.shape = this.#makeShape()
 
-        this.#numExp = new NumExp(this.#config.expression)
+        this.#fx = this.#getExpression()
+        this.#numExp = new NumExp(this.#fx)
 
         // Compute the shape
         this.computed()
@@ -40,17 +44,23 @@ export class Plot extends AbstractFigure {
     set config(value: IPlotConfig) {
         this.#config = value
 
-        this.#numExp = new NumExp(this.#config.expression)
+        this.#numExp = new NumExp(this.#getExpression())
 
         this.computed()
     }
 
     computed(): this {
         // Get the mathematical function from the config
-        const fn: string = this.#config.expression
+        const fn: string = this.#getExpression()
 
         if (!fn || fn === '') {
             return this
+        }
+
+        if(fn!==this.#fx){
+            // update the num exp.
+            this.#fx = fn
+            this.#numExp = new NumExp(this.#getExpression())
         }
 
         // Get the domain from the config
@@ -127,6 +137,20 @@ export class Plot extends AbstractFigure {
          */
         const pt = toCoordinates({x, y}, this.graphConfig)
         return this.evaluate(pt.x)
+    }
+
+    #getExpression(): string {
+        if(typeof this.#config.expression === "string"){
+            return this.#config.expression
+        }
+
+        if(this.#config.quadratic && this.#config.quadratic.length===3 && this.#config.quadratic.every(x=>x instanceof Point)){
+            // Values given here
+            const [A,B,C] = this.#config.quadratic.map(x=>x.coordinates)
+            return quadraticThroughABC(A,B,C)
+        }
+
+        return ""
     }
 
     #makeShape() {

@@ -3,7 +3,7 @@ import {AbstractFigure} from "../figures/AbstractFigure"
 import {type buildInterface, type IGraphConfig} from "../pidraw.common"
 import {buildArc, buildCircle} from "./buildCircle"
 import {buildLine} from "./buildLine"
-import {buildFillBetween, buildFollow, buildParametric, buildPlot, buildRiemann} from "./buildPlot"
+import {buildFillBetween, buildFollow, buildParametric, buildPlot, buildQuad, buildRiemann} from "./buildPlot"
 import {buildPoint} from "./buildPoint"
 import {buildPolygon} from "./buildPolygon"
 import {buildBezier} from "./buildBezier"
@@ -151,6 +151,13 @@ export const parser_config: Record<string, parser_item> = {
         code: 'f(x)=[f=plot ]<function>[@<number>,<domain>,<image>]',
         parameters: [],
         build: buildPlot,
+    },
+    quad: {
+        name: 'quad',
+        description: 'quadrativ plot through three points',
+        code: 'f=quad A,B,C[@<number>,<domain>,<image>]',
+        parameters: [],
+        build: buildQuad,
     },
     parametric: {
         name: 'parametric',

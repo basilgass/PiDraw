@@ -7,12 +7,10 @@ import {type IPlotConfig, Plot} from "../figures/Plot"
 import {type IRiemannConfig} from "../figures/Riemann"
 import {type buildInterface, type IGraphConfig, isDOMAIN} from "../pidraw.common"
 import {convertIdToFigure, PARSER_TYPE} from "./parser.common"
+import {Point} from "../figures/Point"
 
 export function buildPlot(item: PARSER, figures: Record<string, AbstractFigure>, graphConfig: IGraphConfig): buildInterface<IPlotConfig> | null {
     const code = convertIdToFigure(item.values, figures)
-
-    // console.log(item)
-    // console.log(code)
 
     if (item.key === PARSER_TYPE.PLOT.toString()) {
         // item.code = [<function>,<domain>,<image>,<@samples>]
@@ -44,9 +42,21 @@ export function buildPlot(item: PARSER, figures: Record<string, AbstractFigure>,
     }
 
     return null
-
 }
 
+export function buildQuad(item: PARSER, figures: Record<string, AbstractFigure>, graphConfig: IGraphConfig): buildInterface<IPlotConfig> | null {
+    const code = convertIdToFigure(item.values.slice(0,3), figures)
+    if(!code.every(pt=>pt instanceof Point)){
+        return null
+    }
+
+    const config: IPlotConfig = {expression: null, quadratic: code}
+
+    return {
+        create: 'plot',
+        config
+    }
+}
 export function buildParametric(item: PARSER, figures: Record<string, AbstractFigure>, graphConfig: IGraphConfig): buildInterface<IParametricConfig> | null {
     const code = convertIdToFigure(item.values, figures)
 

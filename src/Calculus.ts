@@ -1098,12 +1098,12 @@ export function createMarker(svg: Svg, id: string, scale: number, shape = '->'):
     const markerId = `marker-${id}-${scale}`
     return getMarker(markerId) ??
         svg.marker(
-        scale * 1.2,
-        scale * 1.2,
-        (add) => {
-            const p = add.path(`M1,0 L1,${scale}, L${scale * 1.2},${scale / 2} L1,0z`)
-            p.stroke({color: 'black', width: 1})
-        }).attr(markerAttr(markerId, scale, {refX: scale, refY: scale / 2}))
+            scale * 1.2,
+            scale * 1.2,
+            (add) => {
+                const p = add.path(`M1,0 L1,${scale}, L${scale * 1.2},${scale / 2} L1,0z`)
+                p.stroke({color: 'black', width: 1})
+            }).attr(markerAttr(markerId, scale, {refX: scale, refY: scale / 2}))
 }
 
 //TODO: optimize the neearesPointToPath function
@@ -1141,3 +1141,89 @@ export function toNumber(value: number | string): number {
 
     return +value
 }
+
+export function quadraticThroughABC(A: XY, B: XY, C: XY) {
+    const fixed = 4
+    const variable = ['x^2', 'x', '']
+    const coeffs = Object.values(quadraticThroughPoints(A, B, C))
+        .map((x, index)=> {
+            if(x===0){
+                return ''
+            }
+
+            return ((index > 0 && x > 0) ? `+${x.toFixed(fixed)}` : x.toFixed(fixed)) + variable[index]
+        })
+
+    return coeffs.join('')
+}
+
+
+function quadraticThroughPoints(A: XY, B: XY, C: XY) {
+    const {x: x1, y: y1} = A
+    const {x: x2, y: y2} = B
+    const {x: x3, y: y3} = C
+
+    const denom = (x1 - x2) * (x1 - x3) * (x2 - x3)
+
+    const a =
+        (y1 * (x2 - x3) + y2 * (x3 - x1) + y3 * (x1 - x2)) / denom
+
+    const b =
+        (y1 * (x3 ** 2 - x2 ** 2) +
+            y2 * (x1 ** 2 - x3 ** 2) +
+            y3 * (x2 ** 2 - x1 ** 2)) / denom
+
+    const c =
+        (y1 * (x2 * x3 * (x2 - x3)) +
+            y2 * (x3 * x1 * (x3 - x1)) +
+            y3 * (x1 * x2 * (x1 - x2))) / denom
+
+    return {a, b, c}
+}
+
+/*
+function getPolyFromThreePoints(A, B, C): Polynom {
+	const P = new Equation("y", "ax^2+bx+c"),
+		pA = new Point(A),
+		pB = new Point(B),
+		pC = new Point(C)
+
+	// y=ax^2+bx+c
+	let Pc: Equation = P.clone()
+			.replaceBy("x", new Polynom(pA.x.display))
+			.replaceBy("y", new Polynom(pA.y.display))
+			.isolate("c") as Equation,
+		Pb: Equation = P.clone()
+			.replaceBy("x", new Polynom(pB.x.display))
+			.replaceBy("y", new Polynom(pB.y.display))
+			.replaceBy("c", Pc.right)
+			.isolate("b") as Equation,
+		Pa
+
+	if (C !== "") {
+		Pa = P.clone()
+			.replaceBy("x", new Polynom(pC.x.display))
+			.replaceBy("y", new Polynom(pC.y.display))
+			.replaceBy("c", Pc.right)
+			.replaceBy("b", Pb.right)
+			.isolate("a")
+	} else {
+		// Le point B est un sommet !
+		// x = -b/2a => b = -2ax
+		Pa = new Equation("b = -2a*x")
+			.replaceBy("x", new Polynom(pC.x.display))
+
+		Pa.left = Pb.right.clone()
+		Pa.isolate("a")
+	}
+
+	Pb = Pb.replaceBy("a", Pa.right)
+	Pc = Pc.replaceBy("b", Pb.right).replaceBy("a", Pa.right)
+
+	return P.clone()
+		.replaceBy("a", Pa.right)
+		.replaceBy("b", Pb.right)
+		.replaceBy("c", Pc.right)
+		.right
+}
+ */

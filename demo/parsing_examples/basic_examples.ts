@@ -161,5 +161,12 @@ b=bezier A,B,C->mark=both/20,red`
 A(2,3)
 B(8,6)
 d=AB.->tex=abc`
+    },
+    {
+        name: 'quadratic plot',
+        code: `A(0,1)->drag=grid
+B(1,3)->drag=grid
+C(2,9)->drag=grid
+q=quad A,B,C`
     }
 ]
