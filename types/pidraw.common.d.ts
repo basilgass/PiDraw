@@ -13,12 +13,13 @@ export interface IGraphConfig {
     system: COORDINATE_SYSTEM;
     width: number;
 }
+export interface IGraphAxisType {
+    x: boolean | number | IAxisConfig;
+    y: boolean | number | IAxisConfig;
+}
 export interface IGraphDisplay {
-    axis?: boolean | {
-        x: boolean | number | IAxisConfig;
-        y: boolean | number | IAxisConfig;
-    };
-    grid?: boolean;
+    axis?: boolean | IGraphAxisType;
+    grid?: boolean | IGraphAxisType;
     subgrid?: number;
 }
 export interface IGraphConstructorConfig {

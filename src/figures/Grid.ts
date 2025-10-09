@@ -1,7 +1,7 @@
-import { Svg, Path as svgPath } from "@svgdotjs/svg.js"
-import { AbstractFigure } from "./AbstractFigure"
-import type { XY } from "../pidraw.common"
-import { computeLine } from "../Calculus"
+import {Path as svgPath, Svg} from "@svgdotjs/svg.js"
+import {AbstractFigure} from "./AbstractFigure"
+import type {XY} from "../pidraw.common"
+import {computeLine} from "../Calculus"
 
 interface IGridConfig {
     axis: { x: XY, y: XY },
@@ -12,14 +12,9 @@ interface IGridConfig {
     subdivisions: number
 
 }
+
 export class Grid extends AbstractFigure {
     #config: IGridConfig
-
-    get config() { return this.#config }
-    set config(value: IGridConfig) {
-        this.#config = value
-        this.computed()
-    }
 
     constructor(rootSVG: Svg, name: string, values: IGridConfig) {
         super(rootSVG, name)
@@ -34,9 +29,6 @@ export class Grid extends AbstractFigure {
             values
         )
 
-        // TODO: implement a "scaling factor" for the axis
-        // this.#config.axis.x.x = Math.PI * this.#config.axis.x.x / 4
-
         // Generate the base shape
         this.shape = this.#makeShape()
 
@@ -45,19 +37,13 @@ export class Grid extends AbstractFigure {
         return this
     }
 
-    #makeShape() {
-        this.element.clear()
+    get config() {
+        return this.#config
+    }
 
-        // Create the path
-        this.shape = this.element.path()
-
-        // Apply the stroke.
-        this.stroke()
-
-        // Add the shape to the group.
-        this.element.add(this.shape)
-
-        return this.shape as svgPath
+    set config(value: IGridConfig) {
+        this.#config = value
+        this.computed()
     }
 
     computed(): this {
@@ -80,6 +66,25 @@ export class Grid extends AbstractFigure {
 
     }
 
+    moveLabel(): this {
+        return this
+    }
+
+    #makeShape() {
+        this.element.clear()
+
+        // Create the path
+        this.shape = this.element.path()
+
+        // Apply the stroke.
+        this.stroke()
+
+        // Add the shape to the group.
+        this.element.add(this.shape)
+
+        return this.shape as svgPath
+    }
+
     #computeLines(xDirection: XY, yDirection: XY): [XY, XY][] {
         // X axis lines (aka horizontal lines)
         let x = +this.#config.origin.x,
@@ -89,7 +94,7 @@ export class Grid extends AbstractFigure {
 
         // Determine the first line (through the origin)
         let data = computeLine(
-            { x, y },
+            {x, y},
             xDirection,
             this.#config.width,
             this.#config.height,
@@ -98,34 +103,51 @@ export class Grid extends AbstractFigure {
         // 'Horizontal lines' :
         // direction is the axis.x
         // moving the lines in the direction of the axis.y
-        while (data) {
-            gridPath.push(data)
+        const max_iteration = (this.#config.width + this.#config.height)/2
+        let counter = 0
+
+        while (counter<max_iteration) {
+            if (data) {
+                gridPath.push(data)
+            }
 
             // Move to the next line
             x += yDirection.x
             y -= yDirection.y
 
+
             data = computeLine(
-                { x, y },
+                {x, y},
                 xDirection,
                 this.#config.width,
                 this.#config.height,
             )
 
-            if (gridPath.length > 1000) { throw new Error('Too many lines') }
+            if (data === null && (x > this.#config.width || y > this.#config.height)) {
+                break
+            }
+
+            if (gridPath.length > 1000) {
+                throw new Error('Too many lines')
+            }
+
+            counter++
         }
 
         x = this.#config.origin.x - yDirection.x
         y = this.#config.origin.y + yDirection.y
 
         data = computeLine(
-            { x, y },
+            {x, y},
             xDirection,
             this.#config.width,
             this.#config.height)
 
-        while (data) {
-            gridPath.push(data)
+        counter = 0
+        while (counter<max_iteration) {
+            if(data) {
+                gridPath.push(data)
+            }
 
             // Move to the next line
             x -= yDirection.x
@@ -133,18 +155,22 @@ export class Grid extends AbstractFigure {
 
             // Make the next line
             data = computeLine(
-                { x, y },
+                {x, y},
                 xDirection,
                 this.#config.width,
                 this.#config.height)
 
-            if (gridPath.length > 1000) { throw new Error('Too many lines') }
+            if (data === null && (x < 0 || y < 0)) {
+                break
+            }
+
+            if (gridPath.length > 1000) {
+                throw new Error('Too many lines')
+            }
+
+            counter++
         }
 
         return gridPath
-    }
-
-    moveLabel(): this {
-        return this
     }
 }
