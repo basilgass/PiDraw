@@ -17,9 +17,9 @@ interface IGridConfig {
 }
 export declare class Grid extends AbstractFigure {
     #private;
+    constructor(rootSVG: Svg, name: string, values: IGridConfig);
     get config(): IGridConfig;
     set config(value: IGridConfig);
-    constructor(rootSVG: Svg, name: string, values: IGridConfig);
     computed(): this;
     moveLabel(): this;
 }
