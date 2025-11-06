@@ -32,9 +32,8 @@ export const PARSER_PARAMETERS_KEYS = [
 // TODO: intersection of a line and a circle
 // TODO: prevent creation of too many markers...
 export class Draw extends Graph {
-    #code: PARSER[]
-    #parser: PiParse
-    #settings: IParserSettings
+    protected _parser: PiParse
+    protected _settings: IParserSettings
 
     constructor(id: string | HTMLElement, config?: IParserConfig) {
         super(id, {
@@ -42,7 +41,7 @@ export class Draw extends Graph {
         })
 
         // Set the parser
-        this.#parser = new PiParse({
+        this._parser = new PiParse({
             formatter: (line: string) => this.#parseKeyCode(line),
             keys: PARSER_PARAMETERS_KEYS,
             splitter: {
@@ -52,7 +51,7 @@ export class Draw extends Graph {
             }
         })
 
-        this.#settings = {}
+        this._settings = {}
 
         // Build the layout using the default values or the parameters
         if (config?.parameters) {
@@ -60,7 +59,7 @@ export class Draw extends Graph {
         }
 
         // Define the code to display
-        this.#code = []
+        this._code = []
         if (config?.code) {
             this.#build(config.code)
         }
@@ -68,8 +67,10 @@ export class Draw extends Graph {
         return this
     }
 
+    protected _code: PARSER[]
+
     get code() {
-        return this.#code
+        return this._code
     }
 
     static documentation() {
@@ -98,7 +99,7 @@ export class Draw extends Graph {
 
         this.config = layout.config
         this.display = layout.display
-        this.#settings = layout.settings
+        this._settings = layout.settings
 
         // Update the layout (from the extended Graph class)
         this.updateLayout()
@@ -348,12 +349,12 @@ export class Draw extends Graph {
      * Build the figures from the code
      */
     #build(input: string) {
-        this.#code = this.#prepare(input)
+        this._code = this.#prepare(input)
 
         const pConfig = parser_config
 
         // Loop through each code
-        this.#code.forEach((item) => {
+        this._code.forEach((item) => {
             // Determine the id of the figure.
             item.name = this.#uniqueName(item.name)
 
@@ -447,21 +448,21 @@ export class Draw extends Graph {
         // TODO: make a global reset function for everything
         // Reset the animation flag
         // Apply defaults settings to the object
-        if (this.#settings.label &&
+        if (this._settings.label &&
             obj instanceof Point &&
             item.parameters.label === undefined && item.parameters.tex === undefined
         ) {
             item.parameters.label = {value: true, options: []}
         }
 
-        if (this.#settings.tex &&
+        if (this._settings.tex &&
             obj instanceof Point &&
             item.parameters.label === undefined && item.parameters.tex === undefined
         ) {
             item.parameters.tex = {value: true, options: []}
         }
 
-        if (obj instanceof Point && this.#settings.points === false) {
+        if (obj instanceof Point && this._settings.points === false) {
             item.parameters['!'] = {value: true, options: []}
         }
 
@@ -593,7 +594,7 @@ export class Draw extends Graph {
     #parseLayout(code?: string): { config: IGraphConfig, display: IGraphDisplay, settings: IParserSettings } {
 
         // const parameters = PiParseParameters(code)
-        const parameters = this.#parser.parameters(code ?? '', PARSER_PARAMETERS_KEYS)
+        const parameters = this._parser.parameters(code ?? '', PARSER_PARAMETERS_KEYS)
 
         // Define the configuration
         const ppu = parameters.ppu ? parseFloat(parameters.ppu.value as string) : 50
@@ -702,7 +703,7 @@ export class Draw extends Graph {
             // - d=AB[ or d=[AB[ => d=halfline A,B
             // - d=vAB => d=vec A,B
             // - p(x)=x^2 => p=plot x^2
-            const parsedLine = this.#parser.parse(line)
+            const parsedLine = this._parser.parse(line)
 
             // Add the block data to the parameters.
             parsedLine.parameters = Object.assign(

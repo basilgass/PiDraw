@@ -28,8 +28,20 @@ export interface IDraggableConfig {
 export declare class Graph {
     #private;
     constructor(id: string | HTMLElement, config?: IGraphConstructorConfig);
+    protected _config: IGraphConfig;
     get config(): IGraphConfig;
     set config(value: IGraphConfig);
+    protected _display: IGraphDisplay;
+    get display(): IGraphDisplay;
+    set display(value: IGraphDisplay);
+    protected _figures: Record<string, AbstractFigure>;
+    get figures(): Record<string, AbstractFigure>;
+    protected _layers: ILayers;
+    get layers(): ILayers;
+    protected _rootSVG: Svg;
+    get rootSVG(): Svg;
+    protected _toTex: (value: string) => string;
+    get toTex(): (value: string) => string;
     get create(): {
         point: (coordinates: XY | IPointConfig, name: string, label?: {
             html: boolean;
@@ -46,12 +58,6 @@ export declare class Graph {
         fillbetween: (values: IFillBetweenConfig, name: string) => AbstractFigure;
         riemann: (values: IRiemannConfig, name: string) => AbstractFigure;
     };
-    get display(): IGraphDisplay;
-    set display(value: IGraphDisplay);
-    get figures(): Record<string, AbstractFigure>;
-    get layers(): ILayers;
-    get rootSVG(): Svg;
-    get toTex(): (value: string) => string;
     get animation(): Animate;
     clear(): void;
     coordinate_system(system: COORDINATE_SYSTEM): AbstractFigure;
