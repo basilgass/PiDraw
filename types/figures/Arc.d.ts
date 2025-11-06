@@ -11,8 +11,8 @@ export interface IArcConfig {
     mark?: boolean;
 }
 export declare class Arc extends AbstractFigure {
-    #private;
     constructor(rootSVG: Svg, name: string, values: IArcConfig);
+    protected _config: IArcConfig;
     get config(): IArcConfig;
     set config(value: IArcConfig);
     get center(): XY;
@@ -32,6 +32,7 @@ export declare class Arc extends AbstractFigure {
         end: number;
     };
     getPath(): string;
+    _makeShape(): import('@svgdotjs/svg.js').Shape;
     private _describeSquare;
     private _describeArc;
 }

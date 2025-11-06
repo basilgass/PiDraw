@@ -1,8 +1,8 @@
-import { Path, type PathCommand, Svg } from "@svgdotjs/svg.js"
-import { AbstractFigure } from "./AbstractFigure"
-import {type DOMAIN } from "../pidraw.common"
-import { Plot } from "./Plot"
-import { toPixels } from "../Calculus"
+import {Path, type PathCommand, Svg} from "@svgdotjs/svg.js"
+import {AbstractFigure} from "./AbstractFigure"
+import {type DOMAIN} from "../pidraw.common"
+import {Plot} from "./Plot"
+import {toPixels} from "../Calculus"
 
 export interface IFillBetweenConfig {
     expressions: [Plot] | [Plot, Plot],
@@ -11,23 +11,42 @@ export interface IFillBetweenConfig {
 }
 
 export class FillBetween extends AbstractFigure {
-    #config: IFillBetweenConfig
-    get config() { return this.#config }
+    constructor(rootSVG: Svg, name: string, values: IFillBetweenConfig) {
+        super(rootSVG, name)
+
+        // Store the constraints
+        this._config = Object.assign({
+            samples: 100
+        }, values)
+
+        // Generate the base shape
+        this.shape = this._makeShape()
+
+        // Compute the shape
+        this.computed()
+        return this
+    }
+
+    protected _config: IFillBetweenConfig
+
+    get config() { return this._config }
+
     set config(value: IFillBetweenConfig) {
-        this.#config = value
+        this._config = value
 
         this.computed()
     }
+
     get domain() {
 
-        if (this.#config.domain) {
+        if (this._config.domain) {
             // return {
-            //     min: isNaN(this.#config.domain.min) ? 0 :
-            //         toPixels({ x: this.#config.domain.min, y: 0 }, this.graphConfig).x,
-            //     max: isNaN(this.#config.domain.max) ? this.graphConfig.width :
-            //         toPixels({ x: this.#config.domain.max, y: 0 }, this.graphConfig).x
+            //     min: isNaN(this._config.domain.min) ? 0 :
+            //         toPixels({ x: this._config.domain.min, y: 0 }, this.graphConfig).x,
+            //     max: isNaN(this._config.domain.max) ? this.graphConfig.width :
+            //         toPixels({ x: this._config.domain.max, y: 0 }, this.graphConfig).x
             // }
-            return toPixels(this.#config.domain, this.graphConfig)
+            return toPixels(this._config.domain, this.graphConfig)
 
         }
 
@@ -36,13 +55,14 @@ export class FillBetween extends AbstractFigure {
             max: this.graphConfig.width
         }
     }
+
     get image() {
-        if (this.#config.image) {
+        if (this._config.image) {
             // return {
-            //     min: isNaN(this.#config.image.min) ? 0 : toPixels(this.#config.image.min, this.graphConfig).y,
-            //     max: isNaN(this.#config.image.max) ? this.graphConfig.height : toPixels(this.#config.image.max, this.graphConfig).y
+            //     min: isNaN(this._config.image.min) ? 0 : toPixels(this._config.image.min, this.graphConfig).y,
+            //     max: isNaN(this._config.image.max) ? this.graphConfig.height : toPixels(this._config.image.max, this.graphConfig).y
             // }
-            return toPixels(this.#config.image, this.graphConfig, 'y')
+            return toPixels(this._config.image, this.graphConfig, 'y')
 
         }
 
@@ -51,23 +71,7 @@ export class FillBetween extends AbstractFigure {
         }
     }
 
-    constructor(rootSVG: Svg, name: string, values: IFillBetweenConfig) {
-        super(rootSVG, name)
-
-        // Store the constraints
-        this.#config = Object.assign({
-            samples: 100
-        }, values)
-
-        // Generate the base shape
-        this.shape = this.#makeShape()
-
-        // Compute the shape
-        this.computed()
-        return this
-    }
-
-    #makeShape() {
+    _makeShape() {
         this.element.clear()
 
         // Create the path
@@ -90,7 +94,7 @@ export class FillBetween extends AbstractFigure {
         // - close the path.
         // - fill the path.
 
-        const [f, g] = this.#config.expressions
+        const [f, g] = this._config.expressions
         const domain = this.domain
         const image = this.image
 

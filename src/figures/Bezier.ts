@@ -26,56 +26,37 @@ export interface IBezierConfig {
 }
 
 export class Bezier extends AbstractFigure {
-    #config: IBezierConfig
-    #points: IBezierPointInterface[]
-
     constructor(rootSVG: Svg, name: string, values: IBezierConfig) {
         super(rootSVG, name)
 
         // Default config
-        this.#config = values
+        this._config = values
 
         // Initialize
-        this.#points = []
+        this._points = []
         this.points = values.points
 
         // Create the shape
-        this.#makeShape()
+        this._makeShape()
 
         // Calculate the path.
         this.computed()
     }
 
-    override computed(): this {
-
-        const path = computeBezierPath(this.#points);
-        (this.shape as svgPath).plot(path)
-
-        return this
-    }
+    protected _config: IBezierConfig
 
     get config(): IBezierConfig {
-        return this.#config
+        return this._config
     }
 
     set config(value: IBezierConfig) {
-        this.#config = value
+        this._config = value
     }
 
-    getPointByName(name: string): IBezierPointInterface | undefined {
-        return this.#points.find(x => x.point.name === name)
-    }
-
-    override moveLabel(): this {
-        if (!this.label) {
-            return this
-        }
-
-        throw new Error("Method not implemented.")
-    }
+    protected _points: IBezierPointInterface[]
 
     get points(): IBezierPointInterface[] {
-        return this.#points
+        return this._points
     }
 
     set points(values: IBezierPointInterface[]) {
@@ -86,10 +67,30 @@ export class Bezier extends AbstractFigure {
             right: null
         }
 
-        this.#points = values
-        this.#points.forEach(value => {
+        this._points = values
+        this._points.forEach(value => {
             value.controls = Object.assign({}, defaultControl, value.controls)
         })
+    }
+
+    override computed(): this {
+
+        const path = computeBezierPath(this._points);
+        (this.shape as svgPath).plot(path)
+
+        return this
+    }
+
+    getPointByName(name: string): IBezierPointInterface | undefined {
+        return this._points.find(x => x.point.name === name)
+    }
+
+    override moveLabel(): this {
+        if (!this.label) {
+            return this
+        }
+
+        throw new Error("Method not implemented.")
     }
 
     setControlRatio(name: string, ratio: number): this {
@@ -110,7 +111,7 @@ export class Bezier extends AbstractFigure {
         return this
     }
 
-    #makeShape(): Shape {
+    _makeShape(): Shape {
         this.element.clear()
 
         this.shape = this.element.path("")

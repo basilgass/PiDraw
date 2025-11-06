@@ -1,10 +1,11 @@
-import { Svg } from '@svgdotjs/svg.js';
+import { Shape, Svg } from '@svgdotjs/svg.js';
 import { AbstractFigure } from './AbstractFigure';
 export declare class Path extends AbstractFigure {
-    #private;
     constructor(rootSVG: Svg, name: string, path?: string);
-    computed(): this;
+    protected _d: string;
     get d(): string;
     set d(path: string);
+    computed(): this;
     moveLabel(): this;
+    _makeShape(): Shape;
 }

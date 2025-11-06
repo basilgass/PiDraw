@@ -1,8 +1,7 @@
-import { Svg } from "@svgdotjs/svg.js"
-import { AbstractFigure } from "./AbstractFigure"
-import type { DOMAIN, XY } from "../pidraw.common"
-import { NumExp, toPixels } from "../Calculus"
-import { Path } from "@svgdotjs/svg.js"
+import {Path, Svg} from "@svgdotjs/svg.js"
+import {AbstractFigure} from "./AbstractFigure"
+import type {DOMAIN, XY} from "../pidraw.common"
+import {NumExp, toPixels} from "../Calculus"
 
 export interface IParametricConfig {
     expressions: {
@@ -14,39 +13,42 @@ export interface IParametricConfig {
 }
 
 export class Parametric extends AbstractFigure {
-    #config: IParametricConfig
-    #numExp: {
+    protected _numExp: {
         x: NumExp,
         y: NumExp
-    }
-    get config() { return this.#config }
-    set config(value: IParametricConfig) {
-        this.#config = value
-        this.computed()
     }
 
     constructor(rootSVG: Svg, name: string, values: IParametricConfig) {
         super(rootSVG, name)
 
         // Store the constraints
-        this.#config = Object.assign({
+        this._config = Object.assign({
             expressions: { x: '', y: '' },
         }, values)
 
-        this.#numExp = {
-            x: new NumExp(this.#config.expressions.x),
-            y: new NumExp(this.#config.expressions.y),
+        this._numExp = {
+            x: new NumExp(this._config.expressions.x),
+            y: new NumExp(this._config.expressions.y),
         }
 
         // Generate the base shape
-        this.shape = this.#makeShape()
+        this.shape = this._makeShape()
 
         // Compute the shape
         this.computed()
         return this
     }
 
-    #makeShape() {
+    protected _config: IParametricConfig
+
+    get config() { return this._config }
+
+    set config(value: IParametricConfig) {
+        this._config = value
+        this.computed()
+    }
+
+    _makeShape() {
         this.element.clear()
 
         // Create the path
@@ -63,8 +65,8 @@ export class Parametric extends AbstractFigure {
 
     computed(): this {
         // Get the samples from the config
-        const samples = (this.#config.samples ?? this.graphConfig.axis.x.x)
-        const domain = (this.#config.domain ?? { min: -2 * Math.PI, max: 2 * Math.PI })
+        const samples = (this._config.samples ?? this.graphConfig.axis.x.x)
+        const domain = (this._config.domain ?? { min: -2 * Math.PI, max: 2 * Math.PI })
 
         // Make the numeric expression.
 
@@ -102,8 +104,8 @@ export class Parametric extends AbstractFigure {
     evaluate(t: number): XY {
         return toPixels(
             {
-                x: this.#numExp.x.evaluate({ t }),
-                y: this.#numExp.y.evaluate({ t })
+                x: this._numExp.x.evaluate({ t }),
+                y: this._numExp.y.evaluate({ t })
             }
             , this.graphConfig)
     }

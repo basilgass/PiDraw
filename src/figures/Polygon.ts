@@ -1,7 +1,7 @@
-import { Svg, Polygon as svgPolygon } from "@svgdotjs/svg.js"
-import { AbstractFigure } from "./AbstractFigure"
-import { type XY, isXY } from "../pidraw.common"
-import { distanceAB, mathVector, toPixels } from "../Calculus"
+import {Polygon as svgPolygon, Svg} from "@svgdotjs/svg.js"
+import {AbstractFigure} from "./AbstractFigure"
+import {isXY, type XY} from "../pidraw.common"
+import {distanceAB, mathVector, toPixels} from "../Calculus"
 
 export interface IPolygonConfig {
     vertices?: XY[]
@@ -17,47 +17,48 @@ export interface IPolygonConfig {
     }
 }
 export class Polygon extends AbstractFigure {
-    #config: IPolygonConfig
+    constructor(rootSVG: Svg, name: string, values: IPolygonConfig) {
+        super(rootSVG, name)
 
-    get config() { return this.#config }
+        // Default values
+        this._config = Object.assign({
+            shape: 'polygon',
+        }, values)
+
+        this._makeShape()
+        this.computed()
+    }
+
+    protected _config: IPolygonConfig
+
+    get config() { return this._config }
+
     set config(value: IPolygonConfig) {
-        this.#config = value
-        this.#makeShape()
+        this._config = value
+        this._makeShape()
     }
 
     get vertices() {
-        return this.#config.vertices
+        return this._config.vertices
     }
 
     get radius(): number {
-        if (!this.#config.regular) { return this.graphConfig.axis.x.x }
+        if (!this._config.regular) { return this.graphConfig.axis.x.x }
 
-        if (typeof this.#config.regular.radius === 'number') {
-            return toPixels(this.#config.regular.radius, this.graphConfig)
+        if (typeof this._config.regular.radius === 'number') {
+            return toPixels(this._config.regular.radius, this.graphConfig)
         }
 
-        if (this.#config.vertices && isXY(this.#config.vertices[0]) && isXY(this.#config.regular.radius)) {
-            return distanceAB(this.#config.vertices[0], this.#config.regular.radius)
+        if (this._config.vertices && isXY(this._config.vertices[0]) && isXY(this._config.regular.radius)) {
+            return distanceAB(this._config.vertices[0], this._config.regular.radius)
         }
 
         return 0
     }
 
-    constructor(rootSVG: Svg, name: string, values: IPolygonConfig) {
-        super(rootSVG, name)
-
-        // Default values
-        this.#config = Object.assign({
-            shape: 'polygon',
-        }, values)
-
-        this.#makeShape()
-        this.computed()
-    }
-
-    #figuresXYtoArray(): [number, number][] {
+    _figuresXYtoArray(): [number, number][] {
         const arr: [number, number][] = []
-        this.#config.vertices?.forEach(pt => {
+        this._config.vertices?.forEach(pt => {
             if (isXY(pt)) {
                 arr.push([pt.x, pt.y])
             }
@@ -65,10 +66,10 @@ export class Polygon extends AbstractFigure {
 
         return arr
     }
-    #makeShape() {
+    _makeShape() {
         this.element.clear()
 
-        const pointsCoordinates = this.#figuresXYtoArray()
+        const pointsCoordinates = this._figuresXYtoArray()
         this.shape = this.element.polygon(pointsCoordinates)
 
         this.fill().stroke()
@@ -76,10 +77,10 @@ export class Polygon extends AbstractFigure {
         this.element.add(this.shape)
 
         // Add marks if they exists.
-        if (this.#config.mark) {
+        if (this._config.mark) {
 
             // Set the length of the mark
-            const length = this.#config.mark.center?.length ?? 0
+            const length = this._config.mark.center?.length ?? 0
 
             // Get the center of the figure. It's the average of all vertices.
             const center = pointsCoordinates.reduce((acc, pt) => {
@@ -111,30 +112,30 @@ export class Polygon extends AbstractFigure {
     computed(): this {
         const polygon = this.shape as svgPolygon
 
-        if (this.#config.vertices && this.#config.vertices.length > 2) {
-            polygon.plot(this.#figuresXYtoArray())
+        if (this._config.vertices && this._config.vertices.length > 2) {
+            polygon.plot(this._figuresXYtoArray())
         } else if (
-            this.#config.regular
+            this._config.regular
         ) {
 
             const plotPoints: [number, number][] = []
             const r = this.radius
 
             const OP = new mathVector(
-                this.#config.regular.center,
-                isXY(this.#config.regular.radius) ?
-                    this.#config.regular.radius :
-                    { x: this.#config.regular.center.x, y: this.#config.regular.center.y - r }
+                this._config.regular.center,
+                isXY(this._config.regular.radius) ?
+                    this._config.regular.radius :
+                    { x: this._config.regular.center.x, y: this._config.regular.center.y - r }
             )
 
-            for (let i = 0; i < this.#config.regular.sides; i++) {
+            for (let i = 0; i < this._config.regular.sides; i++) {
                 plotPoints.push([
-                    this.#config.regular.center.x + OP.x,
-                    this.#config.regular.center.y + OP.y
+                    this._config.regular.center.x + OP.x,
+                    this._config.regular.center.y + OP.y
                 ])
 
                 // Rotate the vector
-                OP.rotate(360 / this.#config.regular.sides)
+                OP.rotate(360 / this._config.regular.sides)
             }
 
             polygon.plot(plotPoints)

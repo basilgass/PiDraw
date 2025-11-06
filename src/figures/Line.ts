@@ -17,25 +17,21 @@ export interface ILineConfig {
 
 // A line is a figure defined by a point and a vector
 export class Line extends AbstractFigure {
-    #config: ILineConfig
-    #end: XY
-    #start: XY
-
     constructor(rootSVG: Svg, name: string, values: ILineConfig) {
         super(rootSVG, name)
 
         // Default config
-        this.#config = Object.assign(
+        this._config = Object.assign(
             {shape: 'line',},
             values
         )
 
         // Default values
-        this.#start = {x: 0, y: 0}
-        this.#end = {x: this.graphConfig.width, y: this.graphConfig.height}
+        this._start = {x: 0, y: 0}
+        this._end = {x: this.graphConfig.width, y: this.graphConfig.height}
 
         // Update the shape
-        this.shape = this.#makeShape()
+        this.shape = this._makeShape()
 
         // Calculate
         this.computed()
@@ -43,17 +39,39 @@ export class Line extends AbstractFigure {
         return this
     }
 
-    get angle(): number {
-        return Math.atan2(-this.direction.y, this.direction.x) * 180 / Math.PI
-    }
+    protected _config: ILineConfig
 
     get config() {
-        return this.#config
+        return this._config
     }
 
     set config(value: ILineConfig) {
-        this.#config = value
-        this.#makeShape()
+        this._config = value
+        this._makeShape()
+    }
+
+    protected _end: XY
+
+    get end() {
+        return this._end
+    }
+
+    set end(value: XY) {
+        this._end = value
+    }
+
+    protected _start: XY
+
+    get start() {
+        return this._start
+    }
+
+    set start(value: XY) {
+        this._start = value
+    }
+
+    get angle(): number {
+        return Math.atan2(-this.direction.y, this.direction.x) * 180 / Math.PI
     }
 
     get direction(): XY {
@@ -61,14 +79,6 @@ export class Line extends AbstractFigure {
             x: this.end.x - this.start.x,
             y: this.end.y - this.start.y
         }
-    }
-
-    get end() {
-        return this.#end
-    }
-
-    set end(value: XY) {
-        this.#end = value
     }
 
     get math(): mathLine {
@@ -84,56 +94,48 @@ export class Line extends AbstractFigure {
         }
     }
 
-    get start() {
-        return this.#start
-    }
-
-    set start(value: XY) {
-        this.#start = value
-    }
-
     computed(): this {
         let direction = {x: 0, y: 0}
 
-        if (this.#config.through && this.#config.through.A && this.#config.through.B) {
-            this.start = this.#config.through.A
-            this.end = this.#config.through.B
+        if (this._config.through?.A && this._config.through.B) {
+            this.start = this._config.through.A
+            this.end = this._config.through.B
 
             // Direction
             direction = this.direction
-        } else if (this.#config.director && this.#config.director.A && this.#config.director.d) {
-            this.start = this.#config.director.A
+        } else if (this._config.director?.A && this._config.director.d) {
+            this.start = this._config.director.A
             this.end = {
-                x: this.#config.director.A.x + this.#config.director.d.x,
-                y: this.#config.director.A.y + this.#config.director.d.y
+                x: this._config.director.A.x + this._config.director.d.x,
+                y: this._config.director.A.y + this._config.director.d.y
             }
-            direction = this.#config.director.d
-        } else if (this.#config.parallel && this.#config.parallel.to && this.#config.parallel.through) {
-            this.start = this.#config.parallel.through
-            direction = this.#config.parallel.to.direction
-        } else if (this.#config.perpendicular && this.#config.perpendicular.to && this.#config.perpendicular.through) {
-            this.start = this.#config.perpendicular.through
-            direction = this.#config.perpendicular.to.normal
-        } else if (this.#config.mediator && this.#config.mediator.A && this.#config.mediator.B) {
+            direction = this._config.director.d
+        } else if (this._config.parallel?.to && this._config.parallel.through) {
+            this.start = this._config.parallel.through
+            direction = this._config.parallel.to.direction
+        } else if (this._config.perpendicular?.to && this._config.perpendicular.through) {
+            this.start = this._config.perpendicular.through
+            direction = this._config.perpendicular.to.normal
+        } else if (this._config.mediator?.A && this._config.mediator.B) {
             // Start point is the middle of both figures
             this.start = {
-                x: (this.#config.mediator.A.x + this.#config.mediator.B.x) / 2,
-                y: (this.#config.mediator.A.y + this.#config.mediator.B.y) / 2
+                x: (this._config.mediator.A.x + this._config.mediator.B.x) / 2,
+                y: (this._config.mediator.A.y + this._config.mediator.B.y) / 2
             }
 
             // We are in drawing mode. The y axis must be reversed
             direction = {
-                x: this.#config.mediator.B.y - this.#config.mediator.A.y,
-                y: -(this.#config.mediator.B.x - this.#config.mediator.A.x)
+                x: this._config.mediator.B.y - this._config.mediator.A.y,
+                y: -(this._config.mediator.B.x - this._config.mediator.A.x)
             }
-        } else if (this.#config.bisector) {
+        } else if (this._config.bisector) {
             // Either we have two lines or three points
-            if ('d1' in this.#config.bisector && 'd2' in this.#config.bisector) {
+            if ('d1' in this._config.bisector && 'd2' in this._config.bisector) {
                 // TODO: Implement the bisector of two lines
             }
 
-            if ('A' in this.#config.bisector && 'B' in this.#config.bisector && 'C' in this.#config.bisector) {
-                const {A, B, C} = this.#config.bisector
+            if ('A' in this._config.bisector && 'B' in this._config.bisector && 'C' in this._config.bisector) {
+                const {A, B, C} = this._config.bisector
 
                 const AB = new mathVector(A, B),
                     normAB = AB.norm,
@@ -152,13 +154,13 @@ export class Line extends AbstractFigure {
 
             }
         }
-        // else if (this.#config.equation) {
+        // else if (this._config.equation) {
         //     // the equation can be something like:
         //     // y=ax+b
         //     // y = a
         //     // x = a
         //     // ax+by+c=0
-        //     const [left, right] = this.#config.equation.equation.split('=')
+        //     const [left, right] = this._config.equation.equation.split('=')
         //     if (left === 'x') {
         //         // vetical line
         //         const x = toNumber(right)
@@ -179,14 +181,14 @@ export class Line extends AbstractFigure {
         //         direction = {x: 1, y: a}
         //     } else if (!isNaN(+right)) {
         //         // we have ax+by+c=0 or ax+by=c
-        //         const a: number = toNumber(this.#config.equation.equation.match(/[+-]?[0-9/]*x/g)[0] || 0)
-        //         const b: number = toNumber(this.#config.equation.equation.match(/[+-]?[0-9/]*x/g)[0] || 0)
+        //         const a: number = toNumber(this._config.equation.equation.match(/[+-]?[0-9/]*x/g)[0] || 0)
+        //         const b: number = toNumber(this._config.equation.equation.match(/[+-]?[0-9/]*x/g)[0] || 0)
         //     }
         // }
 
         // If the line is not a segment and not a vector, we need to compute the line
         // it is designed for the line and ray
-        if (this.#config.shape === undefined || this.#config.shape === 'line' || this.#config.shape === 'ray') {
+        if (this._config.shape === undefined || this._config.shape === 'line' || this._config.shape === 'ray') {
 
             // Get the start and end points of the line
             const data = computeLine(
@@ -195,7 +197,7 @@ export class Line extends AbstractFigure {
                 this.graphConfig.width,
                 this.graphConfig.height,
                 0,
-                this.#config.shape === 'ray'
+                this._config.shape === 'ray'
             )
 
             // If the data is not null, update the start and end points of the line
@@ -217,7 +219,7 @@ export class Line extends AbstractFigure {
         const xy = this.math.projection({x, y})
 
         // If the line is a line, return
-        if (this.#config.shape === 'line') {
+        if (this._config.shape === 'line') {
             return xy
         }
 
@@ -253,7 +255,7 @@ export class Line extends AbstractFigure {
         }
 
         // If it's a segment, place it at the middle of the segment
-        if (this.#config.shape === 'segment' || this.#config.shape === 'vector') {
+        if (this._config.shape === 'segment' || this._config.shape === 'vector') {
             const x = (this.start.x + this.end.x) / 2
             const y = (this.start.y + this.end.y) / 2
 
@@ -275,7 +277,7 @@ export class Line extends AbstractFigure {
         return this
     }
 
-    #makeShape(): Shape {
+    _makeShape(): Shape {
         this.element.clear()
 
         // Define the coordinates of the point
@@ -285,7 +287,7 @@ export class Line extends AbstractFigure {
         )
 
         // Apply the style
-        if (this.#config.shape === 'vector') {
+        if (this._config.shape === 'vector') {
             const marker = createMarker(this.rootSVG, this.name, 10)
             const line = this.shape as svgLine
             line.marker('end', marker)

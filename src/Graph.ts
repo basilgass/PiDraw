@@ -44,7 +44,7 @@ export interface IDraggableConfig {
 }
 
 export class Graph {
-    #Animate: Animate | null = null
+    protected _Animate: Animate | null = null
 
     constructor(id: string | HTMLElement, config?: IGraphConstructorConfig) {
         const wrapper = document.createElement('DIV')
@@ -105,7 +105,7 @@ export class Graph {
 
         this._figures = {}
 
-        this.#makeLayout()
+        this._makeLayout()
         return this
     }
 
@@ -275,11 +275,11 @@ export class Graph {
     }
 
     get animation(): Animate{
-        if(!this.#Animate){
-            this.#Animate = new Animate(this)
+        if(!this._Animate){
+            this._Animate = new Animate(this)
         }
 
-        return this.#Animate
+        return this._Animate
     }
 
     public clear() {
@@ -473,13 +473,13 @@ export class Graph {
         })
 
         // Redo the layout
-        this.#makeLayout()
+        this._makeLayout()
 
         // Force a global update.
         this.update([], true)
     }
 
-    #makeLayout(): void {
+   protected _makeLayout(): void {
         // Remove the grid
         this._layers.grids.clear()
 

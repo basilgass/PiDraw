@@ -1,4 +1,4 @@
-import { Svg } from '@svgdotjs/svg.js';
+import { Circle as G, Svg } from '@svgdotjs/svg.js';
 import { AbstractFigure } from './AbstractFigure';
 import { Plot } from './Plot';
 import { DOMAIN } from '../pidraw.common';
@@ -9,14 +9,15 @@ export interface IRiemannConfig {
     position: number;
 }
 export declare class Riemann extends AbstractFigure {
-    #private;
+    constructor(rootSVG: Svg, name: string, values: IRiemannConfig);
+    protected _config: IRiemannConfig;
     get config(): IRiemannConfig;
     set config(value: IRiemannConfig);
     get rectangles(): number;
     set rectangles(value: number);
     get position(): number;
     set position(value: number);
-    constructor(rootSVG: Svg, name: string, values: IRiemannConfig);
+    _makeShape(): G;
     computed(): this;
     moveLabel(): this;
 }

@@ -13,72 +13,73 @@ export interface IPlotConfig {
 }
 
 export class Plot extends AbstractFigure {
-    #config: IPlotConfig
-    #numExp: NumExp
-    #fx: string
+    protected _numExp: NumExp
+    protected _fx: string
 
     constructor(rootSVG: Svg, name: string, values: IPlotConfig) {
         super(rootSVG, name)
 
         // Store the constraints
-        this.#config = Object.assign({
+        this._config = Object.assign({
             expression: '',
             samples: this.graphConfig.axis.x.x,
         }, values)
 
         // Generate the base shape
-        this.shape = this.#makeShape()
+        this.shape = this._makeShape()
 
-        this.#fx = this.#getExpression()
-        this.#numExp = new NumExp(this.#fx)
+        this._fx = this._getExpression()
+        this._numExp = new NumExp(this._fx)
 
         // Compute the shape
         this.computed()
         return this
     }
 
+    protected _config: IPlotConfig
+
     get config() {
-        return this.#config
+        return this._config
     }
 
     set config(value: IPlotConfig) {
-        this.#config = value
+        this._config = value
 
-        this.#numExp = new NumExp(this.#getExpression())
+        this._numExp = new NumExp(this._getExpression())
 
         this.computed()
     }
 
     computed(): this {
         // Get the mathematical function from the config
-        const fn: string = this.#getExpression()
+        const fn: string = this._getExpression()
 
         if (!fn || fn === '') {
             return this
         }
 
-        if(fn!==this.#fx){
+        if(fn!==this._fx){
             // update the num exp.
-            this.#fx = fn
-            this.#numExp = new NumExp(this.#getExpression())
+            this._fx = fn
+            this._numExp = new NumExp(this._getExpression())
         }
 
         // Get the domain from the config
         const minX = -this.graphConfig.origin.x / this.graphConfig.axis.x.x - 1
         const maxX = (this.graphConfig.width - this.graphConfig.origin.x) / this.graphConfig.axis.x.x + 1
-        const domain = (this.#config.domain ?? {min: minX, max: maxX})
-        const image = (this.#config.image ?? {min: -Infinity, max: Infinity})
+        const domain = (this._config.domain ?? {min: minX, max: maxX})
+        const image = (this._config.image ?? {min: -Infinity, max: Infinity})
 
         // Get the samples from the config
-        const samples = (this.#config.samples ?? this.graphConfig.axis.x.x)
+        const samples = (this._config.samples ?? this.graphConfig.axis.x.x)
 
         // Make the numeric expression.
-        const expr = this.#numExp
+        const expr = this._numExp
 
         // Get the (x;y) points from the function
         // 0 < x < width
         // y = fn(x)
-        const points: XY[] = this.#calculatePointsCoordinates(domain, samples, expr, image)
+        const points: XY[] = this._calculatePointsCoordinates(domain, samples, expr, image)
 
         // Create the path string from the points.
         let previous: XY = points[0]
@@ -121,11 +122,11 @@ export class Plot extends AbstractFigure {
 
     evaluate(x: number, asCoordinates?: boolean): XY {
         if (asCoordinates === true) {
-            return {x, y: this.#numExp.evaluate({x})}
+            return {x, y: this._numExp.evaluate({x})}
         }
 
         return toPixels(
-            {x, y: this.#numExp.evaluate({x})}
+            {x, y: this._numExp.evaluate({x})}
             , this.graphConfig)
     }
 
@@ -139,21 +140,21 @@ export class Plot extends AbstractFigure {
         return this.evaluate(pt.x)
     }
 
-    #getExpression(): string {
-        if(typeof this.#config.expression === "string"){
-            return this.#config.expression
+    _getExpression(): string {
+        if(typeof this._config.expression === "string"){
+            return this._config.expression
         }
 
-        if(this.#config.quadratic && this.#config.quadratic.length===3 && this.#config.quadratic.every(x=>x instanceof Point)){
+        if(this._config.quadratic && this._config.quadratic.length===3 && this._config.quadratic.every(x=>x instanceof Point)){
             // Values given here
-            const [A,B,C] = this.#config.quadratic.map(x=>x.coordinates)
+            const [A,B,C] = this._config.quadratic.map(x=>x.coordinates)
             return quadraticThroughABC(A,B,C)
         }
 
         return ""
     }
 
-    #makeShape() {
+    _makeShape() {
         this.element.clear()
 
         // Create the path
@@ -168,7 +169,7 @@ export class Plot extends AbstractFigure {
         return this.shape
     }
 
-    #calculatePointsCoordinates(domain: DOMAIN, samples: number, expr: NumExp, image: DOMAIN): XY[] {
+    _calculatePointsCoordinates(domain: DOMAIN, samples: number, expr: NumExp, image: DOMAIN): XY[] {
         const points: XY[] = []
         for (let x = domain.min; x < domain.max; x += 1 / samples) {
             const y = expr.evaluate({x})

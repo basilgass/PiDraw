@@ -30,14 +30,14 @@ export class Animate {
     protected _elapsedAtPause = 0
     protected _paused = false
 
-    #rafId: number | null = null
+    protected _rafId: number | null = null
 
-    #animations = new Map<string, animationParams>()
+    protected _animations = new Map<string, animationParams>()
 
     constructor(graph: Graph) {
         this._graph = graph
 
-        this.#updatePoints()
+        this._updatePoints()
     }
 
     start() {
@@ -48,17 +48,17 @@ export class Animate {
         this._elapsedAtPause = 0
 
         // Set the starttime to every point
-        this.#animations.forEach(anim => {
+        this._animations.forEach(anim => {
             anim.startTime = 0
         })
 
-        this.#rafId = requestAnimationFrame(this.#step)
+        this._rafId = requestAnimationFrame(this._step)
     }
 
     pause() {
-        if (this.#rafId !== null) {
-            cancelAnimationFrame(this.#rafId)
-            this.#rafId = null
+        if (this._rafId !== null) {
+            cancelAnimationFrame(this._rafId)
+            this._rafId = null
         }
 
         this._paused = true
@@ -71,19 +71,19 @@ export class Animate {
         if (this._paused) {
             const pauseDuration = performance.now() - this._elapsedAtPause
 
-            this.#animations.forEach(anim => {
+            this._animations.forEach(anim => {
                 anim.startTime += pauseDuration
             })
 
             this._paused = false
-            this.#rafId = requestAnimationFrame(this.#step)
+            this._rafId = requestAnimationFrame(this._step)
         }
     }
 
     cancel() {
-        if (this.#rafId !== null) {
-            cancelAnimationFrame(this.#rafId)
-            this.#rafId = null
+        if (this._rafId !== null) {
+            cancelAnimationFrame(this._rafId)
+            this._rafId = null
         }
 
         this._paused = false
@@ -96,12 +96,12 @@ export class Animate {
             this._graph.update()
 
             // Reset the points after the graph update.
-            this.#updatePoints()
+            this._updatePoints()
         }, 200)
     }
 
     isRunning() {
-        return this.#rafId !== null && !this._paused
+        return this._rafId !== null && !this._paused
     }
 
     isPaused() {
@@ -109,11 +109,11 @@ export class Animate {
     }
 
     canBeAnimated(): boolean {
-        return this.#animations.size > 0
+        return this._animations.size > 0
     }
 
-    #updatePoints(): Point[] {
-        this.#animations = new Map()
+    _updatePoints(): Point[] {
+        this._animations = new Map()
 
         Object.values(this._graph.figures).forEach(figure => {
             if (isXY(figure) && figure.animate !== null) {
@@ -125,7 +125,7 @@ export class Animate {
                 const from = animate.from as Point
                 const to = animate.to as Point
 
-                this.#animations.set(
+                this._animations.set(
                     figure.name,
                     {
                         point,
@@ -144,7 +144,7 @@ export class Animate {
         return this._animatedPoints
     }
 
-    #step = (now: number): void => {
+    _step = (now: number): void => {
         if (this._startTime === 0) {
             this._startTime = now - this._elapsedAtPause
         }
@@ -155,7 +155,7 @@ export class Animate {
 
         let anyRunning = false
 
-        for (const anim of this.#animations.values()) {
+        for (const anim of this._animations.values()) {
             if (anim.startTime === 0) {
                 anim.startTime = this._startTime
             }
@@ -183,9 +183,9 @@ export class Animate {
 
 
         if (anyRunning) {
-            this.#rafId = requestAnimationFrame(this.#step)
+            this._rafId = requestAnimationFrame(this._step)
         } else {
-            this.#rafId = null
+            this._rafId = null
         }
     }
 }

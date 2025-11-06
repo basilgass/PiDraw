@@ -14,12 +14,10 @@ export interface IArcConfig {
 }
 
 export class Arc extends AbstractFigure {
-    #config: IArcConfig
-
     constructor(rootSVG: Svg, name: string, values: IArcConfig) {
         super(rootSVG, name)
 
-        this.#config = Object.assign({
+        this._config = Object.assign({
             start: { x: 0, y: 0 },
             center: { x: 10, y: 10 },
             end: { x: 0, y: 10 },
@@ -33,26 +31,28 @@ export class Arc extends AbstractFigure {
         this.config = values
     }
 
-    get config() { return this.#config }
+    protected _config: IArcConfig
+
+    get config() { return this._config }
 
     set config(value: IArcConfig) {
-        this.#config = value
-        this.#makeShape()
+        this._config = value
+        this._makeShape()
         this.computed()
     }
 
-    get center() { return this.#config.center }
+    get center() { return this._config.center }
 
-    get start() { return this.#config.start }
+    get start() { return this._config.start }
 
-    get end() { return this.#config.end }
+    get end() { return this._config.end }
 
     get radius() {
-        if (typeof this.#config.radius === 'number') {
-            return toPixels(this.#config.radius, this.graphConfig)
+        if (typeof this._config.radius === 'number') {
+            return toPixels(this._config.radius, this.graphConfig)
         }
 
-        return distanceAB(this.center, this.#config.radius ?? this.#config.start)
+        return distanceAB(this.center, this._config.radius ?? this._config.start)
     }
 
     get angle(): number {
@@ -127,18 +127,18 @@ export class Arc extends AbstractFigure {
     getPath(): string {
         // Get the angles
         const { start, end } = this.getAngles(),
-            radius = (this.#config.morphToSquare && this.isSquare) ? this.radius / 2 : this.radius,
+            radius = (this._config.morphToSquare && this.isSquare) ? this.radius / 2 : this.radius,
             startXY = polarToCartesian(this.center.x, this.center.y, radius, start),
             endXY = polarToCartesian(this.center.x, this.center.y, radius, end)
 
-        if (this.#config.morphToSquare && this.isSquare) {
+        if (this._config.morphToSquare && this.isSquare) {
             return this._describeSquare(this.center, startXY, endXY)
         } else {
             return this._describeArc(this.center, startXY, endXY, radius, end - start)
         }
     }
 
-    #makeShape() {
+    _makeShape() {
         this.element.clear()
 
         // Create the path
@@ -177,7 +177,7 @@ export class Arc extends AbstractFigure {
             "A", radius, radius, 0, largeArcFlag, swipeFlag, end.x, end.y
         ]
 
-        if (this.#config.sector) {
+        if (this._config.sector) {
             p = p.concat(['L', center.x, center.y, 'L', start.x, start.y])
         }
 

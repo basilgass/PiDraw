@@ -42,7 +42,7 @@ export class Draw extends Graph {
 
         // Set the parser
         this._parser = new PiParse({
-            formatter: (line: string) => this.#parseKeyCode(line),
+            formatter: (line: string) => this._parseKeyCode(line),
             keys: PARSER_PARAMETERS_KEYS,
             splitter: {
                 main: '->',
@@ -61,7 +61,7 @@ export class Draw extends Graph {
         // Define the code to display
         this._code = []
         if (config?.code) {
-            this.#build(config.code)
+            this._build(config.code)
         }
 
         return this
@@ -86,7 +86,7 @@ export class Draw extends Graph {
         this.clear()
 
         // Reload the figures
-        this.#build(code)
+        this._build(code)
     }
 
     /**
@@ -95,7 +95,7 @@ export class Draw extends Graph {
      */
     public refreshLayout(code?: string) {
         // Update the configuration
-        const layout = this.#parseLayout(code)
+        const layout = this._parseLayout(code)
 
         this.config = layout.config
         this.display = layout.display
@@ -105,7 +105,7 @@ export class Draw extends Graph {
         this.updateLayout()
     }
 
-    #applyDrag(obj: AbstractFigure, key: string, options: Record<string, IParserParameters>) {
+    protected _applyDrag(obj: AbstractFigure, key: string, options: Record<string, IParserParameters>) {
         // Actually, only points are draggable
         if (obj instanceof Point) {
             const dragConfigInit: IDraggableFollow[] = []
@@ -160,7 +160,7 @@ export class Draw extends Graph {
         }
     }
 
-    #applyOptions(options: Record<string, IParserParameters>, obj: AbstractFigure) {
+    protected _applyOptions(options: Record<string, IParserParameters>, obj: AbstractFigure) {
 
         Object.keys(options).forEach((key) => {
             switch (key) {
@@ -221,7 +221,7 @@ export class Draw extends Graph {
                     })
                     // obj.label?.show()
                     break
-                case '#':
+                case '_':
                 case 'static':
                     obj.static = options[key].value as boolean
                     break
@@ -285,7 +285,7 @@ export class Draw extends Graph {
 
                 // Draggable
                 case 'drag':
-                    this.#applyDrag(obj, key, options)
+                    this._applyDrag(obj, key, options)
                     break
 
                 // Animation
@@ -348,15 +348,15 @@ export class Draw extends Graph {
     /**
      * Build the figures from the code
      */
-    #build(input: string) {
-        this._code = this.#prepare(input)
+    protected _build(input: string) {
+        this._code = this._prepare(input)
 
         const pConfig = parser_config
 
         // Loop through each code
         this._code.forEach((item) => {
             // Determine the id of the figure.
-            item.name = this.#uniqueName(item.name)
+            item.name = this._uniqueName(item.name)
 
             let obj: AbstractFigure | undefined
 
@@ -397,7 +397,7 @@ export class Draw extends Graph {
 
                         // Load the options.
                         if (obj) {
-                            this.#buildOptions(obj, item)
+                            this._buildOptions(obj, item)
                         }
                     })
 
@@ -435,7 +435,7 @@ export class Draw extends Graph {
             //
             // // Pour chaque objet créé, on applique les options.
             // obj.forEach(o => {
-            //     this.#buildOptions(o, item)
+            //     this._buildOptions(o, item)
             // })
         })
 
@@ -444,7 +444,7 @@ export class Draw extends Graph {
         this.updateLabels([])
     }
 
-    #buildOptions(obj: AbstractFigure, item: PARSER) {
+    protected _buildOptions(obj: AbstractFigure, item: PARSER) {
         // TODO: make a global reset function for everything
         // Reset the animation flag
         // Apply defaults settings to the object
@@ -466,10 +466,10 @@ export class Draw extends Graph {
             item.parameters['!'] = {value: true, options: []}
         }
 
-        this.#applyOptions(item.parameters, obj)
+        this._applyOptions(item.parameters, obj)
     }
 
-    #defineCommand(command: string): { key: string, value: boolean } {
+    protected  _defineCommand(command: string): { key: string, value: boolean } {
         // A command is: @<begin|end>:<key>
 
         // Remove the '@' and split the command into key and value
@@ -480,7 +480,7 @@ export class Draw extends Graph {
 
     }
 
-    #parseKeyCode(key_code: string): string {
+    protected  _parseKeyCode(key_code: string): string {
 
         // There are 3 possibilities for the key_code:
         // 1. A(3,4) => id='A', key=POINT, code= ['3','4']
@@ -489,25 +489,25 @@ export class Draw extends Graph {
 
         // Extract the point (no = sign). The id is before the '(' and the code is between '(' and ')'
         if (/^[A-Z][0-9]*\(.*\)$/.exec(key_code)) {
-            return this.#parseKeyCodePoint(key_code)
+            return this._parseKeyCodePoint(key_code)
         }
 
         // Extract the plot or parametric function
         if (/^[a-z][0-9]*\([x|t]\)/.exec(key_code)) {
-            return this.#parseKeyCodePlot(key_code)
+            return this._parseKeyCodePlot(key_code)
         }
 
         // Extract the line (with = sign). The id is before the '=' and the code is after '='
         // This is a special version (no spaces) and should be checked first
         if (key_code.includes('=') && !key_code.includes(' ')) {
-            return this.#parseKeyCodeLine(key_code)
+            return this._parseKeyCodeLine(key_code)
         }
 
         return key_code
     }
 
     // TO BE MOVED TO BUILD_LINE
-    #parseKeyCodeLine(key_code: string): string {
+    protected _parseKeyCodeLine(key_code: string): string {
         // Extract the line (with = sign). The id is before the '=' and the code is after '='
         const [id, ...datas] = key_code.split('=')
         let data = datas.join('=')
@@ -567,7 +567,7 @@ export class Draw extends Graph {
     }
 
     // TO BE MOVED TO BUILD_PLOT
-    #parseKeyCodePlot(key_code: string): string {
+    protected  _parseKeyCodePlot(key_code: string): string {
         // Extract the plot or parametric function
         const [id_xt, data] = key_code.split('=')
 
@@ -582,16 +582,16 @@ export class Draw extends Graph {
     }
 
     // TO BE MOVED TO BUILD_POINT
-    #parseKeyCodePoint(key_code: string): string {
+    protected _parseKeyCodePoint(key_code: string): string {
         // Extract the point (no = sign). The id is before the '(' and the code is between '(' and ')'
         const id = key_code.split('(')[0]
         const code = key_code.split('(')[1].split(')')[0].split(',')
-        // const parameters = this.#parseParameters(key_code.split(')')[1])
+        // const parameters = this._parseParameters(key_code.split(')')[1])
 
         return `${id}=pt ${code[0]},${code[1]}`
     }
 
-    #parseLayout(code?: string): { config: IGraphConfig, display: IGraphDisplay, settings: IParserSettings } {
+    protected _parseLayout(code?: string): { config: IGraphConfig, display: IGraphDisplay, settings: IParserSettings } {
 
         // const parameters = PiParseParameters(code)
         const parameters = this._parser.parameters(code ?? '', PARSER_PARAMETERS_KEYS)
@@ -664,7 +664,7 @@ export class Draw extends Graph {
      * @param input Input code to parse and prepare
      * @returns
      */
-    #prepare(input: string): PARSER[] {
+    protected  _prepare(input: string): PARSER[] {
         // Reset the code.
         // TODO: check if resetting the code with events are correctly removed.
         const data: PARSER[] = []
@@ -690,7 +690,7 @@ export class Draw extends Graph {
             // Assign the command to the block
             // Until the command is cleared, the block will be applied to the next lines.
             if (line.startsWith('@')) {
-                const {key, value} = this.#defineCommand(line)
+                const {key, value} = this._defineCommand(line)
                 block[key] = {value, options: []}
                 continue
             }
@@ -717,7 +717,7 @@ export class Draw extends Graph {
         return data
     }
 
-    #uniqueName(name: string): string {
+    protected   _uniqueName(name: string): string {
         let newName = name
         let i = 1
         while (this.figures[newName]) {

@@ -9,8 +9,7 @@ export interface ICoordinateSystem {
 }
 
 export class CoordinateSystem extends AbstractFigure {
-    #config: ICoordinateSystem
-    #axis: { x: svgLine, y: svgLine }
+    protected _axis: { x: svgLine, y: svgLine }
 
     constructor(rootSVG: Svg, name: string, values: COORDINATE_SYSTEM | ICoordinateSystem) {
         super(rootSVG, name)
@@ -18,13 +17,13 @@ export class CoordinateSystem extends AbstractFigure {
         this.static = true
 
         if (Object.values(COORDINATE_SYSTEM).includes(values as COORDINATE_SYSTEM)) {
-            this.#config = this.#defaultConfig(values as COORDINATE_SYSTEM)
+            this._config = this._defaultConfig(values as COORDINATE_SYSTEM)
         } else {
-            this.#config = values as ICoordinateSystem
+            this._config = values as ICoordinateSystem
         }
 
         // Generate the base shape
-        this.#axis = this.#makeShape()
+        this._axis = this._makeShape()
 
         // Compute the shape
         this.computed()
@@ -32,21 +31,23 @@ export class CoordinateSystem extends AbstractFigure {
         return this
     }
 
-    get config() { return this.#config }
+    protected _config: ICoordinateSystem
+
+    get config() { return this._config }
 
     set config(value: ICoordinateSystem) {
-        this.#config = value
+        this._config = value
         this.computed()
     }
 
-    get xAxis() { return this.#axis.x }
+    get xAxis() { return this._axis.x }
 
-    get yAxis() { return this.#axis.y }
+    get yAxis() { return this._axis.y }
 
     computed(): this {
         // Loop through each axis and update the position, length, ...
-        this.#updateAxis(this.#axis.x, this.#config.x.direction, this.#config.x)
-        this.#updateAxis(this.#axis.y, this.#config.y.direction, this.#config.y)
+        this._updateAxis(this._axis.x, this._config.x.direction, this._config.x)
+        this._updateAxis(this._axis.y, this._config.y.direction, this._config.y)
         return this
     }
 
@@ -54,7 +55,7 @@ export class CoordinateSystem extends AbstractFigure {
         throw new Error("Method not implemented.")
     }
 
-    #defaultConfig(coordinateSystem: COORDINATE_SYSTEM): ICoordinateSystem {
+    _defaultConfig(coordinateSystem: COORDINATE_SYSTEM): ICoordinateSystem {
         if (coordinateSystem === COORDINATE_SYSTEM.POLAR) {
             // TODO: Implement the polar coordinate system
         }
@@ -78,7 +79,7 @@ export class CoordinateSystem extends AbstractFigure {
         }
     }
 
-    #makeShape(): { x: svgLine, y: svgLine } {
+    _makeShape(): { x: svgLine, y: svgLine } {
         this.element.clear()
 
         // Create the path
@@ -102,7 +103,7 @@ export class CoordinateSystem extends AbstractFigure {
         return axis
     }
 
-    #updateAxis(axis: svgLine, direction: XY, config?: IAxisConfig): svgLine {
+    _updateAxis(axis: svgLine, direction: XY, config?: IAxisConfig): svgLine {
         const color = config?.color ?? 'black'
         const padding = config?.padding ?? 0
         const half_axis = config?.half ?? false

@@ -1,6 +1,6 @@
 import { AbstractFigure } from './AbstractFigure';
 import { XY } from '../pidraw.common';
-import { Svg } from '@svgdotjs/svg.js';
+import { Shape, Svg } from '@svgdotjs/svg.js';
 import { mathLine } from '../Calculus';
 export type ILineType = 'segment' | 'ray' | 'line' | 'vector';
 export interface ILineConfig {
@@ -35,20 +35,23 @@ export interface ILineConfig {
     };
 }
 export declare class Line extends AbstractFigure {
-    #private;
     constructor(rootSVG: Svg, name: string, values: ILineConfig);
-    get angle(): number;
+    protected _config: ILineConfig;
     get config(): ILineConfig;
     set config(value: ILineConfig);
-    get direction(): XY;
+    protected _end: XY;
     get end(): XY;
     set end(value: XY);
-    get math(): mathLine;
-    get normal(): XY;
+    protected _start: XY;
     get start(): XY;
     set start(value: XY);
+    get angle(): number;
+    get direction(): XY;
+    get math(): mathLine;
+    get normal(): XY;
     computed(): this;
     follow(x: number, y: number): XY;
     move(x: number | XY): this;
     moveLabel(): this;
+    _makeShape(): Shape;
 }

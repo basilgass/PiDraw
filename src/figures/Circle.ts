@@ -10,43 +10,43 @@ export interface ICircleConfig {
 }
 
 export class Circle extends AbstractFigure {
-    #config: ICircleConfig
-
     constructor(rootSVG: Svg, name: string, values: ICircleConfig) {
         super(rootSVG, name)
 
         // Default values
-        this.#config = Object.assign({
+        this._config = Object.assign({
             figures: [],
             property: 'fixed',
             center: {x: 0, y: 0},
             radius: 1,
         }, values)
 
-        this.#makeShape()
+        this._makeShape()
         this.computed()
 
     }
 
+    protected _config: ICircleConfig
+
     get config() {
-        return this.#config
+        return this._config
     }
 
     set config(value: ICircleConfig) {
-        this.#config = value
-        this.#makeShape()
+        this._config = value
+        this._makeShape()
     }
 
     get center() {
-        return this.#config.center
+        return this._config.center
     }
 
     get radius(): number {
-        if (typeof this.#config.radius === 'number') {
-            return toPixels(this.#config.radius, this.graphConfig)
+        if (typeof this._config.radius === 'number') {
+            return toPixels(this._config.radius, this.graphConfig)
         }
 
-        return distanceAB(this.center, this.#config.radius)
+        return distanceAB(this.center, this._config.radius)
     }
 
     computed(): this {
@@ -162,7 +162,7 @@ export class Circle extends AbstractFigure {
         return [i1, i2]
     }
 
-    #makeShape(): Shape {
+    _makeShape(): Shape {
         this.element.clear()
 
         this.shape = this.element.circle(this.radius)

@@ -15,12 +15,14 @@ export interface IPolygonConfig {
     };
 }
 export declare class Polygon extends AbstractFigure {
-    #private;
+    constructor(rootSVG: Svg, name: string, values: IPolygonConfig);
+    protected _config: IPolygonConfig;
     get config(): IPolygonConfig;
     set config(value: IPolygonConfig);
     get vertices(): XY[] | undefined;
     get radius(): number;
-    constructor(rootSVG: Svg, name: string, values: IPolygonConfig);
+    _figuresXYtoArray(): [number, number][];
+    _makeShape(): import('@svgdotjs/svg.js').Shape;
     computed(): this;
     update(): this;
     moveLabel(): this;

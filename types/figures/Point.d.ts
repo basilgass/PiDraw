@@ -1,4 +1,4 @@
-import { Svg } from '@svgdotjs/svg.js';
+import { Shape, Svg } from '@svgdotjs/svg.js';
 import { XY } from '../pidraw.common';
 import { AbstractFigure } from './AbstractFigure';
 import { Line } from './Line';
@@ -46,13 +46,14 @@ export interface IPointConfig {
     };
 }
 export declare class Point extends AbstractFigure {
-    #private;
     constructor(rootSVG: Svg, name: string, values: IPointConfig);
+    protected _config: IPointConfig;
     get config(): IPointConfig;
     set config(value: IPointConfig);
-    get coordinates(): XY;
+    protected _pixels: XY;
     get pixels(): XY;
     set pixels(value: XY);
+    get coordinates(): XY;
     get size(): number;
     set size(value: number);
     get x(): number;
@@ -65,4 +66,5 @@ export declare class Point extends AbstractFigure {
     computeLabel(): string;
     computed(): this;
     moveLabel(): this;
+    _makeShape(): Shape;
 }

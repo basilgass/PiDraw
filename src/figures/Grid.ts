@@ -14,14 +14,12 @@ interface IGridConfig {
 }
 
 export class Grid extends AbstractFigure {
-    #config: IGridConfig
-
     constructor(rootSVG: Svg, name: string, values: IGridConfig) {
         super(rootSVG, name)
 
         this.static = true
 
-        this.#config = Object.assign(
+        this._config = Object.assign(
             {
                 ...this.graphConfig,
                 subdivisions: 0
@@ -30,26 +28,28 @@ export class Grid extends AbstractFigure {
         )
 
         // Generate the base shape
-        this.shape = this.#makeShape()
+        this.shape = this._makeShape()
 
         // Compute the shape
         this.computed()
         return this
     }
 
+    protected _config: IGridConfig
+
     get config() {
-        return this.#config
+        return this._config
     }
 
     set config(value: IGridConfig) {
-        this.#config = value
+        this._config = value
         this.computed()
     }
 
     computed(): this {
         const gridPath = [
-            ...this.#computeLines(this.#config.axis.x, this.#config.axis.y),
-            ...this.#computeLines(this.#config.axis.y, this.#config.axis.x)
+            ...this._computeLines(this._config.axis.x, this._config.axis.y),
+            ...this._computeLines(this._config.axis.y, this._config.axis.x)
         ]
 
         // BUild the path
@@ -70,7 +70,7 @@ export class Grid extends AbstractFigure {
         return this
     }
 
-    #makeShape() {
+    _makeShape() {
         this.element.clear()
 
         // Create the path
@@ -85,10 +85,10 @@ export class Grid extends AbstractFigure {
         return this.shape as svgPath
     }
 
-    #computeLines(xDirection: XY, yDirection: XY): [XY, XY][] {
+    _computeLines(xDirection: XY, yDirection: XY): [XY, XY][] {
         // X axis lines (aka horizontal lines)
-        let x = +this.#config.origin.x,
-            y = +this.#config.origin.y
+        let x = +this._config.origin.x,
+            y = +this._config.origin.y
 
         const gridPath: [XY, XY][] = []
 
@@ -96,14 +96,14 @@ export class Grid extends AbstractFigure {
         let data = computeLine(
             {x, y},
             xDirection,
-            this.#config.width,
-            this.#config.height,
+            this._config.width,
+            this._config.height,
         )
 
         // 'Horizontal lines' :
         // direction is the axis.x
         // moving the lines in the direction of the axis.y
-        const max_iteration = (this.#config.width + this.#config.height)/2
+        const max_iteration = (this._config.width + this._config.height)/2
         let counter = 0
 
         while (counter<max_iteration) {
@@ -119,11 +119,11 @@ export class Grid extends AbstractFigure {
             data = computeLine(
                 {x, y},
                 xDirection,
-                this.#config.width,
-                this.#config.height,
+                this._config.width,
+                this._config.height,
             )
 
-            if (data === null && (x > this.#config.width || y > this.#config.height)) {
+            if (data === null && (x > this._config.width || y > this._config.height)) {
                 break
             }
 
@@ -134,14 +134,14 @@ export class Grid extends AbstractFigure {
             counter++
         }
 
-        x = this.#config.origin.x - yDirection.x
-        y = this.#config.origin.y + yDirection.y
+        x = this._config.origin.x - yDirection.x
+        y = this._config.origin.y + yDirection.y
 
         data = computeLine(
             {x, y},
             xDirection,
-            this.#config.width,
-            this.#config.height)
+            this._config.width,
+            this._config.height)
 
         counter = 0
         while (counter<max_iteration) {
@@ -157,8 +157,8 @@ export class Grid extends AbstractFigure {
             data = computeLine(
                 {x, y},
                 xDirection,
-                this.#config.width,
-                this.#config.height)
+                this._config.width,
+                this._config.height)
 
             if (data === null && (x < 0 || y < 0)) {
                 break

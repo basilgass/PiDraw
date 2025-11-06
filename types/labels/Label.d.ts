@@ -11,25 +11,34 @@ export interface ILabelConfig {
     texConverter: (value: string) => string;
 }
 export declare class Label {
-    #private;
+    _element: G;
+    protected _name: string;
+    protected _style: string;
     constructor(rootG: G, name: string, config: ILabelConfig);
+    protected _shape: LabelType;
+    get shape(): LabelType;
+    protected _config: ILabelConfig;
     get config(): ILabelConfig;
+    protected _displayName: string;
+    get displayName(): string;
+    protected _x: number;
     get x(): number;
     set x(value: number);
+    protected _y: number;
     get y(): number;
     set y(value: number);
-    get asHtml(): boolean;
-    get shape(): LabelType;
-    get alignement(): LABEL_POSITION;
-    get label(): LabelType;
+    protected _auto_rotate: boolean;
     get auto_rotate(): boolean;
     set auto_rotate(value: boolean);
-    get displayName(): string;
+    get asHtml(): boolean;
+    get alignement(): LABEL_POSITION;
+    get label(): LabelType;
     hide(): this;
     show(): this;
     setLabel(text?: string): this;
     move(x: number, y: number): this;
     rotate(angle: number): this;
     position(alignement?: LABEL_POSITION, offset?: XY, rotate?: number): this;
+    _makeLabel(): svgLabel | svgHTML;
 }
 export {};

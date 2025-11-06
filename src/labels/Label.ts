@@ -12,26 +12,20 @@ export interface ILabelConfig {
     texConverter: (value: string) => string
 }
 export class Label {
-    #element: G
-    #name: string
-    #shape: LabelType
-    #config: ILabelConfig
-    #displayName: string
-    #x: number
-    #y: number
-    #style: string
-    #auto_rotate = false
+    _element: G
+    protected _name: string
+    protected _style: string
 
     constructor(rootG: G, name: string, config: ILabelConfig) {
         // The parent group : the figure which the label is attached to.
-        this.#element = rootG
+        this._element = rootG
 
         // The name of the label - it's the name / id of the label.
         // Uses the name of the base figure.
-        this.#name = name
+        this._name = name
 
         // Store the configuration of the label.
-        this.#config = Object.assign(
+        this._config = Object.assign(
             {
                 text: name,
                 asHtml: false,
@@ -44,93 +38,105 @@ export class Label {
         )
 
         // displayName is the text displayed on the label.
-        this.#displayName = config.text ?? name
+        this._displayName = config.text ?? name
 
         // Position of the label
-        this.#x = 0
-        this.#y = 0
+        this._x = 0
+        this._y = 0
 
         // Default style
-        this.#style = 'display: block; position: fixed; white-space:nowrap'
+        this._style = 'display: block; position: fixed; white-space:nowrap'
 
         // Create the label shape
-        this.#shape = this.#makeLabel()
+        this._shape = this._makeLabel()
     }
 
-    get config() { return this.#config }
+    protected _shape: LabelType
 
-    get x() { return this.#x }
+    get shape() { return this._shape }
 
-    set x(value: number) { this.#x = value }
+    protected _config: ILabelConfig
 
-    get y() { return this.#y }
+    get config() { return this._config }
 
-    set y(value: number) { this.#y = value }
+    protected _displayName: string
 
-    get asHtml() { return this.#config.asHtml }
+    get displayName() {
+        if (this._config.asHtml) {
+            return this._config.texConverter(this._displayName)
+        }
+        return this._displayName
+    }
 
-    get shape() { return this.#shape }
+    protected _x: number
 
-    get alignement() { return this.#config.alignement }
+    get x() { return this._x }
 
-    // Get the label of the figure.
-    get label(): LabelType { return this.#shape }
+    set x(value: number) { this._x = value }
+
+    protected _y: number
+
+    get y() { return this._y }
+
+    set y(value: number) { this._y = value }
+
+    protected _auto_rotate = false
 
     get auto_rotate(): boolean {
-        return this.#auto_rotate
+        return this._auto_rotate
     }
 
     set auto_rotate(value: boolean) {
-        this.#auto_rotate = value
+        this._auto_rotate = value
     }
 
-    get displayName() {
-        if (this.#config.asHtml) {
-            return this.#config.texConverter(this.#displayName)
-        }
-        return this.#displayName
-    }
+    get asHtml() { return this._config.asHtml }
+
+    get alignement() { return this._config.alignement }
+
+    // Get the label of the figure.
+    get label(): LabelType { return this._shape }
 
     hide() {
-        this.#shape.hide()
+        this._shape.hide()
         return this
     }
 
     show() {
-        this.#shape.show()
+        this._shape.show()
         return this
     }
 
     // Set the label of the figure.
     setLabel(text?: string): this {
         // Default label is the name of the figure.
-        if (text !== undefined) { this.#displayName = text }
+        if (text !== undefined) { this._displayName = text }
 
         // Update the text.
-        this.#makeLabel()
+        this._makeLabel()
 
         return this
     }
 
     move(x: number, y: number): this {
-        this.#x = x
-        this.#y = y
+        this._x = x
+        this._y = y
         this.position()
         return this
     }
 
     rotate(angle: number): this {
-        this.#shape.transform({
+        this._shape.transform({
             rotate: angle,
-            origin: { x: this.#x, y: this.#y }
+            origin: { x: this._x, y: this._y }
         })
         return this
     }
 
     position(alignement?: LABEL_POSITION, offset?: XY, rotate?: number): this {
-        alignement ??= this.#config.alignement
-        offset ??= this.#config.offset
-        rotate ??= this.#config.rotate
+        alignement ??= this._config.alignement
+        offset ??= this._config.offset
+        rotate ??= this._config.rotate
 
         // Make sure the offset is correct (NaN value must be zero.)
         offset = {
@@ -139,26 +145,26 @@ export class Label {
         }
 
         // Set the alignement and offset
-        this.#config.alignement = alignement
-        this.#config.offset = offset
-        this.#config.rotate = rotate
+        this._config.alignement = alignement
+        this._config.offset = offset
+        this._config.rotate = rotate
 
         // Current object position
-        let x = this.#x,
-            y = this.#y
+        let x = this._x,
+            y = this._y
 
         // Get and set the width of the label
         let width = 0, height = 0
-        if (this.#shape instanceof svgHTML) {
+        if (this._shape instanceof svgHTML) {
             // Getting the width and height of the HTML element
-            width = this.#shape.node.children[0].clientWidth
-            height = this.#shape.node.children[0].clientHeight
+            width = this._shape.node.children[0].clientWidth
+            height = this._shape.node.children[0].clientHeight
 
             this.label.width(width)
             this.label.height(height)
         } else {
-            width = this.#shape.length()
-            height = this.#shape.bbox().h
+            width = this._shape.length()
+            height = this._shape.bbox().h
         }
 
         if (alignement.includes('l')) {
@@ -177,10 +183,10 @@ export class Label {
             y = y + height / 2
         }
 
-        if (this.#shape instanceof svgHTML) {
-            this.#shape.center(x + (offset.x ?? 0), y - (offset.y ?? 0))
+        if (this._shape instanceof svgHTML) {
+            this._shape.center(x + (offset.x ?? 0), y - (offset.y ?? 0))
         } else {
-            this.#shape.center(x + (offset.x ?? 0), y - (offset.y ?? 0))
+            this._shape.center(x + (offset.x ?? 0), y - (offset.y ?? 0))
         }
 
         if(rotate !== 0 && rotate !== undefined) {
@@ -189,20 +195,20 @@ export class Label {
         return this
     }
 
-    #makeLabel(): svgLabel | svgHTML {
+    _makeLabel(): svgLabel | svgHTML {
         // Remove the existing label.
-        if (this.#shape) { this.#shape.remove() }
+        if (this._shape) { this._shape.remove() }
 
         // Create a new label.
-        this.#shape = this.#config.asHtml ?
-            this.#element.foreignObject(1, 1)
+        this._shape = this._config.asHtml ?
+            this._element.foreignObject(1, 1)
                 .attr('style', "overflow:visible")
-                .add(SVG(`<div style="${this.#style}">${this.displayName}</div>`, true)) :
-            this.#element.text(this.displayName)
+                .add(SVG(`<div style="${this._style}">${this.displayName}</div>`, true)) :
+            this._element.text(this.displayName)
 
-        this.#shape.attr('id', `${this.#name}-label`)
+        this._shape.attr('id', `${this._name}-label`)
 
-        return this.#shape
+        return this._shape
     }
 
 }

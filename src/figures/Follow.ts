@@ -1,8 +1,8 @@
-import { Svg, Circle as svgCircle, Line as svgLine, G, Shape } from "@svgdotjs/svg.js"
-import { AbstractFigure } from "./AbstractFigure"
-import type { XY } from "../pidraw.common"
-import { computeLine, toCoordinates } from "../Calculus"
-import { Plot } from "./Plot"
+import {Circle as svgCircle, G, Line as svgLine, Shape, Svg} from "@svgdotjs/svg.js"
+import {AbstractFigure} from "./AbstractFigure"
+import type {XY} from "../pidraw.common"
+import {computeLine} from "../Calculus"
+import {Plot} from "./Plot"
 
 export interface IFollowConfig {
     follow: Plot,
@@ -11,40 +11,32 @@ export interface IFollowConfig {
 }
 
 export class Follow extends AbstractFigure {
-    #config: IFollowConfig
-
-    #reference: XY
-    #delta: XY
-    #point: svgCircle
-    #tangent: svgLine
-
-    get config() { return this.#config }
-    set config(value: IFollowConfig) {
-        this.#config = value
-        this.computed()
-    }
+    protected _reference: XY
+    protected _delta: XY
+    protected _point: svgCircle
+    protected _tangent: svgLine
 
     constructor(rootSVG: Svg, name: string, values: IFollowConfig) {
         super(rootSVG, name)
 
         // Store the constraints
-        this.#config = Object.assign({
+        this._config = Object.assign({
             size: 10,
         }, values)
 
         // Default fill color
         this.appearance.fill.color = 'black'
 
-        this.#reference = this.#config.follow.follow(0, 0)
-        this.#delta = { x: 0, y: 0 }
-        this.#tangent = this.element.line()
+        this._reference = this._config.follow.follow(0, 0)
+        this._delta = { x: 0, y: 0 }
+        this._tangent = this.element.line()
 
         // Draw the point at x=0
-        this.#point = this.element.circle(this.#config.size)
-            .center(this.#reference.x, this.#reference.y)
+        this._point = this.element.circle(this._config.size)
+            .center(this._reference.x, this._reference.y)
 
         // Generate the base shape
-        this.shape = this.#makeShape()
+        this.shape = this._makeShape()
 
         // Compute the shape
         this.computed()
@@ -57,34 +49,43 @@ export class Follow extends AbstractFigure {
             clientXY.x = handler.clientX
             clientXY.y = handler.clientY
 
-            // #reference is in pixels : it's the point where the mouse is
+            // _reference is in pixels : it's the point where the mouse is
             clientXY = clientXY.matrixTransform(this.rootSVG.node.getScreenCTM()?.inverse())
 
             // calculate the follow point : it's the point on the Path
             // - it is automatically converted to pixels
-            const follow = this.#config.follow.follow(clientXY.x, clientXY.y)
+            const follow = this._config.follow.follow(clientXY.x, clientXY.y)
 
 
             // Update the point
             if (isNaN(follow.y)) {
-                this.#point.hide()
+                this._point.hide()
             } else {
                 // Make sure the point is visible
-                this.#point.show()
+                this._point.show()
 
                 // Move the point
-                this.#point.center(follow.x, follow.y)
+                this._point.center(follow.x, follow.y)
 
                 // Build the delta point and the corresponding line.
-                this.#reference = follow
-                this.#delta = this.#config.follow.follow(clientXY.x + 0.01, clientXY.y + 0.01)
+                this._reference = follow
+                this._delta = this._config.follow.follow(clientXY.x + 0.01, clientXY.y + 0.01)
                 this.computed()
             }
         })
         return this
     }
 
-    #makeShape(): G {
+    protected _config: IFollowConfig
+
+    get config() { return this._config }
+
+    set config(value: IFollowConfig) {
+        this._config = value
+        this.computed()
+    }
+
+    _makeShape(): G {
         // Create the path
         this.shape = this.element.group().attr({ id: this.name })
 
@@ -99,17 +100,17 @@ export class Follow extends AbstractFigure {
 
     computed(): this {
         const data = computeLine(
-            this.#reference,
+            this._reference,
             {
-                x: this.#delta.x - this.#reference.x,
-                y: this.#delta.y - this.#reference.y
+                x: this._delta.x - this._reference.x,
+                y: this._delta.y - this._reference.y
             },
             this.graphConfig.width, this.graphConfig.height
         )
 
         if (data === null) { return this }
 
-        this.#tangent.plot(
+        this._tangent.plot(
             data[0].x, data[0].y,
             data[1].x, data[1].y
         )
@@ -122,10 +123,10 @@ export class Follow extends AbstractFigure {
     }
 
     override strokeable(): Shape[] {
-        return [this.#tangent]
+        return [this._tangent]
     }
 
     override fillable(): Shape[] {
-        return [this.#point]
+        return [this._point]
     }
 }

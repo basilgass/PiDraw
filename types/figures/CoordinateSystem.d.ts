@@ -10,12 +10,22 @@ export interface ICoordinateSystem {
     } & IAxisConfig;
 }
 export declare class CoordinateSystem extends AbstractFigure {
-    #private;
+    protected _axis: {
+        x: svgLine;
+        y: svgLine;
+    };
     constructor(rootSVG: Svg, name: string, values: COORDINATE_SYSTEM | ICoordinateSystem);
+    protected _config: ICoordinateSystem;
     get config(): ICoordinateSystem;
     set config(value: ICoordinateSystem);
     get xAxis(): svgLine;
     get yAxis(): svgLine;
     computed(): this;
     moveLabel(): this;
+    _defaultConfig(coordinateSystem: COORDINATE_SYSTEM): ICoordinateSystem;
+    _makeShape(): {
+        x: svgLine;
+        y: svgLine;
+    };
+    _updateAxis(axis: svgLine, direction: XY, config?: IAxisConfig): svgLine;
 }

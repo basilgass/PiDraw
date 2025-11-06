@@ -1,4 +1,4 @@
-import { Svg } from '@svgdotjs/svg.js';
+import { Shape, Svg } from '@svgdotjs/svg.js';
 import { AbstractFigure } from './AbstractFigure';
 import { XY } from '../pidraw.common';
 import { Line } from './Line';
@@ -7,8 +7,8 @@ export interface ICircleConfig {
     radius: number | XY;
 }
 export declare class Circle extends AbstractFigure {
-    #private;
     constructor(rootSVG: Svg, name: string, values: ICircleConfig);
+    protected _config: ICircleConfig;
     get config(): ICircleConfig;
     set config(value: ICircleConfig);
     get center(): XY;
@@ -18,4 +18,5 @@ export declare class Circle extends AbstractFigure {
     follow(x: number, y: number): XY;
     intersectionWithLine(line: Line, segment?: boolean): XY[] | null;
     intersectionWithCircle(circle: Circle): XY[] | null;
+    _makeShape(): Shape;
 }

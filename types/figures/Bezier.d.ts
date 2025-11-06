@@ -1,6 +1,6 @@
 import { AbstractFigure } from './AbstractFigure';
 import { BEZIERCONTROL, XY } from '../pidraw.common';
-import { Svg } from '@svgdotjs/svg.js';
+import { Shape, Svg } from '@svgdotjs/svg.js';
 interface IBezierControlPointInterface extends XY {
     point?: XY;
 }
@@ -20,16 +20,18 @@ export interface IBezierConfig {
     points: IBezierPointInterface[];
 }
 export declare class Bezier extends AbstractFigure {
-    #private;
     constructor(rootSVG: Svg, name: string, values: IBezierConfig);
-    computed(): this;
+    protected _config: IBezierConfig;
     get config(): IBezierConfig;
     set config(value: IBezierConfig);
-    getPointByName(name: string): IBezierPointInterface | undefined;
-    moveLabel(): this;
+    protected _points: IBezierPointInterface[];
     get points(): IBezierPointInterface[];
     set points(values: IBezierPointInterface[]);
+    computed(): this;
+    getPointByName(name: string): IBezierPointInterface | undefined;
+    moveLabel(): this;
     setControlRatio(name: string, ratio: number): this;
     setControlType(name: string, type: BEZIERCONTROL): this;
+    _makeShape(): Shape;
 }
 export {};

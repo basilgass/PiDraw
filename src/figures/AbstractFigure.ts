@@ -4,27 +4,16 @@ import {Label} from "../labels/Label"
 import {createMarker, toPixels} from "../Calculus"
 
 export abstract class AbstractFigure {
-    #rootSVG: Svg
-    #name: string
-    #element: G
-    #shape: Shape
-    #appearance: IFigureAppearanceConfig
-    #static: boolean
-    #isDraggable: boolean
-    #label: Label | null
-
-    #animate: IFigureAnimation | null
-
     constructor(rootSVG: Svg, name: string) {
-        this.#rootSVG = rootSVG
-        this.#name = name
-        this.#static = false
-        this.#isDraggable = false
-        this.#animate = null
+        this._rootSVG = rootSVG
+        this._name = name
+        this._static = false
+        this._isDraggable = false
+        this._animate = null
 
-        this.#label = null
-        this.#element = this.#rootSVG.group().attr('id', this.#name)
-        this.#appearance = {
+        this._label = null
+        this._element = this._rootSVG.group().attr('id', this._name)
+        this._appearance = {
             stroke: {
                 color: 'black',
                 width: 1,
@@ -36,101 +25,119 @@ export abstract class AbstractFigure {
             },
         }
 
-        this.#shape = this.#element.path()
+        this._shape = this._element.path()
     }
 
-    get element() {
-        return this.#element
-    }
-
-    get name() {
-        return this.#name
-    }
+    protected _rootSVG: Svg
 
     get rootSVG() {
-        return this.#rootSVG
+        return this._rootSVG
     }
 
+    protected _name: string
+
+    get name() {
+        return this._name
+    }
+
+    protected _element: G
+
+    get element() {
+        return this._element
+    }
+
+    protected _shape: Shape
+
     get shape() {
-        return this.#shape
+        return this._shape
     }
 
     set shape(value: Shape) {
-        this.#shape = value
+        this._shape = value
     }
 
+    protected _appearance: IFigureAppearanceConfig
+
     get appearance() {
-        return this.#appearance
+        return this._appearance
     }
 
     set appearance(value) {
-        this.#appearance = value
+        this._appearance = value
     }
 
-    get graphConfig() {
-        return this.#rootSVG.data('config') as IGraphConfig
-    }
+    protected _static: boolean
 
     get static() {
-        return this.#static
+        return this._static
     }
 
     set static(value: boolean) {
-        this.#static = value
+        this._static = value
     }
 
+    protected _isDraggable: boolean
+
     get isDraggable() {
-        return this.#isDraggable
+        return this._isDraggable
     }
 
     set isDraggable(value: boolean) {
-        this.#isDraggable = value
+        this._isDraggable = value
     }
+
+    protected _label: Label | null
 
     get label() {
-        return this.#label
+        return this._label
     }
 
+    protected _animate: IFigureAnimation | null
+
     get animate(){
-        return this.#animate
+        return this._animate
     }
 
     set animate(value){
-        this.#animate = value
+        this._animate = value
     }
 
-    // abstract #makeShape(): Shape
+    get graphConfig() {
+        return this._rootSVG.data('config') as IGraphConfig
+    }
+
+    // abstract _makeShape(): Shape
     abstract computed(): this
 
     hide() {
-        this.#element.hide()
+        this._element.hide()
         return this
     }
 
     show() {
-        this.#element.show()
+        this._element.show()
         return this
     }
 
     // Defines the shape as strokeable and fillable.
     strokeable(): Shape[] {
-        return [this.#shape]
+        return [this._shape]
     }
 
     fillable(): Shape[] {
-        return [this.#shape]
+        return [this._shape]
     }
 
     fill(color?: string): this {
         if (color !== undefined) {
             const [colorName, opacity] = color.split('/')
-            this.#appearance.fill.color = colorName
-            this.#appearance.fill.opacity = opacity === undefined ? 1 : +opacity
+            this._appearance.fill.color = colorName
+            this._appearance.fill.opacity = opacity === undefined ? 1 : +opacity
         }
 
         this.fillable().forEach((shape) => {
-            shape.fill(this.#appearance.fill)
-            shape.opacity(this.#appearance.fill.opacity)
+            shape.fill(this._appearance.fill)
+            shape.opacity(this._appearance.fill.opacity)
         })
 
         return this
@@ -147,29 +154,29 @@ export abstract class AbstractFigure {
     stroke(color?: string | number, strokeWidth?: number): this {
         if (typeof color === 'string') {
             const [colorName, opacity] = color.split('/')
-            this.#appearance.stroke.color = colorName
-            this.#appearance.stroke.opacity = opacity === undefined ? 1 : +opacity
-            this.#appearance.stroke.width = strokeWidth ?? this.#appearance.stroke.width
+            this._appearance.stroke.color = colorName
+            this._appearance.stroke.opacity = opacity === undefined ? 1 : +opacity
+            this._appearance.stroke.width = strokeWidth ?? this._appearance.stroke.width
         }
 
         if (typeof color === 'number' && strokeWidth === undefined) {
-            this.#appearance.stroke.width = color
+            this._appearance.stroke.width = color
         }
 
         this.strokeable().forEach((shape) => {
-            shape.stroke(this.#appearance.stroke)
-            shape.opacity(this.#appearance.stroke.opacity)
+            shape.stroke(this._appearance.stroke)
+            shape.opacity(this._appearance.stroke.opacity)
         });
 
         // Apply the color and width to the markers.
-        [this.#shape.reference('marker-start'), this.#shape.reference('marker-end')]
+        [this._shape.reference('marker-start'), this._shape.reference('marker-end')]
             .filter(x => x !== null)
             .forEach((marker) => {
                 marker.children().forEach((m) => {
                     m.attr({
-                        fill: this.#appearance.stroke.color,
-                        stroke: this.#appearance.stroke.color,
-                        'stroke-width': this.#appearance.stroke.width
+                        fill: this._appearance.stroke.color,
+                        stroke: this._appearance.stroke.color,
+                        'stroke-width': this._appearance.stroke.width
                     })
                 })
             })
@@ -192,13 +199,13 @@ export abstract class AbstractFigure {
 
         // Clear the figure
         if (all) {
-            this.#element.clear()
+            this._element.clear()
             return this
         }
 
         // Remove everything but the label.
-        this.#element.children().forEach((child) => {
-            if (child.attr('id') !== `${this.#name}-label`) {
+        this._element.children().forEach((child) => {
+            if (child.attr('id') !== `${this._name}-label`) {
                 child.remove()
             }
         })
@@ -208,7 +215,7 @@ export abstract class AbstractFigure {
 
     update(forceUpdate?: boolean): this {
         if (
-            (this.static || this.#isDraggable)
+            (this.static || this._isDraggable)
             && forceUpdate !== true) {
             return this
         }
@@ -223,11 +230,11 @@ export abstract class AbstractFigure {
 
     // The position depends on the figure.
     addLabel(text?: string, asHtml?: boolean, texConverter?: (value: string) => string): Label {
-        this.#label = new Label(
-            this.#element,
-            this.#name,
+        this._label = new Label(
+            this._element,
+            this._name,
             {
-                text: text ?? this.#name,
+                text: text ?? this._name,
                 asHtml: asHtml ?? false,
                 alignement: 'br',
                 offset: {x: 0, y: 0},
@@ -235,19 +242,19 @@ export abstract class AbstractFigure {
             })
 
         this.updateLabel()
-        return this.#label
+        return this._label
     }
 
     abstract moveLabel(): this
 
     // Update the label of the figure when the figure is updated.
     updateLabel(): this {
-        if (!this.#label) {
+        if (!this._label) {
             return this
         }
 
         // if the label is dynamic, update it.
-        this.#label.setLabel(this.computeLabel())
+        this._label.setLabel(this.computeLabel())
 
         // Move the label position
         this.moveLabel()
@@ -256,7 +263,7 @@ export abstract class AbstractFigure {
     }
 
     computeLabel(): string {
-        return this.#label?.config.text ?? this.#name
+        return this._label?.config.text ?? this._name
     }
 
     move(pos: number): this
@@ -265,10 +272,10 @@ export abstract class AbstractFigure {
         if (isXY(pos)) {
             const dx = toPixels(pos.x, this.graphConfig)
             const dy = toPixels(pos.y, this.graphConfig)
-            this.#shape.translate(dx, -dy)
+            this._shape.translate(dx, -dy)
         } else if (typeof pos === 'number') {
             const d = toPixels(pos, this.graphConfig)
-            this.#shape.translate(d, 0)
+            this._shape.translate(d, 0)
         }
         return this
     }
@@ -281,7 +288,7 @@ export abstract class AbstractFigure {
             })
         }
 
-        this.#shape.scale(value.x, value.y)
+        this._shape.scale(value.x, value.y)
         return this
     }
 
@@ -290,13 +297,13 @@ export abstract class AbstractFigure {
         const shape = options?.find(x => typeof x === 'string') ?? '->'
 
         const marker = createMarker(
-            this.#rootSVG,
+            this._rootSVG,
             this.name,
             scale,
             shape
         )
 
-        const path = this.#shape as Path
+        const path = this._shape as Path
 
         if (value === 'start') {
             path.marker('start', marker)

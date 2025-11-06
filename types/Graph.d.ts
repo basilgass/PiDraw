@@ -26,7 +26,7 @@ export interface IDraggableConfig {
     target?: AbstractFigure;
 }
 export declare class Graph {
-    #private;
+    protected _Animate: Animate | null;
     constructor(id: string | HTMLElement, config?: IGraphConstructorConfig);
     protected _config: IGraphConfig;
     get config(): IGraphConfig;
@@ -73,4 +73,5 @@ export declare class Graph {
     update(except?: string[], forceUpdate?: boolean): void;
     updateLabels(except: string[], forceUpdate?: boolean): void;
     updateLayout(): void;
+    protected _makeLayout(): void;
 }

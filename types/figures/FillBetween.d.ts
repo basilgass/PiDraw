@@ -8,12 +8,13 @@ export interface IFillBetweenConfig {
     image?: DOMAIN;
 }
 export declare class FillBetween extends AbstractFigure {
-    #private;
+    constructor(rootSVG: Svg, name: string, values: IFillBetweenConfig);
+    protected _config: IFillBetweenConfig;
     get config(): IFillBetweenConfig;
     set config(value: IFillBetweenConfig);
     get domain(): DOMAIN;
     get image(): DOMAIN;
-    constructor(rootSVG: Svg, name: string, values: IFillBetweenConfig);
+    _makeShape(): import('@svgdotjs/svg.js').Shape;
     computed(): this;
     moveLabel(): this;
 }
