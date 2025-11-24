@@ -7,8 +7,12 @@ import type {Circle} from "./Circle"
 
 export type ILine = Line | 'Ox' | 'Oy'
 
+export interface PointConfigCoordinates {
+    x: number | {point: Point, axis: 'x' | 'y'},
+    y: number | {point: Point, axis: 'x' | 'y'},
+}
 export interface IPointConfig {
-    coordinates?: XY,
+    coordinates?: PointConfigCoordinates,
     direction?: {
         point: XY,
         direction: ILine | { A: XY, B: XY },
@@ -142,7 +146,13 @@ export class Point extends AbstractFigure {
     computed(): this {
         // Update the coordinates, depending on the constraints settings
         if (this._config.coordinates) {
-            this.pixels = toPixels(this._config.coordinates, this.graphConfig)
+            const {x, y} = this._config.coordinates
+
+            this.pixels = toPixels({
+                x: typeof x === "number" ? x : x.point.coordinates[x.axis],
+                y: typeof y === "number" ? y : y.point.coordinates[y.axis]
+            }, this.graphConfig)
+
             return this
         }
 

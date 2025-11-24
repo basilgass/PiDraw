@@ -6,6 +6,7 @@ import {type buildInterface, type IGraphConfig} from "../pidraw.common"
 import {convertIdToFigure, type IParserValues, PARSER_TYPE} from "./parser.common"
 
 const create = 'point'
+
 export function buildPoint(item: PARSER, figures: Record<string, AbstractFigure>, graphConfig: IGraphConfig): buildInterface<IPointConfig> | null {
     // Default values
     let shape = 'circle', size = 5
@@ -49,9 +50,17 @@ function buildPoint_config(item: PARSER, figures: Record<string, AbstractFigure>
     if (item.key === PARSER_TYPE.POINT.toString()) {
         // item.code = [<number>,<number>] -> 2d
         // item.code = [<number>,<number>,<number>] -> 3d
-        const [x, y] = code as number[]
-        if (typeof x === 'number' && typeof y === 'number') {
-            return {coordinates: {x, y}}
+        const [x, y] = code as (number | string)[]
+
+        try {
+            return {
+                coordinates: {
+                    x: coordinateParse(x, figures),
+                    y: coordinateParse(y, figures)
+                }
+            }
+        }catch{
+            return null
         }
     }
 
@@ -122,4 +131,22 @@ function buildPoint_config(item: PARSER, figures: Record<string, AbstractFigure>
         }
     }
     return null
+}
+
+function coordinateParse(x: number | string, figures: Record<string, AbstractFigure>): number | {
+    point: Point,
+    axis: 'x' | 'y'
+} {
+    if (typeof x === 'string') {
+        const [name, axisDirection] = x.split('.')
+        const point = figures[name] as Point | null
+        const axis = axisDirection === 'x' || axisDirection === 'y' ? axisDirection : null
+        if (point === null || axis === null) {
+            throw new Error('Point or axis unrecognized')
+        }
+
+        return {point, axis}
+    } else {
+        return x
+    }
 }
