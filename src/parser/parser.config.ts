@@ -69,6 +69,13 @@ export const parser_config: Record<string, parser_item> = {
         parameters: [],
         build: buildPoint,
     },
+    eval: {
+        name: 'evaluate function',
+        description: 'Evaluate a funciton at a value',
+        code: 'A=eval f,3',
+        parameters: [],
+        build: buildPoint,
+    },
     line: {
         name: 'line',
         description: 'Create a line, a half line or a segment',

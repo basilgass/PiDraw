@@ -4,13 +4,17 @@ import {AbstractFigure} from "./AbstractFigure"
 import {Line} from "./Line"
 import {mathVector, toCoordinates, toPixels} from "../Calculus"
 import type {Circle} from "./Circle"
+import type {Plot} from "./Plot"
 
 export type ILine = Line | 'Ox' | 'Oy'
 
+export type PointCoordinateType = number | { point: Point, axis: 'x' | 'y' }
+
 export interface PointConfigCoordinates {
-    x: number | {point: Point, axis: 'x' | 'y'},
-    y: number | {point: Point, axis: 'x' | 'y'},
+    x: PointCoordinateType,
+    y: PointCoordinateType,
 }
+
 export interface IPointConfig {
     coordinates?: PointConfigCoordinates,
     direction?: {
@@ -19,12 +23,13 @@ export interface IPointConfig {
         distance: number,
         perpendicular?: boolean
     }
-    intersection?: { A: ILine, B: ILine},
-    intersectionWithCircle?: {A: Circle, B: Line, index: number},
-    intersectionBetweenCircles?: {A: Circle, B: Circle, index: number},
+    intersection?: { A: ILine, B: ILine },
+    intersectionWithCircle?: { A: Circle, B: Line, index: number },
+    intersectionBetweenCircles?: { A: Circle, B: Circle, index: number },
     middle?: { A: XY, B: XY },
     pixels?: XY,
     projection?: { axis: ILine, point: XY },
+    evaluation?: { fx: Plot, x: PointCoordinateType }
     shape?: 'circle' | 'square' | 'crosshair'
     size?: number,
     symmetry?: { A: XY, B: XY | ILine }
@@ -199,17 +204,17 @@ export class Point extends AbstractFigure {
         }
 
         if (this._config.intersection) {
-                const line1 = this._config.intersection.A as Line
-                const line2 = this._config.intersection.B as Line
-                // Get the intersection of two lines.
-                const coord = line1.math
-                    .intersection(line2.math)
+            const line1 = this._config.intersection.A as Line
+            const line2 = this._config.intersection.B as Line
+            // Get the intersection of two lines.
+            const coord = line1.math
+                .intersection(line2.math)
 
-                if (coord === null) {
-                    return this
-                }
+            if (coord === null) {
+                return this
+            }
 
-                this.pixels = coord
+            this.pixels = coord
         }
 
         if (this._config.intersectionWithCircle) {
@@ -219,7 +224,7 @@ export class Point extends AbstractFigure {
 
             const coord = circle.intersectionWithLine(line)
 
-            if(coord===null) {
+            if (coord === null) {
                 this.pixels = {x: NaN, y: NaN}
                 return this
             }
@@ -234,7 +239,7 @@ export class Point extends AbstractFigure {
 
             const coord = circle1.intersectionWithCircle(circle2)
 
-            if(coord===null) {
+            if (coord === null) {
                 this.pixels = {x: NaN, y: NaN}
                 return this
             }
@@ -312,6 +317,12 @@ export class Point extends AbstractFigure {
                 this.y = point.y + distance * d.y
                 return this
             }
+        }
+
+        if (this._config.evaluation) {
+            const {fx, x} = this._config.evaluation
+
+            this.pixels =  fx.evaluate(typeof x === "number" ? x : x.point.coordinates[x.axis])
         }
 
         return this

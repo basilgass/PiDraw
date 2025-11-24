@@ -4,6 +4,7 @@ import {Line} from "../figures/Line"
 import {type IPointConfig, Point} from "../figures/Point"
 import {type buildInterface, type IGraphConfig} from "../pidraw.common"
 import {convertIdToFigure, type IParserValues, PARSER_TYPE} from "./parser.common"
+import {Plot} from "../figures/Plot"
 
 const create = 'point'
 
@@ -128,6 +129,28 @@ function buildPoint_config(item: PARSER, figures: Record<string, AbstractFigure>
                     distance
                 }
             }
+        }
+    }
+
+    if(item.key === PARSER_TYPE.EVAL_FX.toString() && code.length>=2){
+        const [fx, value] =  code
+        if(! (fx instanceof Plot)){
+            return null
+        }
+
+
+        try {
+            const x = coordinateParse(value as string | number, figures)
+
+            return {
+                evaluation: {
+                    fx: fx,
+                    x
+                }
+            }
+
+        }catch{
+            return null
         }
     }
     return null
