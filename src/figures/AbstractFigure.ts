@@ -237,6 +237,7 @@ export abstract class AbstractFigure {
                 text: text ?? this._name,
                 asHtml: asHtml ?? false,
                 alignement: 'br',
+                size: 'inherit',
                 offset: {x: 0, y: 0},
                 texConverter: texConverter ?? ((value: string) => value)
             })

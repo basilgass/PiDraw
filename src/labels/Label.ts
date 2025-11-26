@@ -6,7 +6,7 @@ export type LABEL_POSITION = 'tl' | 'tc' | 'tr' | 'ml' | 'mc' | 'mr' | 'bl' | 'b
 
 export interface ILabelConfig {
     text: string,
-    size: string | null,
+    size?: string | null,
     asHtml: boolean,
     alignement: LABEL_POSITION,
     offset: XY,

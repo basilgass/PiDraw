@@ -4,6 +4,7 @@ type LabelType = svgLabel | svgHTML;
 export type LABEL_POSITION = 'tl' | 'tc' | 'tr' | 'ml' | 'mc' | 'mr' | 'bl' | 'bc' | 'br';
 export interface ILabelConfig {
     text: string;
+    size?: string | null;
     asHtml: boolean;
     alignement: LABEL_POSITION;
     offset: XY;
