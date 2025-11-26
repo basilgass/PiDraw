@@ -4057,7 +4057,7 @@ class mr {
   _makeLabel() {
     this._shape && this._shape.remove();
     const t = this._style + (this._config.size !== null ? `; font-size: ${this._config.size}` : "");
-    return console.log(t), this._shape = this._config.asHtml ? this._element.foreignObject(1, 1).attr("style", "overflow:visible").add(Gi(`<div style="${t}">${this.displayName}</div>`, !0)) : this._element.text(this.displayName), this._shape.attr("id", `${this._name}-label`), this._shape;
+    return this._shape = this._config.asHtml ? this._element.foreignObject(1, 1).attr("style", "overflow:visible").add(Gi(`<div style="${t}">${this.displayName}</div>`, !0)) : this._element.text(this.displayName), this._shape.attr("id", `${this._name}-label`), this._shape;
   }
 }
 function Hi(i, t = 10) {
@@ -6028,9 +6028,7 @@ class $r {
   _updatePoints() {
     return this._animations = /* @__PURE__ */ new Map(), Object.values(this._graph.figures).forEach((t) => {
       if (K(t) && t.animate !== null) {
-        const e = t.animate, s = t;
-        console.log(e);
-        const n = e.from, r = e.to;
+        const e = t.animate, s = t, n = e.from, r = e.to;
         this._animations.set(
           t.name,
           {
