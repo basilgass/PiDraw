@@ -171,9 +171,18 @@ q=quad A,B,C`
     },
     {
         name: 'animation with dynamic values',
-        code: `A(0,0)
-B(5,0)
-X(0,0)->red,o=10,fill=red,animate,from=A,to=B,duration=5,loop=reverse
-P(X.x,3)->tex`
+        code: `f(x)=1/4(x+2)^2-5
+g(x)=1/4(x+2)^2-5,-6:4->w=10,red
+X0(-6,0)
+X1(4,0)
+X(-6,0)->animate,from=X0,to=X1,duration=6
+Y=eval f,X.x->o=20
+P=proj Y,Oy
+p=YP.->mark=end
+R0(0,-1)
+R1(0,-5)
+R2(0,4)
+R(0,-1)->animate,from=R0,to=R1,duration=2
+S(0,-5)->animate,from=R1,to=R2,duration=4,delay=2`
     }
 ]

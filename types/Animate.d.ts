@@ -11,6 +11,7 @@ interface animationParams {
     from: XY;
     to: XY;
     duration: number;
+    delay: number;
     ease: (t: number) => number;
     loop: LOOP_STYLE;
     reverse: boolean;

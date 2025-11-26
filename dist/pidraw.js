@@ -5988,8 +5988,13 @@ class $r {
       let e = !1;
       for (const s of this._animations.values()) {
         s.startTime === 0 && (s.startTime = this._startTime);
-        const n = t - s.startTime, r = Math.min(n / s.duration, 1), o = s.ease(r);
-        s.point.x = s.from.x + (s.to.x - s.from.x) * o, s.point.y = s.from.y + (s.to.y - s.from.y) * o, r < 1 ? e = !0 : s.loop === "reset" ? (s.point.x = s.from.x, s.point.y = s.from.y, s.startTime = t, e = !0) : s.loop === "reverse" && ([s.from, s.to] = [s.to, s.from], s.startTime = t, e = !0);
+        const n = t - s.startTime;
+        if (n < s.delay) {
+          s.point.x = s.from.x, s.point.y = s.from.y, e = !0;
+          continue;
+        }
+        const r = n - s.delay, o = Math.min(r / s.duration, 1), a = s.ease(o);
+        s.point.x = s.from.x + (s.to.x - s.from.x) * a, s.point.y = s.from.y + (s.to.y - s.from.y) * a, o < 1 ? e = !0 : s.loop === "reset" ? (s.point.x = s.from.x, s.point.y = s.from.y, s.startTime = t, e = !0) : s.loop === "reverse" && ([s.from, s.to] = [s.to, s.from], s.startTime = t, e = !0);
       }
       this._graph.update(this._animatedPoints), e ? this._rafId = requestAnimationFrame(this._step) : this._rafId = null;
     });
@@ -6041,6 +6046,7 @@ class $r {
             // TODO: Add easing function
             loop: e.loop,
             reverse: !1,
+            delay: e.delay * 1e3,
             startTime: 0
           }
         ), this._animatedPoints.push(t.name);

@@ -16,6 +16,7 @@ interface animationParams {
     from: XY,
     to: XY,
     duration: number,
+    delay: number,
     ease: (t: number) => number, // TODO: add easing to animation
     loop: LOOP_STYLE,
     reverse: boolean,
@@ -134,6 +135,7 @@ export class Animate {
                         ease: (t: number) => t, // TODO: Add easing function
                         loop: animate.loop,
                         reverse: false,
+                        delay: animate.delay * 1000,
                         startTime: 0
                     }
                 )
@@ -162,7 +164,16 @@ export class Animate {
             }
 
             const elapsed = now - anim.startTime
-            const t = Math.min(elapsed / anim.duration, 1)
+
+            if(elapsed < anim.delay){
+                anim.point.x = anim.from.x
+                anim.point.y = anim.from.y
+                anyRunning = true
+                continue
+            }
+
+            const effectiveElapsed = elapsed - anim.delay
+            const t = Math.min(effectiveElapsed / anim.duration, 1)
             const e = anim.ease(t)
 
             anim.point.x = anim.from.x + (anim.to.x - anim.from.x) * e
