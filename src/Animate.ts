@@ -120,8 +120,6 @@ export class Animate {
                 const animate = figure.animate as unknown as IFigureAnimation
                 const point = figure as Point
 
-                console.log(animate)
-                
                 const from = animate.from as Point
                 const to = animate.to as Point
 

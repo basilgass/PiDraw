@@ -230,7 +230,6 @@ export class Label {
                 ? `; font-size: ${this._config.size}`
                 : '')
 
-        console.log(style)
         // Create a new label.
         this._shape = this._config.asHtml ?
             this._element.foreignObject(1, 1)

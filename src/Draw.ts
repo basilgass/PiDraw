@@ -403,40 +403,7 @@ export class Draw extends Graph {
 
                 }
 
-
-                // TODO: make it eslint friendly and ts friendly
-                // if (Object.hasOwn(graphCreate, create)) {
-                //     try {
-                //         // Permet de récupérer la configuration en fonction des données du code.
-                //         const {config, create} = build(item, this.figures, this.config)
-                //
-                //         if (config) {
-                //             /* eslint-disable */
-                //             // @ts-expect-error: create is string and is not
-                //             obj = this.create[create](config, item.name)
-                //             /* eslint-enable */
-                //         }
-                //     } catch (e) {
-                //         // TODO: the build*** function should return an error message
-                //         console.log(e)
-                //     }
-                // }
             }
-            //
-            // // L'objet n'existe pas - on quitte.
-            // if (obj === undefined) {
-            //     return
-            // }
-            //
-            // // On transforme l'objet en array s'il ne l'est pas.
-            // if (obj && !Array.isArray(obj)) {
-            //     obj = [obj]
-            // }
-            //
-            // // Pour chaque objet créé, on applique les options.
-            // obj.forEach(o => {
-            //     this._buildOptions(o, item)
-            // })
         })
 
         // Redraw the labels a second time (for aligneemnt)
