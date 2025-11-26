@@ -24,7 +24,7 @@ interface animationParams {
 
 export class Animate {
     protected _graph: Graph
-    protected _animatedPoints: Point[] = []
+    protected _animatedPoints: string[] = []
 
     protected _startTime = 0
     protected _elapsedAtPause = 0
@@ -112,8 +112,9 @@ export class Animate {
         return this._animations.size > 0
     }
 
-    _updatePoints(): Point[] {
+    _updatePoints(): string[] {
         this._animations = new Map()
+        this._animatedPoints = []
 
         Object.values(this._graph.figures).forEach(figure => {
             if (isXY(figure) && figure.animate !== null) {
@@ -136,6 +137,8 @@ export class Animate {
                         startTime: 0
                     }
                 )
+
+                this._animatedPoints.push(figure.name)
             }
         })
 
@@ -179,6 +182,8 @@ export class Animate {
             }
         }
 
+        // Update the other figures.
+        this._graph.update(this._animatedPoints)
 
         if (anyRunning) {
             this._rafId = requestAnimationFrame(this._step)

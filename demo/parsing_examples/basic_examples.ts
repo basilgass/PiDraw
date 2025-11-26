@@ -168,5 +168,12 @@ d=AB.->tex=abc`
 B(1,3)->drag=grid,tex
 C(2,9)->drag=grid,tex
 q=quad A,B,C`
+    },
+    {
+        name: 'animation with dynamic values',
+        code: `A(0,0)
+B(5,0)
+X(0,0)->red,o=10,fill=red,animate,from=A,to=B,duration=5,loop=reverse
+P(X.x,3)->tex`
     }
 ]

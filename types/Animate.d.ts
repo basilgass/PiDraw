@@ -18,7 +18,7 @@ interface animationParams {
 }
 export declare class Animate {
     protected _graph: Graph;
-    protected _animatedPoints: Point[];
+    protected _animatedPoints: string[];
     protected _startTime: number;
     protected _elapsedAtPause: number;
     protected _paused: boolean;
@@ -32,7 +32,7 @@ export declare class Animate {
     isRunning(): boolean;
     isPaused(): boolean;
     canBeAnimated(): boolean;
-    _updatePoints(): Point[];
+    _updatePoints(): string[];
     _step: (now: number) => void;
 }
 export declare function getLoopStyle(loop: string | boolean | number): LOOP_STYLE;

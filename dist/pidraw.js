@@ -5991,7 +5991,7 @@ class $r {
         const n = t - s.startTime, r = Math.min(n / s.duration, 1), o = s.ease(r);
         s.point.x = s.from.x + (s.to.x - s.from.x) * o, s.point.y = s.from.y + (s.to.y - s.from.y) * o, r < 1 ? e = !0 : s.loop === "reset" ? (s.point.x = s.from.x, s.point.y = s.from.y, s.startTime = t, e = !0) : s.loop === "reverse" && ([s.from, s.to] = [s.to, s.from], s.startTime = t, e = !0);
       }
-      e ? this._rafId = requestAnimationFrame(this._step) : this._rafId = null;
+      this._graph.update(this._animatedPoints), e ? this._rafId = requestAnimationFrame(this._step) : this._rafId = null;
     });
     this._graph = t, this._updatePoints();
   }
@@ -6026,7 +6026,7 @@ class $r {
     return this._animations.size > 0;
   }
   _updatePoints() {
-    return this._animations = /* @__PURE__ */ new Map(), Object.values(this._graph.figures).forEach((t) => {
+    return this._animations = /* @__PURE__ */ new Map(), this._animatedPoints = [], Object.values(this._graph.figures).forEach((t) => {
       if (K(t) && t.animate !== null) {
         const e = t.animate, s = t, n = e.from, r = e.to;
         this._animations.set(
@@ -6043,7 +6043,7 @@ class $r {
             reverse: !1,
             startTime: 0
           }
-        );
+        ), this._animatedPoints.push(t.name);
       }
     }), this._animatedPoints;
   }
