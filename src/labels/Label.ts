@@ -3,14 +3,17 @@ import type {XY} from "../pidraw.common"
 
 type LabelType = svgLabel | svgHTML
 export type LABEL_POSITION = 'tl' | 'tc' | 'tr' | 'ml' | 'mc' | 'mr' | 'bl' | 'bc' | 'br'
+
 export interface ILabelConfig {
     text: string,
+    size: string | null,
     asHtml: boolean,
     alignement: LABEL_POSITION,
     offset: XY,
     rotate?: number,
     texConverter: (value: string) => string
 }
+
 export class Label {
     _element: G
     protected _name: string
@@ -30,8 +33,9 @@ export class Label {
                 text: name,
                 asHtml: false,
                 alignement: 'br',
-                offset: { x: 0, y: 0 },
+                offset: {x: 0, y: 0},
                 rotate: 0,
+                size: null,
                 texConverter: (value: string) => value
             },
             config
@@ -53,11 +57,15 @@ export class Label {
 
     protected _shape: LabelType
 
-    get shape() { return this._shape }
+    get shape() {
+        return this._shape
+    }
 
     protected _config: ILabelConfig
 
-    get config() { return this._config }
+    get config() {
+        return this._config
+    }
 
     protected _displayName: string
 
@@ -70,15 +78,23 @@ export class Label {
 
     protected _x: number
 
-    get x() { return this._x }
+    get x() {
+        return this._x
+    }
 
-    set x(value: number) { this._x = value }
+    set x(value: number) {
+        this._x = value
+    }
 
     protected _y: number
 
-    get y() { return this._y }
+    get y() {
+        return this._y
+    }
 
-    set y(value: number) { this._y = value }
+    set y(value: number) {
+        this._y = value
+    }
 
     protected _auto_rotate = false
 
@@ -90,12 +106,18 @@ export class Label {
         this._auto_rotate = value
     }
 
-    get asHtml() { return this._config.asHtml }
+    get asHtml() {
+        return this._config.asHtml
+    }
 
-    get alignement() { return this._config.alignement }
+    get alignement() {
+        return this._config.alignement
+    }
 
     // Get the label of the figure.
-    get label(): LabelType { return this._shape }
+    get label(): LabelType {
+        return this._shape
+    }
 
     hide() {
         this._shape.hide()
@@ -110,7 +132,9 @@ export class Label {
     // Set the label of the figure.
     setLabel(text?: string): this {
         // Default label is the name of the figure.
-        if (text !== undefined) { this._displayName = text }
+        if (text !== undefined) {
+            this._displayName = text
+        }
 
         // Update the text.
         this._makeLabel()
@@ -128,7 +152,7 @@ export class Label {
     rotate(angle: number): this {
         this._shape.transform({
             rotate: angle,
-            origin: { x: this._x, y: this._y }
+            origin: {x: this._x, y: this._y}
         })
         return this
     }
@@ -189,7 +213,7 @@ export class Label {
             this._shape.center(x + (offset.x ?? 0), y - (offset.y ?? 0))
         }
 
-        if(rotate !== 0 && rotate !== undefined) {
+        if (rotate !== 0 && rotate !== undefined) {
             this.rotate(rotate)
         }
         return this
@@ -197,13 +221,21 @@ export class Label {
 
     _makeLabel(): svgLabel | svgHTML {
         // Remove the existing label.
-        if (this._shape) { this._shape.remove() }
+        if (this._shape) {
+            this._shape.remove()
+        }
 
+        const style = this._style +
+            (this._config.size !== null
+                ? `; font-size: ${this._config.size}`
+                : '')
+
+        console.log(style)
         // Create a new label.
         this._shape = this._config.asHtml ?
             this._element.foreignObject(1, 1)
                 .attr('style', "overflow:visible")
-                .add(SVG(`<div style="${this._style}">${this.displayName}</div>`, true)) :
+                .add(SVG(`<div style="${style}">${this.displayName}</div>`, true)) :
             this._element.text(this.displayName)
 
         this._shape.attr('id', `${this._name}-label`)

@@ -164,9 +164,9 @@ d=AB.->tex=abc`
     },
     {
         name: 'quadratic plot',
-        code: `A(0,1)->drag=grid
-B(1,3)->drag=grid
-C(2,9)->drag=grid
+        code: `A(0,1)->drag=grid,tex
+B(1,3)->drag=grid,tex
+C(2,9)->drag=grid,tex
 q=quad A,B,C`
     }
 ]

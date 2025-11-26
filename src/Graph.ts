@@ -60,6 +60,7 @@ export class Graph {
             id.appendChild(wrapper)
         }
 
+
         const defaultUnit = config?.ppu ?? 50
 
         this._config = Object.assign({

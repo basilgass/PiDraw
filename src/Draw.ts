@@ -596,6 +596,8 @@ export class Draw extends Graph {
         // const parameters = PiParseParameters(code)
         const parameters = this._parser.parameters(code ?? '', PARSER_PARAMETERS_KEYS)
 
+        // BUG: PPU should be more dynamic and update correctly.
+
         // Define the configuration
         const ppu = parameters.ppu ? parseFloat(parameters.ppu.value as string) : 50
         const xDomain = parameters.x && isDOMAIN(parameters.x.value) ? parameters.x.value : {min: -8, max: 8}

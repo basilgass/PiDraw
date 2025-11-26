@@ -3,9 +3,18 @@ import { XY } from '../pidraw.common';
 import { AbstractFigure } from './AbstractFigure';
 import { Line } from './Line';
 import { Circle } from './Circle';
+import { Plot } from './Plot';
 export type ILine = Line | 'Ox' | 'Oy';
+export type PointCoordinateType = number | {
+    point: Point;
+    axis: 'x' | 'y';
+};
+export interface PointConfigCoordinates {
+    x: PointCoordinateType;
+    y: PointCoordinateType;
+}
 export interface IPointConfig {
-    coordinates?: XY;
+    coordinates?: PointConfigCoordinates;
     direction?: {
         point: XY;
         direction: ILine | {
@@ -37,6 +46,10 @@ export interface IPointConfig {
     projection?: {
         axis: ILine;
         point: XY;
+    };
+    evaluation?: {
+        fx: Plot;
+        x: PointCoordinateType;
     };
     shape?: 'circle' | 'square' | 'crosshair';
     size?: number;
