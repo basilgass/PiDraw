@@ -1,7 +1,7 @@
-import { describe, test, expect } from 'vitest'
-import { Graph } from '../src/Graph'
-import {NumExp} from "../src/Calculus";
-import {parsePolynom} from "../src/parser/buildLine";
+import {describe, expect, test} from 'vitest'
+import {Graph} from '../src/Graph'
+import {NumExp} from "../src/Calculus"
+import {parsePolynom} from "../src/parser/buildLine"
 
 describe('Graph', () => {
     test.skip('create a graph', () => {
@@ -34,7 +34,7 @@ describe('Graph', () => {
 
     })
     test('parse polynom', ()=>{
-        console.log(parsePolynom('3x+2y-5'));
-        console.log(parsePolynom('3/2x+2/5y-5/7'));
+        console.log(parsePolynom('3x+2y-5'))
+        console.log(parsePolynom('3/2x+2/5y-5/7'))
     })
 })

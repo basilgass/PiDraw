@@ -53,7 +53,7 @@ export interface IFigureAppearanceConfig {
         color: string,
         width: number,
         opacity: number
-    },
+    }
 }
 
 export interface IFigureAnimation {
@@ -72,12 +72,12 @@ export interface XY {
 
 export function isXY(obj: unknown): obj is XY {
     // @ts-expect-error : obj is XY
-    return obj !== null && obj !== undefined && obj.x !== undefined && obj.y !== undefined
+    return obj?.x !== undefined && obj.y !== undefined
 }
 
 export function isDOMAIN(obj: unknown): obj is DOMAIN {
     // @ts-expect-error : obj is DOMAIN
-    return obj !== null && obj !== undefined && obj.min !== undefined && obj.max !== undefined
+    return obj?.min !== undefined && obj.max !== undefined
 }
 
 
@@ -149,6 +149,10 @@ export enum BEZIERCONTROL {
     SMOOTH = 'smooth',
     VERTICAL = 'vertical',
     HORIZONTAL = 'horizontal',
+    UP = 'up',
+    DOWN = 'down',
+    RIGHT = 'right',
+    LEFT = 'left'
 }
 
 

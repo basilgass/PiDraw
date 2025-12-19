@@ -51,7 +51,7 @@ export class Graph {
         wrapper.style.position = 'relative'
         wrapper.style.width = '100%'
         wrapper.style.height = 'auto'
-        wrapper.style.border = 'thin solid black'
+        // wrapper.style.border = 'thin solid black'
         wrapper.style.userSelect = 'none'
 
         if (typeof id === 'string') {
@@ -59,7 +59,6 @@ export class Graph {
         } else {
             id.appendChild(wrapper)
         }
-
 
         const defaultUnit = config?.ppu ?? 50
 
@@ -462,7 +461,7 @@ export class Graph {
 
     // Update the layout of the graph
     public updateLayout() {
-        // Update the viewbox
+                // Update the viewbox
         this._rootSVG.viewbox(0, 0, this._config.width, this._config.height)
 
         // Update the transfer data
@@ -518,7 +517,6 @@ export class Graph {
         if (this._display.axis) {
             this.coordinate_system(this._config.system)
         }
-
 
     }
 }

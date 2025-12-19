@@ -53,6 +53,7 @@ export class Label {
 
         // Create the label shape
         this._shape = this._makeLabel()
+
     }
 
     protected _shape: LabelType
@@ -235,7 +236,7 @@ export class Label {
             this._element.foreignObject(1, 1)
                 .attr('style', "overflow:visible")
                 .add(SVG(`<div style="${style}">${this.displayName}</div>`, true)) :
-            this._element.text(this.displayName)
+            this._element.text(this.displayName).css('vector-effect', "non-scaling-size")
 
         this._shape.attr('id', `${this._name}-label`)
 

@@ -1,1 +1,0 @@
-{"version":3,"file":"computedBezier.d.ts","sourceRoot":"","sources":["../../src/functions/computedBezier.ts"],"names":[],"mappings":"AASA,OAAO,EAAC,KAAK,qBAAqB,EAAC,MAAM,mBAAmB,CAAA;AAG5D,MAAM,MAAM,iBAAiB,GAAG,CAAC,MAAM,EAAE,qBAAqB,EAAE,CAAC,EAAE,MAAM,EAAE,CAAC,EAAE,qBAAqB,EAAE,KAAK,MAAM,CAAA;AAEhH,wBAAgB,iBAAiB,CAAC,MAAM,EAAE,qBAAqB,EAAE,UAShE"}

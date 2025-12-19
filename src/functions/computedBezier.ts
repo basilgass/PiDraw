@@ -58,10 +58,14 @@ function bezierControlPoint(current: IBezierPointInterface, previous: IBezierPoi
     const length = o.length * smoothing
 
     // If the current control type is vertical or horizontal, adapt the angle
-    if (current.controls.type === BEZIERCONTROL.VERTICAL) {
+    if (current.controls.type === BEZIERCONTROL.VERTICAL || current.controls.type===BEZIERCONTROL.DOWN) {
         angle = Math.PI / 2 + (reverse ? Math.PI : 0)
-    } else if (current.controls.type === BEZIERCONTROL.HORIZONTAL) {
-        angle = 0 + (reverse ? Math.PI : 0)
+    }else if(current.controls.type===BEZIERCONTROL.UP){
+        angle = Math.PI / 2 + (!reverse ? Math.PI : 0)
+    } else if (current.controls.type === BEZIERCONTROL.HORIZONTAL || current.controls.type===BEZIERCONTROL.RIGHT) {
+        angle = reverse ? Math.PI : 0
+    }else if (current.controls.type===BEZIERCONTROL.LEFT){
+        angle = !reverse ? Math.PI : 0
     }
 
     // The control point position is relative to the current point

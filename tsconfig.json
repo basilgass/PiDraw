@@ -19,6 +19,6 @@
     "dist",
     "tests",
     "*.config.js",
-    "demo",
+    "demo"
   ],
 }

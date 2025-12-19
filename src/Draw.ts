@@ -271,7 +271,7 @@ export class Draw extends Graph {
 
                         const rotate = options[key].options[2] as number | boolean | undefined
 
-                        obj.label.auto_rotate = rotate===true
+                        obj.label.auto_rotate = rotate === true
 
                         obj.label.position(
                             alignement,
@@ -436,7 +436,7 @@ export class Draw extends Graph {
         this._applyOptions(item.parameters, obj)
     }
 
-    protected  _defineCommand(command: string): { key: string, value: boolean } {
+    protected _defineCommand(command: string): { key: string, value: boolean } {
         // A command is: @<begin|end>:<key>
 
         // Remove the '@' and split the command into key and value
@@ -447,7 +447,7 @@ export class Draw extends Graph {
 
     }
 
-    protected  _parseKeyCode(key_code: string): string {
+    protected _parseKeyCode(key_code: string): string {
 
         // There are 3 possibilities for the key_code:
         // 1. A(3,4) => id='A', key=POINT, code= ['3','4']
@@ -534,7 +534,7 @@ export class Draw extends Graph {
     }
 
     // TO BE MOVED TO BUILD_PLOT
-    protected  _parseKeyCodePlot(key_code: string): string {
+    protected _parseKeyCodePlot(key_code: string): string {
         // Extract the plot or parametric function
         const [id_xt, data] = key_code.split('=')
 
@@ -563,18 +563,24 @@ export class Draw extends Graph {
         // const parameters = PiParseParameters(code)
         const parameters = this._parser.parameters(code ?? '', PARSER_PARAMETERS_KEYS)
 
-        // BUG: PPU should be more dynamic and update correctly.
-
         // Define the configuration
-        const ppu = parameters.ppu ? parseFloat(parameters.ppu.value as string) : 50
         const xDomain = parameters.x && isDOMAIN(parameters.x.value) ? parameters.x.value : {min: -8, max: 8}
         const yDomain = parameters.y && isDOMAIN(parameters.y.value) ? parameters.y.value : {min: -8, max: 8}
         const dx = Math.abs(xDomain.max - xDomain.min)
         const dy = Math.abs(yDomain.max - yDomain.min)
 
+        // Set by default the ppu to auto
+        const box = this.rootSVG.node.getBoundingClientRect()
+        let ppu = Math.max( Math.round(box.width / dx), 20)
+
+        // User defined ppu value
+        if (Object.hasOwn(parameters, 'ppu') && !isNaN(+parameters.ppu.value)) {
+            ppu = parseFloat(parameters.ppu.value as string)
+        }
+
+
         const unitX = parameters.unitX ? parseFloat(parameters.unitX.value as string) : 1
         const unitY = parameters.unitY ? parseFloat(parameters.unitY.value as string) : 1
-
 
         const width = dx * ppu
         const height = dy * ppu
@@ -585,8 +591,8 @@ export class Draw extends Graph {
 
         const system = COORDINATE_SYSTEM.CARTESIAN_2D
         const axisConfig = {
-            x: {x: ppu*unitX, y: 0},
-            y: {x: 0, y: -ppu*unitY}
+            x: {x: ppu * unitX, y: 0},
+            y: {x: 0, y: -ppu * unitY}
         }
 
         // Display options
@@ -595,9 +601,9 @@ export class Draw extends Graph {
             ? parameters.grid.value
             : false
 
-        if(typeof grid==='string' && grid.includes('pi')){
-            const numerator = grid==='pi' ? 1 : +grid.split('pi')[0]
-            const denominator =(parameters.grid.options.length && Number.isSafeInteger(+parameters.grid.options[0])) ? parameters.grid.options[0] as number : 2
+        if (typeof grid === 'string' && grid.includes('pi')) {
+            const numerator = grid === 'pi' ? 1 : +grid.split('pi')[0]
+            const denominator = (parameters.grid.options.length && Number.isSafeInteger(+parameters.grid.options[0])) ? parameters.grid.options[0] as number : 2
             grid = {x: numerator * Math.PI / denominator, y: 1}
         }
 
@@ -633,7 +639,7 @@ export class Draw extends Graph {
      * @param input Input code to parse and prepare
      * @returns
      */
-    protected  _prepare(input: string): PARSER[] {
+    protected _prepare(input: string): PARSER[] {
         // Reset the code.
         // TODO: check if resetting the code with events are correctly removed.
         const data: PARSER[] = []
@@ -686,7 +692,7 @@ export class Draw extends Graph {
         return data
     }
 
-    protected   _uniqueName(name: string): string {
+    protected _uniqueName(name: string): string {
         let newName = name
         let i = 1
         while (this.figures[newName]) {

@@ -13,6 +13,7 @@ export abstract class AbstractFigure {
 
         this._label = null
         this._element = this._rootSVG.group().attr('id', this._name)
+
         this._appearance = {
             stroke: {
                 color: 'black',
@@ -22,7 +23,7 @@ export abstract class AbstractFigure {
             fill: {
                 color: 'transparent',
                 opacity: 1.0
-            },
+            }
         }
 
         this._shape = this._element.path()
@@ -152,6 +153,9 @@ export abstract class AbstractFigure {
     stroke(color: string, strokeWidth: number): this
 
     stroke(color?: string | number, strokeWidth?: number): this {
+        // TODO: handle non scaling stroke
+        // this.shape.css('vector-effect', "non-scaling-stroke")
+
         if (typeof color === 'string') {
             const [colorName, opacity] = color.split('/')
             this._appearance.stroke.color = colorName
