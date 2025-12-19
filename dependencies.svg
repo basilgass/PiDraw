@@ -19,15 +19,15 @@
 <path fill="#ffffff" stroke="black" stroke-width="2" d="M310,-424C310,-424 686.5,-424 686.5,-424 692.5,-424 698.5,-430 698.5,-436 698.5,-436 698.5,-774 698.5,-774 698.5,-780 692.5,-786 686.5,-786 686.5,-786 310,-786 310,-786 304,-786 298,-780 298,-774 298,-774 298,-436 298,-436 298,-430 304,-424 310,-424"/>
 <text text-anchor="middle" x="498.25" y="-774.8" font-family="Helvetica,sans-Serif" font-weight="bold" font-size="9.00">figures</text>
 </g>
-<g id="clust3" class="cluster">
-<title>cluster_src/functions</title>
-<path fill="#ffffff" stroke="black" stroke-width="2" d="M605,-364C605,-364 690,-364 690,-364 696,-364 702,-370 702,-376 702,-376 702,-404 702,-404 702,-410 696,-416 690,-416 690,-416 605,-416 605,-416 599,-416 593,-410 593,-404 593,-404 593,-376 593,-376 593,-370 599,-364 605,-364"/>
-<text text-anchor="middle" x="647.5" y="-404.8" font-family="Helvetica,sans-Serif" font-weight="bold" font-size="9.00">functions</text>
-</g>
 <g id="clust4" class="cluster">
 <title>cluster_src/labels</title>
 <path fill="#ffffff" stroke="black" stroke-width="2" d="M624.5,-26C624.5,-26 670.5,-26 670.5,-26 676.5,-26 682.5,-32 682.5,-38 682.5,-38 682.5,-66 682.5,-66 682.5,-72 676.5,-78 670.5,-78 670.5,-78 624.5,-78 624.5,-78 618.5,-78 612.5,-72 612.5,-66 612.5,-66 612.5,-38 612.5,-38 612.5,-32 618.5,-26 624.5,-26"/>
 <text text-anchor="middle" x="647.5" y="-66.8" font-family="Helvetica,sans-Serif" font-weight="bold" font-size="9.00">labels</text>
+</g>
+<g id="clust3" class="cluster">
+<title>cluster_src/functions</title>
+<path fill="#ffffff" stroke="black" stroke-width="2" d="M605,-364C605,-364 690,-364 690,-364 696,-364 702,-370 702,-376 702,-376 702,-404 702,-404 702,-410 696,-416 690,-416 690,-416 605,-416 605,-416 599,-416 593,-410 593,-404 593,-404 593,-376 593,-376 593,-370 599,-364 605,-364"/>
+<text text-anchor="middle" x="647.5" y="-404.8" font-family="Helvetica,sans-Serif" font-weight="bold" font-size="9.00">functions</text>
 </g>
 <g id="clust5" class="cluster">
 <title>cluster_src/parser</title>
