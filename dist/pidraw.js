@@ -5144,7 +5144,7 @@ class q extends V {
   }
 }
 function oi(i) {
-  const t = i.split(/([+-]?[0-9./]*[xy]?)/).filter((r) => r.trim() !== ""), e = ai(t, "x"), s = ai(t, "y"), n = Ui(t.filter((r) => !r.includes("x") && !r.includes("y"))[0] ?? 0);
+  const t = i.split(/([+-]?[0-9./]*[xy]?)/).filter((r) => r.trim() !== ""), e = ai(t, "x"), s = ai(t, "y"), n = Ui(t.find((r) => !r.includes("x") && !r.includes("y")) ?? 0);
   return {
     a: +P([e], {})[0],
     b: +P([s], {})[0],

@@ -324,8 +324,7 @@ function parsePolynom(polynom: string): { a: number, b: number, c: number } {
 
     const a = extractNumberFromMonoms(data, 'x')
     const b = extractNumberFromMonoms(data, 'y')
-    const c = toNumber(data
-        .filter((d) => (!d.includes('x') && !d.includes('y')))[0] ?? 0)
+    const c = toNumber(data.find((d) => (!d.includes('x') && !d.includes('y'))) ?? 0)
 
     return {
         a: +convertIdToFigure([a], {})[0],
