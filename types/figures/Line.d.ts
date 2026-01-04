@@ -16,6 +16,7 @@ export interface ILineConfig {
         A: XY;
         d: XY;
     };
+    equation?: string;
     mediator?: {
         A: XY;
         B: XY;

@@ -1,13 +1,15 @@
 import {AbstractFigure} from "./AbstractFigure"
 import type {XY} from "../pidraw.common"
 import {Line as svgLine, Shape, Svg} from "@svgdotjs/svg.js"
-import {computeLine, createMarker, mathLine, mathVector} from "../Calculus"
+import {computeLine, createMarker, mathLine, mathVector, toNumber, toPixels} from "../Calculus"
+import {convertIdToFigure} from "../parser/parser.common"
 
 export type ILineType = 'segment' | 'ray' | 'line' | 'vector'
 
 export interface ILineConfig {
     bisector?: { d1: Line, d2: Line } | { A: XY, B: XY, C: XY },
     director?: { A: XY, d: XY },
+    equation?: string,
     mediator?: { A: XY, B: XY },
     parallel?: { to: Line, through: XY },
     perpendicular?: { to: Line, through: XY },
@@ -109,6 +111,7 @@ export class Line extends AbstractFigure {
                 x: this._config.director.A.x + this._config.director.d.x,
                 y: this._config.director.A.y + this._config.director.d.y
             }
+
             direction = this._config.director.d
         } else if (this._config.parallel?.to && this._config.parallel.through) {
             this.start = this._config.parallel.through
@@ -153,38 +156,54 @@ export class Line extends AbstractFigure {
                 }
 
             }
+        } else if (this._config.equation) {
+            const equ = this._config.equation
+
+            if(!equ.includes('=')){return this}
+
+            let A: XY = {x: 0, y: 0}
+            // horizontal line.
+            if (equ.startsWith('y=') && !equ.includes('x')) {
+                const value = convertIdToFigure([equ.split('=')[1]], {})[0]
+                A = toPixels({x: 0, y: value as number}, this.graphConfig)
+                direction = {x: 1, y: 0}
+            }
+            // vertical line
+            else  if (equ.startsWith('x=')) {
+                const value = convertIdToFigure([equ.split('=')[1]], {})[0]
+                A = toPixels({x: value as number, y: 0}, this.graphConfig)
+                direction = {x: 0, y: 1}
+            }
+            // any other lines
+            else {
+                const [left, right] = equ.split('=')
+
+                const coefficientLeft = parsePolynom(left),
+                    coefficientRight = parsePolynom(right)
+
+                const coefficients = {
+                    a: coefficientLeft.a - coefficientRight.a,
+                    b: coefficientLeft.b - coefficientRight.b,
+                    c: coefficientLeft.c - coefficientRight.c
+                }
+
+                // ax+by+c=0
+                // A=(0, -c/b)
+                // slope = -a/b
+
+                A = toPixels({x: 0, y: -coefficients.c / coefficients.b}, this.graphConfig)
+                direction = {
+                    x: coefficients.b,
+                    y: coefficients.a
+                }
+            }
+
+            this.start = A
+            this.end = {
+                x: A.x + direction.x,
+                y: A.y + direction.y
+            }
         }
-        // else if (this._config.equation) {
-        //     // the equation can be something like:
-        //     // y=ax+b
-        //     // y = a
-        //     // x = a
-        //     // ax+by+c=0
-        //     const [left, right] = this._config.equation.equation.split('=')
-        //     if (left === 'x') {
-        //         // vetical line
-        //         const x = toNumber(right)
-        //         this.start = {x, y: 0}
-        //         direction = {x: 0, y: 1}
-        //     } else if (left === 'y' && !right.includes('y')) {
-        //         // vetical line
-        //         const y = toNumber(right)
-        //         this.start = {x: 0, y}
-        //         direction = {x: 1, y: 0}
-        //     } else if (left === 'y') {
-        //         // we have y=ax+b
-        //         const a = toNumber(right.match(/^[-]?[0-9/]*/g)[0] || 0)
-        //         const b = toNumber(right.match(/[-]?[0-9/]*$/g)
-        //             .filter(x => x !== '')[0] || 0)
-        //
-        //         this.start = {x: 0, y: b}
-        //         direction = {x: 1, y: a}
-        //     } else if (!isNaN(+right)) {
-        //         // we have ax+by+c=0 or ax+by=c
-        //         const a: number = toNumber(this._config.equation.equation.match(/[+-]?[0-9/]*x/g)[0] || 0)
-        //         const b: number = toNumber(this._config.equation.equation.match(/[+-]?[0-9/]*x/g)[0] || 0)
-        //     }
-        // }
 
         // If the line is not a segment and not a vector, we need to compute the line
         // it is designed for the line and ray
@@ -298,4 +317,35 @@ export class Line extends AbstractFigure {
 
         return this.shape
     }
+}
+
+function parsePolynom(polynom: string): { a: number, b: number, c: number } {
+    const data = polynom.split(/([+-]?[0-9./]*[xy]?)/).filter((d) => d.trim() !== '')
+
+    const a = extractNumberFromMonoms(data, 'x')
+    const b = extractNumberFromMonoms(data, 'y')
+    const c = toNumber(data
+        .filter((d) => (!d.includes('x') && !d.includes('y')))[0] ?? 0)
+
+    return {
+        a: +convertIdToFigure([a], {})[0],
+        b: +convertIdToFigure([b], {})[0],
+        c: +convertIdToFigure([c], {})[0],
+    }
+}
+
+function extractNumberFromMonoms(data: string[], letter: string): number {
+    return data
+        .filter((d) => d.includes(letter))
+        .map((d) => {
+            // Remove the letter 'x'
+            if (d === letter || d === `+${letter}`) {
+                return 1
+            }
+            if (d === `-${letter}`) {
+                return -1
+            }
+
+            return toNumber(d.replace(letter, ''))
+        })[0] ?? 0
 }

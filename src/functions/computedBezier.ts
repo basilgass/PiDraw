@@ -10,6 +10,7 @@
 import {type IBezierPointInterface} from "../figures/Bezier"
 import {BEZIERCONTROL} from "../pidraw.common"
 
+// TODO: analyser et améliorer pour avoir un plus grand contrôle par rapport au ratio gauche / droite.
 export type bezierCommandType = (bPoint: IBezierPointInterface, i: number, a: IBezierPointInterface[]) => string
 
 export function computeBezierPath(points: IBezierPointInterface[]) {

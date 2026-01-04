@@ -1,11 +1,11 @@
 <script lang="ts" setup>
-import DemoSizes from "./components/demo.sizes.vue";
+import DemoParser from "./components/demoParser.vue";
 </script>
 
 
 <template>
   <div class="p-4 space-y-4">
-    <demo-sizes/>
+    <demo-parser/>
   </div>
 </template>
 

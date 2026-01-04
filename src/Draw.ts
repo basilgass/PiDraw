@@ -578,7 +578,6 @@ export class Draw extends Graph {
             ppu = parseFloat(parameters.ppu.value as string)
         }
 
-
         const unitX = parameters.unitX ? parseFloat(parameters.unitX.value as string) : 1
         const unitY = parameters.unitY ? parseFloat(parameters.unitY.value as string) : 1
 

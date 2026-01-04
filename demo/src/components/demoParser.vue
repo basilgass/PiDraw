@@ -5,8 +5,10 @@ import {basic_examples} from "../../parsing_examples/basic_examples";
 import {PiDraw} from "../../../src";
 import katex from "katex";
 
-const parameter = ref<string>(`x=-11:11,y=-11:11,axis,grid`)
-const code = ref<string>(basic_examples[basic_examples.length - 1].code ?? '')
+const parameter = ref<string>(`x=-11:11,y=-11:11,axis,grid,ppu=50`)
+const id = 0
+const code = ref<string>('a=line y=1/2x+3->w=10')
+// const code = ref<string>(basic_examples[id].code ?? '')
 
 const showAnimation = ref<boolean>(false)
 
@@ -28,7 +30,7 @@ function update(newCode: unknown) {
 }
 
 function updateLayout() {
-  draw.refresh(parameter.value)
+  draw.refreshLayout(parameter.value)
 }
 
 function animation(value) {
