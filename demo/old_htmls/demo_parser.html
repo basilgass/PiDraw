@@ -110,9 +110,10 @@
     createApp({
         mounted() {
             // this.code = 'f(x)=sin(x),-pi:2pi'
-            this.parameter = `x=-11:11,y=-11:11,axis,grid`
+            const example =basic_examples[basic_examples.length-1]
+            this.parameter = example.parameters ?? `x=-11:11,y=-11:11,axis,grid`
 
-            this.code = basic_examples[basic_examples.length-1].code
+            this.code = example.code
             draw = new PiDraw(
                 'root',
                 {

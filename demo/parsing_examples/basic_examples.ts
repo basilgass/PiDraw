@@ -184,5 +184,12 @@ R1(0,-5)
 R2(0,4)
 R(0,-1)->animate,from=R0,to=R1,duration=2
 S(0,-5)->animate,from=R1,to=R2,duration=4,delay=2`
+    },
+    {
+        name: "simple drag",
+        parameters: `axis,grid,x=-5:5,y=-5:5`,
+        code: `A(0,0)->drag=grid
+B(2,1)->drag=grid
+d=AB`
     }
 ]

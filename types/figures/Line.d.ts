@@ -50,6 +50,7 @@ export declare class Line extends AbstractFigure {
     get direction(): XY;
     get math(): mathLine;
     get normal(): XY;
+    computeLabel(): string;
     computed(): this;
     follow(x: number, y: number): XY;
     move(x: number | XY): this;

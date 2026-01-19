@@ -2,47 +2,17 @@
 <html lang="en">
 
 <head>
-	<meta charset="UTF-8" />
-	<meta content="width=device-width, initial-scale=1.0" name="viewport" />
-	<title>PiDraw</title>
+    <meta charset="UTF-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>PiDraw</title>
 
-	<!-- adding vue -->
-	<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="demo/main.ts" type="module"></script>
 
-	<!-- adding pimath.css  -->
-	<link rel="stylesheet" href="/demo/app.css" />
+    <link href="demo/app.css" rel="stylesheet"/>
 </head>
 
 <body class="bg-gray-100">
-	<div id="app" class="max-w-2xl bg-white mx-auto p-3">
-		<h2 class="text-3xl py-3">PiDraw</h2>
-		<ul class="list list-inside list-disc">
-			<li class="cursor-pointer hover:font-semibold"><a href="/demo/demo.html">graph</a></li>
-			<li class="cursor-pointer hover:font-semibold"><a href="/demo/demo_parser.html">parser</a></li>
-			<li class="cursor-pointer hover:font-semibold"><a href="/demo/demo_text.html">text</a></li>
-			<li class="cursor-pointer hover:font-semibold"><a href="/demo/demo_trigo.html">cercle trigo</a></li>
-			<li class="cursor-pointer hover:font-semibold"><a href="/demo/demo_plot_plugins.html">plot plugins</a>
-			<li class="cursor-pointer hover:font-semibold"><a href="/demo/demo_path.html">path example (Venn diagram)</a>
-			<li class="cursor-pointer hover:font-semibold"><a href="/demo/demo_bezier.html">Bezier path example</a>
-			</li>
-		</ul>
-	</div>
-
-	</div>
-
-	<script  type="module">
-		const { createApp, ref } = Vue
-
-		createApp({
-			setup() {
-				const message = ref('Hello vue!')
-				return {
-					message
-				}
-			}
-		}).mount('#app')
-
-	</script>
+<div id="app"></div>
 </body>
 
 </html>

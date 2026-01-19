@@ -1,7 +1,17 @@
 import {AbstractFigure} from "./AbstractFigure"
 import type {XY} from "../pidraw.common"
 import {Line as svgLine, Shape, Svg} from "@svgdotjs/svg.js"
-import {computeLine, createMarker, mathLine, mathVector, toNumber, toPixels} from "../Calculus"
+import {
+    computeLine,
+    createMarker,
+    distanceAB,
+    mathLine,
+    mathVector,
+    numberCorrection,
+    toCoordinates,
+    toNumber,
+    toPixels
+} from "../Calculus"
 import {convertIdToFigure} from "../parser/parser.common"
 
 export type ILineType = 'segment' | 'ray' | 'line' | 'vector'
@@ -94,6 +104,22 @@ export class Line extends AbstractFigure {
             x: d.y,
             y: -d.x
         }
+    }
+
+    override computeLabel(): string {
+        if (this.label?.config.text.includes('@')) {
+            // replace the @ by the length of the segment.
+            if(this._config.shape==="segment") {
+                const A = toCoordinates(this._start, this.graphConfig)
+                const B = toCoordinates(this._end, this.graphConfig)
+
+                return this.label.config.text.replace('@', numberCorrection(+distanceAB(A, B).toFixed(2)).toString())
+            }
+
+
+        }
+
+        return this.label?.config.text ?? this.name
     }
 
     computed(): this {

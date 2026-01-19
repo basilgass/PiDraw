@@ -28,8 +28,8 @@ export const parser_config: Record<string, parser_item> = {
         build: buildPoint,
     },
     vpt: {
-        name: 'point from vector',
-        description: 'Create a point from a vector and a starting point',
+        name: 'point from two points',
+        description: 'Create a point from a vector defined by two points and a starting point',
         code: 'A=vpt <point>,<point>,<scale?>,<starting point?>',
         parameters: [],
         build: buildPoint,
@@ -37,7 +37,7 @@ export const parser_config: Record<string, parser_item> = {
     dpt: {
         name: 'point from direction line',
         description: 'Create a point from a line and a starting point',
-        code: 'A=vpt <point>,<line>,<distance>,<perpendicular?>',
+        code: 'A=dpt <point>,<line>,<distance>,<perpendicular?>',
         parameters: [],
         build: buildPoint,
     },

@@ -1,33 +1,68 @@
 import eslint from '@eslint/js'
-import tseslint from "typescript-eslint"
+import eslintPluginVue from 'eslint-plugin-vue'
+import typescriptEslint from "typescript-eslint"
+import globals from 'globals'
 
-export default tseslint.config(
-	eslint.configs.recommended,
-	...tseslint.configs.strictTypeChecked,
-	...tseslint.configs.stylisticTypeChecked,
+export default typescriptEslint.config(
+	{ignores: ['*.d.ts', '**/coverage', '**/dist']},
 	{
+		extends: [
+			eslint.configs.recommended,
+			...typescriptEslint.configs.stylistic,
+			...eslintPluginVue.configs['flat/recommended']
+		],
+		files: ['**/*.{ts,vue}'],
 		languageOptions: {
+			ecmaVersion: 'latest',
+			sourceType: 'module',
+			globals: globals.browser,
 			parserOptions: {
-				project: true,
-				tsconfigRootDir: import.meta.dirname
+				parser: typescriptEslint.parser,
+				"allowImportExportEverywhere": true,
 			},
 		},
 		rules: {
-			semi: ['error', 'never'],
-			curly: ['error'],
-			"prefer-const": ["error", {
-				"destructuring": "all",
-				"ignoreReadBeforeAssign": false
-			}],
-			"@typescript-eslint/unified-signatures": "off",
-			"@typescript-eslint/no-unnecessary-condition": "warn",
-			"@typescript-eslint/restrict-template-expressions": ["error", {
-				allowNumber: true,
-				allowAny: false,
-				allowBoolean: false,
-				allowNullish: false,
-				allowRegExp: false,
-				allowNever: true,
+			"semi": [
+				"error",
+				"never"
+			],
+			"no-undef": "off",
+			"prefer-const": "off",
+			"vue/html-indent": [
+				"error",
+				"tab"
+			],
+			"vue/first-attribute-linebreak": [
+				"error",
+				{
+					"multiline": "below",
+					"singleline": "ignore"
+				}
+			],
+			"vue/html-closing-bracket-newline": [
+				"error", {
+					"singleline": "never",
+					"multiline": "always"
+				}
+			],
+			"vue/block-order": [
+				"error",
+				{
+					"order": [
+						"script",
+						"template",
+						"style"
+					]
+				}
+			],
+			"vue/multi-word-component-names": "off",
+			"vue/max-attributes-per-line": ["error", {
+				"singleline": {
+					"max": 1
+				},
+				"multiline": {
+					"max": 1
+				}
 			}],
 		}
 	},
