@@ -165,8 +165,8 @@ export class Point extends AbstractFigure {
             const A = this._config.middle.A
             const B = this._config.middle.B
 
-            this._pixels.x = (A.x + B.x) / 2
-            this._pixels.y = (A.y + B.y) / 2
+            this.x = (A.x + B.x) / 2
+            this.y = (A.y + B.y) / 2
 
             return this
         }
