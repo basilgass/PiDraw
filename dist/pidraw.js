@@ -12,7 +12,7 @@ function m(i, t) {
   }
   di(Object.getOwnPropertyNames(t)), _e[i] = Object.assign(_e[i] || {}, t);
 }
-function q(i) {
+function F(i) {
   return _e[i] || {};
 }
 function Ki() {
@@ -68,7 +68,7 @@ const Ji = /* @__PURE__ */ new Set(["desc", "metadata", "title"]), xe = (i) => J
   for (const n in s)
     s[n].valueOf() === e[n] && delete s[n];
   Object.keys(s).length ? i.node.setAttribute("data-svgjs", JSON.stringify(s)) : (i.node.removeAttribute("data-svgjs"), i.node.removeAttribute("svgjs:data"));
-}, Ie = "http://www.w3.org/2000/svg", ts = "http://www.w3.org/1999/xhtml", he = "http://www.w3.org/2000/xmlns/", qt = "http://www.w3.org/1999/xlink", w = {
+}, Ie = "http://www.w3.org/2000/svg", ts = "http://www.w3.org/1999/xhtml", he = "http://www.w3.org/2000/xmlns/", Ft = "http://www.w3.org/1999/xlink", w = {
   window: typeof window > "u" ? null : window,
   document: typeof document > "u" ? null : document
 };
@@ -536,7 +536,7 @@ let E = class bi {
     return this.x = t.a * e + t.c * s + t.e, this.y = t.b * e + t.d * s + t.f, this;
   }
 };
-function Fs(i, t) {
+function qs(i, t) {
   return new E(i, t).transformO(this.screenCTM().inverseO());
 }
 function yt(i, t, e) {
@@ -748,7 +748,7 @@ class p {
 function Vs() {
   return new p(this.node.getCTM());
 }
-function qs() {
+function Fs() {
   try {
     if (typeof this.isRoot == "function" && !this.isRoot()) {
       const i = this.rect(1, 1), t = i.node.getScreenCTM();
@@ -1430,9 +1430,9 @@ y(Z, {
   bbox: Bs,
   rbox: Gs,
   inside: Xs,
-  point: Fs,
+  point: qs,
   ctm: Vs,
-  screenCTM: qs
+  screenCTM: Fs
 });
 k(Z, "Element");
 const Nt = {
@@ -1818,7 +1818,7 @@ class ie extends X {
       this
     ), Dt(s, "load error", function() {
       tt(s);
-    }), this.attr("href", s.src = t, qt);
+    }), this.attr("href", s.src = t, Ft);
   }
 }
 tn(function(i, t, e) {
@@ -1911,7 +1911,7 @@ function gn(i) {
   const t = this.bbox();
   return i == null ? t.height : this.size(t.width, i);
 }
-const Fe = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const qe = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   MorphArray: un,
   height: gn,
@@ -1945,7 +1945,7 @@ let jt = class extends X {
     return this.attr(this.array().size(s.width, s.height).toLine());
   }
 };
-y(jt, Fe);
+y(jt, qe);
 m({
   Container: {
     // Create a line element
@@ -2297,7 +2297,7 @@ class mt extends St {
 }
 const zi = (i) => {
   const t = typeof i;
-  return t === "number" ? d : t === "string" ? M.isColor(i) ? M : et.test(i) ? $e.test(i) ? mt : St : xi.test(i) ? d : Ce : qe.indexOf(i.constructor) > -1 ? i.constructor : Array.isArray(i) ? St : t === "object" ? Ft : Ce;
+  return t === "number" ? d : t === "string" ? M.isColor(i) ? M : et.test(i) ? $e.test(i) ? mt : St : xi.test(i) ? d : Ce : Fe.indexOf(i.constructor) > -1 ? i.constructor : Array.isArray(i) ? St : t === "object" ? qt : Ce;
 };
 class ut {
   constructor(t) {
@@ -2332,7 +2332,7 @@ class ut {
   _set(t) {
     this._type || this.type(zi(t));
     let e = new this._type(t);
-    return this._type === M && (e = this._to ? e[this._to[4]]() : this._from ? e[this._from[4]]() : e), this._type === Ft && (e = this._to ? e.align(this._to) : this._from ? e.align(this._from) : e), e = e.toConsumable(), this._morphObj = this._morphObj || new this._type(), this._context = this._context || Array.apply(null, Array(e.length)).map(Object).map(function(s) {
+    return this._type === M && (e = this._to ? e[this._to[4]]() : this._from ? e[this._from[4]]() : e), this._type === qt && (e = this._to ? e.align(this._to) : this._from ? e.align(this._from) : e), e = e.toConsumable(), this._morphObj = this._morphObj || new this._type(), this._context = this._context || Array.apply(null, Array(e.length)).map(Object).map(function(s) {
       return s.done = !0, s;
     }), e;
   }
@@ -2392,7 +2392,7 @@ Gt.defaults = {
   originY: 0
 };
 const Tn = (i, t) => i[0] < t[0] ? -1 : i[0] > t[0] ? 1 : 0;
-class Ft {
+class qt {
   constructor(...t) {
     this.init(...t);
   }
@@ -2446,12 +2446,12 @@ class Ft {
     return t;
   }
 }
-const qe = [Ce, Gt, Ft];
+const Fe = [Ce, Gt, qt];
 function An(i = []) {
-  qe.push(...[].concat(i));
+  Fe.push(...[].concat(i));
 }
 function On() {
-  y(qe, {
+  y(Fe, {
     to(i) {
       return new ut().type(this.constructor).from(this.toArray()).to(i);
     },
@@ -2566,7 +2566,7 @@ m({
     })
   }
 });
-y(Xt, Fe);
+y(Xt, qe);
 y(Xt, Di);
 k(Xt, "Polygon");
 class Ht extends X {
@@ -2583,7 +2583,7 @@ m({
     })
   }
 });
-y(Ht, Fe);
+y(Ht, qe);
 y(Ht, Di);
 k(Ht, "Polyline");
 class se extends X {
@@ -3023,9 +3023,9 @@ y([G, Zt], {
     );
   }
 });
-const ji = (i, t) => i.lmultiplyO(t), Fi = (i) => i.transforms;
+const ji = (i, t) => i.lmultiplyO(t), qi = (i) => i.transforms;
 function Pn() {
-  const t = this._transformationRunners.runners.map(Fi).reduce(ji, new p());
+  const t = this._transformationRunners.runners.map(qi).reduce(ji, new p());
   this.transform(t), this._transformationRunners.merge(), this._transformationRunners.length() === 1 && (this._frameId = null);
 }
 class jn {
@@ -3087,7 +3087,7 @@ m({
       this._transformationRunners.clearBefore(i.id);
     },
     _currentTransform(i) {
-      return this._transformationRunners.runners.filter((t) => t.id <= i.id).map(Fi).reduce(ji, new p());
+      return this._transformationRunners.runners.filter((t) => t.id <= i.id).map(qi).reduce(ji, new p());
     },
     _addRunner(i) {
       this._transformationRunners.add(i), S.cancelImmediate(this._frameId), this._frameId = S.immediate(Pn.bind(this));
@@ -3099,7 +3099,7 @@ m({
     }
   }
 });
-const Fn = (i, t) => i.filter((e) => !t.includes(e));
+const qn = (i, t) => i.filter((e) => !t.includes(e));
 y(G, {
   attr(i, t) {
     return this.styleAttr("attr", i, t);
@@ -3122,12 +3122,12 @@ y(G, {
         return this.element()[i](n.at(o).valueOf()), n.done();
       },
       function(o) {
-        const a = Object.keys(o), h = Fn(a, r);
+        const a = Object.keys(o), h = qn(a, r);
         if (h.length) {
-          const l = this.element()[i](h), u = new Ft(n.from()).valueOf();
+          const l = this.element()[i](h), u = new qt(n.from()).valueOf();
           Object.assign(u, l), n.from(u);
         }
-        const c = new Ft(n.to()).valueOf();
+        const c = new qt(n.to()).valueOf();
         Object.assign(c, o), n.to(c), r = a, s = o;
       }
     ), this._rememberMorpher(i, n), this;
@@ -3328,7 +3328,7 @@ class Re extends R {
   namespace() {
     return this.isRoot() ? this.attr({ xmlns: Ie, version: "1.1" }).attr(
       "xmlns:xlink",
-      qt,
+      Ft,
       he
     ) : this.root().namespace();
   }
@@ -3367,7 +3367,7 @@ k(Be, "Symbol");
 function Vn(i) {
   return this._build === !1 && this.clear(), this.node.appendChild(w.document.createTextNode(i)), this;
 }
-function qn() {
+function Fn() {
   return this.node.getComputedTextLength();
 }
 function Rn(i, t = this.bbox()) {
@@ -3409,7 +3409,7 @@ const Vi = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   center: Un,
   cx: Xn,
   cy: Hn,
-  length: qn,
+  length: Fn,
   move: Gn,
   plain: Vn,
   x: Rn,
@@ -3650,7 +3650,7 @@ function rr(i, t = this.bbox()) {
 function or(i, t = this.bbox()) {
   return i == null ? t.y : this.move(t.x, i, t);
 }
-const qi = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const Fi = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   dmove: Zn,
   dx: Jn,
@@ -3667,7 +3667,7 @@ class re extends R {
     super(O("g", t), e);
   }
 }
-y(re, qi);
+y(re, Fi);
 m({
   Container: {
     // Create a group element
@@ -3687,10 +3687,10 @@ class te extends R {
   }
   // Link url
   to(t) {
-    return this.attr("href", t, qt);
+    return this.attr("href", t, Ft);
   }
 }
-y(te, qi);
+y(te, Fi);
 m({
   Container: {
     // Create a hyperlink element
@@ -3844,7 +3844,7 @@ m({
     // Create path for text to run on
     path: A(function(i, t = !0) {
       const e = new Xe();
-      i instanceof Ot || (i = this.defs().path(i)), e.attr("href", "#" + i, qt);
+      i instanceof Ot || (i = this.defs().path(i)), e.attr("href", "#" + i, Ft);
       let s;
       if (t)
         for (; s = this.node.firstChild; )
@@ -3874,7 +3874,7 @@ class Bi extends X {
   }
   // Use element as a reference
   use(t, e) {
-    return this.attr("href", (e || "") + "#" + t, qt);
+    return this.attr("href", (e || "") + "#" + t, Ft);
   }
 }
 m({
@@ -3887,20 +3887,20 @@ m({
 });
 k(Bi, "Use");
 const Gi = j;
-y([Re, Be, ie, Pt, Kt], q("viewbox"));
-y([jt, Ht, Xt, Ot], q("marker"));
-y(Q, q("Text"));
-y(Ot, q("Path"));
-y(De, q("Defs"));
-y([Q, ne], q("Tspan"));
-y([se, ee, Bt, G], q("radius"));
-y(Rt, q("EventTarget"));
-y(rt, q("Dom"));
-y(Z, q("Element"));
-y(X, q("Shape"));
-y([R, Ei], q("Container"));
-y(Bt, q("Gradient"));
-y(G, q("Runner"));
+y([Re, Be, ie, Pt, Kt], F("viewbox"));
+y([jt, Ht, Xt, Ot], F("marker"));
+y(Q, F("Text"));
+y(Ot, F("Path"));
+y(De, F("Defs"));
+y([Q, ne], F("Tspan"));
+y([se, ee, Bt, G], F("radius"));
+y(Rt, F("EventTarget"));
+y(rt, F("Dom"));
+y(Z, F("Element"));
+y(X, F("Shape"));
+y([R, Ei], F("Container"));
+y(Bt, F("Gradient"));
+y(G, F("Runner"));
 gt.extend(Ki());
 An([
   d,
@@ -4777,7 +4777,7 @@ function _r(i, t, e) {
   const { x: s, y: n } = i, { x: r, y: o } = t, { x: a, y: h } = e, c = (s - r) * (s - a) * (r - a), l = (n * (r - a) + o * (a - s) + h * (s - r)) / c, u = (n * (a ** 2 - r ** 2) + o * (s ** 2 - a ** 2) + h * (r ** 2 - s ** 2)) / c, f = (n * (r * a * (r - a)) + o * (a * s * (a - s)) + h * (s * r * (s - r))) / c;
   return { a: l, b: u, c: f };
 }
-class F {
+class q {
   constructor(t, e) {
     this._rootSVG = t, this._name = e, this._static = !1, this._isDraggable = !1, this._animate = null, this._label = null, this._element = this._rootSVG.group().attr("id", this._name), this._appearance = {
       stroke: {
@@ -4979,7 +4979,7 @@ const yr = [
   "teal",
   "gold"
 ];
-class V extends F {
+class V extends q {
   constructor(t, e, s) {
     return super(t, e), this._config = Object.assign(
       { shape: "line" },
@@ -5155,7 +5155,7 @@ function oi(i) {
 function ai(i, t) {
   return i.filter((e) => e.includes(t)).map((e) => e === t || e === `+${t}` ? 1 : e === `-${t}` ? -1 : Hi(e.replace(t, "")))[0] ?? 0;
 }
-class b extends F {
+class b extends q {
   constructor(t, e, s) {
     return super(t, e), this._pixels = { x: NaN, y: NaN }, this._config = Object.assign(
       {
@@ -5316,7 +5316,7 @@ class b extends F {
     return this.fill().stroke(), this.shape;
   }
 }
-class Ct extends F {
+class Ct extends q {
   _numExp;
   _fx;
   constructor(t, e, s) {
@@ -5383,7 +5383,7 @@ class Ct extends F {
     return r;
   }
 }
-class Wt extends F {
+class Wt extends q {
   constructor(t, e, s) {
     super(t, e), this._config = Object.assign({
       figures: [],
@@ -5442,7 +5442,7 @@ class Wt extends F {
     return this.element.clear(), this.shape = this.element.circle(this.radius).center(this.center.x, this.center.y), this.shape.stroke(this.appearance.stroke.color), this.shape.fill(this.appearance.fill), this.shape;
   }
 }
-class xr extends F {
+class xr extends q {
   constructor(t, e, s) {
     super(t, e), this._config = Object.assign({
       shape: "polygon"
@@ -5507,7 +5507,7 @@ class xr extends F {
     return this;
   }
 }
-class br extends F {
+class br extends q {
   constructor(t, e, s) {
     return super(t, e), this.static = !0, this._config = Object.assign(
       {
@@ -5579,7 +5579,7 @@ class br extends F {
     return r;
   }
 }
-class wr extends F {
+class wr extends q {
   constructor(t, e, s) {
     super(t, e), this._config = Object.assign({
       start: { x: 0, y: 0 },
@@ -5588,7 +5588,7 @@ class wr extends F {
       radius: this.graphConfig.axis.x.x,
       morphToSquare: !0,
       sector: !1,
-      mark: !1
+      acute: !1
     }, s), this.config = s;
   }
   _config;
@@ -5644,7 +5644,7 @@ class wr extends F {
     return this.element.clear(), this.shape = this.element.path("M0 0"), this.fill().stroke(), this.element.add(this.shape), this.shape;
   }
   _describeSquare(t, e, s) {
-    return [
+    let n = [
       "M",
       e.x,
       e.y,
@@ -5654,10 +5654,15 @@ class wr extends F {
       "L",
       s.x,
       s.y
-    ].join(" ");
+    ];
+    return n = this._describe_add_sector(n, t, e), n.join(" ");
+  }
+  _describe_add_sector(t, e, s) {
+    return this._config.sector && (t = t.concat(["L", e.x, e.y, "L", s.x, s.y])), t;
   }
   _describeArc(t, e, s, n, r) {
-    const o = (r + 360) % 360 <= 180 ? 0 : 1;
+    let o = (r + 360) % 360 <= 180 ? 0 : 1, a = 0;
+    this.config.acute && r > 180 && (o = (o + 1) % 2, a = 1);
     let h = [
       "M",
       e.x,
@@ -5667,14 +5672,14 @@ class wr extends F {
       n,
       0,
       o,
-      0,
+      a,
       s.x,
       s.y
     ];
-    return this._config.sector && (h = h.concat(["L", t.x, t.y, "L", e.x, e.y])), h.join(" ");
+    return h = this._describe_add_sector(h, t, e), h.join(" ");
   }
 }
-class kr extends F {
+class kr extends q {
   _axis;
   constructor(t, e, s) {
     return super(t, e), this.static = !0, Object.values(Vt).includes(s) ? this._config = this._defaultConfig(s) : this._config = s, this._axis = this._makeShape(), this.computed(), this;
@@ -5737,7 +5742,7 @@ class kr extends F {
     return c !== null && t.plot(c[0].x, c[0].y, c[1].x, c[1].y), t.stroke({ color: n, width: 1 }).marker("end", h), this.shape.add(t), t;
   }
 }
-class vr extends F {
+class vr extends q {
   _numExp;
   constructor(t, e, s) {
     return super(t, e), this._config = Object.assign({
@@ -5779,7 +5784,7 @@ class vr extends F {
     );
   }
 }
-class Cr extends F {
+class Cr extends q {
   _reference;
   _delta;
   _point;
@@ -5831,7 +5836,7 @@ class Cr extends F {
     return [this._point];
   }
 }
-class Sr extends F {
+class Sr extends q {
   constructor(t, e, s) {
     return super(t, e), this._config = Object.assign({
       samples: 100
@@ -5880,7 +5885,7 @@ class Sr extends F {
     return this;
   }
 }
-class Mr extends F {
+class Mr extends q {
   constructor(t, e, s) {
     super(t, e), this._config = Object.assign({}, s), this.shape = this._makeShape(), this.computed();
   }
@@ -5921,7 +5926,7 @@ class Mr extends F {
     return this;
   }
 }
-class Tr extends F {
+class Tr extends q {
   constructor(t, e, s) {
     super(t, e), s && (this._d = s, this.computed(), this._makeShape());
   }
@@ -5973,7 +5978,7 @@ function Nr(i, t, e) {
   const [s, n] = hi(e[t - 1], e[t - 2], i), [r, o] = hi(i, e[t - 1], e[t + 1], !0);
   return `C ${s},${n} ${r},${o} ${i.point.x},${i.point.y}`;
 }
-class Ir extends F {
+class Ir extends q {
   constructor(t, e, s) {
     super(t, e), this._config = s, this._points = [], this.points = s.points, this._makeShape(), this.computed();
   }
@@ -6256,7 +6261,7 @@ class $r {
       if (e?.follow?.length) {
         let u = { x: a, y: h };
         e.follow.forEach((f) => {
-          f instanceof F ? u = f.follow(a, h) : typeof f == "string" ? u = this.follow(f, r)(a, h) : u = f(a, h), a = u.x, h = u.y;
+          f instanceof q ? u = f.follow(a, h) : typeof f == "string" ? u = this.follow(f, r)(a, h) : u = f(a, h), a = u.x, h = u.y;
         });
       }
       if (r.pixels.x === a && r.pixels.y === h)
@@ -6486,11 +6491,13 @@ function jr(i, t, e) {
   const s = z(i.values, t);
   if (i.key === C.ARC.toString() && s.length >= 3) {
     const [n, r, o, a] = s;
-    if (n instanceof b && r instanceof b && o instanceof b)
+    if (n instanceof b && r instanceof b && o instanceof b) {
+      const h = i.parameters?.square?.value ?? !1, c = i.parameters?.sector?.value ?? !1, l = i.parameters?.acute?.value ?? !1;
       return {
         create: "arc",
-        config: { start: n, center: r, end: o, radius: a }
+        config: { start: n, center: r, end: o, radius: a, morphToSquare: h, sector: c, acute: l }
       };
+    }
   }
   return null;
 }
@@ -6570,7 +6577,7 @@ function it(i, t, e) {
   }
   return null;
 }
-function Fr(i, t, e) {
+function qr(i, t, e) {
   const s = z(i.values, t);
   if (i.key === C.PLOT.toString()) {
     const [n, ...r] = s, o = { expression: typeof n == "number" ? n.toString() : n }, a = r.filter((c) => K(c));
@@ -6590,7 +6597,7 @@ function Vr(i, t, e) {
     config: { expression: null, quadratic: s }
   } : null;
 }
-function qr(i, t, e) {
+function Fr(i, t, e) {
   const s = z(i.values, t);
   if (i.key === C.PARAMETRIC.toString() && s.length === 2) {
     const [n, r] = s;
@@ -7009,7 +7016,7 @@ const ui = {
     name: "arc",
     description: "Create an arc",
     code: "c=arc <point>,<point>,<point>[,<number>]",
-    parameters: [],
+    parameters: ["sector", "square", "acute"],
     build: jr
   },
   plot: {
@@ -7017,11 +7024,11 @@ const ui = {
     description: "Plot a function",
     code: "f(x)=[f=plot ]<function>[@<number>,<domain>,<image>]",
     parameters: [],
-    build: Fr
+    build: qr
   },
   quad: {
     name: "quad",
-    description: "quadrativ plot through three points",
+    description: "quadrative plot through three points",
     code: "f=quad A,B,C[@<number>,<domain>,<image>]",
     parameters: [],
     build: Vr
@@ -7031,7 +7038,7 @@ const ui = {
     description: "Plot a parametric function",
     code: "f(t)=[f=parametric ]<function_x>,<function_y>[,<domain>]",
     parameters: [],
-    build: qr
+    build: Fr
   },
   bezier: {
     name: "bezier",
