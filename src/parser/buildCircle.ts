@@ -32,11 +32,21 @@ export function buildArc(item: PARSER, figures: Record<string, AbstractFigure>, 
         const [start, center, end, radius] = code
 
         if (start instanceof Point && center instanceof Point && end instanceof Point) {
+            const morphToSquare = (item.parameters?.square?.value ?? false) as boolean
+            const sector = (item.parameters?.sector?.value ?? false) as boolean
+            const acute = (item.parameters?.acute?.value ?? false) as boolean
             return {
                 create: 'arc',
-                config: {start, center, end, radius: radius as number | Point}
+                config: {start, center, end, radius: radius as number | Point, morphToSquare, sector, acute}
             }
         }
+
+        /**
+         * A(0,0)
+         * B(5,0)
+         * C(3,4)->drag=grid
+         * a=arc B,A,C->acute
+         */
     }
 
     return null

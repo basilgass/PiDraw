@@ -95,11 +95,11 @@ export abstract class AbstractFigure {
 
     protected _animate: IFigureAnimation | null
 
-    get animate(){
+    get animate() {
         return this._animate
     }
 
-    set animate(value){
+    set animate(value) {
         this._animate = value
     }
 
@@ -145,13 +145,9 @@ export abstract class AbstractFigure {
     }
 
     stroke(): this
-
     stroke(color: string): this
-
     stroke(strokeWidth: number): this
-
     stroke(color: string, strokeWidth: number): this
-
     stroke(color?: string | number, strokeWidth?: number): this {
         // TODO: handle non scaling stroke
         // this.shape.css('vector-effect', "non-scaling-stroke")

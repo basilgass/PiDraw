@@ -149,7 +149,7 @@ export const parser_config: Record<string, parser_item> = {
         name: 'arc',
         description: 'Create an arc',
         code: 'c=arc <point>,<point>,<point>[,<number>]',
-        parameters: [],
+        parameters: ['sector', 'square', 'acute'],
         build: buildArc,
     },
     plot: {
@@ -161,7 +161,7 @@ export const parser_config: Record<string, parser_item> = {
     },
     quad: {
         name: 'quad',
-        description: 'quadrativ plot through three points',
+        description: 'quadrative plot through three points',
         code: 'f=quad A,B,C[@<number>,<domain>,<image>]',
         parameters: [],
         build: buildQuad,

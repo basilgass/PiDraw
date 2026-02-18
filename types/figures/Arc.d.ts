@@ -8,7 +8,7 @@ export interface IArcConfig {
     radius?: number | XY;
     morphToSquare?: boolean;
     sector?: boolean;
-    mark?: boolean;
+    acute?: boolean;
 }
 export declare class Arc extends AbstractFigure {
     constructor(rootSVG: Svg, name: string, values: IArcConfig);
@@ -34,5 +34,6 @@ export declare class Arc extends AbstractFigure {
     getPath(): string;
     _makeShape(): import('@svgdotjs/svg.js').Shape;
     private _describeSquare;
+    private _describe_add_sector;
     private _describeArc;
 }

@@ -30,7 +30,6 @@ export const PARSER_PARAMETERS_KEYS = [
 ]
 
 // TODO: intersection of a line and a circle
-// TODO: prevent creation of too many markers...
 export class Draw extends Graph {
     protected _parser: PiParse
     protected _settings: IParserSettings
@@ -285,6 +284,7 @@ export class Draw extends Graph {
 
                 // Draggable
                 case 'drag':
+                    // TODO: enable multiple options drag=x/0;3|y/-1:4
                     this._applyDrag(obj, key, options)
                     break
 
@@ -386,10 +386,10 @@ export class Draw extends Graph {
                             const {config, create} = build
 
                             if (config && create) {
-                                /* eslint-disable */
+                                 
                                 // @ts-expect-error: create is string and is not
                                 obj = this.create[create](config, item.name + (buildResult.length > 1 ? `${index + 1}` : ''))
-                                /* eslint-enable */
+                                 
                             }
                         } catch (e) {
                             console.error(e)

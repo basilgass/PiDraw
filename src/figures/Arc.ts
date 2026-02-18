@@ -10,7 +10,7 @@ export interface IArcConfig {
     radius?: number | XY,
     morphToSquare?: boolean,
     sector?: boolean,
-    mark?: boolean
+    acute?: boolean
 }
 
 export class Arc extends AbstractFigure {
@@ -18,13 +18,13 @@ export class Arc extends AbstractFigure {
         super(rootSVG, name)
 
         this._config = Object.assign({
-            start: { x: 0, y: 0 },
-            center: { x: 10, y: 10 },
-            end: { x: 0, y: 10 },
+            start: {x: 0, y: 0},
+            center: {x: 10, y: 10},
+            end: {x: 0, y: 10},
             radius: this.graphConfig.axis.x.x,
             morphToSquare: true,
             sector: false,
-            mark: false
+            acute: false
         }, values)
 
         // Store the config -> it triggers makeShape and computed.
@@ -33,7 +33,9 @@ export class Arc extends AbstractFigure {
 
     protected _config: IArcConfig
 
-    get config() { return this._config }
+    get config() {
+        return this._config
+    }
 
     set config(value: IArcConfig) {
         this._config = value
@@ -41,11 +43,17 @@ export class Arc extends AbstractFigure {
         this.computed()
     }
 
-    get center() { return this._config.center }
+    get center() {
+        return this._config.center
+    }
 
-    get start() { return this._config.start }
+    get start() {
+        return this._config.start
+    }
 
-    get end() { return this._config.end }
+    get end() {
+        return this._config.end
+    }
 
     get radius() {
         if (typeof this._config.radius === 'number') {
@@ -56,7 +64,7 @@ export class Arc extends AbstractFigure {
     }
 
     get angle(): number {
-        const { start, end } = this.getAngles()
+        const {start, end} = this.getAngles()
         if (end - start < 0) {
             return 360 + end - start
         }
@@ -76,7 +84,9 @@ export class Arc extends AbstractFigure {
 
     moveLabel(): this {
         // No label - no need to continue
-        if (!this.label) { return this }
+        if (!this.label) {
+            return this
+        }
 
         // Radius of the arc.
         const r = this.radius
@@ -126,7 +136,7 @@ export class Arc extends AbstractFigure {
 
     getPath(): string {
         // Get the angles
-        const { start, end } = this.getAngles(),
+        const {start, end} = this.getAngles(),
             radius = (this._config.morphToSquare && this.isSquare) ? this.radius / 2 : this.radius,
             startXY = polarToCartesian(this.center.x, this.center.y, radius, start),
             endXY = polarToCartesian(this.center.x, this.center.y, radius, end)
@@ -154,32 +164,37 @@ export class Arc extends AbstractFigure {
     }
 
     private _describeSquare(center: XY, start: XY, end: XY): string {
-        return [
+        let p = [
             "M", start.x, start.y,
             "l", (end.x - center.x), (end.y - center.y),
             "L", end.x, end.y
-        ].join(" ")
+        ]
+        p = this._describe_add_sector(p, center, start)
+        return p.join(" ")
+    }
+
+    private _describe_add_sector(p: (string | number)[], center: XY, start: XY) {
+        if (this._config.sector) {
+            p = p.concat(['L', center.x, center.y, 'L', start.x, start.y])
+        }
+        return p
     }
 
     private _describeArc(center: XY, start: XY, end: XY, radius: number, angle: number): string {
-        const largeArcFlag = (angle + 360) % 360 <= 180 ? 0 : 1,
-            swipeFlag = 0
+        let largeArcFlag = (angle + 360) % 360 <= 180 ? 0 : 1
+        let swipeFlag = 0
 
-        // TODO: Mark an angle: use always the smallest arc ?
-        // this._mark &&
-        // if (angle < 0 && angle > -180) {
-        //     largeArcFlag = (largeArcFlag + 1) % 2
-        //     swipeFlag = 1
-        // }
+        if (this.config.acute && angle > 180) {
+            largeArcFlag = (largeArcFlag + 1) % 2
+            swipeFlag = 1
+        }
 
         let p = [
             "M", start.x, start.y,
             "A", radius, radius, 0, largeArcFlag, swipeFlag, end.x, end.y
         ]
 
-        if (this._config.sector) {
-            p = p.concat(['L', center.x, center.y, 'L', start.x, start.y])
-        }
+        p = this._describe_add_sector(p, center, start)
 
         return p.join(" ")
     }
