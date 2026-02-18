@@ -5228,7 +5228,7 @@ class b extends q {
     }
     if (this._config.middle) {
       const t = this._config.middle.A, e = this._config.middle.B;
-      return this._pixels.x = (t.x + e.x) / 2, this._pixels.y = (t.y + e.y) / 2, this;
+      return this.x = (t.x + e.x) / 2, this.y = (t.y + e.y) / 2, this;
     }
     if (this._config.projection) {
       const t = this._config.projection.point;
