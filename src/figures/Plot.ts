@@ -13,7 +13,6 @@ export interface IPlotConfig {
 }
 
 export class Plot extends AbstractFigure {
-    protected _numExp: NumExp
     protected _fx: string
 
     constructor(rootSVG: Svg, name: string, values: IPlotConfig) {
@@ -34,6 +33,12 @@ export class Plot extends AbstractFigure {
         // Compute the shape
         this.computed()
         return this
+    }
+
+    protected _numExp: NumExp
+
+    get numExp(){
+        return this._numExp
     }
 
     protected _config: IPlotConfig

@@ -5,9 +5,10 @@ import katex from "katex"
 import {PiDraw} from "../../src"
 import {basic_examples} from "../parsing_examples/basic_examples"
 
+const id = basic_examples.length - 1
 const parameter = ref<string>(`x=-11:11,y=-11:11,axis,grid,ppu=50`)
-const code = ref<string>('a=line y=1/2x+3->w=10')
-// const code = ref<string>(basic_examples[id].code ?? '')
+// const code = ref<string>('a=line y=1/2x+3->w=10')
+const code = ref<string>(basic_examples[id].code ?? '')
 
 const showAnimation = ref<boolean>(false)
 
@@ -32,7 +33,8 @@ function updateLayout() {
   draw.refreshLayout(parameter.value)
 }
 
-function animation(value) {
+function animation(value: string) {
+  // TODO: type correctly value.
   if (value === 'start') {
     draw.animation.start()
   } else if (value === 'pause') {

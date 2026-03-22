@@ -19,6 +19,7 @@ export interface parser_item {
     option?: string
     parameters: string[],
 }
+
 export const parser_config: Record<string, parser_item> = {
     pt: {
         name: 'point',
@@ -125,12 +126,13 @@ export const parser_config: Record<string, parser_item> = {
         parameters: [],
         build: buildLine,
     },
-    // tangent: {
-    // name: 'tangent',
-    //     description: 'Create a tangent line from a point to a circle',
-    //     code: 'd=tan <point>,<point>',
-    //     parameters: []
-    // },
+    tan: {
+        name: 'tangent',
+        description: 'Create a tangent line from a <circle|plot> by a Point',
+        code: 'd=tan <circle|plot>,<point>',
+        parameters: [],
+        build: buildLine,
+    },
     bis: {
         name: 'bisector',
         description: 'Create the bisector of an angle',

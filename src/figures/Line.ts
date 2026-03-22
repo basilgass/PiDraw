@@ -13,6 +13,7 @@ import {
     toPixels
 } from "../Calculus"
 import {convertIdToFigure} from "../parser/parser.common"
+import type {Plot} from "./Plot"
 
 export type ILineType = 'segment' | 'ray' | 'line' | 'vector'
 
@@ -25,6 +26,7 @@ export interface ILineConfig {
     perpendicular?: { to: Line, through: XY },
     shape?: ILineType
     through?: { A: XY, B: XY },
+    tangent?: { f: Plot, A: XY }
 }
 
 // A line is a figure defined by a point and a vector
@@ -109,7 +111,7 @@ export class Line extends AbstractFigure {
     override computeLabel(): string {
         if (this.label?.config.text.includes('@')) {
             // replace the @ by the length of the segment.
-            if(this._config.shape==="segment") {
+            if (this._config.shape === "segment") {
                 const A = toCoordinates(this._start, this.graphConfig)
                 const B = toCoordinates(this._end, this.graphConfig)
 
@@ -185,7 +187,9 @@ export class Line extends AbstractFigure {
         } else if (this._config.equation) {
             const equ = this._config.equation
 
-            if(!equ.includes('=')){return this}
+            if (!equ.includes('=')) {
+                return this
+            }
 
             let A: XY = {x: 0, y: 0}
             // horizontal line.
@@ -195,7 +199,7 @@ export class Line extends AbstractFigure {
                 direction = {x: 1, y: 0}
             }
             // vertical line
-            else  if (equ.startsWith('x=')) {
+            else if (equ.startsWith('x=')) {
                 const value = convertIdToFigure([equ.split('=')[1]], {})[0]
                 A = toPixels({x: value as number, y: 0}, this.graphConfig)
                 direction = {x: 0, y: 1}
@@ -229,6 +233,21 @@ export class Line extends AbstractFigure {
                 x: A.x + direction.x,
                 y: A.y + direction.y
             }
+        } else if (this._config.tangent?.A && this._config.tangent?.f) {
+            const A = this._config.tangent.A // in pixels
+            const P = toCoordinates(A, this.graphConfig)  // in coordinate system
+
+            const x = P.x + 0.0001 // neighbour point
+            const y = this._config.tangent.f.numExp.evaluate({x})
+            const dx = toPixels({x, y}, this.graphConfig)
+
+            this.start = {x: A.x, y: A.y}
+            direction = {
+                x: dx.x - A.x,
+                y: dx.y - A.y
+            }
+        } else {
+            console.log(this._config)
         }
 
         // If the line is not a segment and not a vector, we need to compute the line

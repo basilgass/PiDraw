@@ -191,5 +191,12 @@ S(0,-5)->animate,from=R1,to=R2,duration=4,delay=2`
         code: `A(0,0)->drag=grid
 B(2,1)->drag=grid
 d=AB`
+    },
+    {
+        name: 'tangent to f(x) through a point',
+        parameters: 'f,P',
+        code: `f(x)=1/2x^2-3x+5
+P(4,1)->drag=f
+t=tan f,P`
     }
 ]

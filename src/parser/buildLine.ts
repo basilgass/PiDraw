@@ -4,6 +4,7 @@ import {type ILineConfig, type ILineType, Line} from "../figures/Line"
 import {Point} from "../figures/Point"
 import {type buildInterface, type IGraphConfig} from "../pidraw.common"
 import {convertIdToFigure, PARSER_TYPE} from "./parser.common"
+import {Plot} from "../figures/Plot"
 
 const create = 'line'
 
@@ -47,7 +48,7 @@ export function buildLine(item: PARSER, figures: Record<string, AbstractFigure>,
     if (item.key === PARSER_TYPE.LINE.toString() && code.length === 1) {
         return {
             create,
-            config:{
+            config: {
                 equation: code[0] as string
             }
         }
@@ -103,6 +104,16 @@ export function buildLine(item: PARSER, figures: Record<string, AbstractFigure>,
             return {
                 create,
                 config: {bisector: {A, B, C}}
+            }
+        }
+    }
+
+    if (item.key === PARSER_TYPE.TANGENT.toString() && code.length === 2) {
+        const [f, A] = code
+        if (A instanceof Point && f instanceof Plot) {
+            return {
+                create,
+                config: {tangent: {A, f}}
             }
         }
     }

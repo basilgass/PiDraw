@@ -2,6 +2,7 @@ import { AbstractFigure } from './AbstractFigure';
 import { XY } from '../pidraw.common';
 import { Shape, Svg } from '@svgdotjs/svg.js';
 import { mathLine } from '../Calculus';
+import { Plot } from './Plot';
 export type ILineType = 'segment' | 'ray' | 'line' | 'vector';
 export interface ILineConfig {
     bisector?: {
@@ -33,6 +34,10 @@ export interface ILineConfig {
     through?: {
         A: XY;
         B: XY;
+    };
+    tangent?: {
+        f: Plot;
+        A: XY;
     };
 }
 export declare class Line extends AbstractFigure {

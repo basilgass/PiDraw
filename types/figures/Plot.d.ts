@@ -10,9 +10,10 @@ export interface IPlotConfig {
     samples?: number;
 }
 export declare class Plot extends AbstractFigure {
-    protected _numExp: NumExp;
     protected _fx: string;
     constructor(rootSVG: Svg, name: string, values: IPlotConfig);
+    protected _numExp: NumExp;
+    get numExp(): NumExp;
     protected _config: IPlotConfig;
     get config(): IPlotConfig;
     set config(value: IPlotConfig);
