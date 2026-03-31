@@ -10,7 +10,9 @@ export interface IPlotConfig {
     domain?: DOMAIN,
     image?: DOMAIN,
     samples?: number,
-    asymptoteThreshold?: number
+    asymptoteThreshold?: number,
+    tolerance?: number,
+    maxDepth?: number
 }
 
 export class Plot extends AbstractFigure {
@@ -180,21 +182,81 @@ export class Plot extends AbstractFigure {
     }
 
     _calculatePointsCoordinates(domain: DOMAIN, samples: number, expr: NumExp, image: DOMAIN, graphConfig = this.graphConfig): XY[] {
-        const points: XY[] = []
-        const pt: XY = {x: 0, y: 0}
+        const toleranceSq = (this._config.tolerance ?? 1.0) ** 2
+        const maxDepth = this._config.maxDepth ?? 6
+        const discontinuityThreshold = graphConfig.height * (this._config.asymptoteThreshold ?? 10)
 
-        for (let x = domain.min; x < domain.max; x += 1 / samples) {
-            pt.x = graphConfig.origin.x + toPixels(x, graphConfig, 'x')
-            const y = expr.evaluate({x})
+        // Constantes de conversion inlinées (évite les appels toPixels + vérifications de type)
+        const ox = graphConfig.origin.x
+        const oy = graphConfig.origin.y
+        const sx = graphConfig.axis.x.x
+        const sy = graphConfig.axis.y.y
 
+        // Objet réutilisable pour expr.evaluate (évite N allocations {x})
+        const vars: Record<string, number> = {x: 0}
+
+        const toPixelPoint = (x: number): XY => {
+            vars.x = x
+            const y = expr.evaluate(vars)
+            const px = ox + x * sx
             if (isNaN(y) || y === Infinity || y === -Infinity || y < image.min || y > image.max) {
-                pt.y = NaN
-            } else {
-                pt.y = graphConfig.origin.y + toPixels(y, graphConfig, 'y')
+                return {x: px, y: NaN}
+            }
+            return {x: px, y: oy + y * sy}
+        }
+
+        const points: XY[] = []
+
+        // subdivide pousse directement dans points — aucune allocation de tableau intermédiaire
+        const subdivide = (x1: number, p1: XY, x2: number, p2: XY, depth: number): void => {
+            if (depth >= maxDepth) return
+            if (isNaN(p1.y) || isNaN(p2.y)) return
+            if (Math.abs(p1.y - p2.y) > discontinuityThreshold) return
+
+            const xm = (x1 + x2) / 2
+            const pm = toPixelPoint(xm)
+
+            if (isNaN(pm.y)) {
+                points.push(pm)
+                return
             }
 
-            points.push({...pt})
+            // Distance² de pm à la droite p1-p2 (évite Math.sqrt)
+            const dx = p2.x - p1.x
+            const dy = p2.y - p1.y
+            const len2 = dx * dx + dy * dy
+            let ecartSq: number
+            if (len2 === 0) {
+                ecartSq = (pm.x - p1.x) ** 2 + (pm.y - p1.y) ** 2
+            } else {
+                const t = Math.max(0, Math.min(1, ((pm.x - p1.x) * dx + (pm.y - p1.y) * dy) / len2))
+                ecartSq = (pm.x - (p1.x + t * dx)) ** 2 + (pm.y - (p1.y + t * dy)) ** 2
+            }
+
+            if (ecartSq <= toleranceSq) {
+                points.push(pm)
+                return
+            }
+
+            subdivide(x1, p1, xm, pm, depth + 1)
+            points.push(pm)
+            subdivide(xm, pm, x2, p2, depth + 1)
         }
+
+        // Passe initiale + subdivisions sans tableau intermédiaire
+        const step = 1 / samples
+        let prevX = domain.min
+        let prevP = toPixelPoint(prevX)
+        points.push(prevP)
+
+        for (let x = domain.min + step; x <= domain.max; x += step) {
+            const p = toPixelPoint(x)
+            subdivide(prevX, prevP, x, p, 0)
+            points.push(p)
+            prevX = x
+            prevP = p
+        }
+
         return points
     }
 }
