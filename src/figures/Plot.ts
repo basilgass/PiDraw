@@ -9,7 +9,8 @@ export interface IPlotConfig {
     quadratic?: XY[],
     domain?: DOMAIN,
     image?: DOMAIN,
-    samples?: number
+    samples?: number,
+    asymptoteThreshold?: number
 }
 
 export class Plot extends AbstractFigure {
@@ -22,6 +23,7 @@ export class Plot extends AbstractFigure {
         this._config = Object.assign({
             expression: '',
             samples: this.graphConfig.axis.x.x,
+            asymptoteThreshold: 10
         }, values)
 
         // Generate the base shape
@@ -37,7 +39,7 @@ export class Plot extends AbstractFigure {
 
     protected _numExp: NumExp
 
-    get numExp(){
+    get numExp() {
         return this._numExp
     }
 
@@ -50,8 +52,6 @@ export class Plot extends AbstractFigure {
     set config(value: IPlotConfig) {
         this._config = value
 
-        this._numExp = new NumExp(this._getExpression())
-
         this.computed()
     }
 
@@ -63,20 +63,22 @@ export class Plot extends AbstractFigure {
             return this
         }
 
-        if(fn!==this._fx){
+        if (fn !== this._fx) {
             // update the num exp.
             this._fx = fn
-            this._numExp = new NumExp(this._getExpression())
+            this._numExp = new NumExp(fn)
         }
 
+        const graphConfig = this.graphConfig
+
         // Get the domain from the config
-        const minX = -this.graphConfig.origin.x / this.graphConfig.axis.x.x - 1
-        const maxX = (this.graphConfig.width - this.graphConfig.origin.x) / this.graphConfig.axis.x.x + 1
+        const minX = -graphConfig.origin.x / graphConfig.axis.x.x - 1
+        const maxX = (graphConfig.width - graphConfig.origin.x) / graphConfig.axis.x.x + 1
         const domain = (this._config.domain ?? {min: minX, max: maxX})
         const image = (this._config.image ?? {min: -Infinity, max: Infinity})
 
         // Get the samples from the config
-        const samples = (this._config.samples ?? this.graphConfig.axis.x.x)
+        const samples = (this._config.samples ?? graphConfig.axis.x.x)
 
         // Make the numeric expression.
         const expr = this._numExp
@@ -84,35 +86,38 @@ export class Plot extends AbstractFigure {
         // Get the (x;y) points from the function
         // 0 < x < width
         // y = fn(x)
-        const points: XY[] = this._calculatePointsCoordinates(domain, samples, expr, image)
+        const points: XY[] = this._calculatePointsCoordinates(domain, samples, expr, image, graphConfig)
 
         // Create the path string from the points.
         let previous: XY = points[0]
-        const outsideGraphY = 1000000
-        const path = points
-            .map(({x, y}, index) => {
-                // Determine the path command
-                let cmd = index === 0 ? 'M' : 'L'
+        const discontinuityThreshold = graphConfig.height * (this._config.asymptoteThreshold ?? 10)
+        let path = ''
 
-                if(index>0) {
-                    if (isNaN(y)) {
-                        // If the y value is not defined, move the cursor to the next point.
-                        cmd = 'M'
-                        y = previous.y>0 ? outsideGraphY: -outsideGraphY
-                    } else if(
-                        (previous.y < 0 && y > this.graphConfig.height) ||
-                        (y < 0 && previous.y > this.graphConfig.height)
-                    ){
-                        // the previous point and the current point are on both side of the graph. Assume it's an asymptote
-                        cmd = 'M'
-                    }
+        for(let index=0; index<points.length; index++){
+
+            let {x, y} = points[index]
+            let cmd = (index === 0) ? 'M' : 'L'
+
+            if (isNaN(y)) {
+                // If the y value is not defined, move the cursor to the next point.
+                cmd = 'M'
+
+                if (isNaN(previous.y)) {
+                    const next = points[index + 1] ?? {x: NaN, y: NaN}
+                    y = next.y > 0 ? -discontinuityThreshold : discontinuityThreshold
+                } else {
+                    y = previous.y > 0 ? -discontinuityThreshold : discontinuityThreshold
                 }
+            } else if (index > 0) {
+                if (Math.abs(y - previous.y) > discontinuityThreshold) {
+                    cmd = 'M'
+                }
+            }
 
-                // Set the current point as the previous point
-                previous = {x, y}
-
-                return `${cmd} ${x} ${y}`
-            }).join(' ')
+            // Set the current point as the previous point
+            previous = {x, y}
+            path+= `${cmd} ${x} ${y} `
+        }
 
         // Update the path
         const shape = this.shape as Path
@@ -146,14 +151,14 @@ export class Plot extends AbstractFigure {
     }
 
     _getExpression(): string {
-        if(typeof this._config.expression === "string"){
+        if (typeof this._config.expression === "string") {
             return this._config.expression
         }
 
-        if(this._config.quadratic && this._config.quadratic.length===3 && this._config.quadratic.every(x=>x instanceof Point)){
+        if (this._config.quadratic && this._config.quadratic.length === 3 && this._config.quadratic.every(x => x instanceof Point)) {
             // Values given here
-            const [A,B,C] = this._config.quadratic.map(x=>x.coordinates)
-            return quadraticThroughABC(A,B,C)
+            const [A, B, C] = this._config.quadratic.map(x => x.coordinates)
+            return quadraticThroughABC(A, B, C)
         }
 
         return ""
@@ -174,17 +179,21 @@ export class Plot extends AbstractFigure {
         return this.shape
     }
 
-    _calculatePointsCoordinates(domain: DOMAIN, samples: number, expr: NumExp, image: DOMAIN): XY[] {
+    _calculatePointsCoordinates(domain: DOMAIN, samples: number, expr: NumExp, image: DOMAIN, graphConfig = this.graphConfig): XY[] {
         const points: XY[] = []
+        const pt: XY = {x: 0, y: 0}
+
         for (let x = domain.min; x < domain.max; x += 1 / samples) {
+            pt.x = graphConfig.origin.x + toPixels(x, graphConfig, 'x')
             const y = expr.evaluate({x})
 
             if (isNaN(y) || y === Infinity || y === -Infinity || y < image.min || y > image.max) {
-                const coords = toPixels({x, y: 0}, this.graphConfig)
-                points.push({x: coords.x, y: NaN})
+                pt.y = NaN
             } else {
-                points.push(toPixels({x, y}, this.graphConfig))
+                pt.y = graphConfig.origin.y + toPixels(y, graphConfig, 'y')
             }
+
+            points.push({...pt})
         }
         return points
     }

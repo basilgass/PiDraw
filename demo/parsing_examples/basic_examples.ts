@@ -198,5 +198,10 @@ d=AB`
         code: `f(x)=1/2x^2-3x+5
 P(4,1)->drag=f
 t=tan f,P`
+    },
+    {
+        name: 'log and ln',
+        parameters: 'axis,grid,x=-3:5,y=-10:10',
+        code: `f(x)=ln(x)`
     }
 ]
