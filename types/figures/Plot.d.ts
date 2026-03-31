@@ -8,6 +8,9 @@ export interface IPlotConfig {
     domain?: DOMAIN;
     image?: DOMAIN;
     samples?: number;
+    asymptoteThreshold?: number;
+    tolerance?: number;
+    maxDepth?: number;
 }
 export declare class Plot extends AbstractFigure {
     protected _fx: string;
@@ -23,5 +26,5 @@ export declare class Plot extends AbstractFigure {
     follow(x: number, y: number): XY;
     _getExpression(): string;
     _makeShape(): import('@svgdotjs/svg.js').Shape;
-    _calculatePointsCoordinates(domain: DOMAIN, samples: number, expr: NumExp, image: DOMAIN): XY[];
+    _calculatePointsCoordinates(domain: DOMAIN, samples: number, expr: NumExp, image: DOMAIN, graphConfig?: import('..').IGraphConfig): XY[];
 }
