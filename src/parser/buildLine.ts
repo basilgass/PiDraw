@@ -16,9 +16,8 @@ export function buildLine(item: PARSER, figures: Record<string, AbstractFigure>,
         item.key === PARSER_TYPE.VECTOR.toString() ||
         item.key === PARSER_TYPE.RAY.toString()
         && code.length === 2) {
-        // item.code = [<point>,<point>] --> A,B
-        // item.code = [<point>,<number|string>] --> A,slope
         const [A, B] = code
+        // item.code = [<point>,<point>] --> A,B
         if (A instanceof Point && B instanceof Point) {
             let lineType: ILineType = 'line'
             switch (item.key) {
@@ -41,6 +40,20 @@ export function buildLine(item: PARSER, figures: Record<string, AbstractFigure>,
                     shape: lineType
                 }
 
+            }
+        }
+
+        // item.code = [<point>,<number|string>] --> A,slope
+        if( A instanceof Point && ( typeof B === "number" || typeof B === "string" )){
+            return {
+                create,
+                config: {
+                    slope: {
+                        A,
+                        slope: +B,
+                    },
+                    shape: "line"
+                }
             }
         }
     }

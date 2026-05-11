@@ -20,6 +20,7 @@ export type ILineType = 'segment' | 'ray' | 'line' | 'vector'
 export interface ILineConfig {
     bisector?: { d1: Line, d2: Line } | { A: XY, B: XY, C: XY },
     director?: { A: XY, d: XY },
+    slope?: { A: XY, slope: number },
     equation?: string,
     mediator?: { A: XY, B: XY },
     parallel?: { to: Line, through: XY },
@@ -141,6 +142,14 @@ export class Line extends AbstractFigure {
             }
 
             direction = this._config.director.d
+        } else if (this._config.slope?.A && this._config.slope.slope) {
+            this.start = this._config.slope.A
+            
+            // Direction
+            direction = {
+                x: 1,
+                y: -this._config.slope.slope
+            }
         } else if (this._config.parallel?.to && this._config.parallel.through) {
             this.start = this._config.parallel.through
             direction = this._config.parallel.to.direction
