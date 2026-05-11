@@ -17,6 +17,10 @@ export interface ILineConfig {
         A: XY;
         d: XY;
     };
+    slope?: {
+        A: XY;
+        slope: number;
+    };
     equation?: string;
     mediator?: {
         A: XY;
