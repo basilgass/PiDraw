@@ -2,13 +2,13 @@ import {Shape, Svg} from "@svgdotjs/svg.js"
 import type {XY} from "../pidraw.common"
 import {AbstractFigure} from "./AbstractFigure"
 import {Line} from "./Line"
-import {mathVector, toCoordinates, toPixels} from "../Calculus"
+import {distanceAB, mathVector, toCoordinates, toPixels} from "../Calculus"
 import type {Circle} from "./Circle"
 import type {Plot} from "./Plot"
 
 export type ILine = Line | 'Ox' | 'Oy'
 
-export type PointCoordinateType = number | { point: Point, axis: 'x' | 'y' }
+export type PointCoordinateType = number | { point: Point, axis: 'x' | 'y' } | { point1: Point, point2: Point }
 
 export interface PointConfigCoordinates {
     x: PointCoordinateType,
@@ -151,11 +151,11 @@ export class Point extends AbstractFigure {
     computed(): this {
         // Update the coordinates, depending on the constraints settings
         if (this._config.coordinates) {
-            const {x, y} = this._config.coordinates
+            const {x: coordX, y: coordY} = this._config.coordinates
 
             this.pixels = toPixels({
-                x: typeof x === "number" ? x : x.point.coordinates[x.axis],
-                y: typeof y === "number" ? y : y.point.coordinates[y.axis]
+                x: this._coordToNumber(coordX),
+                y: this._coordToNumber(coordY)
             }, this.graphConfig)
 
             return this
@@ -322,7 +322,7 @@ export class Point extends AbstractFigure {
         if (this._config.evaluation) {
             const {fx, x} = this._config.evaluation
 
-            this.pixels =  fx.evaluate(typeof x === "number" ? x : x.point.coordinates[x.axis])
+            this.pixels = fx.evaluate(this._coordToNumber(x))
         }
 
         return this
@@ -361,5 +361,19 @@ export class Point extends AbstractFigure {
         this.fill().stroke()
 
         return this.shape
+    }
+
+    _coordToNumber(coord: PointCoordinateType): number {
+        if (typeof coord === "number") return coord
+
+        if ('point' in coord && 'axis' in coord) {
+            return coord.point.coordinates[coord.axis]
+        }
+
+        if ('point1' in coord && 'point2' in coord) {
+            return distanceAB(coord.point1.coordinates, coord.point2.coordinates)
+        }
+
+        throw new Error(`${coord} not recognized.`)
     }
 }

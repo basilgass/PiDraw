@@ -60,7 +60,7 @@ function buildPoint_config(item: PARSER, figures: Record<string, AbstractFigure>
                     y: coordinateParse(y, figures)
                 }
             }
-        }catch{
+        } catch {
             return null
         }
     }
@@ -132,9 +132,9 @@ function buildPoint_config(item: PARSER, figures: Record<string, AbstractFigure>
         }
     }
 
-    if(item.key === PARSER_TYPE.EVAL_FX.toString() && code.length>=2){
-        const [fx, value] =  code
-        if(! (fx instanceof Plot)){
+    if (item.key === PARSER_TYPE.EVAL_FX.toString() && code.length >= 2) {
+        const [fx, value] = code
+        if (!(fx instanceof Plot)) {
             return null
         }
 
@@ -149,27 +149,51 @@ function buildPoint_config(item: PARSER, figures: Record<string, AbstractFigure>
                 }
             }
 
-        }catch{
+        } catch {
             return null
         }
     }
     return null
 }
 
-function coordinateParse(x: number | string, figures: Record<string, AbstractFigure>): number | {
-    point: Point,
-    axis: 'x' | 'y'
-} {
+function coordinateParse(x: number | string, figures: Record<string, AbstractFigure>): number |
+    { point: Point, axis: 'x' | 'y' } |
+    { point1: Point, point2: Point }
+{
     if (typeof x === 'string') {
-        const [name, axisDirection] = x.split('.')
-        const point = figures[name] as Point | null
-        const axis = axisDirection === 'x' || axisDirection === 'y' ? axisDirection : null
-        if (point === null || axis === null) {
+
+        if (x.includes('.')) {
+            // the value is given like <name>.<axis> : x|y value of the point,
+            const [name, axisDirection] = x.split('.')
+            const point = figures[name] as Point | null
+            const axis = axisDirection === 'x' || axisDirection === 'y' ? axisDirection : null
+
+            if (point instanceof Point && axis !== null) {
+                return {point, axis}
+            }
+
             throw new Error('Point or axis unrecognized')
         }
 
-        return {point, axis}
+        if (x.includes(':')) {
+            // the value is given like <name>:<name> = distance between two points
+            const [Aname, Bname] = x.split(':')
+
+            const A = figures[Aname] as Point | null
+            const B = figures[Bname] as Point | null
+
+            if (A instanceof Point && B instanceof Point) {
+                return {
+                    point1: A,
+                    point2: B
+                }
+            }
+
+            throw new Error('Points are not unrecognized')
+        }
     } else {
         return x
     }
+
+    throw new Error('Nothing to parse...')
 }

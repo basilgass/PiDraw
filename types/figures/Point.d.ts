@@ -8,6 +8,9 @@ export type ILine = Line | 'Ox' | 'Oy';
 export type PointCoordinateType = number | {
     point: Point;
     axis: 'x' | 'y';
+} | {
+    point1: Point;
+    point2: Point;
 };
 export interface PointConfigCoordinates {
     x: PointCoordinateType;
@@ -80,4 +83,5 @@ export declare class Point extends AbstractFigure {
     computed(): this;
     moveLabel(): this;
     _makeShape(): Shape;
+    _coordToNumber(coord: PointCoordinateType): number;
 }
