@@ -44,7 +44,7 @@ export function buildLine(item: PARSER, figures: Record<string, AbstractFigure>,
         }
 
         // item.code = [<point>,<number|string>] --> A,slope
-        if( A instanceof Point && ( typeof B === "number" || typeof B === "string" )){
+        if (A instanceof Point && (typeof B === "number" || typeof B === "string")) {
             return {
                 create,
                 config: {
@@ -82,7 +82,7 @@ export function buildLine(item: PARSER, figures: Record<string, AbstractFigure>,
     if (item.key === PARSER_TYPE.PERPENDICULAR.toString() && code.length === 2) {
         // item.code = [<line>,<point>]
         const [to, through] = code
-        if (to instanceof Line && through instanceof Point) {
+        if ((to instanceof Line || to === 'Ox' || to === 'Oy') && through instanceof Point) {
             return {
                 create,
                 config: {perpendicular: {to, through}}

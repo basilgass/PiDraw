@@ -27,11 +27,11 @@ export interface ILineConfig {
         B: XY;
     };
     parallel?: {
-        to: Line;
+        to: Line | 'Ox' | 'Oy';
         through: XY;
     };
     perpendicular?: {
-        to: Line;
+        to: Line | 'Ox' | 'Oy';
         through: XY;
     };
     shape?: ILineType;

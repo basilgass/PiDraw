@@ -23,8 +23,8 @@ export interface ILineConfig {
     slope?: { A: XY, slope: number },
     equation?: string,
     mediator?: { A: XY, B: XY },
-    parallel?: { to: Line, through: XY },
-    perpendicular?: { to: Line, through: XY },
+    parallel?: { to: Line | 'Ox' | 'Oy', through: XY },
+    perpendicular?: { to: Line | 'Ox' | 'Oy', through: XY },
     shape?: ILineType
     through?: { A: XY, B: XY },
     tangent?: { f: Plot, A: XY }
@@ -152,10 +152,24 @@ export class Line extends AbstractFigure {
             }
         } else if (this._config.parallel?.to && this._config.parallel.through) {
             this.start = this._config.parallel.through
-            direction = this._config.parallel.to.direction
+
+            if(this._config.parallel.to==='Ox'){
+                direction = {x: 1, y: 0}
+            }else if (this._config.parallel.to==='Oy'){
+                direction = {x: 0, y: 1}
+            }else {
+                direction = this._config.parallel.to.direction
+            }
         } else if (this._config.perpendicular?.to && this._config.perpendicular.through) {
             this.start = this._config.perpendicular.through
-            direction = this._config.perpendicular.to.normal
+
+            if(this._config.perpendicular.to === 'Ox') {
+                direction = {x: 0, y: 1}
+            } else if(this._config.perpendicular.to === 'Oy') {
+                direction = {x: 1, y: 0}
+            } else {
+                direction = this._config.perpendicular.to.normal
+            }
         } else if (this._config.mediator?.A && this._config.mediator.B) {
             // Start point is the middle of both figures
             this.start = {

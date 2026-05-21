@@ -83,6 +83,7 @@ export function convertIdToFigure(options: PARSER_VALUES[], figures: Record<stri
         if (typeof option === 'string' && option in figures) {
             return figures[option]
         }
+
         return option
     })
 }

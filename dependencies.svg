@@ -14,15 +14,15 @@
 <path fill="#ffffff" stroke="black" stroke-width="2" d="M20,-8C20,-8 866,-8 866,-8 872,-8 878,-14 878,-20 878,-20 878,-1130 878,-1130 878,-1136 872,-1142 866,-1142 866,-1142 20,-1142 20,-1142 14,-1142 8,-1136 8,-1130 8,-1130 8,-20 8,-20 8,-14 14,-8 20,-8"/>
 <text text-anchor="middle" x="443" y="-1130.8" font-family="Helvetica,sans-Serif" font-weight="bold" font-size="9.00">src</text>
 </g>
-<g id="clust3" class="cluster">
-<title>cluster_src/functions</title>
-<path fill="#ffffff" stroke="black" stroke-width="2" d="M672,-298C672,-298 757,-298 757,-298 763,-298 769,-304 769,-310 769,-310 769,-338 769,-338 769,-344 763,-350 757,-350 757,-350 672,-350 672,-350 666,-350 660,-344 660,-338 660,-338 660,-310 660,-310 660,-304 666,-298 672,-298"/>
-<text text-anchor="middle" x="714.5" y="-338.8" font-family="Helvetica,sans-Serif" font-weight="bold" font-size="9.00">functions</text>
-</g>
 <g id="clust2" class="cluster">
 <title>cluster_src/figures</title>
 <path fill="#ffffff" stroke="black" stroke-width="2" d="M310,-358C310,-358 753.5,-358 753.5,-358 759.5,-358 765.5,-364 765.5,-370 765.5,-370 765.5,-692 765.5,-692 765.5,-698 759.5,-704 753.5,-704 753.5,-704 310,-704 310,-704 304,-704 298,-698 298,-692 298,-692 298,-370 298,-370 298,-364 304,-358 310,-358"/>
 <text text-anchor="middle" x="531.75" y="-692.8" font-family="Helvetica,sans-Serif" font-weight="bold" font-size="9.00">figures</text>
+</g>
+<g id="clust3" class="cluster">
+<title>cluster_src/functions</title>
+<path fill="#ffffff" stroke="black" stroke-width="2" d="M672,-298C672,-298 757,-298 757,-298 763,-298 769,-304 769,-310 769,-310 769,-338 769,-338 769,-344 763,-350 757,-350 757,-350 672,-350 672,-350 666,-350 660,-344 660,-338 660,-338 660,-310 660,-310 660,-304 666,-298 672,-298"/>
+<text text-anchor="middle" x="714.5" y="-338.8" font-family="Helvetica,sans-Serif" font-weight="bold" font-size="9.00">functions</text>
 </g>
 <g id="clust5" class="cluster">
 <title>cluster_src/parser</title>

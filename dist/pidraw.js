@@ -5048,9 +5048,9 @@ class F extends V {
         y: -this._config.slope.slope
       };
     else if (this._config.parallel?.to && this._config.parallel.through)
-      this.start = this._config.parallel.through, t = this._config.parallel.to.direction;
+      this.start = this._config.parallel.through, this._config.parallel.to === "Ox" ? t = { x: 1, y: 0 } : this._config.parallel.to === "Oy" ? t = { x: 0, y: 1 } : t = this._config.parallel.to.direction;
     else if (this._config.perpendicular?.to && this._config.perpendicular.through)
-      this.start = this._config.perpendicular.through, t = this._config.perpendicular.to.normal;
+      this.start = this._config.perpendicular.through, this._config.perpendicular.to === "Ox" ? t = { x: 0, y: 1 } : this._config.perpendicular.to === "Oy" ? t = { x: 1, y: 0 } : t = this._config.perpendicular.to.normal;
     else if (this._config.mediator?.A && this._config.mediator.B)
       this.start = {
         x: (this._config.mediator.A.x + this._config.mediator.B.x) / 2,
@@ -6604,7 +6604,7 @@ function rt(i, t, e) {
   }
   if (i.key === C.PERPENDICULAR.toString() && s.length === 2) {
     const [n, r] = s;
-    if (n instanceof F && r instanceof y)
+    if ((n instanceof F || n === "Ox" || n === "Oy") && r instanceof y)
       return {
         create: nt,
         config: { perpendicular: { to: n, through: r } }
