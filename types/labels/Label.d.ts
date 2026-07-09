@@ -1,5 +1,5 @@
-import { ForeignObject as svgHTML, G, Text as svgLabel } from '@svgdotjs/svg.js';
-import { XY } from '../pidraw.common';
+import { ForeignObject as svgHTML, G, Text as svgLabel } from "@svgdotjs/svg.js";
+import type { XY } from "../pidraw.common";
 type LabelType = svgLabel | svgHTML;
 export type LABEL_POSITION = 'tl' | 'tc' | 'tr' | 'ml' | 'mc' | 'mr' | 'bl' | 'bc' | 'br';
 export interface ILabelConfig {
@@ -43,3 +43,4 @@ export declare class Label {
     _makeLabel(): svgLabel | svgHTML;
 }
 export {};
+//# sourceMappingURL=Label.d.ts.map

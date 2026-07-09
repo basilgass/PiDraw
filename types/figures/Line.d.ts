@@ -1,8 +1,8 @@
-import { AbstractFigure } from './AbstractFigure';
-import { XY } from '../pidraw.common';
-import { Shape, Svg } from '@svgdotjs/svg.js';
-import { mathLine } from '../Calculus';
-import { Plot } from './Plot';
+import { AbstractFigure } from "./AbstractFigure";
+import type { XY } from "../pidraw.common";
+import { Shape, Svg } from "@svgdotjs/svg.js";
+import { mathLine } from "../Calculus";
+import type { Plot } from "./Plot";
 export type ILineType = 'segment' | 'ray' | 'line' | 'vector';
 export interface ILineConfig {
     bisector?: {
@@ -66,3 +66,4 @@ export declare class Line extends AbstractFigure {
     moveLabel(): this;
     _makeShape(): Shape;
 }
+//# sourceMappingURL=Line.d.ts.map

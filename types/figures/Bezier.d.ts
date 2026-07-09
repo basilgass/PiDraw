@@ -1,6 +1,6 @@
-import { AbstractFigure } from './AbstractFigure';
-import { BEZIERCONTROL, XY } from '../pidraw.common';
-import { Shape, Svg } from '@svgdotjs/svg.js';
+import { AbstractFigure } from "./AbstractFigure";
+import { BEZIERCONTROL, type XY } from "../pidraw.common";
+import { type Shape, Svg } from "@svgdotjs/svg.js";
 interface IBezierControlPointInterface extends XY {
     point?: XY;
 }
@@ -35,3 +35,4 @@ export declare class Bezier extends AbstractFigure {
     _makeShape(): Shape;
 }
 export {};
+//# sourceMappingURL=Bezier.d.ts.map

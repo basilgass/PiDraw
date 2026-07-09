@@ -1,6 +1,6 @@
-import { Line as svgLine, Svg } from '@svgdotjs/svg.js';
-import { COORDINATE_SYSTEM, IAxisConfig, XY } from '../pidraw.common';
-import { AbstractFigure } from './AbstractFigure';
+import { Line as svgLine, Svg } from "@svgdotjs/svg.js";
+import { COORDINATE_SYSTEM, type IAxisConfig, type XY } from "../pidraw.common";
+import { AbstractFigure } from "./AbstractFigure";
 export interface ICoordinateSystem {
     x: {
         direction: XY;
@@ -29,3 +29,4 @@ export declare class CoordinateSystem extends AbstractFigure {
     };
     _updateAxis(axis: svgLine, direction: XY, config?: IAxisConfig): svgLine;
 }
+//# sourceMappingURL=CoordinateSystem.d.ts.map

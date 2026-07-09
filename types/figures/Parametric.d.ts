@@ -1,7 +1,7 @@
-import { Svg } from '@svgdotjs/svg.js';
-import { AbstractFigure } from './AbstractFigure';
-import { DOMAIN, XY } from '../pidraw.common';
-import { NumExp } from '../Calculus';
+import { Svg } from "@svgdotjs/svg.js";
+import { AbstractFigure } from "./AbstractFigure";
+import type { DOMAIN, XY } from "../pidraw.common";
+import { NumExp } from "../Calculus";
 export interface IParametricConfig {
     expressions: {
         x: string;
@@ -19,8 +19,9 @@ export declare class Parametric extends AbstractFigure {
     protected _config: IParametricConfig;
     get config(): IParametricConfig;
     set config(value: IParametricConfig);
-    _makeShape(): import('@svgdotjs/svg.js').Shape;
+    _makeShape(): import("@svgdotjs/svg.js").Shape;
     computed(): this;
     moveLabel(): this;
     evaluate(t: number): XY;
 }
+//# sourceMappingURL=Parametric.d.ts.map

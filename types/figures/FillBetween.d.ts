@@ -1,7 +1,7 @@
-import { Svg } from '@svgdotjs/svg.js';
-import { AbstractFigure } from './AbstractFigure';
-import { DOMAIN } from '../pidraw.common';
-import { Plot } from './Plot';
+import { Svg } from "@svgdotjs/svg.js";
+import { AbstractFigure } from "./AbstractFigure";
+import { type DOMAIN } from "../pidraw.common";
+import { Plot } from "./Plot";
 export interface IFillBetweenConfig {
     expressions: [Plot] | [Plot, Plot];
     domain?: DOMAIN;
@@ -14,7 +14,8 @@ export declare class FillBetween extends AbstractFigure {
     set config(value: IFillBetweenConfig);
     get domain(): DOMAIN;
     get image(): DOMAIN;
-    _makeShape(): import('@svgdotjs/svg.js').Shape;
+    _makeShape(): import("@svgdotjs/svg.js").Shape;
     computed(): this;
     moveLabel(): this;
 }
+//# sourceMappingURL=FillBetween.d.ts.map

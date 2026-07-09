@@ -1,6 +1,6 @@
-import { G, Shape, Svg } from '@svgdotjs/svg.js';
-import { IFigureAnimation, IFigureAppearanceConfig, IGraphConfig, XY } from '../pidraw.common';
-import { Label } from '../labels/Label';
+import { G, Shape, Svg } from "@svgdotjs/svg.js";
+import { type IFigureAnimation, type IFigureAppearanceConfig, type IGraphConfig, type XY } from "../pidraw.common";
+import { Label } from "../labels/Label";
 export declare abstract class AbstractFigure {
     constructor(rootSVG: Svg, name: string);
     protected _rootSVG: Svg;
@@ -51,3 +51,4 @@ export declare abstract class AbstractFigure {
     mark(value?: string | boolean, options?: (string | number)[]): this;
     follow(x: number, y: number): XY;
 }
+//# sourceMappingURL=AbstractFigure.d.ts.map

@@ -1,7 +1,8 @@
-import { PARSER } from 'piparser';
-import { AbstractFigure } from '../figures/AbstractFigure';
-import { IArcConfig } from '../figures/Arc';
-import { ICircleConfig } from '../figures/Circle';
-import { buildInterface, IGraphConfig } from '../pidraw.common';
+import { type PARSER } from "piparser";
+import { AbstractFigure } from "../figures/AbstractFigure";
+import { type IArcConfig } from "../figures/Arc";
+import { type ICircleConfig } from "../figures/Circle";
+import { type buildInterface, type IGraphConfig } from "../pidraw.common";
 export declare function buildCircle(item: PARSER, figures: Record<string, AbstractFigure>, graphConfig: IGraphConfig): buildInterface<ICircleConfig> | null;
 export declare function buildArc(item: PARSER, figures: Record<string, AbstractFigure>, graphConfig: IGraphConfig): buildInterface<IArcConfig> | null;
+//# sourceMappingURL=buildCircle.d.ts.map

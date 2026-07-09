@@ -1,9 +1,9 @@
-import { Shape, Svg } from '@svgdotjs/svg.js';
-import { XY } from '../pidraw.common';
-import { AbstractFigure } from './AbstractFigure';
-import { Line } from './Line';
-import { Circle } from './Circle';
-import { Plot } from './Plot';
+import { Shape, Svg } from "@svgdotjs/svg.js";
+import type { XY } from "../pidraw.common";
+import { AbstractFigure } from "./AbstractFigure";
+import { Line } from "./Line";
+import type { Circle } from "./Circle";
+import type { Plot } from "./Plot";
 export type ILine = Line | 'Ox' | 'Oy';
 export type PointCoordinateType = number | {
     point: Point;
@@ -85,3 +85,4 @@ export declare class Point extends AbstractFigure {
     _makeShape(): Shape;
     _coordToNumber(coord: PointCoordinateType): number;
 }
+//# sourceMappingURL=Point.d.ts.map

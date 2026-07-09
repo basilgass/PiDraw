@@ -1,7 +1,7 @@
-import { Circle as G, Svg } from '@svgdotjs/svg.js';
-import { AbstractFigure } from './AbstractFigure';
-import { Plot } from './Plot';
-import { DOMAIN } from '../pidraw.common';
+import { Circle as G, Svg } from "@svgdotjs/svg.js";
+import { AbstractFigure } from "./AbstractFigure";
+import { Plot } from "./Plot";
+import type { DOMAIN } from "../pidraw.common";
 export interface IRiemannConfig {
     follow: Plot;
     domain: DOMAIN;
@@ -21,3 +21,4 @@ export declare class Riemann extends AbstractFigure {
     computed(): this;
     moveLabel(): this;
 }
+//# sourceMappingURL=Riemann.d.ts.map

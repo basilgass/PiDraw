@@ -1,6 +1,6 @@
-import { Svg } from '@svgdotjs/svg.js';
-import { AbstractFigure } from './AbstractFigure';
-import { XY } from '../pidraw.common';
+import { Svg } from "@svgdotjs/svg.js";
+import { AbstractFigure } from "./AbstractFigure";
+import type { XY } from "../pidraw.common";
 export interface IArcConfig {
     start: XY;
     center: XY;
@@ -23,17 +23,14 @@ export declare class Arc extends AbstractFigure {
     get isSquare(): boolean;
     computed(): this;
     moveLabel(): this;
-    /**
-     * Calculate the start and end angle of an arc
-     * @returns {{startAngle: number, endAngle: number}}
-     */
     getAngles(): {
         start: number;
         end: number;
     };
     getPath(): string;
-    _makeShape(): import('@svgdotjs/svg.js').Shape;
+    _makeShape(): import("@svgdotjs/svg.js").Shape;
     private _describeSquare;
     private _describe_add_sector;
     private _describeArc;
 }
+//# sourceMappingURL=Arc.d.ts.map

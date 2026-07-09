@@ -1,7 +1,7 @@
-import { Shape, Svg } from '@svgdotjs/svg.js';
-import { AbstractFigure } from './AbstractFigure';
-import { XY } from '../pidraw.common';
-import { Line } from './Line';
+import { Shape, Svg } from "@svgdotjs/svg.js";
+import { AbstractFigure } from "./AbstractFigure";
+import type { XY } from "../pidraw.common";
+import type { Line } from "./Line";
 export interface ICircleConfig {
     center: XY;
     radius: number | XY;
@@ -20,3 +20,4 @@ export declare class Circle extends AbstractFigure {
     intersectionWithCircle(circle: Circle): XY[] | null;
     _makeShape(): Shape;
 }
+//# sourceMappingURL=Circle.d.ts.map

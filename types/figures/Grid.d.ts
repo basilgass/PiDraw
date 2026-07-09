@@ -1,6 +1,6 @@
-import { Path as svgPath, Svg } from '@svgdotjs/svg.js';
-import { AbstractFigure } from './AbstractFigure';
-import { XY } from '../pidraw.common';
+import { Path as svgPath, Svg } from "@svgdotjs/svg.js";
+import { AbstractFigure } from "./AbstractFigure";
+import type { XY } from "../pidraw.common";
 interface IGridConfig {
     axis: {
         x: XY;
@@ -26,3 +26,4 @@ export declare class Grid extends AbstractFigure {
     _computeLines(xDirection: XY, yDirection: XY): [XY, XY][];
 }
 export {};
+//# sourceMappingURL=Grid.d.ts.map

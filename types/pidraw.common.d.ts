@@ -1,7 +1,7 @@
-import { ForeignObject as svgHTML, G, Text as svgLabel } from '@svgdotjs/svg.js';
-import { parser_config } from './parser/parser.config';
-import { Point } from './figures/Point';
-import { LOOP_STYLE } from './Animate';
+import { ForeignObject as svgHTML, G, Text as svgLabel } from "@svgdotjs/svg.js";
+import type { parser_config } from "./parser/parser.config";
+import type { Point } from "./figures/Point";
+import type { LOOP_STYLE } from "./Animate";
 export type TeXConverterType = (value: string) => string;
 export interface IGraphConfig {
     axis: {
@@ -108,12 +108,12 @@ export declare enum POINTCONSTRAINT {
     COORDINATES = "coordinates"
 }
 export declare enum LINECONSTRAINT {
-    FIXED = "fixed",// two points
-    PARALLEL = "parallel",// a point and a vector
-    PERPENDICULAR = "perpendicular",// a point and a vector
-    TANGENT = "tangent",// a point and a circle
-    MEDIATOR = "mediator",// two points
-    SLOPE = "slope",// a point and a slope
+    FIXED = "fixed",
+    PARALLEL = "parallel",
+    PERPENDICULAR = "perpendicular",
+    TANGENT = "tangent",
+    MEDIATOR = "mediator",
+    SLOPE = "slope",
     BISECTOR = "bisector"
 }
 export declare enum POLYGON_CONSTRAINT {
@@ -135,3 +135,4 @@ export interface buildInterface<T> {
     create: keyof typeof parser_config;
     config: T;
 }
+//# sourceMappingURL=pidraw.common.d.ts.map

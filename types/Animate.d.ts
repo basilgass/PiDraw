@@ -1,6 +1,6 @@
-import { Graph } from './Graph';
-import { Point } from './figures/Point';
-import { XY } from './pidraw.common';
+import { type Graph } from "./Graph";
+import type { Point } from "./figures/Point";
+import { type XY } from "./pidraw.common";
 export declare enum LOOP_STYLE {
     RESET = "reset",
     REVERSE = "reverse",
@@ -38,3 +38,4 @@ export declare class Animate {
 }
 export declare function getLoopStyle(loop: string | boolean | number): LOOP_STYLE;
 export {};
+//# sourceMappingURL=Animate.d.ts.map
