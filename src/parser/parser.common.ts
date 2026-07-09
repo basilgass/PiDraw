@@ -12,7 +12,7 @@ export enum PARSER_TYPE {
     SYMMETRY = 'sym',           // OK: sym <point>,<point|line>
     DIRECTION_POINT = 'dpt',    // OK: dpt <point>,<line>,<distance>,<perpendicular?>
     VECTOR_POINT = 'vpt',       // OK: vpt <point>,<point>,<scale?>,<starting point?>
-    EVAL_FX = 'eval',       // OK:eval <function>,<x>
+    EVAL_FX = 'eval',            // OK:eval <function>,<x>
     // LINES
     LINE = 'line',              // OK : <point><point> or line <point>,<point>
     VECTOR = 'vec',

@@ -134,6 +134,7 @@ function buildPoint_config(item: PARSER, figures: Record<string, AbstractFigure>
 
     if (item.key === PARSER_TYPE.EVAL_FX.toString() && code.length >= 2) {
         const [fx, value] = code
+
         if (!(fx instanceof Plot)) {
             return null
         }

@@ -2,7 +2,7 @@ import {Shape, Svg} from "@svgdotjs/svg.js"
 import type {XY} from "../pidraw.common"
 import {AbstractFigure} from "./AbstractFigure"
 import {Line} from "./Line"
-import {distanceAB, mathVector, toCoordinates, toPixels} from "../Calculus"
+import {distanceAB, mathVector, numberCorrection, toCoordinates, toPixels} from "../Calculus"
 import type {Circle} from "./Circle"
 import type {Plot} from "./Plot"
 
@@ -141,8 +141,9 @@ export class Point extends AbstractFigure {
     override computeLabel(): string {
         if (this.label?.config.text.includes('@')) {
             const coords = toCoordinates(this._pixels, this.graphConfig)
+            const digits = Number(this.label.config.text.match(/@\.(\d+)/)?.[1] ?? 2)
 
-            return this.label.config.text.replace('@', `(${coords.x};${coords.y})`)
+            return this.label.config.text.replace('@', `(${numberCorrection(coords.x, digits)};${numberCorrection(coords.y, digits)})`)
         }
 
         return this.label?.config.text ?? this.name
