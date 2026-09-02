@@ -1,3 +1,4 @@
+export type * from "./figures/AbstractFigure";
 export type * from "./figures/Arc";
 export type * from "./figures/Bezier";
 export type * from "./figures/Circle";
