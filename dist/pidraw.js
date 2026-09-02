@@ -6081,7 +6081,7 @@ var Bi = class extends EventTarget {
 		return this.addEventListener(e, t), this;
 	}
 	off(e, t) {
-		return this.addEventListener(e, t), this;
+		return this.removeEventListener(e, t), this;
 	}
 	emit(e, t) {
 		this.dispatchEvent(new CustomEvent(e, { detail: t }));
