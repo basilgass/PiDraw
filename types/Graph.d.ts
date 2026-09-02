@@ -1,6 +1,6 @@
 import { Svg } from "@svgdotjs/svg.js";
 import '@svgdotjs/svg.draggable.js';
-import { COORDINATE_SYSTEM, type DOMAIN, type IGraphConfig, type IGraphConstructorConfig, type IGraphDisplay, type ILayers, type XY } from "./pidraw.common";
+import { COORDINATE_SYSTEM, type DOMAIN, type IGraphConfig, type IGraphConstructorConfig, type IGraphDisplay, type IGraphEventMap, type ILayers, type XY } from "./pidraw.common";
 import { type IPointConfig, Point } from "./figures/Point";
 import { type ILineConfig, Line } from "./figures/Line";
 import { type IPlotConfig, Plot } from "./figures/Plot";
@@ -26,7 +26,7 @@ export interface IDraggableConfig {
     grid?: boolean;
     target?: AbstractFigure;
 }
-export declare class Graph {
+export declare class Graph extends EventTarget {
     protected _Animate: Animate | null;
     constructor(id: string | HTMLElement, config?: IGraphConstructorConfig);
     protected _config: IGraphConfig;
@@ -74,6 +74,9 @@ export declare class Graph {
     update(except?: string[], forceUpdate?: boolean): void;
     updateLabels(except: string[], forceUpdate?: boolean): void;
     updateLayout(): void;
+    on<K extends keyof IGraphEventMap>(event: K, handler: (e: CustomEvent<IGraphEventMap[K]>) => void): this;
+    off<K extends keyof IGraphEventMap>(event: K, handler: (e: CustomEvent<IGraphEventMap[K]>) => void): this;
+    protected emit<K extends keyof IGraphEventMap>(event: K, detail: IGraphEventMap[K]): void;
     protected _makeLayout(): void;
 }
 //# sourceMappingURL=Graph.d.ts.map

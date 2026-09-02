@@ -7,6 +7,7 @@ import {
     type IGraphConfig,
     type IGraphConstructorConfig,
     type IGraphDisplay,
+    type IGraphEventMap,
     type ILayers,
     isXY,
     LAYER_NAME,
@@ -43,10 +44,12 @@ export interface IDraggableConfig {
     target?: AbstractFigure,
 }
 
-export class Graph {
+export class Graph extends EventTarget {
     protected _Animate: Animate | null = null
 
     constructor(id: string | HTMLElement, config?: IGraphConstructorConfig) {
+        super()
+
         const wrapper = document.createElement('DIV')
         wrapper.style.position = 'relative'
         wrapper.style.width = '100%'
@@ -363,6 +366,8 @@ export class Graph {
             }
 
             this.update(updateException)
+
+            this.emit('dragmove', {graph: this, figure})
         }
 
         // Move the figure to the top layer.
@@ -372,7 +377,9 @@ export class Graph {
         figure.isDraggable = true
         figure.shape
             .draggable()
+            .on('dragstart', ()=>this.emit('dragstart', {graph: this, figure}))
             .on('dragmove', dragmove as EventListener)
+            .on('dragend', ()=>this.emit('dragend', {graph: this, figure}))
         return figure
     }
 
@@ -477,6 +484,27 @@ export class Graph {
 
         // Force a global update.
         this.update([], true)
+    }
+
+    on<K extends keyof IGraphEventMap>(
+        event: K,
+        handler: (e: CustomEvent<IGraphEventMap[K]>)=>void
+    ): this {
+        this.addEventListener(event, handler as EventListener)
+        return this
+    }
+    off<K extends keyof IGraphEventMap>(
+        event: K,
+        handler: (e: CustomEvent<IGraphEventMap[K]>)=>void
+    ): this {
+        this.removeEventListener(event, handler as EventListener)
+        return this
+    }
+    protected emit<K extends keyof IGraphEventMap>(
+        event: K,
+        detail: IGraphEventMap[K]
+    ):void {
+        this.dispatchEvent(new CustomEvent(event, {detail}))
     }
 
    protected _makeLayout(): void {

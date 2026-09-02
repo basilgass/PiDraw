@@ -5841,9 +5841,10 @@ function zi(e) {
 }
 //#endregion
 //#region src/Graph.ts
-var Bi = class {
+var Bi = class extends EventTarget {
 	_Animate = null;
 	constructor(e, t) {
+		super();
 		let n = document.createElement("DIV");
 		n.style.position = "relative", n.style.width = "100%", n.style.height = "auto", n.style.userSelect = "none", typeof e == "string" ? document.getElementById(e)?.appendChild(n) : e.appendChild(n);
 		let r = t?.ppu ?? 50;
@@ -5975,7 +5976,10 @@ var Bi = class {
 		return this._layers.axis.add(t.element), t;
 	}
 	draggable(e, t) {
-		return this._layers.interactive.add(e.element), e.isDraggable = !0, e.shape.draggable().on("dragmove", (n) => {
+		return this._layers.interactive.add(e.element), e.isDraggable = !0, e.shape.draggable().on("dragstart", () => this.emit("dragstart", {
+			graph: this,
+			figure: e
+		})).on("dragmove", (n) => {
 			let r = e, { box: i } = n.detail, { x: a, y: o } = i;
 			if (n.preventDefault(), a < 0 || a > this._config.width - i.width / 2 || o < 0 || o > this._config.height - i.height / 2) return;
 			if (t?.follow?.length) {
@@ -5998,8 +6002,14 @@ var Bi = class {
 				y: o
 			}), t?.callback && t.callback(e);
 			let c = [e.name];
-			s && c.push(s.name), this.update(c);
-		}), e;
+			s && c.push(s.name), this.update(c), this.emit("dragmove", {
+				graph: this,
+				figure: e
+			});
+		}).on("dragend", () => this.emit("dragend", {
+			graph: this,
+			figure: e
+		})), e;
 	}
 	follow(e, t) {
 		return e === "Ox" ? (e) => ({
@@ -6066,6 +6076,15 @@ var Bi = class {
 			origin: this._config.origin,
 			axis: this._config.axis
 		}), this._makeLayout(), this.update([], !0);
+	}
+	on(e, t) {
+		return this.addEventListener(e, t), this;
+	}
+	off(e, t) {
+		return this.addEventListener(e, t), this;
+	}
+	emit(e, t) {
+		this.dispatchEvent(new CustomEvent(e, { detail: t }));
 	}
 	_makeLayout() {
 		if (this._layers.grids.clear(), this._layers.axis.clear(), this._display.subgrid && this.subgrid("SUBGRID", this._display.subgrid).stroke("purple/0.5", .1), this._display.grid) if (this._display.grid === !0) this.grid("MAINGRID", this._config.axis).stroke("lightgray", 1);

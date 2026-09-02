@@ -24,22 +24,22 @@
 <path fill="#ffffff" stroke="black" stroke-width="2" d="M672,-298C672,-298 757,-298 757,-298 763,-298 769,-304 769,-310 769,-310 769,-338 769,-338 769,-344 763,-350 757,-350 757,-350 672,-350 672,-350 666,-350 660,-344 660,-338 660,-338 660,-310 660,-310 660,-304 666,-298 672,-298"/>
 <text text-anchor="middle" x="714.5" y="-338.8" font-family="Helvetica,sans-Serif" font-weight="bold" font-size="9.00">functions</text>
 </g>
-<g id="clust5" class="cluster">
-<title>cluster_src/parser</title>
-<path fill="#ffffff" stroke="black" stroke-width="2" d="M90,-712C90,-712 375,-712 375,-712 381,-712 387,-718 387,-724 387,-724 387,-932 387,-932 387,-938 381,-944 375,-944 375,-944 90,-944 90,-944 84,-944 78,-938 78,-932 78,-932 78,-724 78,-724 78,-718 84,-712 90,-712"/>
-<text text-anchor="middle" x="232.5" y="-932.8" font-family="Helvetica,sans-Serif" font-weight="bold" font-size="9.00">parser</text>
-</g>
 <g id="clust4" class="cluster">
 <title>cluster_src/labels</title>
 <path fill="#ffffff" stroke="black" stroke-width="2" d="M691.5,-16C691.5,-16 737.5,-16 737.5,-16 743.5,-16 749.5,-22 749.5,-28 749.5,-28 749.5,-56 749.5,-56 749.5,-62 743.5,-68 737.5,-68 737.5,-68 691.5,-68 691.5,-68 685.5,-68 679.5,-62 679.5,-56 679.5,-56 679.5,-28 679.5,-28 679.5,-22 685.5,-16 691.5,-16"/>
 <text text-anchor="middle" x="714.5" y="-56.8" font-family="Helvetica,sans-Serif" font-weight="bold" font-size="9.00">labels</text>
 </g>
+<g id="clust5" class="cluster">
+<title>cluster_src/parser</title>
+<path fill="#ffffff" stroke="black" stroke-width="2" d="M90,-712C90,-712 375,-712 375,-712 381,-712 387,-718 387,-724 387,-724 387,-932 387,-932 387,-938 381,-944 375,-944 375,-944 90,-944 90,-944 84,-944 78,-938 78,-932 78,-932 78,-724 78,-724 78,-718 84,-712 90,-712"/>
+<text text-anchor="middle" x="232.5" y="-932.8" font-family="Helvetica,sans-Serif" font-weight="bold" font-size="9.00">parser</text>
+</g>
 <!-- src/Animate.ts -->
 <g id="node1" class="node">
 <title>src/Animate.ts</title>
 <g id="a_node1"><a xlink:href="src/Animate.ts" xlink:title="Animate.ts">
-<path fill="#ddfeff" stroke="black" d="M250.5,-307C250.5,-307 202.5,-307 202.5,-307 199.5,-307 196.5,-304 196.5,-301 196.5,-301 196.5,-295 196.5,-295 196.5,-292 199.5,-289 202.5,-289 202.5,-289 250.5,-289 250.5,-289 253.5,-289 256.5,-292 256.5,-295 256.5,-295 256.5,-301 256.5,-301 256.5,-304 253.5,-307 250.5,-307"/>
-<text text-anchor="start" x="204.5" y="-295.8" font-family="Helvetica,sans-Serif" font-size="9.00">Animate.ts</text>
+<path fill="#ddfeff" stroke="black" d="M250.5,-300C250.5,-300 202.5,-300 202.5,-300 199.5,-300 196.5,-297 196.5,-294 196.5,-294 196.5,-288 196.5,-288 196.5,-285 199.5,-282 202.5,-282 202.5,-282 250.5,-282 250.5,-282 253.5,-282 256.5,-285 256.5,-288 256.5,-288 256.5,-294 256.5,-294 256.5,-297 253.5,-300 250.5,-300"/>
+<text text-anchor="start" x="204.5" y="-288.8" font-family="Helvetica,sans-Serif" font-size="9.00">Animate.ts</text>
 </a>
 </g>
 </g>
@@ -55,52 +55,52 @@
 <!-- src/Animate.ts&#45;&gt;src/figures/Point.ts -->
 <g id="edge1" class="edge">
 <title>src/Animate.ts&#45;&gt;src/figures/Point.ts</title>
-<path fill="none" stroke="#000000" stroke-opacity="0.200000" d="M256.88,-304C281.46,-304 312,-304 312,-304 312,-304 312,-415.92 312,-415.92"/>
-<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-opacity="0.200000" points="309.9,-423.72 312,-429.72 314.1,-423.72 309.9,-423.72"/>
-<polyline fill="none" stroke="#000000" stroke-opacity="0.200000" points="312,-423.72 312,-420.72 "/>
-<ellipse fill="none" stroke="#000000" stroke-opacity="0.200000" cx="312" cy="-418.32" rx="2.4" ry="2.4"/>
+<path fill="none" stroke="#000000" stroke-opacity="0.200000" d="M256.88,-297.75C281.46,-297.75 312,-297.75 312,-297.75 312,-297.75 312,-415.93 312,-415.93"/>
+<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-opacity="0.200000" points="309.9,-423.73 312,-429.73 314.1,-423.73 309.9,-423.73"/>
+<polyline fill="none" stroke="#000000" stroke-opacity="0.200000" points="312,-423.73 312,-420.73 "/>
+<ellipse fill="none" stroke="#000000" stroke-opacity="0.200000" cx="312" cy="-418.33" rx="2.4" ry="2.4"/>
 </g>
 <!-- src/Graph.ts -->
 <g id="node3" class="node">
 <title>src/Graph.ts</title>
 <g id="a_node3"><a xlink:href="src/Graph.ts" xlink:title="Graph.ts">
-<path fill="#ddfeff" stroke="black" d="M354,-296C354,-296 312,-296 312,-296 309,-296 306,-293 306,-290 306,-290 306,-284 306,-284 306,-281 309,-278 312,-278 312,-278 354,-278 354,-278 357,-278 360,-281 360,-284 360,-284 360,-290 360,-290 360,-293 357,-296 354,-296"/>
-<text text-anchor="start" x="315" y="-284.8" font-family="Helvetica,sans-Serif" font-size="9.00">Graph.ts</text>
+<path fill="#ddfeff" stroke="black" d="M354,-289C354,-289 312,-289 312,-289 309,-289 306,-286 306,-283 306,-283 306,-277 306,-277 306,-274 309,-271 312,-271 312,-271 354,-271 354,-271 357,-271 360,-274 360,-277 360,-277 360,-283 360,-283 360,-286 357,-289 354,-289"/>
+<text text-anchor="start" x="315" y="-277.8" font-family="Helvetica,sans-Serif" font-size="9.00">Graph.ts</text>
 </a>
 </g>
 </g>
 <!-- src/Animate.ts&#45;&gt;src/Graph.ts -->
 <g id="edge2" class="edge">
 <title>src/Animate.ts&#45;&gt;src/Graph.ts</title>
-<path fill="none" stroke="#000000" stroke-opacity="0.200000" d="M256.73,-292.5C256.73,-292.5 292.16,-292.5 292.16,-292.5"/>
-<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-opacity="0.200000" points="299.96,-294.6 305.96,-292.5 299.96,-290.4 299.96,-294.6"/>
-<polyline fill="none" stroke="#000000" stroke-opacity="0.200000" points="299.96,-292.5 296.96,-292.5 "/>
-<ellipse fill="none" stroke="#000000" stroke-opacity="0.200000" cx="294.56" cy="-292.5" rx="2.4" ry="2.4"/>
+<path fill="none" stroke="#000000" stroke-opacity="0.200000" d="M256.73,-287.25C256.73,-287.25 292.16,-287.25 292.16,-287.25"/>
+<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-opacity="0.200000" points="299.96,-289.35 305.96,-287.25 299.96,-285.15 299.96,-289.35"/>
+<polyline fill="none" stroke="#000000" stroke-opacity="0.200000" points="299.96,-287.25 296.96,-287.25 "/>
+<ellipse fill="none" stroke="#000000" stroke-opacity="0.200000" cx="294.56" cy="-287.25" rx="2.4" ry="2.4"/>
 </g>
 <!-- src/pidraw.common.ts -->
 <g id="node4" class="node">
 <title>src/pidraw.common.ts</title>
 <g id="a_node4"><a xlink:href="src/pidraw.common.ts" xlink:title="pidraw.common.ts">
-<path fill="#ddfeff" stroke="black" d="M864,-298C864,-298 783,-298 783,-298 780,-298 777,-295 777,-292 777,-292 777,-286 777,-286 777,-283 780,-280 783,-280 783,-280 864,-280 864,-280 867,-280 870,-283 870,-286 870,-286 870,-292 870,-292 870,-295 867,-298 864,-298"/>
-<text text-anchor="start" x="785" y="-286.8" font-family="Helvetica,sans-Serif" font-size="9.00">pidraw.common.ts</text>
+<path fill="#ddfeff" stroke="black" d="M864,-291C864,-291 783,-291 783,-291 780,-291 777,-288 777,-285 777,-285 777,-279 777,-279 777,-276 780,-273 783,-273 783,-273 864,-273 864,-273 867,-273 870,-276 870,-279 870,-279 870,-285 870,-285 870,-288 867,-291 864,-291"/>
+<text text-anchor="start" x="785" y="-279.8" font-family="Helvetica,sans-Serif" font-size="9.00">pidraw.common.ts</text>
 </a>
 </g>
 </g>
 <!-- src/Animate.ts&#45;&gt;src/pidraw.common.ts -->
 <g id="edge3" class="edge">
 <title>src/Animate.ts&#45;&gt;src/pidraw.common.ts</title>
-<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M256.91,-300C318.46,-300 452,-300 452,-300 452,-300 452,-289.41 452,-289.41 452,-289.41 763.03,-289.41 763.03,-289.41"/>
-<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="770.83,-291.51 776.83,-289.41 770.83,-287.31 770.83,-291.51"/>
-<polyline fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="770.83,-289.41 767.83,-289.41 "/>
-<ellipse fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" cx="765.43" cy="-289.41" rx="2.4" ry="2.4"/>
+<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M256.69,-293.25C303.18,-293.25 387,-293.25 387,-293.25 387,-293.25 387,-281 387,-281 387,-281 762.99,-281 762.99,-281"/>
+<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="770.79,-283.1 776.79,-281 770.79,-278.9 770.79,-283.1"/>
+<polyline fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="770.79,-281 767.79,-281 "/>
+<ellipse fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" cx="765.39" cy="-281" rx="2.4" ry="2.4"/>
 </g>
 <!-- src/figures/Point.ts&#45;&gt;src/pidraw.common.ts -->
 <g id="edge72" class="edge">
 <title>src/figures/Point.ts&#45;&gt;src/pidraw.common.ts</title>
-<path fill="none" stroke="#000000" stroke-opacity="0.200000" d="M330,-429.75C330,-408 330,-355.5 330,-355.5 330,-355.5 790,-355.5 790,-355.5 790,-355.5 790,-312.05 790,-312.05"/>
-<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-opacity="0.200000" points="792.1,-304.25 790,-298.25 787.9,-304.25 792.1,-304.25"/>
-<polyline fill="none" stroke="#000000" stroke-opacity="0.200000" points="790,-304.25 790,-307.25 "/>
-<ellipse fill="none" stroke="#000000" stroke-opacity="0.200000" cx="790" cy="-309.65" rx="2.4" ry="2.4"/>
+<path fill="none" stroke="#000000" stroke-opacity="0.200000" d="M324,-429.99C324,-406.46 324,-345 324,-345 324,-345 786,-345 786,-345 786,-345 786,-304.83 786,-304.83"/>
+<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-opacity="0.200000" points="788.1,-297.03 786,-291.03 783.9,-297.03 788.1,-297.03"/>
+<polyline fill="none" stroke="#000000" stroke-opacity="0.200000" points="786,-297.03 786,-300.03 "/>
+<ellipse fill="none" stroke="#000000" stroke-opacity="0.200000" cx="786" cy="-302.43" rx="2.4" ry="2.4"/>
 </g>
 <!-- src/Calculus.ts -->
 <g id="node5" class="node">
@@ -190,39 +190,39 @@
 <!-- src/Graph.ts&#45;&gt;src/Animate.ts -->
 <g id="edge13" class="edge">
 <title>src/Graph.ts&#45;&gt;src/Animate.ts</title>
-<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M305.85,-294.25C305.85,-294.25 270.4,-294.25 270.4,-294.25"/>
-<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="262.6,-292.15 256.6,-294.25 262.6,-296.35 262.6,-292.15"/>
-<polyline fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="262.6,-294.25 265.6,-294.25 "/>
-<ellipse fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" cx="268" cy="-294.25" rx="2.4" ry="2.4"/>
+<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M305.85,-285.5C305.85,-285.5 270.4,-285.5 270.4,-285.5"/>
+<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="262.6,-283.4 256.6,-285.5 262.6,-287.6 262.6,-283.4"/>
+<polyline fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="262.6,-285.5 265.6,-285.5 "/>
+<ellipse fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" cx="268" cy="-285.5" rx="2.4" ry="2.4"/>
 </g>
 <!-- src/Graph.ts&#45;&gt;src/figures/Point.ts -->
 <g id="edge27" class="edge">
 <title>src/Graph.ts&#45;&gt;src/figures/Point.ts</title>
-<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M318,-296.05C318,-296.05 318,-416 318,-416"/>
-<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="315.9,-423.8 318,-429.8 320.1,-423.8 315.9,-423.8"/>
-<polyline fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="318,-423.8 318,-420.8 "/>
-<ellipse fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" cx="318" cy="-418.4" rx="2.4" ry="2.4"/>
+<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M318,-289C318,-289 318,-415.9 318,-415.9"/>
+<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="315.9,-423.7 318,-429.7 320.1,-423.7 315.9,-423.7"/>
+<polyline fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="318,-423.7 318,-420.7 "/>
+<ellipse fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" cx="318" cy="-418.3" rx="2.4" ry="2.4"/>
 </g>
 <!-- src/Graph.ts&#45;&gt;src/pidraw.common.ts -->
 <g id="edge30" class="edge">
 <title>src/Graph.ts&#45;&gt;src/pidraw.common.ts</title>
-<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M324,-277.92C324,-271.24 324,-263.33 324,-263.33 324,-263.33 801,-263.33 801,-263.33 801,-263.33 801,-265.93 801,-265.93"/>
-<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="798.9,-273.73 801,-279.73 803.1,-273.73 798.9,-273.73"/>
-<polyline fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="801,-273.73 801,-270.73 "/>
-<ellipse fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" cx="801" cy="-268.33" rx="2.4" ry="2.4"/>
+<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M333,-270.88C333,-266.31 333,-261.75 333,-261.75 333,-261.75 796,-261.75 796,-261.75 796,-261.75 796,-262.86 796,-262.86"/>
+<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="793.9,-266.82 796,-272.82 798.1,-266.82 793.9,-266.82"/>
+<polyline fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="796,-266.82 796,-263.82 "/>
+<ellipse fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" cx="796" cy="-261.42" rx="2.4" ry="2.4"/>
 </g>
 <!-- src/Graph.ts&#45;&gt;src/Calculus.ts -->
 <g id="edge14" class="edge">
 <title>src/Graph.ts&#45;&gt;src/Calculus.ts</title>
-<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M342,-277.91C342,-259.08 342,-217.5 342,-217.5 342,-217.5 668.94,-217.5 668.94,-217.5"/>
-<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="676.74,-219.6 682.74,-217.5 676.74,-215.4 676.74,-219.6"/>
-<polyline fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="676.74,-217.5 673.74,-217.5 "/>
-<ellipse fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" cx="671.34" cy="-217.5" rx="2.4" ry="2.4"/>
+<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M347,-270.78C347,-253.39 347,-217.5 347,-217.5 347,-217.5 669.05,-217.5 669.05,-217.5"/>
+<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="676.85,-219.6 682.85,-217.5 676.85,-215.4 676.85,-219.6"/>
+<polyline fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="676.85,-217.5 673.85,-217.5 "/>
+<ellipse fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" cx="671.45" cy="-217.5" rx="2.4" ry="2.4"/>
 </g>
 <!-- src/Graph.ts&#45;&gt;src/figures/AbstractFigure.ts -->
 <g id="edge15" class="edge">
 <title>src/Graph.ts&#45;&gt;src/figures/AbstractFigure.ts</title>
-<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M342,-296.04C342,-321.67 342,-393 342,-393 342,-393 735,-393 735,-393 735,-393 735,-578.95 735,-578.95"/>
+<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M342,-289.25C342,-316.23 342,-393 342,-393 342,-393 735,-393 735,-393 735,-393 735,-578.95 735,-578.95"/>
 <polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="732.9,-586.75 735,-592.75 737.1,-586.75 732.9,-586.75"/>
 <polyline fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="735,-586.75 735,-583.75 "/>
 <ellipse fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" cx="735" cy="-581.35" rx="2.4" ry="2.4"/>
@@ -239,10 +239,10 @@
 <!-- src/Graph.ts&#45;&gt;src/figures/Arc.ts -->
 <g id="edge16" class="edge">
 <title>src/Graph.ts&#45;&gt;src/figures/Arc.ts</title>
-<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M360.48,-284.71C368.9,-284.71 376,-284.71 376,-284.71 376,-284.71 376,-433.43 376,-433.43 376,-433.43 559.62,-433.43 559.62,-433.43"/>
-<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="567.42,-435.53 573.42,-433.43 567.42,-431.33 567.42,-435.53"/>
-<polyline fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="567.42,-433.43 564.42,-433.43 "/>
-<ellipse fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" cx="562.02" cy="-433.43" rx="2.4" ry="2.4"/>
+<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M360.28,-277.44C365.82,-277.44 370,-277.44 370,-277.44 370,-277.44 370,-433.43 370,-433.43 370,-433.43 559.35,-433.43 559.35,-433.43"/>
+<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="567.15,-435.53 573.15,-433.43 567.15,-431.33 567.15,-435.53"/>
+<polyline fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="567.15,-433.43 564.15,-433.43 "/>
+<ellipse fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" cx="561.75" cy="-433.43" rx="2.4" ry="2.4"/>
 </g>
 <!-- src/figures/Bezier.ts -->
 <g id="node12" class="node">
@@ -256,16 +256,18 @@
 <!-- src/Graph.ts&#45;&gt;src/figures/Bezier.ts -->
 <g id="edge17" class="edge">
 <title>src/Graph.ts&#45;&gt;src/figures/Bezier.ts</title>
-<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M305.77,-290.75C304.05,-290.75 303,-290.75 303,-290.75 303,-290.75 303,-493.2 303,-493.2 303,-493.2 567.31,-493.2 567.31,-493.2"/>
+<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M305.77,-283.75C304.05,-283.75 303,-283.75 303,-283.75 303,-283.75 303,-493.2 303,-493.2 303,-493.2 559.51,-493.2 559.51,-493.2"/>
 <polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="567.31,-495.3 573.31,-493.2 567.31,-491.1 567.31,-495.3"/>
+<polyline fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="567.31,-493.2 564.31,-493.2 "/>
+<ellipse fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" cx="561.91" cy="-493.2" rx="2.4" ry="2.4"/>
 </g>
 <!-- src/Graph.ts&#45;&gt;src/figures/Circle.ts -->
 <g id="edge18" class="edge">
 <title>src/Graph.ts&#45;&gt;src/figures/Circle.ts</title>
-<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M360.01,-286.59C381.85,-286.59 409,-286.59 409,-286.59 409,-286.59 409,-397.96 409,-397.96"/>
-<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="406.9,-405.76 409,-411.76 411.1,-405.76 406.9,-405.76"/>
-<polyline fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="409,-405.76 409,-402.76 "/>
-<ellipse fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" cx="409" cy="-400.36" rx="2.4" ry="2.4"/>
+<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M360.01,-279.22C381.85,-279.22 409,-279.22 409,-279.22 409,-279.22 409,-397.9 409,-397.9"/>
+<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="406.9,-405.7 409,-411.7 411.1,-405.7 406.9,-405.7"/>
+<polyline fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="409,-405.7 409,-402.7 "/>
+<ellipse fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" cx="409" cy="-400.3" rx="2.4" ry="2.4"/>
 </g>
 <!-- src/figures/CoordinateSystem.ts -->
 <g id="node14" class="node">
@@ -279,10 +281,10 @@
 <!-- src/Graph.ts&#45;&gt;src/figures/CoordinateSystem.ts -->
 <g id="edge19" class="edge">
 <title>src/Graph.ts&#45;&gt;src/figures/CoordinateSystem.ts</title>
-<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M360.02,-283.76C419.6,-283.76 557,-283.76 557,-283.76 557,-283.76 557,-441.96 557,-441.96"/>
-<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="554.9,-449.76 557,-455.76 559.1,-449.76 554.9,-449.76"/>
-<polyline fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="557,-449.76 557,-446.76 "/>
-<ellipse fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" cx="557" cy="-444.36" rx="2.4" ry="2.4"/>
+<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M360.02,-276.56C419.6,-276.56 557,-276.56 557,-276.56 557,-276.56 557,-442.11 557,-442.11"/>
+<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="554.9,-449.91 557,-455.91 559.1,-449.91 554.9,-449.91"/>
+<polyline fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="557,-449.91 557,-446.91 "/>
+<ellipse fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" cx="557" cy="-444.51" rx="2.4" ry="2.4"/>
 </g>
 <!-- src/figures/FillBetween.ts -->
 <g id="node15" class="node">
@@ -296,7 +298,7 @@
 <!-- src/Graph.ts&#45;&gt;src/figures/FillBetween.ts -->
 <g id="edge20" class="edge">
 <title>src/Graph.ts&#45;&gt;src/figures/FillBetween.ts</title>
-<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M348,-296.25C348,-318 348,-370.5 348,-370.5 348,-370.5 447.87,-370.5 447.87,-370.5"/>
+<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M348,-289.01C348,-311.9 348,-370.5 348,-370.5 348,-370.5 447.87,-370.5 447.87,-370.5"/>
 <polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="455.67,-372.6 461.67,-370.5 455.67,-368.4 455.67,-372.6"/>
 <polyline fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="455.67,-370.5 452.67,-370.5 "/>
 <ellipse fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" cx="450.27" cy="-370.5" rx="2.4" ry="2.4"/>
@@ -313,7 +315,7 @@
 <!-- src/Graph.ts&#45;&gt;src/figures/Follow.ts -->
 <g id="edge21" class="edge">
 <title>src/Graph.ts&#45;&gt;src/figures/Follow.ts</title>
-<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M360.34,-280.94C367.38,-280.94 373,-280.94 373,-280.94 373,-280.94 373,-451 373,-451 373,-451 458.17,-451 458.17,-451"/>
+<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M360.12,-273.89C364.16,-273.89 367,-273.89 367,-273.89 367,-273.89 367,-451 367,-451 367,-451 458.17,-451 458.17,-451"/>
 <polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="465.97,-453.1 471.97,-451 465.97,-448.9 465.97,-453.1"/>
 <polyline fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="465.97,-451 462.97,-451 "/>
 <ellipse fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" cx="460.57" cy="-451" rx="2.4" ry="2.4"/>
@@ -330,7 +332,7 @@
 <!-- src/Graph.ts&#45;&gt;src/figures/Grid.ts -->
 <g id="edge22" class="edge">
 <title>src/Graph.ts&#45;&gt;src/figures/Grid.ts</title>
-<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M305.88,-284.6C301.84,-284.6 299,-284.6 299,-284.6 299,-284.6 299,-523 299,-523 299,-523 559.68,-523 559.68,-523"/>
+<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M305.88,-277.6C301.84,-277.6 299,-277.6 299,-277.6 299,-277.6 299,-523 299,-523 299,-523 559.68,-523 559.68,-523"/>
 <polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="567.48,-525.1 573.48,-523 567.48,-520.9 567.48,-525.1"/>
 <polyline fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="567.48,-523 564.48,-523 "/>
 <ellipse fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" cx="562.08" cy="-523" rx="2.4" ry="2.4"/>
@@ -338,7 +340,7 @@
 <!-- src/Graph.ts&#45;&gt;src/figures/Line.ts -->
 <g id="edge23" class="edge">
 <title>src/Graph.ts&#45;&gt;src/figures/Line.ts</title>
-<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M360.2,-281.88C362.52,-281.88 364,-281.88 364,-281.88 364,-281.88 364,-558 364,-558 364,-558 457.88,-558 457.88,-558"/>
+<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M360.2,-274.78C362.52,-274.78 364,-274.78 364,-274.78 364,-274.78 364,-558 364,-558 364,-558 457.88,-558 457.88,-558"/>
 <polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="465.68,-560.1 471.68,-558 465.68,-555.9 465.68,-560.1"/>
 <polyline fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="465.68,-558 462.68,-558 "/>
 <ellipse fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" cx="460.28" cy="-558" rx="2.4" ry="2.4"/>
@@ -355,7 +357,7 @@
 <!-- src/Graph.ts&#45;&gt;src/figures/Parametric.ts -->
 <g id="edge24" class="edge">
 <title>src/Graph.ts&#45;&gt;src/figures/Parametric.ts</title>
-<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M354,-296.23C354,-305.47 354,-318.33 354,-318.33 354,-318.33 542,-318.33 542,-318.33 542,-318.33 542,-558 542,-558 542,-558 550.99,-558 550.99,-558"/>
+<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M354,-289.2C354,-300.44 354,-318 354,-318 354,-318 542,-318 542,-318 542,-318 542,-558 542,-558 542,-558 550.99,-558 550.99,-558"/>
 <polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="558.79,-560.1 564.79,-558 558.79,-555.9 558.79,-560.1"/>
 <polyline fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="558.79,-558 555.79,-558 "/>
 <ellipse fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" cx="553.39" cy="-558" rx="2.4" ry="2.4"/>
@@ -372,7 +374,7 @@
 <!-- src/Graph.ts&#45;&gt;src/figures/Path.ts -->
 <g id="edge25" class="edge">
 <title>src/Graph.ts&#45;&gt;src/figures/Path.ts</title>
-<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M305.79,-280.2C299.7,-280.2 295,-280.2 295,-280.2 295,-280.2 295,-610 295,-610 295,-610 559.59,-610 559.59,-610"/>
+<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M305.79,-273.2C299.7,-273.2 295,-273.2 295,-273.2 295,-273.2 295,-610 295,-610 295,-610 559.59,-610 559.59,-610"/>
 <polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="567.39,-612.1 573.39,-610 567.39,-607.9 567.39,-612.1"/>
 <polyline fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="567.39,-610 564.39,-610 "/>
 <ellipse fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" cx="561.99" cy="-610" rx="2.4" ry="2.4"/>
@@ -380,10 +382,10 @@
 <!-- src/Graph.ts&#45;&gt;src/figures/Plot.ts -->
 <g id="edge26" class="edge">
 <title>src/Graph.ts&#45;&gt;src/figures/Plot.ts</title>
-<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M360.18,-282.82C425.71,-282.82 587,-282.82 587,-282.82 587,-282.82 587,-352.02 587,-352.02"/>
-<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="584.9,-359.82 587,-365.82 589.1,-359.82 584.9,-359.82"/>
-<polyline fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="587,-359.82 587,-356.82 "/>
-<ellipse fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" cx="587" cy="-354.42" rx="2.4" ry="2.4"/>
+<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M360.18,-275.67C425.71,-275.67 587,-275.67 587,-275.67 587,-275.67 587,-352.03 587,-352.03"/>
+<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="584.9,-359.83 587,-365.83 589.1,-359.83 584.9,-359.83"/>
+<polyline fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="587,-359.83 587,-356.83 "/>
+<ellipse fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" cx="587" cy="-354.43" rx="2.4" ry="2.4"/>
 </g>
 <!-- src/figures/Polygon.ts -->
 <g id="node22" class="node">
@@ -397,7 +399,7 @@
 <!-- src/Graph.ts&#45;&gt;src/figures/Polygon.ts -->
 <g id="edge28" class="edge">
 <title>src/Graph.ts&#45;&gt;src/figures/Polygon.ts</title>
-<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M336,-296.18C336,-322.98 336,-399.2 336,-399.2 336,-399.2 557.13,-399.2 557.13,-399.2"/>
+<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M336,-289.35C336,-317.45 336,-399.2 336,-399.2 336,-399.2 557.13,-399.2 557.13,-399.2"/>
 <polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="564.93,-401.3 570.93,-399.2 564.93,-397.1 564.93,-401.3"/>
 <polyline fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="564.93,-399.2 561.93,-399.2 "/>
 <ellipse fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" cx="559.53" cy="-399.2" rx="2.4" ry="2.4"/>
@@ -414,7 +416,7 @@
 <!-- src/Graph.ts&#45;&gt;src/figures/Riemann.ts -->
 <g id="edge29" class="edge">
 <title>src/Graph.ts&#45;&gt;src/figures/Riemann.ts</title>
-<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M360.24,-285.65C397.56,-285.65 460,-285.65 460,-285.65 460,-285.65 460,-416.5 460,-416.5 460,-416.5 460.64,-416.5 460.64,-416.5"/>
+<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M360.24,-278.33C397.56,-278.33 460,-278.33 460,-278.33 460,-278.33 460,-416.5 460,-416.5 460,-416.5 460.64,-416.5 460.64,-416.5"/>
 <polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="460.44,-418.6 466.44,-416.5 460.44,-414.4 460.44,-418.6"/>
 <polyline fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="460.44,-416.5 457.44,-416.5 "/>
 <ellipse fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" cx="455.04" cy="-416.5" rx="2.4" ry="2.4"/>
@@ -422,18 +424,34 @@
 <!-- src/pidraw.common.ts&#45;&gt;src/Animate.ts -->
 <g id="edge159" class="edge">
 <title>src/pidraw.common.ts&#45;&gt;src/Animate.ts</title>
-<path fill="none" stroke="#000000" stroke-opacity="0.200000" d="M776.83,-294.12C733.62,-294.12 676,-294.12 676,-294.12 676,-294.12 676,-302 676,-302 676,-302 270.49,-302 270.49,-302"/>
-<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-opacity="0.200000" points="262.69,-299.9 256.69,-302 262.69,-304.1 262.69,-299.9"/>
-<polyline fill="none" stroke="#000000" stroke-opacity="0.200000" points="262.69,-302 265.69,-302 "/>
-<ellipse fill="none" stroke="#000000" stroke-opacity="0.200000" cx="268.09" cy="-302" rx="2.4" ry="2.4"/>
+<path fill="none" stroke="#000000" stroke-opacity="0.200000" d="M776.95,-282.78C683.31,-282.78 481,-282.78 481,-282.78 481,-282.78 481,-295.5 481,-295.5 481,-295.5 270.49,-295.5 270.49,-295.5"/>
+<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-opacity="0.200000" points="262.69,-293.4 256.69,-295.5 262.69,-297.6 262.69,-293.4"/>
+<polyline fill="none" stroke="#000000" stroke-opacity="0.200000" points="262.69,-295.5 265.69,-295.5 "/>
+<ellipse fill="none" stroke="#000000" stroke-opacity="0.200000" cx="268.09" cy="-295.5" rx="2.4" ry="2.4"/>
 </g>
 <!-- src/pidraw.common.ts&#45;&gt;src/figures/Point.ts -->
-<g id="edge160" class="edge">
+<g id="edge161" class="edge">
 <title>src/pidraw.common.ts&#45;&gt;src/figures/Point.ts</title>
-<path fill="none" stroke="#000000" stroke-opacity="0.200000" d="M786,-298.25C786,-314.15 786,-345 786,-345 786,-345 324,-345 324,-345 324,-345 324,-416.19 324,-416.19"/>
-<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-opacity="0.200000" points="321.9,-423.99 324,-429.99 326.1,-423.99 321.9,-423.99"/>
-<polyline fill="none" stroke="#000000" stroke-opacity="0.200000" points="324,-423.99 324,-420.99 "/>
-<ellipse fill="none" stroke="#000000" stroke-opacity="0.200000" cx="324" cy="-418.59" rx="2.4" ry="2.4"/>
+<path fill="none" stroke="#000000" stroke-opacity="0.200000" d="M790,-291.01C790,-310.64 790,-355.5 790,-355.5 790,-355.5 330,-355.5 330,-355.5 330,-355.5 330,-415.95 330,-415.95"/>
+<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-opacity="0.200000" points="327.9,-423.74 330,-429.75 332.1,-423.75 327.9,-423.74"/>
+<polyline fill="none" stroke="#000000" stroke-opacity="0.200000" points="330,-423.75 330,-420.75 "/>
+<ellipse fill="none" stroke="#000000" stroke-opacity="0.200000" cx="330" cy="-418.35" rx="2.4" ry="2.4"/>
+</g>
+<!-- src/pidraw.common.ts&#45;&gt;src/Graph.ts -->
+<g id="edge162" class="edge">
+<title>src/pidraw.common.ts&#45;&gt;src/Graph.ts</title>
+<path fill="none" stroke="#000000" stroke-opacity="0.200000" d="M815,-272.99C815,-264.31 815,-252.5 815,-252.5 815,-252.5 320,-252.5 320,-252.5 320,-252.5 320,-257.2 320,-257.2"/>
+<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-opacity="0.200000" points="317.9,-265 320,-271 322.1,-265 317.9,-265"/>
+<polyline fill="none" stroke="#000000" stroke-opacity="0.200000" points="320,-265 320,-262 "/>
+<ellipse fill="none" stroke="#000000" stroke-opacity="0.200000" cx="320" cy="-259.6" rx="2.4" ry="2.4"/>
+</g>
+<!-- src/pidraw.common.ts&#45;&gt;src/figures/AbstractFigure.ts -->
+<g id="edge160" class="edge">
+<title>src/pidraw.common.ts&#45;&gt;src/figures/AbstractFigure.ts</title>
+<path fill="none" stroke="#000000" stroke-opacity="0.200000" d="M820,-291.28C820,-344.05 820,-603.8 820,-603.8 820,-603.8 771.52,-603.8 771.52,-603.8"/>
+<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-opacity="0.200000" points="763.72,-601.7 757.72,-603.8 763.72,-605.9 763.72,-601.7"/>
+<polyline fill="none" stroke="#000000" stroke-opacity="0.200000" points="763.72,-603.8 766.72,-603.8 "/>
+<ellipse fill="none" stroke="#000000" stroke-opacity="0.200000" cx="769.12" cy="-603.8" rx="2.4" ry="2.4"/>
 </g>
 <!-- src/parser/parser.config.ts -->
 <g id="node10" class="node">
@@ -445,58 +463,58 @@
 </g>
 </g>
 <!-- src/pidraw.common.ts&#45;&gt;src/parser/parser.config.ts -->
-<g id="edge161" class="edge">
+<g id="edge163" class="edge">
 <title>src/pidraw.common.ts&#45;&gt;src/parser/parser.config.ts</title>
-<path fill="none" stroke="#000000" stroke-opacity="0.200000" d="M828,-298.04C828,-354.35 828,-654.67 828,-654.67 828,-654.67 157,-654.67 157,-654.67 157,-654.67 157,-826.09 157,-826.09"/>
-<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-opacity="0.200000" points="154.9,-833.89 157,-839.89 159.1,-833.89 154.9,-833.89"/>
-<polyline fill="none" stroke="#000000" stroke-opacity="0.200000" points="157,-833.89 157,-830.89 "/>
-<ellipse fill="none" stroke="#000000" stroke-opacity="0.200000" cx="157" cy="-828.49" rx="2.4" ry="2.4"/>
+<path fill="none" stroke="#000000" stroke-opacity="0.200000" d="M849,-291.06C849,-360.38 849,-804 849,-804 849,-804 163,-804 163,-804 163,-804 163,-826.09 163,-826.09"/>
+<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-opacity="0.200000" points="160.9,-833.89 163,-839.89 165.1,-833.89 160.9,-833.89"/>
+<polyline fill="none" stroke="#000000" stroke-opacity="0.200000" points="163,-833.89 163,-830.89 "/>
+<ellipse fill="none" stroke="#000000" stroke-opacity="0.200000" cx="163" cy="-828.49" rx="2.4" ry="2.4"/>
 </g>
 <!-- src/Calculus.ts&#45;&gt;src/pidraw.common.ts -->
 <g id="edge4" class="edge">
 <title>src/Calculus.ts&#45;&gt;src/pidraw.common.ts</title>
-<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M715,-234.23C715,-251.62 715,-287.53 715,-287.53 715,-287.53 763.06,-287.53 763.06,-287.53"/>
-<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="770.86,-289.63 776.86,-287.53 770.86,-285.43 770.86,-289.63"/>
-<polyline fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="770.86,-287.53 767.86,-287.53 "/>
-<ellipse fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" cx="765.46" cy="-287.53" rx="2.4" ry="2.4"/>
+<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M715,-234.1C715,-249.75 715,-280.11 715,-280.11 715,-280.11 763.06,-280.11 763.06,-280.11"/>
+<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="770.86,-282.21 776.86,-280.11 770.86,-278.01 770.86,-282.21"/>
+<polyline fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="770.86,-280.11 767.86,-280.11 "/>
+<ellipse fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" cx="765.46" cy="-280.11" rx="2.4" ry="2.4"/>
 </g>
 <!-- src/Draw.ts -->
 <g id="node6" class="node">
 <title>src/Draw.ts</title>
 <g id="a_node6"><a xlink:href="src/Draw.ts" xlink:title="Draw.ts">
-<path fill="#ddfeff" stroke="black" d="M147,-307C147,-307 105,-307 105,-307 102,-307 99,-304 99,-301 99,-301 99,-295 99,-295 99,-292 102,-289 105,-289 105,-289 147,-289 147,-289 150,-289 153,-292 153,-295 153,-295 153,-301 153,-301 153,-304 150,-307 147,-307"/>
-<text text-anchor="start" x="110" y="-295.8" font-family="Helvetica,sans-Serif" font-size="9.00">Draw.ts</text>
+<path fill="#ddfeff" stroke="black" d="M147,-300C147,-300 105,-300 105,-300 102,-300 99,-297 99,-294 99,-294 99,-288 99,-288 99,-285 102,-282 105,-282 105,-282 147,-282 147,-282 150,-282 153,-285 153,-288 153,-288 153,-294 153,-294 153,-297 150,-300 147,-300"/>
+<text text-anchor="start" x="110" y="-288.8" font-family="Helvetica,sans-Serif" font-size="9.00">Draw.ts</text>
 </a>
 </g>
 </g>
 <!-- src/Draw.ts&#45;&gt;src/Animate.ts -->
 <g id="edge5" class="edge">
 <title>src/Draw.ts&#45;&gt;src/Animate.ts</title>
-<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M153.2,-298C153.2,-298 190.45,-298 190.45,-298"/>
-<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="190.45,-300.1 196.45,-298 190.45,-295.9 190.45,-300.1"/>
+<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M153.2,-291C153.2,-291 190.45,-291 190.45,-291"/>
+<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="190.45,-293.1 196.45,-291 190.45,-288.9 190.45,-293.1"/>
 </g>
 <!-- src/Draw.ts&#45;&gt;src/figures/Point.ts -->
 <g id="edge7" class="edge">
 <title>src/Draw.ts&#45;&gt;src/figures/Point.ts</title>
-<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M143,-307.2C143,-337.43 143,-431.8 143,-431.8 143,-431.8 299.78,-431.8 299.78,-431.8"/>
-<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="299.78,-433.9 305.78,-431.8 299.78,-429.7 299.78,-433.9"/>
+<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M132,-300.24C132,-331.56 132,-431.8 132,-431.8 132,-431.8 299.89,-431.8 299.89,-431.8"/>
+<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="299.89,-433.9 305.89,-431.8 299.89,-429.7 299.89,-433.9"/>
 </g>
 <!-- src/Draw.ts&#45;&gt;src/Graph.ts -->
 <g id="edge8" class="edge">
 <title>src/Draw.ts&#45;&gt;src/Graph.ts</title>
-<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M140,-288.96C140,-287.69 140,-286.8 140,-286.8 140,-286.8 299.76,-286.8 299.76,-286.8"/>
-<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="299.76,-288.9 305.76,-286.8 299.76,-284.7 299.76,-288.9"/>
+<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M140,-281.96C140,-280.69 140,-279.8 140,-279.8 140,-279.8 299.76,-279.8 299.76,-279.8"/>
+<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="299.76,-281.9 305.76,-279.8 299.76,-277.7 299.76,-281.9"/>
 </g>
 <!-- src/Draw.ts&#45;&gt;src/pidraw.common.ts -->
 <g id="edge12" class="edge">
 <title>src/Draw.ts&#45;&gt;src/pidraw.common.ts</title>
-<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M126,-288.95C126,-274.71 126,-248.67 126,-248.67 126,-248.67 824,-248.67 824,-248.67 824,-248.67 824,-273.65 824,-273.65"/>
-<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="821.9,-273.65 824,-279.65 826.1,-273.65 821.9,-273.65"/>
+<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M126,-281.79C126,-267.92 126,-243.25 126,-243.25 126,-243.25 833,-243.25 833,-243.25 833,-243.25 833,-266.62 833,-266.62"/>
+<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="830.9,-266.62 833,-272.62 835.1,-266.62 830.9,-266.62"/>
 </g>
 <!-- src/Draw.ts&#45;&gt;src/figures/AbstractFigure.ts -->
 <g id="edge6" class="edge">
 <title>src/Draw.ts&#45;&gt;src/figures/AbstractFigure.ts</title>
-<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M121,-307.04C121,-357.29 121,-600 121,-600 121,-600 665.34,-600 665.34,-600"/>
+<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M121,-300.25C121,-351.66 121,-600 121,-600 121,-600 665.34,-600 665.34,-600"/>
 <polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="665.34,-602.1 671.34,-600 665.34,-597.9 665.34,-602.1"/>
 </g>
 <!-- src/labels/Label.ts -->
@@ -511,7 +529,7 @@
 <!-- src/Draw.ts&#45;&gt;src/labels/Label.ts -->
 <g id="edge9" class="edge">
 <title>src/Draw.ts&#45;&gt;src/labels/Label.ts</title>
-<path fill="none" stroke="#000000" stroke-opacity="0.200000" d="M113,-288.98C113,-242.91 113,-36 113,-36 113,-36 681.49,-36 681.49,-36"/>
+<path fill="none" stroke="#000000" stroke-opacity="0.200000" d="M113,-281.92C113,-236.5 113,-36 113,-36 113,-36 681.49,-36 681.49,-36"/>
 <polygon fill="none" stroke="#000000" stroke-opacity="0.200000" points="681.49,-38.1 687.49,-36 681.49,-33.9 681.49,-38.1"/>
 </g>
 <!-- src/parser/parser.common.ts -->
@@ -526,27 +544,27 @@
 <!-- src/Draw.ts&#45;&gt;src/parser/parser.common.ts -->
 <g id="edge10" class="edge">
 <title>src/Draw.ts&#45;&gt;src/parser/parser.common.ts</title>
-<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M132,-307.04C132,-310.06 132,-312.67 132,-312.67 132,-312.67 291,-312.67 291,-312.67 291,-312.67 291,-713.92 291,-713.92"/>
-<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="288.9,-713.92 291,-719.92 293.1,-713.92 288.9,-713.92"/>
+<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M143,-300.03C143,-305.72 143,-312 143,-312 143,-312 291,-312 291,-312 291,-312 291,-713.9 291,-713.9"/>
+<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="288.9,-713.9 291,-719.9 293.1,-713.9 288.9,-713.9"/>
 </g>
 <!-- src/Draw.ts&#45;&gt;src/parser/parser.config.ts -->
 <g id="edge11" class="edge">
 <title>src/Draw.ts&#45;&gt;src/parser/parser.config.ts</title>
-<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M110,-307.1C110,-307.1 110,-833.99 110,-833.99"/>
-<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="107.9,-833.99 110,-839.99 112.1,-833.99 107.9,-833.99"/>
+<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M110,-300.22C110,-300.22 110,-833.87 110,-833.87"/>
+<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="107.9,-833.87 110,-839.87 112.1,-833.87 107.9,-833.87"/>
 </g>
 <!-- src/figures/AbstractFigure.ts&#45;&gt;src/pidraw.common.ts -->
 <g id="edge33" class="edge">
 <title>src/figures/AbstractFigure.ts&#45;&gt;src/pidraw.common.ts</title>
-<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M757.78,-606.5C788.38,-606.5 824,-606.5 824,-606.5 824,-606.5 824,-311.96 824,-311.96"/>
-<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="826.1,-304.16 824,-298.16 821.9,-304.16 826.1,-304.16"/>
-<polyline fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="824,-304.16 824,-307.16 "/>
-<ellipse fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" cx="824" cy="-309.56" rx="2.4" ry="2.4"/>
+<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M757.78,-607.4C788.38,-607.4 824,-607.4 824,-607.4 824,-607.4 824,-304.84 824,-304.84"/>
+<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="826.1,-297.04 824,-291.04 821.9,-297.04 826.1,-297.04"/>
+<polyline fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="824,-297.04 824,-300.04 "/>
+<ellipse fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" cx="824" cy="-302.44" rx="2.4" ry="2.4"/>
 </g>
 <!-- src/figures/AbstractFigure.ts&#45;&gt;src/Calculus.ts -->
 <g id="edge31" class="edge">
 <title>src/figures/AbstractFigure.ts&#45;&gt;src/Calculus.ts</title>
-<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M757.61,-602C765.34,-602 771,-602 771,-602 771,-602 771,-220.5 771,-220.5 771,-220.5 759.85,-220.5 759.85,-220.5"/>
+<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M757.61,-600.2C765.34,-600.2 771,-600.2 771,-600.2 771,-600.2 771,-220.5 771,-220.5 771,-220.5 759.85,-220.5 759.85,-220.5"/>
 <polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="752.05,-218.4 746.05,-220.5 752.05,-222.6 752.05,-218.4"/>
 <polyline fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="752.05,-220.5 755.05,-220.5 "/>
 <ellipse fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" cx="757.45" cy="-220.5" rx="2.4" ry="2.4"/>
@@ -554,7 +572,7 @@
 <!-- src/figures/AbstractFigure.ts&#45;&gt;src/labels/Label.ts -->
 <g id="edge32" class="edge">
 <title>src/figures/AbstractFigure.ts&#45;&gt;src/labels/Label.ts</title>
-<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M757.74,-597.5C766.97,-597.5 774,-597.5 774,-597.5 774,-597.5 774,-36 774,-36 774,-36 755.61,-36 755.61,-36"/>
+<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M757.74,-596.6C766.97,-596.6 774,-596.6 774,-596.6 774,-596.6 774,-36 774,-36 774,-36 755.61,-36 755.61,-36"/>
 <polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="747.81,-33.9 741.81,-36 747.81,-38.1 747.81,-33.9"/>
 <polyline fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="747.81,-36 750.81,-36 "/>
 <ellipse fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" cx="753.21" cy="-36" rx="2.4" ry="2.4"/>
@@ -562,32 +580,34 @@
 <!-- src/labels/Label.ts&#45;&gt;src/pidraw.common.ts -->
 <g id="edge105" class="edge">
 <title>src/labels/Label.ts&#45;&gt;src/pidraw.common.ts</title>
-<path fill="none" stroke="#000000" stroke-opacity="0.200000" d="M741.63,-30C780.4,-30 847,-30 847,-30 847,-30 847,-273.78 847,-273.78"/>
-<polygon fill="none" stroke="#000000" stroke-opacity="0.200000" points="844.9,-273.78 847,-279.78 849.1,-273.78 844.9,-273.78"/>
+<path fill="none" stroke="#000000" stroke-opacity="0.200000" d="M741.67,-30C781.74,-30 852,-30 852,-30 852,-30 852,-258.93 852,-258.93"/>
+<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-opacity="0.200000" points="849.9,-266.73 852,-272.73 854.1,-266.73 849.9,-266.73"/>
+<polyline fill="none" stroke="#000000" stroke-opacity="0.200000" points="852,-266.73 852,-263.73 "/>
+<ellipse fill="none" stroke="#000000" stroke-opacity="0.200000" cx="852" cy="-261.33" rx="2.4" ry="2.4"/>
 </g>
 <!-- src/parser/parser.common.ts&#45;&gt;src/pidraw.common.ts -->
 <g id="edge149" class="edge">
 <title>src/parser/parser.common.ts&#45;&gt;src/pidraw.common.ts</title>
-<path fill="none" stroke="#000000" stroke-opacity="0.200000" d="M379.06,-729C503.48,-729 837,-729 837,-729 837,-729 837,-311.99 837,-311.99"/>
-<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-opacity="0.200000" points="839.1,-304.19 837,-298.19 834.9,-304.19 839.1,-304.19"/>
-<polyline fill="none" stroke="#000000" stroke-opacity="0.200000" points="837,-304.19 837,-307.19 "/>
-<ellipse fill="none" stroke="#000000" stroke-opacity="0.200000" cx="837" cy="-309.59" rx="2.4" ry="2.4"/>
+<path fill="none" stroke="#000000" stroke-opacity="0.200000" d="M379.06,-729C503.48,-729 837,-729 837,-729 837,-729 837,-305.14 837,-305.14"/>
+<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-opacity="0.200000" points="839.1,-297.34 837,-291.34 834.9,-297.34 839.1,-297.34"/>
+<polyline fill="none" stroke="#000000" stroke-opacity="0.200000" points="837,-297.34 837,-300.34 "/>
+<ellipse fill="none" stroke="#000000" stroke-opacity="0.200000" cx="837" cy="-302.74" rx="2.4" ry="2.4"/>
 </g>
 <!-- src/parser/parser.common.ts&#45;&gt;src/figures/AbstractFigure.ts -->
 <g id="edge148" class="edge">
 <title>src/parser/parser.common.ts&#45;&gt;src/figures/AbstractFigure.ts</title>
-<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M370,-719.94C370,-691.05 370,-603 370,-603 370,-603 657.42,-603 657.42,-603"/>
-<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="665.22,-605.1 671.22,-603 665.22,-600.9 665.22,-605.1"/>
-<polyline fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="665.22,-603 662.22,-603 "/>
-<ellipse fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" cx="659.82" cy="-603" rx="2.4" ry="2.4"/>
+<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M376,-719.94C376,-691.05 376,-603 376,-603 376,-603 657.48,-603 657.48,-603"/>
+<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="665.28,-605.1 671.28,-603 665.28,-600.9 665.28,-605.1"/>
+<polyline fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="665.28,-603 662.28,-603 "/>
+<ellipse fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" cx="659.88" cy="-603" rx="2.4" ry="2.4"/>
 </g>
 <!-- src/parser/parser.config.ts&#45;&gt;src/pidraw.common.ts -->
 <g id="edge151" class="edge">
 <title>src/parser/parser.config.ts&#45;&gt;src/pidraw.common.ts</title>
-<path fill="none" stroke="#000000" stroke-opacity="0.200000" d="M163,-839.89C163,-826.74 163,-804 163,-804 163,-804 849,-804 849,-804 849,-804 849,-312.18 849,-312.18"/>
-<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-opacity="0.200000" points="851.1,-304.38 849,-298.38 846.9,-304.38 851.1,-304.38"/>
-<polyline fill="none" stroke="#000000" stroke-opacity="0.200000" points="849,-304.38 849,-307.38 "/>
-<ellipse fill="none" stroke="#000000" stroke-opacity="0.200000" cx="849" cy="-309.78" rx="2.4" ry="2.4"/>
+<path fill="none" stroke="#000000" stroke-opacity="0.200000" d="M157,-839.89C157,-801.47 157,-654.67 157,-654.67 157,-654.67 828,-654.67 828,-654.67 828,-654.67 828,-305.01 828,-305.01"/>
+<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-opacity="0.200000" points="830.1,-297.21 828,-291.21 825.9,-297.21 830.1,-297.21"/>
+<polyline fill="none" stroke="#000000" stroke-opacity="0.200000" points="828,-297.21 828,-300.21 "/>
+<ellipse fill="none" stroke="#000000" stroke-opacity="0.200000" cx="828" cy="-302.61" rx="2.4" ry="2.4"/>
 </g>
 <!-- src/parser/parser.config.ts&#45;&gt;src/figures/AbstractFigure.ts -->
 <g id="edge150" class="edge">
@@ -719,8 +739,10 @@
 <!-- src/figures/Arc.ts&#45;&gt;src/pidraw.common.ts -->
 <g id="edge35" class="edge">
 <title>src/figures/Arc.ts&#45;&gt;src/pidraw.common.ts</title>
-<path fill="none" stroke="#000000" stroke-opacity="0.200000" d="M627.68,-433.2C682.05,-433.2 799,-433.2 799,-433.2 799,-433.2 799,-304.02 799,-304.02"/>
-<polygon fill="none" stroke="#000000" stroke-opacity="0.200000" points="801.1,-304.02 799,-298.02 796.9,-304.02 801.1,-304.02"/>
+<path fill="none" stroke="#000000" stroke-opacity="0.200000" d="M627.68,-433.2C682.05,-433.2 799,-433.2 799,-433.2 799,-433.2 799,-304.81 799,-304.81"/>
+<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-opacity="0.200000" points="801.1,-297.01 799,-291.01 796.9,-297.01 801.1,-297.01"/>
+<polyline fill="none" stroke="#000000" stroke-opacity="0.200000" points="799,-297.01 799,-300.01 "/>
+<ellipse fill="none" stroke="#000000" stroke-opacity="0.200000" cx="799" cy="-302.41" rx="2.4" ry="2.4"/>
 </g>
 <!-- src/figures/Arc.ts&#45;&gt;src/Calculus.ts -->
 <g id="edge34" class="edge">
@@ -741,8 +763,10 @@
 <!-- src/figures/Bezier.ts&#45;&gt;src/pidraw.common.ts -->
 <g id="edge38" class="edge">
 <title>src/figures/Bezier.ts&#45;&gt;src/pidraw.common.ts</title>
-<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M627.92,-496.8C684.09,-496.8 807,-496.8 807,-496.8 807,-496.8 807,-304.2 807,-304.2"/>
-<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="809.1,-304.2 807,-298.2 804.9,-304.2 809.1,-304.2"/>
+<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M627.81,-496.8C683.08,-496.8 803,-496.8 803,-496.8 803,-496.8 803,-305.03 803,-305.03"/>
+<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="805.1,-297.23 803,-291.23 800.9,-297.23 805.1,-297.23"/>
+<polyline fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="803,-297.23 803,-300.23 "/>
+<ellipse fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" cx="803" cy="-302.63" rx="2.4" ry="2.4"/>
 </g>
 <!-- src/figures/Bezier.ts&#45;&gt;src/figures/AbstractFigure.ts -->
 <g id="edge39" class="edge">
@@ -764,18 +788,18 @@
 <!-- src/figures/Bezier.ts&#45;&gt;src/functions/computedBezier.ts -->
 <g id="edge37" class="edge">
 <title>src/figures/Bezier.ts&#45;&gt;src/functions/computedBezier.ts</title>
-<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M627.86,-489.6C650.86,-489.6 680,-489.6 680,-489.6 680,-489.6 680,-338.19 680,-338.19"/>
-<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="682.1,-330.39 680,-324.39 677.9,-330.39 682.1,-330.39"/>
-<polyline fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="680,-330.39 680,-333.39 "/>
-<ellipse fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" cx="680" cy="-335.79" rx="2.4" ry="2.4"/>
+<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M627.71,-493.2C653.39,-493.2 688,-493.2 688,-493.2 688,-493.2 688,-337.88 688,-337.88"/>
+<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="690.1,-330.08 688,-324.08 685.9,-330.08 690.1,-330.08"/>
+<polyline fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="688,-330.08 688,-333.08 "/>
+<ellipse fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" cx="688" cy="-335.48" rx="2.4" ry="2.4"/>
 </g>
 <!-- src/figures/Circle.ts&#45;&gt;src/pidraw.common.ts -->
 <g id="edge41" class="edge">
 <title>src/figures/Circle.ts&#45;&gt;src/pidraw.common.ts</title>
-<path fill="none" stroke="#000000" stroke-opacity="0.200000" d="M436,-411.89C436,-381.95 436,-288.47 436,-288.47 436,-288.47 762.96,-288.47 762.96,-288.47"/>
-<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-opacity="0.200000" points="770.76,-290.57 776.76,-288.47 770.76,-286.37 770.76,-290.57"/>
-<polyline fill="none" stroke="#000000" stroke-opacity="0.200000" points="770.76,-288.47 767.76,-288.47 "/>
-<ellipse fill="none" stroke="#000000" stroke-opacity="0.200000" cx="765.36" cy="-288.47" rx="2.4" ry="2.4"/>
+<path fill="none" stroke="#000000" stroke-opacity="0.200000" d="M436,-411.87C436,-380.92 436,-281.89 436,-281.89 436,-281.89 762.96,-281.89 762.96,-281.89"/>
+<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-opacity="0.200000" points="770.76,-283.99 776.76,-281.89 770.76,-279.79 770.76,-283.99"/>
+<polyline fill="none" stroke="#000000" stroke-opacity="0.200000" points="770.76,-281.89 767.76,-281.89 "/>
+<ellipse fill="none" stroke="#000000" stroke-opacity="0.200000" cx="765.36" cy="-281.89" rx="2.4" ry="2.4"/>
 </g>
 <!-- src/figures/Circle.ts&#45;&gt;src/Calculus.ts -->
 <g id="edge40" class="edge">
@@ -804,10 +828,10 @@
 <!-- src/figures/CoordinateSystem.ts&#45;&gt;src/pidraw.common.ts -->
 <g id="edge45" class="edge">
 <title>src/figures/CoordinateSystem.ts&#45;&gt;src/pidraw.common.ts</title>
-<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M648,-455.76C648,-420.07 648,-293.18 648,-293.18 648,-293.18 763.13,-293.18 763.13,-293.18"/>
-<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="770.93,-295.28 776.93,-293.18 770.93,-291.08 770.93,-295.28"/>
-<polyline fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="770.93,-293.18 767.93,-293.18 "/>
-<ellipse fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" cx="765.53" cy="-293.18" rx="2.4" ry="2.4"/>
+<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M648,-455.94C648,-419.71 648,-287.22 648,-287.22 648,-287.22 763.13,-287.22 763.13,-287.22"/>
+<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="770.93,-289.32 776.93,-287.22 770.93,-285.12 770.93,-289.32"/>
+<polyline fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="770.93,-287.22 767.93,-287.22 "/>
+<ellipse fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" cx="765.53" cy="-287.22" rx="2.4" ry="2.4"/>
 </g>
 <!-- src/figures/CoordinateSystem.ts&#45;&gt;src/Calculus.ts -->
 <g id="edge44" class="edge">
@@ -828,16 +852,18 @@
 <!-- src/figures/FillBetween.ts&#45;&gt;src/pidraw.common.ts -->
 <g id="edge48" class="edge">
 <title>src/figures/FillBetween.ts&#45;&gt;src/pidraw.common.ts</title>
-<path fill="none" stroke="#000000" stroke-opacity="0.200000" d="M512,-365.94C512,-344.1 512,-290.35 512,-290.35 512,-290.35 770.87,-290.35 770.87,-290.35"/>
-<polygon fill="none" stroke="#000000" stroke-opacity="0.200000" points="770.87,-292.45 776.87,-290.35 770.87,-288.25 770.87,-292.45"/>
+<path fill="none" stroke="#000000" stroke-opacity="0.200000" d="M518,-365.91C518,-342.81 518,-283.67 518,-283.67 518,-283.67 762.97,-283.67 762.97,-283.67"/>
+<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-opacity="0.200000" points="770.77,-285.77 776.77,-283.67 770.77,-281.57 770.77,-285.77"/>
+<polyline fill="none" stroke="#000000" stroke-opacity="0.200000" points="770.77,-283.67 767.77,-283.67 "/>
+<ellipse fill="none" stroke="#000000" stroke-opacity="0.200000" cx="765.37" cy="-283.67" rx="2.4" ry="2.4"/>
 </g>
 <!-- src/figures/FillBetween.ts&#45;&gt;src/Calculus.ts -->
 <g id="edge47" class="edge">
 <title>src/figures/FillBetween.ts&#45;&gt;src/Calculus.ts</title>
-<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M487,-365.8C487,-332.54 487,-220.5 487,-220.5 487,-220.5 669.07,-220.5 669.07,-220.5"/>
-<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="676.87,-222.6 682.87,-220.5 676.87,-218.4 676.87,-222.6"/>
-<polyline fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="676.87,-220.5 673.87,-220.5 "/>
-<ellipse fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" cx="671.47" cy="-220.5" rx="2.4" ry="2.4"/>
+<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M499,-365.8C499,-332.54 499,-220.5 499,-220.5 499,-220.5 668.9,-220.5 668.9,-220.5"/>
+<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="676.7,-222.6 682.7,-220.5 676.7,-218.4 676.7,-222.6"/>
+<polyline fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="676.7,-220.5 673.7,-220.5 "/>
+<ellipse fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" cx="671.3" cy="-220.5" rx="2.4" ry="2.4"/>
 </g>
 <!-- src/figures/FillBetween.ts&#45;&gt;src/figures/AbstractFigure.ts -->
 <g id="edge49" class="edge">
@@ -858,13 +884,15 @@
 <!-- src/figures/Follow.ts&#45;&gt;src/pidraw.common.ts -->
 <g id="edge52" class="edge">
 <title>src/figures/Follow.ts&#45;&gt;src/pidraw.common.ts</title>
-<path fill="none" stroke="#000000" stroke-opacity="0.200000" d="M526.25,-451.2C600.86,-451.2 803,-451.2 803,-451.2 803,-451.2 803,-304.19 803,-304.19"/>
-<polygon fill="none" stroke="#000000" stroke-opacity="0.200000" points="805.1,-304.19 803,-298.19 800.9,-304.19 805.1,-304.19"/>
+<path fill="none" stroke="#000000" stroke-opacity="0.200000" d="M526.12,-446.4C533.74,-446.4 540,-446.4 540,-446.4 540,-446.4 540,-284.56 540,-284.56 540,-284.56 762.89,-284.56 762.89,-284.56"/>
+<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-opacity="0.200000" points="770.69,-286.66 776.69,-284.56 770.69,-282.46 770.69,-286.66"/>
+<polyline fill="none" stroke="#000000" stroke-opacity="0.200000" points="770.69,-284.56 767.69,-284.56 "/>
+<ellipse fill="none" stroke="#000000" stroke-opacity="0.200000" cx="765.29" cy="-284.56" rx="2.4" ry="2.4"/>
 </g>
 <!-- src/figures/Follow.ts&#45;&gt;src/Calculus.ts -->
 <g id="edge51" class="edge">
 <title>src/figures/Follow.ts&#45;&gt;src/Calculus.ts</title>
-<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M526.09,-446.4C532.74,-446.4 538,-446.4 538,-446.4 538,-446.4 538,-222 538,-222 538,-222 669.15,-222 669.15,-222"/>
+<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M526.09,-448.8C532.74,-448.8 538,-448.8 538,-448.8 538,-448.8 538,-222 538,-222 538,-222 669.15,-222 669.15,-222"/>
 <polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="676.95,-224.1 682.95,-222 676.95,-219.9 676.95,-224.1"/>
 <polyline fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="676.95,-222 673.95,-222 "/>
 <ellipse fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" cx="671.55" cy="-222" rx="2.4" ry="2.4"/>
@@ -872,15 +900,15 @@
 <!-- src/figures/Follow.ts&#45;&gt;src/figures/AbstractFigure.ts -->
 <g id="edge53" class="edge">
 <title>src/figures/Follow.ts&#45;&gt;src/figures/AbstractFigure.ts</title>
-<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M526.12,-453.6C533.74,-453.6 540,-453.6 540,-453.6 540,-453.6 540,-596 540,-596 540,-596 657.57,-596 657.57,-596"/>
-<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="665.37,-598.1 671.37,-596 665.37,-593.9 665.37,-598.1"/>
-<polyline fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="665.37,-596 662.37,-596 "/>
-<ellipse fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" cx="659.97" cy="-596" rx="2.4" ry="2.4"/>
+<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M526.31,-453.6C534.33,-453.6 541,-453.6 541,-453.6 541,-453.6 541,-596 541,-596 541,-596 657.37,-596 657.37,-596"/>
+<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="665.17,-598.1 671.17,-596 665.17,-593.9 665.17,-598.1"/>
+<polyline fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="665.17,-596 662.17,-596 "/>
+<ellipse fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" cx="659.77" cy="-596" rx="2.4" ry="2.4"/>
 </g>
 <!-- src/figures/Follow.ts&#45;&gt;src/figures/Plot.ts -->
 <g id="edge54" class="edge">
 <title>src/figures/Follow.ts&#45;&gt;src/figures/Plot.ts</title>
-<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M526.09,-448.8C536.97,-448.8 547,-448.8 547,-448.8 547,-448.8 547,-378.86 547,-378.86 547,-378.86 559.64,-378.86 559.64,-378.86"/>
+<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M526.09,-451.2C536.97,-451.2 547,-451.2 547,-451.2 547,-451.2 547,-378.86 547,-378.86 547,-378.86 559.64,-378.86 559.64,-378.86"/>
 <polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="567.44,-380.96 573.44,-378.86 567.44,-376.76 567.44,-380.96"/>
 <polyline fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="567.44,-378.86 564.44,-378.86 "/>
 <ellipse fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" cx="562.04" cy="-378.86" rx="2.4" ry="2.4"/>
@@ -888,10 +916,10 @@
 <!-- src/figures/Grid.ts&#45;&gt;src/pidraw.common.ts -->
 <g id="edge56" class="edge">
 <title>src/figures/Grid.ts&#45;&gt;src/pidraw.common.ts</title>
-<path fill="none" stroke="#000000" stroke-opacity="0.200000" d="M627.59,-525C684.44,-525 811,-525 811,-525 811,-525 811,-312.05 811,-312.05"/>
-<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-opacity="0.200000" points="813.1,-304.25 811,-298.25 808.9,-304.25 813.1,-304.25"/>
-<polyline fill="none" stroke="#000000" stroke-opacity="0.200000" points="811,-304.25 811,-307.25 "/>
-<ellipse fill="none" stroke="#000000" stroke-opacity="0.200000" cx="811" cy="-309.65" rx="2.4" ry="2.4"/>
+<path fill="none" stroke="#000000" stroke-opacity="0.200000" d="M627.92,-525C684.09,-525 807,-525 807,-525 807,-525 807,-305.03 807,-305.03"/>
+<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-opacity="0.200000" points="809.1,-297.23 807,-291.23 804.9,-297.23 809.1,-297.23"/>
+<polyline fill="none" stroke="#000000" stroke-opacity="0.200000" points="807,-297.23 807,-300.23 "/>
+<ellipse fill="none" stroke="#000000" stroke-opacity="0.200000" cx="807" cy="-302.63" rx="2.4" ry="2.4"/>
 </g>
 <!-- src/figures/Grid.ts&#45;&gt;src/Calculus.ts -->
 <g id="edge55" class="edge">
@@ -912,10 +940,10 @@
 <!-- src/figures/Line.ts&#45;&gt;src/pidraw.common.ts -->
 <g id="edge60" class="edge">
 <title>src/figures/Line.ts&#45;&gt;src/pidraw.common.ts</title>
-<path fill="none" stroke="#000000" stroke-opacity="0.200000" d="M508,-551.79C508,-547.18 508,-542.57 508,-542.57 508,-542.57 816,-542.57 816,-542.57 816,-542.57 816,-311.82 816,-311.82"/>
-<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-opacity="0.200000" points="818.1,-304.02 816,-298.02 813.9,-304.02 818.1,-304.02"/>
-<polyline fill="none" stroke="#000000" stroke-opacity="0.200000" points="816,-304.02 816,-307.02 "/>
-<ellipse fill="none" stroke="#000000" stroke-opacity="0.200000" cx="816" cy="-309.42" rx="2.4" ry="2.4"/>
+<path fill="none" stroke="#000000" stroke-opacity="0.200000" d="M508,-551.79C508,-547.18 508,-542.57 508,-542.57 508,-542.57 811,-542.57 811,-542.57 811,-542.57 811,-305.07 811,-305.07"/>
+<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-opacity="0.200000" points="813.1,-297.27 811,-291.27 808.9,-297.27 813.1,-297.27"/>
+<polyline fill="none" stroke="#000000" stroke-opacity="0.200000" points="811,-297.27 811,-300.27 "/>
+<ellipse fill="none" stroke="#000000" stroke-opacity="0.200000" cx="811" cy="-302.67" rx="2.4" ry="2.4"/>
 </g>
 <!-- src/figures/Line.ts&#45;&gt;src/Calculus.ts -->
 <g id="edge58" class="edge">
@@ -936,10 +964,10 @@
 <!-- src/figures/Line.ts&#45;&gt;src/parser/parser.common.ts -->
 <g id="edge59" class="edge">
 <title>src/figures/Line.ts&#45;&gt;src/parser/parser.common.ts</title>
-<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M471.97,-567C433.35,-567 367,-567 367,-567 367,-567 367,-706.03 367,-706.03"/>
-<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="364.9,-713.83 367,-719.83 369.1,-713.83 364.9,-713.83"/>
-<polyline fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="367,-713.83 367,-710.83 "/>
-<ellipse fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" cx="367" cy="-708.43" rx="2.4" ry="2.4"/>
+<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M471.97,-567C434.95,-567 373,-567 373,-567 373,-567 373,-706.03 373,-706.03"/>
+<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="370.9,-713.83 373,-719.83 375.1,-713.83 370.9,-713.83"/>
+<polyline fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="373,-713.83 373,-710.83 "/>
+<ellipse fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" cx="373" cy="-708.43" rx="2.4" ry="2.4"/>
 </g>
 <!-- src/figures/Line.ts&#45;&gt;src/figures/Plot.ts -->
 <g id="edge62" class="edge">
@@ -952,8 +980,10 @@
 <!-- src/figures/Parametric.ts&#45;&gt;src/pidraw.common.ts -->
 <g id="edge64" class="edge">
 <title>src/figures/Parametric.ts&#45;&gt;src/pidraw.common.ts</title>
-<path fill="none" stroke="#000000" stroke-opacity="0.200000" d="M636.25,-558C698.45,-558 820,-558 820,-558 820,-558 820,-304.26 820,-304.26"/>
-<polygon fill="none" stroke="#000000" stroke-opacity="0.200000" points="822.1,-304.26 820,-298.26 817.9,-304.26 822.1,-304.26"/>
+<path fill="none" stroke="#000000" stroke-opacity="0.200000" d="M636.09,-558C697.29,-558 816,-558 816,-558 816,-558 816,-304.98 816,-304.98"/>
+<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-opacity="0.200000" points="818.1,-297.18 816,-291.18 813.9,-297.18 818.1,-297.18"/>
+<polyline fill="none" stroke="#000000" stroke-opacity="0.200000" points="816,-297.18 816,-300.18 "/>
+<ellipse fill="none" stroke="#000000" stroke-opacity="0.200000" cx="816" cy="-302.58" rx="2.4" ry="2.4"/>
 </g>
 <!-- src/figures/Parametric.ts&#45;&gt;src/Calculus.ts -->
 <g id="edge63" class="edge">
@@ -982,18 +1012,18 @@
 <!-- src/figures/Plot.ts&#45;&gt;src/figures/Point.ts -->
 <g id="edge70" class="edge">
 <title>src/figures/Plot.ts&#45;&gt;src/figures/Point.ts</title>
-<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M573.24,-373.71C558.79,-373.71 544,-373.71 544,-373.71 544,-373.71 544,-436.86 544,-436.86 544,-436.86 373.95,-436.86 373.95,-436.86"/>
-<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="366.15,-434.76 360.15,-436.86 366.15,-438.96 366.15,-434.76"/>
-<polyline fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="366.15,-436.86 369.15,-436.86 "/>
-<ellipse fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" cx="371.55" cy="-436.86" rx="2.4" ry="2.4"/>
+<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M573.4,-373.71C559.31,-373.71 545,-373.71 545,-373.71 545,-373.71 545,-436.86 545,-436.86 545,-436.86 374.08,-436.86 374.08,-436.86"/>
+<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="366.28,-434.76 360.28,-436.86 366.28,-438.96 366.28,-434.76"/>
+<polyline fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="366.28,-436.86 369.28,-436.86 "/>
+<ellipse fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" cx="371.68" cy="-436.86" rx="2.4" ry="2.4"/>
 </g>
 <!-- src/figures/Plot.ts&#45;&gt;src/pidraw.common.ts -->
 <g id="edge68" class="edge">
 <title>src/figures/Plot.ts&#45;&gt;src/pidraw.common.ts</title>
-<path fill="none" stroke="#000000" stroke-opacity="0.200000" d="M614,-365.83C614,-344.28 614,-292.24 614,-292.24 614,-292.24 762.94,-292.24 762.94,-292.24"/>
-<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-opacity="0.200000" points="770.74,-294.34 776.74,-292.24 770.74,-290.14 770.74,-294.34"/>
-<polyline fill="none" stroke="#000000" stroke-opacity="0.200000" points="770.74,-292.24 767.74,-292.24 "/>
-<ellipse fill="none" stroke="#000000" stroke-opacity="0.200000" cx="765.34" cy="-292.24" rx="2.4" ry="2.4"/>
+<path fill="none" stroke="#000000" stroke-opacity="0.200000" d="M614,-365.85C614,-343.19 614,-286.33 614,-286.33 614,-286.33 762.94,-286.33 762.94,-286.33"/>
+<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-opacity="0.200000" points="770.74,-288.43 776.74,-286.33 770.74,-284.23 770.74,-288.43"/>
+<polyline fill="none" stroke="#000000" stroke-opacity="0.200000" points="770.74,-286.33 767.74,-286.33 "/>
+<ellipse fill="none" stroke="#000000" stroke-opacity="0.200000" cx="765.34" cy="-286.33" rx="2.4" ry="2.4"/>
 </g>
 <!-- src/figures/Plot.ts&#45;&gt;src/Calculus.ts -->
 <g id="edge67" class="edge">
@@ -1014,8 +1044,10 @@
 <!-- src/figures/Polygon.ts&#45;&gt;src/pidraw.common.ts -->
 <g id="edge78" class="edge">
 <title>src/figures/Polygon.ts&#45;&gt;src/pidraw.common.ts</title>
-<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M630.31,-405C684.59,-405 794,-405 794,-405 794,-405 794,-304.1 794,-304.1"/>
-<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="796.1,-304.1 794,-298.1 791.9,-304.1 796.1,-304.1"/>
+<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M630.31,-405C684.59,-405 794,-405 794,-405 794,-405 794,-305.04 794,-305.04"/>
+<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="796.1,-297.24 794,-291.24 791.9,-297.25 796.1,-297.24"/>
+<polyline fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="794,-297.24 794,-300.24 "/>
+<ellipse fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" cx="794" cy="-302.64" rx="2.4" ry="2.4"/>
 </g>
 <!-- src/figures/Polygon.ts&#45;&gt;src/Calculus.ts -->
 <g id="edge77" class="edge">
@@ -1036,8 +1068,10 @@
 <!-- src/figures/Riemann.ts&#45;&gt;src/pidraw.common.ts -->
 <g id="edge81" class="edge">
 <title>src/figures/Riemann.ts&#45;&gt;src/pidraw.common.ts</title>
-<path fill="none" stroke="#000000" stroke-opacity="0.200000" d="M531.88,-418.8C549.66,-418.8 568,-418.8 568,-418.8 568,-418.8 568,-291.29 568,-291.29 568,-291.29 770.93,-291.29 770.93,-291.29"/>
-<polygon fill="none" stroke="#000000" stroke-opacity="0.200000" points="770.93,-293.39 776.93,-291.29 770.93,-289.19 770.93,-293.39"/>
+<path fill="none" stroke="#000000" stroke-opacity="0.200000" d="M531.88,-418.8C549.66,-418.8 568,-418.8 568,-418.8 568,-418.8 568,-285.44 568,-285.44 568,-285.44 763.13,-285.44 763.13,-285.44"/>
+<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-opacity="0.200000" points="770.93,-287.54 776.93,-285.44 770.93,-283.34 770.93,-287.54"/>
+<polyline fill="none" stroke="#000000" stroke-opacity="0.200000" points="770.93,-285.44 767.93,-285.44 "/>
+<ellipse fill="none" stroke="#000000" stroke-opacity="0.200000" cx="765.53" cy="-285.44" rx="2.4" ry="2.4"/>
 </g>
 <!-- src/figures/Riemann.ts&#45;&gt;src/Calculus.ts -->
 <g id="edge80" class="edge">
@@ -1058,24 +1092,24 @@
 <!-- src/figures/Riemann.ts&#45;&gt;src/figures/Plot.ts -->
 <g id="edge83" class="edge">
 <title>src/figures/Riemann.ts&#45;&gt;src/figures/Plot.ts</title>
-<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M531.9,-416.4C538.26,-416.4 543,-416.4 543,-416.4 543,-416.4 543,-371.14 543,-371.14 543,-371.14 559.63,-371.14 559.63,-371.14"/>
-<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="567.43,-373.24 573.43,-371.14 567.43,-369.04 567.43,-373.24"/>
-<polyline fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="567.43,-371.14 564.43,-371.14 "/>
-<ellipse fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" cx="562.03" cy="-371.14" rx="2.4" ry="2.4"/>
+<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M531.7,-416.4C538.68,-416.4 544,-416.4 544,-416.4 544,-416.4 544,-371.14 544,-371.14 544,-371.14 559.44,-371.14 559.44,-371.14"/>
+<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="567.24,-373.24 573.24,-371.14 567.24,-369.04 567.24,-373.24"/>
+<polyline fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="567.24,-371.14 564.24,-371.14 "/>
+<ellipse fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" cx="561.84" cy="-371.14" rx="2.4" ry="2.4"/>
 </g>
 <!-- src/functions/computedBezier.ts&#45;&gt;src/pidraw.common.ts -->
 <g id="edge85" class="edge">
 <title>src/functions/computedBezier.ts&#45;&gt;src/pidraw.common.ts</title>
-<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M754,-305.96C754,-300.69 754,-295.06 754,-295.06 754,-295.06 770.76,-295.06 770.76,-295.06"/>
-<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="770.76,-297.16 776.76,-295.06 770.76,-292.96 770.76,-297.16"/>
+<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M754,-305.9C754,-298.1 754,-288.11 754,-288.11 754,-288.11 770.76,-288.11 770.76,-288.11"/>
+<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="770.76,-290.21 776.76,-288.11 770.76,-286.01 770.76,-290.21"/>
 </g>
 <!-- src/functions/computedBezier.ts&#45;&gt;src/figures/Bezier.ts -->
 <g id="edge84" class="edge">
 <title>src/functions/computedBezier.ts&#45;&gt;src/figures/Bezier.ts</title>
-<path fill="none" stroke="#000000" stroke-opacity="0.200000" d="M688,-324.08C688,-360.4 688,-493.2 688,-493.2 688,-493.2 641.51,-493.2 641.51,-493.2"/>
-<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-opacity="0.200000" points="633.71,-491.1 627.71,-493.2 633.71,-495.3 633.71,-491.1"/>
-<polyline fill="none" stroke="#000000" stroke-opacity="0.200000" points="633.71,-493.2 636.71,-493.2 "/>
-<ellipse fill="none" stroke="#000000" stroke-opacity="0.200000" cx="639.11" cy="-493.2" rx="2.4" ry="2.4"/>
+<path fill="none" stroke="#000000" stroke-opacity="0.200000" d="M680,-324.39C680,-360.65 680,-489.6 680,-489.6 680,-489.6 641.66,-489.6 641.66,-489.6"/>
+<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-opacity="0.200000" points="633.86,-487.5 627.86,-489.6 633.86,-491.7 633.86,-487.5"/>
+<polyline fill="none" stroke="#000000" stroke-opacity="0.200000" points="633.86,-489.6 636.86,-489.6 "/>
+<ellipse fill="none" stroke="#000000" stroke-opacity="0.200000" cx="639.26" cy="-489.6" rx="2.4" ry="2.4"/>
 </g>
 <!-- src/index.ts -->
 <g id="node25" class="node">
@@ -1089,8 +1123,8 @@
 <!-- src/index.ts&#45;&gt;src/Animate.ts -->
 <g id="edge86" class="edge">
 <title>src/index.ts&#45;&gt;src/Animate.ts</title>
-<path fill="none" stroke="#000000" stroke-opacity="0.200000" d="M70.15,-535.71C121.33,-535.71 227,-535.71 227,-535.71 227,-535.71 227,-313.03 227,-313.03"/>
-<polygon fill="none" stroke="#000000" stroke-opacity="0.200000" points="229.1,-313.03 227,-307.03 224.9,-313.03 229.1,-313.03"/>
+<path fill="none" stroke="#000000" stroke-opacity="0.200000" d="M70.15,-535.71C121.33,-535.71 227,-535.71 227,-535.71 227,-535.71 227,-306.29 227,-306.29"/>
+<polygon fill="none" stroke="#000000" stroke-opacity="0.200000" points="229.1,-306.29 227,-300.29 224.9,-306.29 229.1,-306.29"/>
 </g>
 <!-- src/index.ts&#45;&gt;src/figures/Point.ts -->
 <g id="edge99" class="edge">
@@ -1101,20 +1135,20 @@
 <!-- src/index.ts&#45;&gt;src/Graph.ts -->
 <g id="edge102" class="edge">
 <title>src/index.ts&#45;&gt;src/Graph.ts</title>
-<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M24,-529.87C24,-484.16 24,-282.4 24,-282.4 24,-282.4 299.85,-282.4 299.85,-282.4"/>
-<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="305.85,-284.5 299.85,-282.4 305.85,-280.3 305.85,-284.5"/>
+<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M24,-529.93C24,-483.57 24,-275.4 24,-275.4 24,-275.4 299.85,-275.4 299.85,-275.4"/>
+<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="305.85,-277.5 299.85,-275.4 305.85,-273.3 305.85,-277.5"/>
 </g>
 <!-- src/index.ts&#45;&gt;src/pidraw.common.ts -->
 <g id="edge104" class="edge">
 <title>src/index.ts&#45;&gt;src/pidraw.common.ts</title>
-<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M32,-529.95C32,-490.37 32,-334.5 32,-334.5 32,-334.5 782,-334.5 782,-334.5 782,-334.5 782,-304.21 782,-304.21"/>
-<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="784.1,-298.21 782,-304.21 779.9,-298.21 784.1,-298.21"/>
+<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M32,-529.95C32,-490.37 32,-334.5 32,-334.5 32,-334.5 782,-334.5 782,-334.5 782,-334.5 782,-297.14 782,-297.14"/>
+<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="784.1,-291.14 782,-297.14 779.9,-291.14 784.1,-291.14"/>
 </g>
 <!-- src/index.ts&#45;&gt;src/Draw.ts -->
 <g id="edge87" class="edge">
 <title>src/index.ts&#45;&gt;src/Draw.ts</title>
-<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M28,-529.85C28,-485.83 28,-298 28,-298 28,-298 92.96,-298 92.96,-298"/>
-<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="98.96,-300.1 92.96,-298 98.96,-295.9 98.96,-300.1"/>
+<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M28,-529.88C28,-485.14 28,-291 28,-291 28,-291 92.96,-291 92.96,-291"/>
+<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="98.96,-293.1 92.96,-291 98.96,-288.9 98.96,-293.1"/>
 </g>
 <!-- src/index.ts&#45;&gt;src/labels/Label.ts -->
 <g id="edge103" class="edge">
@@ -1197,8 +1231,8 @@
 <!-- src/index.ts&#45;&gt;src/figures/Riemann.ts -->
 <g id="edge101" class="edge">
 <title>src/index.ts&#45;&gt;src/figures/Riemann.ts</title>
-<path fill="none" stroke="#000000" stroke-opacity="0.200000" d="M70.29,-537.43C162.08,-537.43 454,-537.43 454,-537.43 454,-537.43 454,-421 454,-421 454,-421 460.3,-421 460.3,-421"/>
-<polygon fill="none" stroke="#000000" stroke-opacity="0.200000" points="460.3,-423.1 466.3,-421 460.3,-418.9 460.3,-423.1"/>
+<path fill="none" stroke="#000000" stroke-opacity="0.200000" d="M70.15,-537.43C161.5,-537.43 452,-537.43 452,-537.43 452,-537.43 452,-421 452,-421 452,-421 460.36,-421 460.36,-421"/>
+<polygon fill="none" stroke="#000000" stroke-opacity="0.200000" points="460.36,-423.1 466.36,-421 460.36,-418.9 460.36,-423.1"/>
 </g>
 <!-- src/parser/buildBezier.ts&#45;&gt;src/figures/Point.ts -->
 <g id="edge108" class="edge">
@@ -1211,10 +1245,10 @@
 <!-- src/parser/buildBezier.ts&#45;&gt;src/pidraw.common.ts -->
 <g id="edge109" class="edge">
 <title>src/parser/buildBezier.ts&#45;&gt;src/pidraw.common.ts</title>
-<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M262.71,-913.5C398,-913.5 866,-913.5 866,-913.5 866,-913.5 866,-312.11 866,-312.11"/>
-<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="868.1,-304.31 866,-298.31 863.9,-304.31 868.1,-304.31"/>
-<polyline fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="866,-304.31 866,-307.31 "/>
-<ellipse fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" cx="866" cy="-309.71" rx="2.4" ry="2.4"/>
+<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M262.71,-913.5C398,-913.5 866,-913.5 866,-913.5 866,-913.5 866,-304.97 866,-304.97"/>
+<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="868.1,-297.17 866,-291.17 863.9,-297.17 868.1,-297.17"/>
+<polyline fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="866,-297.17 866,-300.17 "/>
+<ellipse fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" cx="866" cy="-302.57" rx="2.4" ry="2.4"/>
 </g>
 <!-- src/parser/buildBezier.ts&#45;&gt;src/figures/AbstractFigure.ts -->
 <g id="edge106" class="edge">
@@ -1241,10 +1275,10 @@
 <!-- src/parser/buildCircle.ts&#45;&gt;src/pidraw.common.ts -->
 <g id="edge114" class="edge">
 <title>src/parser/buildCircle.ts&#45;&gt;src/pidraw.common.ts</title>
-<path fill="none" stroke="#000000" stroke-opacity="0.200000" d="M262.26,-855C395.85,-855 858,-855 858,-855 858,-855 858,-312.15 858,-312.15"/>
-<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-opacity="0.200000" points="860.1,-304.35 858,-298.35 855.9,-304.35 860.1,-304.35"/>
-<polyline fill="none" stroke="#000000" stroke-opacity="0.200000" points="858,-304.35 858,-307.35 "/>
-<ellipse fill="none" stroke="#000000" stroke-opacity="0.200000" cx="858" cy="-309.75" rx="2.4" ry="2.4"/>
+<path fill="none" stroke="#000000" stroke-opacity="0.200000" d="M262.26,-855C395.85,-855 858,-855 858,-855 858,-855 858,-304.8 858,-304.8"/>
+<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-opacity="0.200000" points="860.1,-297 858,-291 855.9,-297 860.1,-297"/>
+<polyline fill="none" stroke="#000000" stroke-opacity="0.200000" points="858,-297 858,-300 "/>
+<ellipse fill="none" stroke="#000000" stroke-opacity="0.200000" cx="858" cy="-302.4" rx="2.4" ry="2.4"/>
 </g>
 <!-- src/parser/buildCircle.ts&#45;&gt;src/figures/AbstractFigure.ts -->
 <g id="edge110" class="edge">
@@ -1289,10 +1323,10 @@
 <!-- src/parser/buildIntersection.ts&#45;&gt;src/pidraw.common.ts -->
 <g id="edge120" class="edge">
 <title>src/parser/buildIntersection.ts&#45;&gt;src/pidraw.common.ts</title>
-<path fill="none" stroke="#000000" stroke-opacity="0.200000" d="M260,-719.75C260,-707.48 260,-687.33 260,-687.33 260,-687.33 832,-687.33 832,-687.33 832,-687.33 832,-311.87 832,-311.87"/>
-<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-opacity="0.200000" points="834.1,-304.07 832,-298.07 829.9,-304.07 834.1,-304.07"/>
-<polyline fill="none" stroke="#000000" stroke-opacity="0.200000" points="832,-304.07 832,-307.07 "/>
-<ellipse fill="none" stroke="#000000" stroke-opacity="0.200000" cx="832" cy="-309.47" rx="2.4" ry="2.4"/>
+<path fill="none" stroke="#000000" stroke-opacity="0.200000" d="M260,-719.75C260,-707.48 260,-687.33 260,-687.33 260,-687.33 832,-687.33 832,-687.33 832,-687.33 832,-305.03 832,-305.03"/>
+<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-opacity="0.200000" points="834.1,-297.23 832,-291.23 829.9,-297.23 834.1,-297.23"/>
+<polyline fill="none" stroke="#000000" stroke-opacity="0.200000" points="832,-297.23 832,-300.23 "/>
+<ellipse fill="none" stroke="#000000" stroke-opacity="0.200000" cx="832" cy="-302.63" rx="2.4" ry="2.4"/>
 </g>
 <!-- src/parser/buildIntersection.ts&#45;&gt;src/figures/AbstractFigure.ts -->
 <g id="edge116" class="edge">
@@ -1337,10 +1371,10 @@
 <!-- src/parser/buildLine.ts&#45;&gt;src/pidraw.common.ts -->
 <g id="edge126" class="edge">
 <title>src/parser/buildLine.ts&#45;&gt;src/pidraw.common.ts</title>
-<path fill="none" stroke="#000000" stroke-opacity="0.200000" d="M259.32,-795.43C387.18,-795.43 845,-795.43 845,-795.43 845,-795.43 845,-312.02 845,-312.02"/>
-<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-opacity="0.200000" points="847.1,-304.22 845,-298.22 842.9,-304.22 847.1,-304.22"/>
-<polyline fill="none" stroke="#000000" stroke-opacity="0.200000" points="845,-304.22 845,-307.22 "/>
-<ellipse fill="none" stroke="#000000" stroke-opacity="0.200000" cx="845" cy="-309.62" rx="2.4" ry="2.4"/>
+<path fill="none" stroke="#000000" stroke-opacity="0.200000" d="M259.32,-795.43C387.18,-795.43 845,-795.43 845,-795.43 845,-795.43 845,-305.15 845,-305.15"/>
+<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-opacity="0.200000" points="847.1,-297.35 845,-291.35 842.9,-297.35 847.1,-297.35"/>
+<polyline fill="none" stroke="#000000" stroke-opacity="0.200000" points="845,-297.35 845,-300.35 "/>
+<ellipse fill="none" stroke="#000000" stroke-opacity="0.200000" cx="845" cy="-302.75" rx="2.4" ry="2.4"/>
 </g>
 <!-- src/parser/buildLine.ts&#45;&gt;src/figures/AbstractFigure.ts -->
 <g id="edge122" class="edge">
@@ -1385,10 +1419,10 @@
 <!-- src/parser/buildPlot.ts&#45;&gt;src/pidraw.common.ts -->
 <g id="edge135" class="edge">
 <title>src/parser/buildPlot.ts&#45;&gt;src/pidraw.common.ts</title>
-<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M227,-749.76C227,-746.67 227,-744 227,-744 227,-744 841,-744 841,-744 841,-744 841,-311.89 841,-311.89"/>
-<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="843.1,-304.09 841,-298.09 838.9,-304.09 843.1,-304.09"/>
-<polyline fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="841,-304.09 841,-307.09 "/>
-<ellipse fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" cx="841" cy="-309.49" rx="2.4" ry="2.4"/>
+<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M227,-749.76C227,-746.67 227,-744 227,-744 227,-744 841,-744 841,-744 841,-744 841,-305.03 841,-305.03"/>
+<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="843.1,-297.23 841,-291.23 838.9,-297.23 843.1,-297.23"/>
+<polyline fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="841,-297.23 841,-300.23 "/>
+<ellipse fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" cx="841" cy="-302.63" rx="2.4" ry="2.4"/>
 </g>
 <!-- src/parser/buildPlot.ts&#45;&gt;src/figures/AbstractFigure.ts -->
 <g id="edge128" class="edge">
@@ -1409,10 +1443,10 @@
 <!-- src/parser/buildPlot.ts&#45;&gt;src/figures/FillBetween.ts -->
 <g id="edge129" class="edge">
 <title>src/parser/buildPlot.ts&#45;&gt;src/figures/FillBetween.ts</title>
-<path fill="none" stroke="#000000" stroke-opacity="0.200000" d="M257.93,-758C320.78,-758 456,-758 456,-758 456,-758 456,-379.5 456,-379.5 456,-379.5 456.6,-379.5 456.6,-379.5"/>
-<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-opacity="0.200000" points="455.98,-381.6 461.98,-379.5 455.98,-377.4 455.98,-381.6"/>
-<polyline fill="none" stroke="#000000" stroke-opacity="0.200000" points="455.98,-379.5 452.98,-379.5 "/>
-<ellipse fill="none" stroke="#000000" stroke-opacity="0.200000" cx="450.58" cy="-379.5" rx="2.4" ry="2.4"/>
+<path fill="none" stroke="#000000" stroke-opacity="0.200000" d="M257.79,-758C320.37,-758 455,-758 455,-758 455,-758 455,-379.5 455,-379.5 455,-379.5 455.69,-379.5 455.69,-379.5"/>
+<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-opacity="0.200000" points="455.88,-381.6 461.88,-379.5 455.87,-377.4 455.88,-381.6"/>
+<polyline fill="none" stroke="#000000" stroke-opacity="0.200000" points="455.88,-379.5 452.88,-379.5 "/>
+<ellipse fill="none" stroke="#000000" stroke-opacity="0.200000" cx="450.48" cy="-379.5" rx="2.4" ry="2.4"/>
 </g>
 <!-- src/parser/buildPlot.ts&#45;&gt;src/figures/Follow.ts -->
 <g id="edge130" class="edge">
@@ -1441,10 +1475,10 @@
 <!-- src/parser/buildPlot.ts&#45;&gt;src/figures/Riemann.ts -->
 <g id="edge134" class="edge">
 <title>src/parser/buildPlot.ts&#45;&gt;src/figures/Riemann.ts</title>
-<path fill="none" stroke="#000000" stroke-opacity="0.200000" d="M257.72,-760C320.91,-760 458,-760 458,-760 458,-760 458,-425.5 458,-425.5 458,-425.5 458.83,-425.5 458.83,-425.5"/>
-<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-opacity="0.200000" points="460.3,-427.6 466.3,-425.5 460.3,-423.4 460.3,-427.6"/>
-<polyline fill="none" stroke="#000000" stroke-opacity="0.200000" points="460.3,-425.5 457.3,-425.5 "/>
-<ellipse fill="none" stroke="#000000" stroke-opacity="0.200000" cx="454.9" cy="-425.5" rx="2.4" ry="2.4"/>
+<path fill="none" stroke="#000000" stroke-opacity="0.200000" d="M257.59,-760C320.5,-760 457,-760 457,-760 457,-760 457,-425.5 457,-425.5 457,-425.5 457.93,-425.5 457.93,-425.5"/>
+<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-opacity="0.200000" points="460.32,-427.6 466.32,-425.5 460.32,-423.4 460.32,-427.6"/>
+<polyline fill="none" stroke="#000000" stroke-opacity="0.200000" points="460.32,-425.5 457.32,-425.5 "/>
+<ellipse fill="none" stroke="#000000" stroke-opacity="0.200000" cx="454.92" cy="-425.5" rx="2.4" ry="2.4"/>
 </g>
 <!-- src/parser/buildPoint.ts&#45;&gt;src/figures/Point.ts -->
 <g id="edge140" class="edge">
@@ -1457,10 +1491,10 @@
 <!-- src/parser/buildPoint.ts&#45;&gt;src/pidraw.common.ts -->
 <g id="edge141" class="edge">
 <title>src/parser/buildPoint.ts&#45;&gt;src/pidraw.common.ts</title>
-<path fill="none" stroke="#000000" stroke-opacity="0.200000" d="M260.68,-825.43C391.63,-825.43 854,-825.43 854,-825.43 854,-825.43 854,-312.11 854,-312.11"/>
-<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-opacity="0.200000" points="856.1,-304.31 854,-298.31 851.9,-304.31 856.1,-304.31"/>
-<polyline fill="none" stroke="#000000" stroke-opacity="0.200000" points="854,-304.31 854,-307.31 "/>
-<ellipse fill="none" stroke="#000000" stroke-opacity="0.200000" cx="854" cy="-309.71" rx="2.4" ry="2.4"/>
+<path fill="none" stroke="#000000" stroke-opacity="0.200000" d="M260.68,-825.43C391.63,-825.43 854,-825.43 854,-825.43 854,-825.43 854,-305.23 854,-305.23"/>
+<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-opacity="0.200000" points="856.1,-297.43 854,-291.43 851.9,-297.43 856.1,-297.43"/>
+<polyline fill="none" stroke="#000000" stroke-opacity="0.200000" points="854,-297.43 854,-300.43 "/>
+<ellipse fill="none" stroke="#000000" stroke-opacity="0.200000" cx="854" cy="-302.83" rx="2.4" ry="2.4"/>
 </g>
 <!-- src/parser/buildPoint.ts&#45;&gt;src/figures/AbstractFigure.ts -->
 <g id="edge137" class="edge">
@@ -1505,10 +1539,10 @@
 <!-- src/parser/buildPolygon.ts&#45;&gt;src/pidraw.common.ts -->
 <g id="edge146" class="edge">
 <title>src/parser/buildPolygon.ts&#45;&gt;src/pidraw.common.ts</title>
-<path fill="none" stroke="#000000" stroke-opacity="0.200000" d="M266.74,-884.4C406.43,-884.4 862,-884.4 862,-884.4 862,-884.4 862,-312.15 862,-312.15"/>
-<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-opacity="0.200000" points="864.1,-304.35 862,-298.35 859.9,-304.35 864.1,-304.35"/>
-<polyline fill="none" stroke="#000000" stroke-opacity="0.200000" points="862,-304.35 862,-307.35 "/>
-<ellipse fill="none" stroke="#000000" stroke-opacity="0.200000" cx="862" cy="-309.75" rx="2.4" ry="2.4"/>
+<path fill="none" stroke="#000000" stroke-opacity="0.200000" d="M266.74,-884.4C406.43,-884.4 862,-884.4 862,-884.4 862,-884.4 862,-305.26 862,-305.26"/>
+<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-opacity="0.200000" points="864.1,-297.46 862,-291.46 859.9,-297.46 864.1,-297.46"/>
+<polyline fill="none" stroke="#000000" stroke-opacity="0.200000" points="862,-297.46 862,-300.46 "/>
+<ellipse fill="none" stroke="#000000" stroke-opacity="0.200000" cx="862" cy="-302.86" rx="2.4" ry="2.4"/>
 </g>
 <!-- src/parser/buildPolygon.ts&#45;&gt;src/figures/AbstractFigure.ts -->
 <g id="edge143" class="edge">

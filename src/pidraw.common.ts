@@ -2,8 +2,21 @@ import {ForeignObject as svgHTML, G, Text as svgLabel} from "@svgdotjs/svg.js"
 import type {parser_config} from "./parser/parser.config"
 import type {Point} from "./figures/Point"
 import type {LOOP_STYLE} from "./Animate"
+import type {Graph} from "./Graph";
+import type {AbstractFigure} from "./figures/AbstractFigure";
 
 export type TeXConverterType = (value: string) => string
+
+export interface IGraphDragEvent {
+    graph: Graph
+    figure: AbstractFigure
+}
+
+export interface IGraphEventMap {
+    'dragstart': IGraphDragEvent
+    'dragmove': IGraphDragEvent
+    'dragend': IGraphDragEvent
+}
 
 export interface IGraphConfig {
     axis: {

@@ -203,5 +203,65 @@ t=tan f,P`
         name: 'log and ln',
         parameters: 'axis,grid,x=-3:5,y=-10:10',
         code: `f(x)=ln(x)`
+    },
+    {
+        name: 'box with ribbons (cavalier projection)',
+        parameters: 'x=-0.5:13,y=-0.5:7.5',
+        code: `A(0,0)->hide
+B(10,0)->hide
+C(10,4)->hide
+D(0,4)->hide
+E(2,3)->hide
+F(12,3)->hide
+G(12,7)->hide
+H(2,7)->hide
+P1(2.7,0)->hide
+P2(2.7,4)->hide
+P3(4.7,7)->hide
+P4(4.7,3)->hide
+P5(3.5,0)->hide
+P6(3.5,4)->hide
+P7(5.5,7)->hide
+P8(5.5,3)->hide
+Q1(6.3,0)->hide
+Q2(6.3,4)->hide
+Q3(8.3,7)->hide
+Q4(8.3,3)->hide
+Q5(7.1,0)->hide
+Q6(7.1,4)->hide
+Q7(9.1,7)->hide
+Q8(9.1,3)->hide
+R1(0,1.4)->hide
+R2(10,1.4)->hide
+R3(12,4.4)->hide
+R4(2,4.4)->hide
+R5(0,2.1)->hide
+R6(10,2.1)->hide
+R7(12,5.1)->hide
+R8(2,5.1)->hide
+y1=poly P3,P7,P8,P4->fill=gray/0.2
+y2=poly P4,P8,P5,P1->fill=gray/0.2
+y3=poly Q3,Q7,Q8,Q4->fill=gray/0.2
+y4=poly Q4,Q8,Q5,Q1->fill=gray/0.2
+y5=poly R3,R4,R8,R7->fill=gray/0.2
+y6=poly R4,R1,R5,R8->fill=gray/0.2
+y7=poly P2,P6,P7,P3->fill=gray/0.3
+y8=poly Q2,Q6,Q7,Q3->fill=gray/0.3
+y9=poly R2,R3,R7,R6->fill=gray/0.3
+z1=poly P1,P5,P6,P2->fill=gray/0.55
+z2=poly Q1,Q5,Q6,Q2->fill=gray/0.55
+z3=poly R1,R2,R6,R5->fill=gray/0.55
+ae=AE.->dot
+ef=EF.->dot
+eh=EH.->dot
+ab=AB.
+bc=BC.
+cd=CD.
+da=DA.
+dh=DH.
+cg=CG.
+bf=BF.
+hg=HG.
+gf=GF.`
     }
 ]
