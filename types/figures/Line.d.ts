@@ -1,53 +1,14 @@
 import { AbstractFigure } from "./AbstractFigure";
-import type { XY } from "../pidraw.common";
-import { Shape, Svg } from "@svgdotjs/svg.js";
-import { mathLine } from "../Calculus";
-import type { Plot } from "./Plot";
-export type ILineType = 'segment' | 'ray' | 'line' | 'vector';
-export interface ILineConfig {
-    bisector?: {
-        d1: Line;
-        d2: Line;
-    } | {
-        A: XY;
-        B: XY;
-        C: XY;
-    };
-    director?: {
-        A: XY;
-        d: XY;
-    };
-    slope?: {
-        A: XY;
-        slope: number;
-    };
-    equation?: string;
-    mediator?: {
-        A: XY;
-        B: XY;
-    };
-    parallel?: {
-        to: Line | 'Ox' | 'Oy';
-        through: XY;
-    };
-    perpendicular?: {
-        to: Line | 'Ox' | 'Oy';
-        through: XY;
-    };
-    shape?: ILineType;
-    through?: {
-        A: XY;
-        B: XY;
-    };
-    tangent?: {
-        f: Plot;
-        A: XY;
-    };
-}
+import type { XY, IFigureContext } from "../pidraw.common";
+import type { LabelFields } from "../labels/Label";
+import type { Shape } from "@svgdotjs/svg.js";
+import { mathLine } from "../calculus";
+import { type LineFound } from "./Line.constraints";
+import type { ILineConfig, ILineResolvedConfig } from "./Line.types";
 export declare class Line extends AbstractFigure {
-    constructor(rootSVG: Svg, name: string, values: ILineConfig);
-    protected _config: ILineConfig;
-    get config(): ILineConfig;
+    constructor(context: IFigureContext, name: string, values: ILineConfig);
+    protected _config: ILineResolvedConfig;
+    get config(): ILineResolvedConfig;
     set config(value: ILineConfig);
     protected _end: XY;
     get end(): XY;
@@ -59,11 +20,14 @@ export declare class Line extends AbstractFigure {
     get direction(): XY;
     get math(): mathLine;
     get normal(): XY;
-    computeLabel(): string;
+    labelFields(): LabelFields;
     computed(): this;
+    protected _place({ start, direction, end }: LineFound): this;
+    readonly followable = true;
     follow(x: number, y: number): XY;
-    move(x: number | XY): this;
+    tikz(): string;
+    protected _labelPoint(): XY;
     moveLabel(): this;
-    _makeShape(): Shape;
+    protected _makeShape(): Shape;
 }
 //# sourceMappingURL=Line.d.ts.map

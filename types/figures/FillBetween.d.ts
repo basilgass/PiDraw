@@ -1,21 +1,31 @@
-import { Svg } from "@svgdotjs/svg.js";
 import { AbstractFigure } from "./AbstractFigure";
-import { type DOMAIN } from "../pidraw.common";
-import { Plot } from "./Plot";
-export interface IFillBetweenConfig {
-    expressions: [Plot] | [Plot, Plot];
-    domain?: DOMAIN;
-    image?: DOMAIN;
-}
+import type { IFigureContext, XY } from "../pidraw.common";
+import type { LabelFields } from "../labels/Label";
+import { type FillBetweenRun } from "../calculus";
+import type { IFillBetweenConfig } from "./FillBetween.types";
 export declare class FillBetween extends AbstractFigure {
-    constructor(rootSVG: Svg, name: string, values: IFillBetweenConfig);
+    constructor(context: IFigureContext, name: string, values: IFillBetweenConfig);
+    protected static _copy(values: IFillBetweenConfig): IFillBetweenConfig;
     protected _config: IFillBetweenConfig;
     get config(): IFillBetweenConfig;
     set config(value: IFillBetweenConfig);
-    get domain(): DOMAIN;
-    get image(): DOMAIN;
-    _makeShape(): import("@svgdotjs/svg.js").Shape;
+    protected _runs: FillBetweenRun[];
+    protected _range: {
+        from: number;
+        to: number;
+        intervals: number;
+    } | null;
+    get area(): number;
     computed(): this;
+    labelFields(): LabelFields;
+    protected _labelPlace(): XY | null;
     moveLabel(): this;
+    tikz(): string;
+    protected _tikzArea({ from, to, intervals }: {
+        from: number;
+        to: number;
+        intervals: number;
+    }): string;
+    _makeShape(): import("@svgdotjs/svg.js").Shape;
 }
 //# sourceMappingURL=FillBetween.d.ts.map

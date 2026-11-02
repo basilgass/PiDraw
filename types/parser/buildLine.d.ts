@@ -1,6 +1,9 @@
-import { type PARSER } from "piparser";
-import { AbstractFigure } from "../figures/AbstractFigure";
-import { type ILineConfig } from "../figures/Line";
-import { type buildInterface, type IGraphConfig } from "../pidraw.common";
-export declare function buildLine(item: PARSER, figures: Record<string, AbstractFigure>, graphConfig: IGraphConfig): buildInterface<ILineConfig> | null;
+import type { PARSER } from "piparser";
+import type { AbstractFigure } from "../figures/AbstractFigure";
+import type { ILineConfig } from "../figures/Line.types";
+import type { buildInterface } from "../pidraw.common";
+type Figures = Record<string, AbstractFigure>;
+export declare function buildLine(item: PARSER, figures: Figures): buildInterface<ILineConfig>;
+export declare function parseLineShorthand(keyCode: string): string | null;
+export {};
 //# sourceMappingURL=buildLine.d.ts.map

@@ -1,29 +1,32 @@
-import { Path as svgPath, Svg } from "@svgdotjs/svg.js";
+import type { Path, Shape } from "@svgdotjs/svg.js";
 import { AbstractFigure } from "./AbstractFigure";
-import type { XY } from "../pidraw.common";
-interface IGridConfig {
-    axis: {
-        x: XY;
-        y: XY;
-    };
-    scale?: {
-        x: number;
-        y: number;
-    };
-    origin: XY;
-    width: number;
-    height: number;
-    subdivisions: number;
-}
+import type { IFigureContext, XY } from "../pidraw.common";
+import type { IGridConfig } from "./Grid.types";
 export declare class Grid extends AbstractFigure {
-    constructor(rootSVG: Svg, name: string, values: IGridConfig);
+    constructor(context: IFigureContext, name: string, values?: IGridConfig);
     protected _config: IGridConfig;
     get config(): IGridConfig;
     set config(value: IGridConfig);
+    protected _lines: [XY, XY][];
+    protected _subLines: [XY, XY][];
+    protected _sub?: Path;
+    get lines(): [XY, XY][];
+    get subLines(): [XY, XY][];
+    protected _view(): {
+        x: {
+            min: number;
+            max: number;
+        };
+        y: {
+            min: number;
+            max: number;
+        };
+    };
+    protected _family(parts: number, skipEvery: number): [XY, XY][];
     computed(): this;
     moveLabel(): this;
-    _makeShape(): svgPath;
-    _computeLines(xDirection: XY, yDirection: XY): [XY, XY][];
+    strokeable(): Shape[];
+    tikz(): string;
+    _makeShape(): Shape;
 }
-export {};
 //# sourceMappingURL=Grid.d.ts.map

@@ -167,7 +167,7 @@ d=AB.->tex=abc`
         code: `A(0,1)->drag=grid,tex
 B(1,3)->drag=grid,tex
 C(2,9)->drag=grid,tex
-q=quad A,B,C`
+q=plot A,B,C`
     },
     {
         name: 'animation with dynamic values',
@@ -194,7 +194,7 @@ d=AB`
     },
     {
         name: 'tangent to f(x) through a point',
-        parameters: 'f,P',
+        parameters: 'axis,grid',
         code: `f(x)=1/2x^2-3x+5
 P(4,1)->drag=f
 t=tan f,P`

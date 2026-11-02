@@ -1,38 +1,27 @@
 import { AbstractFigure } from "./AbstractFigure";
-import { BEZIERCONTROL, type XY } from "../pidraw.common";
-import { type Shape, Svg } from "@svgdotjs/svg.js";
-interface IBezierControlPointInterface extends XY {
-    point?: XY;
-}
-interface pointWithName extends XY {
-    name: string;
-}
-export interface IBezierPointInterface {
-    controls: {
-        type: BEZIERCONTROL;
-        ratio: number;
-        left: IBezierControlPointInterface | null;
-        right: IBezierControlPointInterface | null;
-    };
-    point: pointWithName;
-}
-export interface IBezierConfig {
-    points: IBezierPointInterface[];
-}
+import type { IFigureContext, XY } from "../pidraw.common";
+import { type LABEL_POSITION } from "../labels/Label";
+import { type BezierSegment } from "../calculus";
+import type { IBezierConfig } from "./Bezier.types";
 export declare class Bezier extends AbstractFigure {
-    constructor(rootSVG: Svg, name: string, values: IBezierConfig);
+    constructor(context: IFigureContext, name: string, values: IBezierConfig);
+    protected static _copy(values: IBezierConfig): IBezierConfig;
     protected _config: IBezierConfig;
     get config(): IBezierConfig;
     set config(value: IBezierConfig);
-    protected _points: IBezierPointInterface[];
-    get points(): IBezierPointInterface[];
-    set points(values: IBezierPointInterface[]);
+    protected _segments: BezierSegment[] | null;
+    get segments(): BezierSegment[];
+    asClosed(): this;
     computed(): this;
-    getPointByName(name: string): IBezierPointInterface | undefined;
+    protected _place(segments: BezierSegment[] | null): this;
+    readonly followable = true;
+    follow(x: number, y: number): XY;
+    protected _labelPlace(): {
+        point: XY;
+        alignement: LABEL_POSITION;
+    } | null;
     moveLabel(): this;
-    setControlRatio(name: string, ratio: number): this;
-    setControlType(name: string, type: BEZIERCONTROL): this;
-    _makeShape(): Shape;
+    tikz(): string;
+    _makeShape(): import("@svgdotjs/svg.js").Shape;
 }
-export {};
 //# sourceMappingURL=Bezier.d.ts.map

@@ -36,17 +36,21 @@ interface IParserConfig {
 `parameters` string could be
 
 ```ts
-parameters = "axis,grid,ppu=80,x=-5:10,y=-2:9,subgrid=2"
+parameters = "axis,grid->subgrid=2,x=-5:10,y=-2:9,unitX=1.2"
 ```
 
-| key     | value               | description                                                |
-|---------|---------------------|------------------------------------------------------------|
-| axis    | `null`              | if `axis` is given, the axis are displayed                 |
-| grid    | `null`              | if `grid` is given, the grids are displayed                |
-| subgrid | `<number>`          | number of subdivisions of the grid                         |
-| x       | `<number>:<number>` | gives the `x-axis` min and max value, separated by `:`     |
-| y       | `<number>:<number>` | gives the `y-axis` min and max value, separated by `:`     |
-| ppu     | `<number>`          | points per unit - used to defined the scale of the viewbox |
+| key                | value                          | description                                                                              |
+|--------------------|--------------------------------|------------------------------------------------------------------------------------------|
+| x, y               | `min:max` or `n`               | the part of the coordinate system that is drawn (`x=6` is `x=-6:6`; a bound can be `2pi`) |
+| box                | `n`, `a;b` or `min:max`        | `x` and `y` together (`box=5` is `x=-5:5,y=-5:5`)                                       |
+| unitX, unitY       | `<number>`                     | the length of a unit in cm (1 by default): the drawing has its real size                  |
+| axis, axisX, axisY | word, or a step                | shows the axes (`axisX`: only that one)                                                   |
+| grid, gridX, gridY | word, or a step                | shows the grid; the option `subgrid=n` cuts each step in `n` (`grid->subgrid=4`)         |
+| default.label      | word                           | the points have a label                                                                  |
+| default.tex        | word                           | the labels are written in LaTeX                                                          |
+| default.points     | `no`, `o`, `s`, `*` + size      | hides the points, or gives their shape                                                   |
+
+An entry can have options after `->` (`grid=2->red,w=5`); a double comma `,,` ends them. See `docs/parser.md`.
 
 ### `code`
 
@@ -86,19 +90,14 @@ interface IGraphConstructorConfig {
     width?: number,
     height?: number,
     origin?: { x: number, y: number },
-    ppu?: number,
     system?: cartesian_2d | polar,
     axis?: {
         x: { x: number, y: number }
         y: { x: number, y: number }
     },
     display?: {
-        axis?: boolean | {
-            x: boolean | number | IAxisConfig,
-            y: boolean | number | IAxisConfig
-        },
-        grid?: boolean,
-        subgrid?: number,
+        axis?: boolean | { x: IAxisDisplay | false, y: IAxisDisplay | false },
+        grid?: boolean | IGridConfig,
     },
     tex?: (value: string) => string
 }
@@ -111,9 +110,8 @@ interface IGraphConstructorConfig {
 | width   | `number`                                           | `800`                                  | width of the svg viewbox in pixels                                                                                                                                                                |                
 | height  | `number`                                           | `600`                                  | width of the svg viewbox in pixels                                                                                                                                                                | 
 | origin  | `{x:number,y:number}`                              | `{x: 400, y: 300}`                     | origin of the axis, from the top left of the viewbox.                                                                                                                                             |
-| ppu     | `number`                                           | `50`                                   | points per unit. With the default `width` at `800`, the `x-axis` will have `800/50=16 units`                                                                                                      |
 | system  | `string`                                           | `"cartesian_2d"`                       | type of coordinate system.<br/>Allowed values: `cartesian_2d` or `polar`                                                                                                                          |
-| axis    | `{x: {x:number,y:number}, y:{x:number,y:number}}`  | `{x: {x: 50, y: 0}, y: {x: 0, y:-50}}` | x and y axis. Each axis is defined by it's vector in pixels, with the y-axis inverted                                                                                                             |
-| display | `{axis: boolean, grid: boolean, subgrid: number }` | `{grid: true, subgrid: 0, axis: true}` | `grid`: hide or show the <br/> `subgrid`: set a subgrid, defined by the number of subdivision (0=no subgrid, 1=one subdivision) <br/> `axis`: show or hide the grid (TODO: more possibilities...) |
-| tex     | `(value:string)=>string`                           | `(value)=>value`                       | the TeX converter (I'm using katex)                                                                                                                                                               |
+| axis    | `{x: {x:number,y:number}, y:{x:number,y:number}}`  | one cm per unit (37.94 px)             | x and y axis. Each axis is defined by it's vector in pixels, with the y-axis inverted                                                                                                             |
+| display | `{axis, grid}`                                     | `{grid: true, axis: true}`             | `grid`: hide, show, or the config of the grid (`step`, `subdivisions`) <br/> `axis`: show or hide the axes, or each one                                                                           |
+| tex     | `(value:string)=>string`                           | none                                   | the TeX converter (I'm using katex). Without it the text of an HTML label is written as text, never read as HTML                                                                                  |
 

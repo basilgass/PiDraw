@@ -1,43 +1,50 @@
-import {Graph, type IDraggableFollow} from "./Graph"
+import {Graph, type IDraggableConfig, type IDraggableFollow} from "./Graph"
 import {
     type IParserConfig,
     type IParserParameters,
     type IParserSettings,
-    PARSER_COLOR_VALUES,
-    PARSER_TYPE
+    PARSER_COLOR_VALUES
 } from "./parser/parser.common"
-import {
-    COORDINATE_SYSTEM,
-    type DOMAIN,
-    type IFigureAnimation,
-    type IGraphAxisType,
-    type IGraphConfig,
-    type IGraphDisplay,
-    isDOMAIN,
-    type XY
-} from "./pidraw.common"
+import {COORDINATE_SYSTEM, type IFigureAnimation, isDOMAIN, type XY} from "./pidraw.common"
+import {layoutGeometry} from "./calculus"
 import {parser_config} from "./parser/parser.config"
-import {AbstractFigure} from "./figures/AbstractFigure"
-import {type LABEL_POSITION} from "./labels/Label"
-import {Point} from "./figures/Point"
+import {applyAxisOption} from "./figures/Axis/Axis.parser"
+import {applyGridOption} from "./figures/Grid/Grid.parser"
+import {buildLayout, type ILayout, LAYOUT_KEYS} from "./parser/buildLayout"
+import {parseLabelText} from "./figures/Label/Label.parser"
+import {applyArcOption} from "./figures/Arc/Arc.parser"
+import {applyBezierOption} from "./figures/Bezier/Bezier.parser"
+import {parseParametricShorthand} from "./figures/Parametric/Parametric.parser"
+import {parsePlotShorthand} from "./figures/Plot/Plot.parser"
+import {applyPointShapeOption, parsePointShorthand} from "./figures/Point/Point.parser"
+import {parseLineShorthand} from "./figures/Line/Line.parser"
+import {AbstractFigure} from "./figures/AbstractFigure/AbstractFigure"
+import type {LABEL_POSITION} from "./figures/Label/Label.types"
+import {Point} from "./figures/Point/Point"
 import {type PARSER, PiParse} from "piparser"
 import {getLoopStyle, LOOP_STYLE} from "./Animate"
+import {InvalidArgumentError, ParseError} from "./errors"
 
-export const PARSER_PARAMETERS_KEYS = [
-    'ppu', 'x', 'y', 'unitX', 'unitY',
-    'grid', 'axis', 'subgrid',
-    'label', 'tex', 'points', 'no-points'
-]
+/** The names of the axes of the graph, which no figure can have. */
+const AXIS_NAMES = ['Ox', 'Oy']
+
+/** The names of the parameters of the graph (see `buildLayout`). */
+export const PARSER_PARAMETERS_KEYS = [...LAYOUT_KEYS]
 
 // TODO: intersection of a line and a circle
-export class Draw extends Graph {
+/**
+ * Reads the code of a drawing and builds it in a {@link Graph}, which is the one that draws, updates and exports it.
+ */
+export class Draw {
+    /** The graph that the code is drawn in. */
+    readonly graph: Graph
+
     protected _parser: PiParse
     protected _settings: IParserSettings
 
     constructor(id: string | HTMLElement, config?: IParserConfig) {
-        super(id, {
-            tex: config?.tex ?? ((value) => value)
-        })
+        // Without a converter the text of an HTML label is written as text, never read as HTML.
+        this.graph = new Graph(id, config?.tex === undefined ? {} : {tex: config.tex})
 
         // Set the parser
         this._parser = new PiParse({
@@ -53,9 +60,7 @@ export class Draw extends Graph {
         this._settings = {}
 
         // Build the layout using the default values or the parameters
-        if (config?.parameters) {
-            this.refreshLayout(config.parameters)
-        }
+        this.refreshLayout(config?.parameters)
 
         // Define the code to display
         this._code = []
@@ -80,83 +85,107 @@ export class Draw extends Graph {
      * Refresh the code to display
      * @param code Code to parse and display
      */
-    public refresh(code: string) {
+    refresh(code: string) {
         // Remove every figures
-        this.clear()
+        this.graph.clear()
 
         // Reload the figures
         this._build(code)
     }
 
     /**
-     * Refresh the layout
-     * @param code Layout code to parse
+     * Refresh the layout: the part of the coordinate system that is drawn, the size of a unit, the axes, the grid and the defaults of the
+     * figures.
+     * @param code Parameters to read (`x=-10:10,axis,grid=2->red`, see `buildLayout`). The default layout without them.
+     * @throws ParseError if a parameter does not exist or is not valid. The layout is then left as it was.
      */
-    public refreshLayout(code?: string) {
-        // Update the configuration
-        const layout = this._parseLayout(code)
-
-        this.config = layout.config
-        this.display = layout.display
-        this._settings = layout.settings
+    refreshLayout(code?: string) {
+        const layout = buildLayout(code ?? '', this._parser)
 
         // Update the layout (from the extended Graph class)
-        this.updateLayout()
+        this.graph.updateLayout({
+            ...layoutGeometry({...layout.window, unit: layout.unit}),
+            system: COORDINATE_SYSTEM.CARTESIAN_2D
+        }, layout.display)
+        this._settings = layout.defaults
+        this._applyLayoutOptions(layout.options)
+    }
+
+    /** Give the options of the parameters (`axis->red`, `grid->subgrid=4`) to the axes and to the grid. */
+    protected _applyLayoutOptions(options: ILayout['options']): void {
+        const targets: [AbstractFigure | null, ILayout['options']['grid']][] = [
+            [this.graph.drawnAxes.x, options.x],
+            [this.graph.drawnAxes.y, options.y],
+            [this.graph.mainGrid, options.grid]
+        ]
+
+        for (const [figure, own] of targets) {
+            if (figure !== null && Object.keys(own).length > 0) {
+                this._applyOptions(own, figure)
+            }
+        }
     }
 
     protected _applyDrag(obj: AbstractFigure, key: string, options: Record<string, IParserParameters>) {
         // Actually, only points are draggable
         if (obj instanceof Point) {
-            const dragConfigInit: IDraggableFollow[] = []
-            const dragConfig: IDraggableFollow[] = []
-
-            const interactive = this.create.point({x: 0, y: 0}, obj.name + '_drag')
+            const interactive = this.graph.create.point({x: 0, y: 0}, obj.name + '_drag')
 
             interactive.pixels = obj.pixels
             interactive.asCircle(30).fill('white/0.8')
-            this.layers.interactive.add(interactive.element)
+            this.graph.layers.interactive.add(interactive.element)
 
-            // Check the options
-            // - grid
-            // - Ox
-            // - Oy
-            // - DOMAIN / IMAGE
-            const dragOptions = [options[key].value as string, ...options[key].options]
-            dragOptions.forEach((dragFollow) => {
-                if (['grid', 'Ox', 'Oy'].includes(dragFollow as string)) {
-                    dragConfigInit.push(this.follow(dragFollow as string, obj))
-                }
-
-                if (isDOMAIN(dragFollow)) {
-                    const axis = dragFollow.axis ?? 'x'
-                    const delta: DOMAIN = this.toPixels(dragFollow, axis)
-
-                    dragConfigInit.push(
-                        (x: number, y: number) => {
-                            return {
-                                x: axis === 'x' ? Math.max(delta.min, Math.min(x, delta.max)) : x,
-                                y: axis === 'y' ? Math.max(delta.min, Math.min(y, delta.max)) : y
-                            }
-                        }
-                    )
-                }
-
-                if (Object.hasOwn(this.figures, dragFollow as string)) {
-                    const figToFollow = this.figures[dragFollow as string]
-                    dragConfig.push((x: number, y: number) => figToFollow.follow(x, y))
-                }
-            })
-
-            this.draggable(interactive,
-                {
-                    target: obj,
-                    follow: [
-                        ...dragConfigInit,
-                        ...dragConfig
-                    ]
-                }
-            )
+            this.graph.draggable(interactive, {target: obj, ...this._dragConfig([options[key].value, ...options[key].options])})
         }
+    }
+
+    /**
+     * The limits of a drag from the values of its option (`drag=grid`, `drag=Ox`, `drag=Oy`, `drag=-2:3`, `drag=f` for a figure `f`), which
+     * can be given together. Two domains of the same axis limit the point to the part they share. A value that means none of these is ignored.
+     */
+    protected _dragConfig(values: unknown[]): IDraggableConfig {
+        const config: IDraggableConfig = {}
+        const follow: IDraggableFollow[] = []
+
+        for (const value of values) {
+            if (value === 'grid') {
+                config.grid = true
+            } else if (value === 'Ox') {
+                config.along = 'x'
+            } else if (value === 'Oy') {
+                config.along = 'y'
+            } else if (isDOMAIN(value)) {
+                const axis = value.axis ?? 'x'
+                const own = config.bounds?.[axis]
+
+                config.bounds = {
+                    ...config.bounds,
+                    [axis]: {min: Math.max(own?.min ?? -Infinity, value.min), max: Math.min(own?.max ?? Infinity, value.max)}
+                }
+            } else if (typeof value === 'string' && Object.hasOwn(this.graph.figures, value)) {
+                follow.push(this.graph.figures[value])
+            }
+        }
+
+        if (follow.length > 0) {
+            config.follow = follow
+        }
+
+        return config
+    }
+
+    /**
+     * The point named by the option `from` or `to` of an animation.
+     * @throws InvalidArgumentError if the name is not the one of a point of the drawing.
+     */
+    protected _animationPoint(name: unknown, option: 'from' | 'to'): Point {
+        const figure = typeof name === 'string' && Object.hasOwn(this.graph.figures, name) ? this.graph.figures[name] : undefined
+
+        if (!(figure instanceof Point)) {
+            throw new InvalidArgumentError(`The option ${option}=${String(name)} of an animation must be the name of a point of the drawing`)
+        }
+
+        return figure
     }
 
     protected _applyOptions(options: Record<string, IParserParameters>, obj: AbstractFigure) {
@@ -254,23 +283,25 @@ export class Draw extends Graph {
 
                     // Create the label
                     obj.addLabel(
-                        value,
+                        parseLabelText(value, obj),
                         key === 'tex',
-                        this.toTex
+                        this.graph.toTex
                     )
 
                     if (obj.label) {
-                        const alignement = (options[key].options[0] === false || options[key].options[0] === true) ? 'br' : options[key].options[0] as LABEL_POSITION
+                        // Without a position, the figure keeps its own (`br`, or the one it chooses from where the label lies).
+                        const given = options[key].options[0]
+                        const alignement = typeof given === 'boolean' ? undefined : given as LABEL_POSITION | undefined
 
                         const offsetAsUnits = options[key].options[1] as XY | undefined ?? {x: 0, y: 0}
                         const offset = {
-                            x: offsetAsUnits.x * this.config.axis.x.x,
-                            y: -offsetAsUnits.y * this.config.axis.y.y
+                            x: offsetAsUnits.x * this.graph.config.axis.x.x,
+                            y: -offsetAsUnits.y * this.graph.config.axis.y.y
                         }
 
                         const rotate = options[key].options[2] as number | boolean | undefined
 
-                        obj.label.auto_rotate = rotate === true
+                        obj.label.autoRotate = rotate === true
 
                         obj.label.position(
                             alignement,
@@ -299,18 +330,13 @@ export class Draw extends Graph {
                         loop: LOOP_STYLE.NONE,
                     }
 
+                    // Whether the figure needs a start and an end point is for the figure to say (obj.animate below).
                     if (Object.hasOwn(options, 'from')) {
-                        const fromFigure = options.from.value as unknown as string
-                        if (Object.hasOwn(this.figures, fromFigure) && this.figures[fromFigure] instanceof Point) {
-                            animate.from = this.figures[fromFigure]
-                        }
+                        animate.from = this._animationPoint(options.from.value, 'from')
                     }
 
                     if (Object.hasOwn(options, 'to')) {
-                        const toFigure = options.to.value as unknown as string
-                        if (Object.hasOwn(this.figures, toFigure) && this.figures[toFigure] instanceof Point) {
-                            animate.to = this.figures[toFigure]
-                        }
+                        animate.to = this._animationPoint(options.to.value, 'to')
                     }
 
                     if (Object.hasOwn(options, 'duration')) {
@@ -334,6 +360,38 @@ export class Draw extends Graph {
                     break
                 }
 
+                // Shape of a Bézier curve
+                case 'close':
+                    applyBezierOption(obj, key, options[key].value)
+                    break
+
+                // Graduation and name of an axis
+                case 'ticks':
+                case 'numbers':
+                case 'name':
+                case 'side':
+                case 'padding':
+                    applyAxisOption(obj, key, options[key])
+                    break
+
+                // Subdivisions of a grid
+                case 'subgrid':
+                    applyGridOption(obj, key, options[key].value)
+                    break
+
+                // Shape of an arc
+                case 'sector':
+                case 'square':
+                    applyArcOption(obj, key, options[key].value)
+                    break
+
+                // Shape of a point
+                case 'o':
+                case 's':
+                case '*':
+                    applyPointShapeOption(obj, key, options[key].value)
+                    break
+
                 default: {
                     // Maybe it's a color
                     if (PARSER_COLOR_VALUES.includes(key)) {
@@ -355,60 +413,78 @@ export class Draw extends Graph {
 
         // Loop through each code
         this._code.forEach((item) => {
-            // Determine the id of the figure.
-            item.name = this._uniqueName(item.name)
-
-            let obj: AbstractFigure | undefined
-
-            if (Object.hasOwn(pConfig, item.key)) {
-                // On récupère le constructeur (build), la clé du parser (create) et les paramètres (parameters)
-                const {build, parameters} = pConfig[item.key]
-
-                // if <parameters> is not empty, it means the figure has specific parameters
-                // Check if they are defined in the item.parameters
-                if (parameters && parameters.length > 0 && Object.keys(item.parameters).length === 0) {
-                    const keys = Object.keys(item.parameters).filter(key => parameters.includes(key))
-                    keys.forEach((parameter) => {
-                        item.parameters[parameter] = {value: true, options: []}
-                    })
-                }
-
-                // Create the object
-                let buildResult = build(item, this.figures, this.config)
-
-                if (buildResult) {
-                    if (!Array.isArray(buildResult)) {
-                        buildResult = [buildResult]
-                    }
-
-                    buildResult.forEach((build, index) => {
-                        try {
-                            const {config, create} = build
-
-                            if (config && create) {
-                                 
-                                // @ts-expect-error: create is string and is not
-                                obj = this.create[create](config, item.name + (buildResult.length > 1 ? `${index + 1}` : ''))
-                                 
-                            }
-                        } catch (e) {
-                            console.error(e)
-                        }
-
-                        // Load the options.
-                        if (obj) {
-                            this._buildOptions(obj, item)
-                        }
-                    })
-
-                }
-
+            // A line that cannot be built, or whose options are not valid, does not stop the drawing: the others are drawn.
+            try {
+                this._buildItem(item, pConfig)
+            } catch (e) {
+                console.error(e)
             }
         })
 
-        // Redraw the labels a second time (for aligneemnt)
-        //REFACTOR: optimisation du update pour ne pas faire deux fois la maj des labels.
-        this.updateLabels([])
+        // Draw the figures a second time (for the alignment of the labels)
+        // TODO: remove the "dual" update ? buildItem should place everything correctly or the new update systme will be smooth enough to handle this correctly ?
+        this.graph.update()
+    }
+
+    /**
+     * Build the figures of one line of code and apply its options.
+     * @throws ParseError if the line cannot be built, OptionError if one of its options is not valid.
+     */
+    protected _buildItem(item: PARSER, pConfig: typeof parser_config) {
+        // The names of the axes are theirs.
+        if (AXIS_NAMES.includes(item.name)) {
+            throw new ParseError(`Cannot build "${item.name}" (${item.key}): ${item.name} is the name of an axis of the graph, choose another name`)
+        }
+
+        // Determine the id of the figure.
+        item.name = this._uniqueName(item.name)
+
+        let obj: AbstractFigure | undefined
+
+        if (Object.hasOwn(pConfig, item.key)) {
+            // On récupère le constructeur (build), la clé du parser (create) et les paramètres (parameters)
+            const {build, parameters} = pConfig[item.key]
+
+            // if <parameters> is not empty, it means the figure has specific parameters
+            // Check if they are defined in the item.parameters
+            if (parameters && parameters.length > 0 && Object.keys(item.parameters).length === 0) {
+                const keys = Object.keys(item.parameters).filter(key => parameters.includes(key))
+                keys.forEach((parameter) => {
+                    item.parameters[parameter] = {value: true, options: []}
+                })
+            }
+
+            // Create the object
+            let buildResult = build(item, this._namedFigures(), this.graph.config)
+
+            if (buildResult) {
+                if (!Array.isArray(buildResult)) {
+                    buildResult = [buildResult]
+                }
+
+                buildResult.forEach((build, index) => {
+                    try {
+                        const {config, create} = build
+
+                        if (config && create) {
+
+                            // @ts-expect-error: create is string and is not
+                            obj = this.graph.create[create](config, item.name + (buildResult.length > 1 ? `${index + 1}` : ''))
+
+                        }
+                    } catch (e) {
+                        console.error(e)
+                    }
+
+                    // Load the options.
+                    if (obj) {
+                        this._buildOptions(obj, item)
+                    }
+                })
+
+            }
+
+        }
     }
 
     protected _buildOptions(obj: AbstractFigure, item: PARSER) {
@@ -433,6 +509,14 @@ export class Draw extends Graph {
             item.parameters['!'] = {value: true, options: []}
         }
 
+        // The shape that the points take when they do not ask for one (`points=s/12`).
+        const shape = this._settings.points
+        if (obj instanceof Point && shape && !['o', 's', '*'].some(key => Object.hasOwn(item.parameters, key))) {
+            if (shape.shape !== 'o' || shape.size !== undefined) {
+                applyPointShapeOption(obj, shape.shape, shape.size ?? true)
+            }
+        }
+
         this._applyOptions(item.parameters, obj)
     }
 
@@ -447,190 +531,29 @@ export class Draw extends Graph {
 
     }
 
+    /**
+     * Write a line of code in its standard form (`<id>=<key> <values>`): the shorthand of a point (`A(3,4)`), of a function
+     * (`f(x)=x^2`) or of a line (`d=AB`). Any other text is already in that form and is not changed.
+     * @throws ParseError if the text is the shorthand of a line, but not a valid one.
+     */
     protected _parseKeyCode(key_code: string): string {
-
-        // There are 3 possibilities for the key_code:
-        // 1. A(3,4) => id='A', key=POINT, code= ['3','4']
-        // 2. d=AB => id='AB', key=LINE, code=['A', 'B']
-        // 3. d=<key> <code> => id='d', key='<key>' code
-
-        // Extract the point (no = sign). The id is before the '(' and the code is between '(' and ')'
-        if (/^[A-Z][0-9]*\(.*\)$/.exec(key_code)) {
-            return this._parseKeyCodePoint(key_code)
+        // The shorthands of a point and of a line belong to their build (buildPoint.ts, buildLine.ts).
+        const point = parsePointShorthand(key_code)
+        if (point !== null) {
+            return point
         }
 
-        // Extract the plot or parametric function
-        if (/^[a-z][0-9]*\([x|t]\)/.exec(key_code)) {
-            return this._parseKeyCodePlot(key_code)
+        const plot = parsePlotShorthand(key_code)
+        if (plot !== null) {
+            return plot
         }
 
-        // Extract the line (with = sign). The id is before the '=' and the code is after '='
-        // This is a special version (no spaces) and should be checked first
-        if (key_code.includes('=') && !key_code.includes(' ')) {
-            return this._parseKeyCodeLine(key_code)
+        const parametric = parseParametricShorthand(key_code)
+        if (parametric !== null) {
+            return parametric
         }
 
-        return key_code
-    }
-
-    // TO BE MOVED TO BUILD_LINE
-    protected _parseKeyCodeLine(key_code: string): string {
-        // Extract the line (with = sign). The id is before the '=' and the code is after '='
-        const [id, ...datas] = key_code.split('=')
-        let data = datas.join('=')
-
-        // Determine the shape of the line
-        // vAB => vector AB
-        // AB. => segment AB
-        // [AB] => segment AB
-        // [AB[ => half line AB
-        // AB[ => half line AB
-        // [AB => half line AB
-        // AB => line AB
-
-        // prefix can be v or [ or null
-        let prefix: string | null = data[0]
-        if (prefix !== 'v' && prefix !== '[') {
-            prefix = null
-        }
-
-        // suffix can be ., ], [ or null
-        let suffix: string | null = data[data.length - 1]
-        if (suffix !== '.' && suffix !== ']' && suffix !== '[') {
-            suffix = null
-        }
-
-        let shape = 'line'
-        if (prefix === 'v' && suffix === null) {
-            data = data.slice(1)
-            shape = 'vec'
-        } else if (
-            (prefix === null && suffix === '.') ||
-            (prefix === '[' && suffix === ']')
-        ) {
-            if (prefix === '[') {
-                data = data.slice(1)
-            }
-            data = data.slice(0, -1)
-            shape = 'seg'
-        } else if (
-            (prefix === '[' && suffix === '[') ||
-            (prefix === null && suffix === '[') ||
-            (prefix === '[' && suffix === null)
-        ) {
-            if (prefix === '[') {
-                data = data.slice(1)
-            }
-            if (suffix === '[') {
-                data = data.slice(0, -1)
-            }
-
-            shape = 'ray'
-        }
-
-        const code = data.split(/(?=[A-Z])/)
-
-        return `${id}=${shape} ${code[0]},${code[1]}`
-    }
-
-    // TO BE MOVED TO BUILD_PLOT
-    protected _parseKeyCodePlot(key_code: string): string {
-        // Extract the plot or parametric function
-        const [id_xt, data] = key_code.split('=')
-
-        // Remove the (x) or (t) from the id
-        const id = id_xt.split('(')[0]
-
-        // Determine the type of the parser (plot or parametric)
-        const key = key_code.includes('(x)=') ? PARSER_TYPE.PLOT : PARSER_TYPE.PARAMETRIC
-
-
-        return `${id}=${key} ${data}`
-    }
-
-    // TO BE MOVED TO BUILD_POINT
-    protected _parseKeyCodePoint(key_code: string): string {
-        // Extract the point (no = sign). The id is before the '(' and the code is between '(' and ')'
-        const id = key_code.split('(')[0]
-        const code = key_code.split('(')[1].split(')')[0].split(',')
-        // const parameters = this._parseParameters(key_code.split(')')[1])
-
-        return `${id}=pt ${code[0]},${code[1]}`
-    }
-
-    protected _parseLayout(code?: string): { config: IGraphConfig, display: IGraphDisplay, settings: IParserSettings } {
-
-        // const parameters = PiParseParameters(code)
-        const parameters = this._parser.parameters(code ?? '', PARSER_PARAMETERS_KEYS)
-
-        // Define the configuration
-        const xDomain = parameters.x && isDOMAIN(parameters.x.value) ? parameters.x.value : {min: -8, max: 8}
-        const yDomain = parameters.y && isDOMAIN(parameters.y.value) ? parameters.y.value : {min: -8, max: 8}
-        const dx = Math.abs(xDomain.max - xDomain.min)
-        const dy = Math.abs(yDomain.max - yDomain.min)
-
-        // Set by default the ppu to auto
-        const box = this.rootSVG.node.getBoundingClientRect()
-        let ppu = Math.max( Math.round(box.width / dx), 20)
-
-        // User defined ppu value
-        if (Object.hasOwn(parameters, 'ppu') && !isNaN(+parameters.ppu.value)) {
-            ppu = parseFloat(parameters.ppu.value as string)
-        }
-
-        const unitX = parameters.unitX ? parseFloat(parameters.unitX.value as string) : 1
-        const unitY = parameters.unitY ? parseFloat(parameters.unitY.value as string) : 1
-
-        const width = dx * ppu
-        const height = dy * ppu
-        const origin = {
-            x: -xDomain.min * ppu,
-            y: yDomain.max * ppu
-        }
-
-        const system = COORDINATE_SYSTEM.CARTESIAN_2D
-        const axisConfig = {
-            x: {x: ppu * unitX, y: 0},
-            y: {x: 0, y: -ppu * unitY}
-        }
-
-        // Display options
-        // REFACTOR: make the types much more robust.
-        let grid = Object.hasOwn(parameters, 'grid')
-            ? parameters.grid.value
-            : false
-
-        if (typeof grid === 'string' && grid.includes('pi')) {
-            const numerator = grid === 'pi' ? 1 : +grid.split('pi')[0]
-            const denominator = (parameters.grid.options.length && Number.isSafeInteger(+parameters.grid.options[0])) ? parameters.grid.options[0] as number : 2
-            grid = {x: numerator * Math.PI / denominator, y: 1}
-        }
-
-        const axis = parameters.axis ? true : false
-        const subgrid = parameters.subgrid ? parseFloat(parameters.subgrid.value as string) : 0
-
-        // Parser specific settings
-        const settings: IParserSettings = {
-            label: parameters.label ? true : false,
-            tex: parameters.tex ? true : false,
-            points: parameters['no-points'] ? false : parameters.points ? parameters.points.value as 'o' | '*' | 's' : 'o'
-        }
-
-        return {
-            config: {
-                width,
-                height,
-                origin,
-                system,
-                axis: axisConfig,
-            },
-            display: {
-                grid: grid as IGraphAxisType,
-                subgrid,
-                axis
-            },
-            settings
-        }
+        return parseLineShorthand(key_code) ?? key_code
     }
 
     /**
@@ -669,15 +592,16 @@ export class Draw extends Graph {
                 continue
             }
 
-            // Parse the line
-            // Refactor a line for special cases:
-            // - A(3,4) => A=pt 3,4
-            // - d=AB => d=line A,B
-            // - d=AB. or d=[AB] => d=segment A,B
-            // - d=AB[ or d=[AB[ => d=halfline A,B
-            // - d=vAB => d=vec A,B
-            // - p(x)=x^2 => p=plot x^2
-            const parsedLine = this._parser.parse(line)
+            // Parse the line. The formatter of the parser writes its shorthands in their standard form (see _parseKeyCode):
+            // A(3,4) => A=pt 3,4, d=AB => d=line A,B, p(x)=x^2 => p=plot x^2...
+            // A line that cannot be parsed does not stop the others: it is reported and skipped.
+            let parsedLine: PARSER
+            try {
+                parsedLine = this._parser.parse(line)
+            } catch (e) {
+                console.error(e)
+                continue
+            }
 
             // Add the block data to the parameters.
             parsedLine.parameters = Object.assign(
@@ -691,10 +615,18 @@ export class Draw extends Graph {
         return data
     }
 
+    /**
+     * The figures that a line of code can name: the ones of the drawing, and the axes of the graph, `Ox` and `Oy`, which are lines like
+     * the others (an intersection, a perpendicular, a tangent circle...). They exist whether they are drawn or not.
+     */
+    protected _namedFigures(): Record<string, AbstractFigure> {
+        return {Ox: this.graph.axes.x, Oy: this.graph.axes.y, ...this.graph.figures}
+    }
+
     protected _uniqueName(name: string): string {
         let newName = name
         let i = 1
-        while (this.figures[newName]) {
+        while (this.graph.figures[newName]) {
             newName = `${name}_${i}`
             i++
         }

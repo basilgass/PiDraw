@@ -1,18 +1,30 @@
-import { ForeignObject as svgHTML, G, Text as svgLabel } from "@svgdotjs/svg.js";
+import type { G, Svg } from "@svgdotjs/svg.js";
 import type { parser_config } from "./parser/parser.config";
-import type { Point } from "./figures/Point";
+import type { IGridConfig } from "./figures/Grid/Grid.types";
+import type { TickSelection } from "./calculus";
+import type { Point } from "./figures/Point/Point";
 import type { LOOP_STYLE } from "./Animate";
 import type { Graph } from "./Graph";
-import type { AbstractFigure } from "./figures/AbstractFigure";
+import type { AbstractFigure } from "./figures/AbstractFigure/AbstractFigure";
 export type TeXConverterType = (value: string) => string;
 export interface IGraphDragEvent {
     graph: Graph;
     figure: AbstractFigure;
 }
+export interface IGraphUpdate {
+    updated: number;
+    total: number;
+}
+export interface IGraphDragMoveEvent extends IGraphDragEvent, IGraphUpdate {
+}
 export interface IGraphEventMap {
     'dragstart': IGraphDragEvent;
-    'dragmove': IGraphDragEvent;
+    'dragmove': IGraphDragMoveEvent;
     'dragend': IGraphDragEvent;
+}
+export interface IFigureContext {
+    readonly rootSVG: Svg;
+    readonly config: IGraphConfig;
 }
 export interface IGraphConfig {
     axis: {
@@ -24,14 +36,20 @@ export interface IGraphConfig {
     system: COORDINATE_SYSTEM;
     width: number;
 }
-export interface IGraphAxisType {
-    x: boolean | number | IAxisConfig;
-    y: boolean | number | IAxisConfig;
+export interface IAxisDisplay {
+    step?: number;
+    labels?: 'numbers' | 'pi';
+    name?: string;
+    marks?: TickSelection;
+    numbers?: TickSelection | 'none';
+    padding?: number;
 }
 export interface IGraphDisplay {
-    axis?: boolean | IGraphAxisType;
-    grid?: boolean | IGraphAxisType;
-    subgrid?: number;
+    axis?: boolean | {
+        x: IAxisDisplay | false;
+        y: IAxisDisplay | false;
+    };
+    grid?: boolean | IGridConfig;
 }
 export interface IGraphConstructorConfig {
     axis?: {
@@ -41,16 +59,9 @@ export interface IGraphConstructorConfig {
     display?: IGraphDisplay;
     height?: number;
     origin?: XY;
-    ppu?: number;
     system?: COORDINATE_SYSTEM;
     tex?: TeXConverterType;
     width?: number;
-}
-export interface IAxisConfig {
-    color?: string;
-    half?: boolean;
-    length?: number;
-    padding?: number;
 }
 export interface IFigureAppearanceConfig {
     fill: {
@@ -76,6 +87,9 @@ export interface XY {
     x: number;
     y: number;
 }
+export type Exclusive<T> = {
+    [K in keyof T]: Pick<T, K> & Partial<Record<Exclude<keyof T, K>, never>>;
+}[keyof T];
 export declare function isXY(obj: unknown): obj is XY;
 export declare function isDOMAIN(obj: unknown): obj is DOMAIN;
 export interface DOMAIN {
@@ -126,21 +140,6 @@ export declare enum LINECONSTRAINT {
     MEDIATOR = "mediator",
     SLOPE = "slope",
     BISECTOR = "bisector"
-}
-export declare enum POLYGON_CONSTRAINT {
-    FIXED = "fixed",
-    REGULAR = "regular",
-    STAR = "star"
-}
-export type LabelType = svgLabel | svgHTML | null;
-export declare enum BEZIERCONTROL {
-    SMOOTH = "smooth",
-    VERTICAL = "vertical",
-    HORIZONTAL = "horizontal",
-    UP = "up",
-    DOWN = "down",
-    RIGHT = "right",
-    LEFT = "left"
 }
 export interface buildInterface<T> {
     create: keyof typeof parser_config;

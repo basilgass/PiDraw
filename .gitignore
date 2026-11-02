@@ -5,3 +5,7 @@
 /.vscode/
 /.dependencygraph/
 /lib_backup/
+# VitePress
+/docs/.vitepress/cache/
+/docs/.vitepress/dist/
+/docs/public/api/

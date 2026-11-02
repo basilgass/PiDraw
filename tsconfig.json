@@ -18,6 +18,7 @@
     "src",
     "dist",
     "tests",
+    "bench",
     "*.config.js",
     "demo"
   ],

@@ -1,30 +1,22 @@
-import { Svg } from "@svgdotjs/svg.js";
 import { AbstractFigure } from "./AbstractFigure";
-import { type XY } from "../pidraw.common";
-export interface IPolygonConfig {
-    vertices?: XY[];
-    regular?: {
-        center: XY;
-        radius: number | XY;
-        sides: number;
-    };
-    mark?: {
-        center?: {
-            length?: number;
-        };
-    };
-}
+import type { IFigureContext, XY } from "../pidraw.common";
+import { type PolygonShape } from "../calculus";
+import type { IPolygonConfig } from "./Polygon.types";
 export declare class Polygon extends AbstractFigure {
-    constructor(rootSVG: Svg, name: string, values: IPolygonConfig);
+    constructor(context: IFigureContext, name: string, values: IPolygonConfig);
+    protected static _copy(values: IPolygonConfig): IPolygonConfig;
     protected _config: IPolygonConfig;
     get config(): IPolygonConfig;
     set config(value: IPolygonConfig);
-    get vertices(): XY[] | undefined;
-    get radius(): number;
-    _figuresXYtoArray(): [number, number][];
-    _makeShape(): import("@svgdotjs/svg.js").Shape;
+    protected _polygon: PolygonShape | null;
+    get vertices(): XY[];
+    get centroid(): XY;
     computed(): this;
-    update(): this;
+    protected _place(shape: PolygonShape | null): this;
+    readonly followable = true;
+    follow(x: number, y: number): XY;
     moveLabel(): this;
+    tikz(): string;
+    _makeShape(): import("@svgdotjs/svg.js").Shape;
 }
 //# sourceMappingURL=Polygon.d.ts.map

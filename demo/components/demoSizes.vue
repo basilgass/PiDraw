@@ -60,7 +60,7 @@ s1=OS.->red,w=5
 a=arc P0,O,P,1->tex=\\theta/mc
 T=inter p,t
 t1=P0T.->gold,w=5`
-const parameter = ref<string>(`x=-11:11,y=-11:11,axis,grid,ppu=auto`)
+const parameter = ref<string>(`x=-11:11,y=-11:11,axis,grid`)
 const code = ref<string>(c)
 let draws: PiDraw[] = []
 

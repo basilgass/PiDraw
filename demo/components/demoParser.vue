@@ -2,11 +2,15 @@
 
 import {onMounted, ref} from "vue"
 import katex from "katex"
-import {PiDraw} from "../../src"
+import {type IGraphDragEvent, type IGraphDragMoveEvent, PiDraw} from "../../src"
 import {basic_examples} from "../parsing_examples/basic_examples"
 
 const id = basic_examples.length - 1
-const parameter = ref<string>(`x=-11:11,y=-11:11,axis,grid,ppu=50`)
+const parameter = ref<string>(`x=-11:11,y=-11:11,axis,grid,unitX=1.3`)
+// How many figures the last move of a point reached, out of how many there are.
+const touched = ref<string>('')
+// The message of the parameters that cannot be read.
+const parameterError = ref<string>('')
 // const code = ref<string>('a=line y=1/2x+3->w=10')
 const code = ref<string>(basic_examples[id].code ?? '')
 
@@ -26,23 +30,28 @@ function update(newCode: unknown) {
   }
 
   draw.refresh(code.value)
-  showAnimation.value = draw.animation.canBeAnimated()
+  showAnimation.value = draw.graph.animation.canBeAnimated()
 }
 
 function updateLayout() {
-  draw.refreshLayout(parameter.value)
+  try {
+    draw.refreshLayout(parameter.value)
+    parameterError.value = ''
+  } catch (error) {
+    parameterError.value = error instanceof Error ? error.message : String(error)
+  }
 }
 
 function animation(value: string) {
   // TODO: type correctly value.
   if (value === 'start') {
-    draw.animation.start()
+    draw.graph.animation.start()
   } else if (value === 'pause') {
-    draw.animation.pause()
+    draw.graph.animation.pause()
   } else if (value === 'continue') {
-    draw.animation.resume()
+    draw.graph.animation.resume()
   } else if (value === 'stop') {
-    draw.animation.cancel()
+    draw.graph.animation.cancel()
   }
 }
 
@@ -56,8 +65,21 @@ onMounted(() => {
         code: code.value
       }
   )
+
+  draw.graph.on('dragstart', (e: CustomEvent<IGraphDragEvent>)=>{
+    console.log('MOVE', e.detail.figure.name)
+  })
+  draw.graph.on('dragmove', (e: CustomEvent<IGraphDragMoveEvent>)=>{
+    const {figure, updated, total} = e.detail
+
+    touched.value = `${figure.name} moved: ${updated} figures reached out of ${total}`
+  })
 })
 
+function logTikz(){
+  console.log(draw.graph.tikzPreamble())
+  console.log(draw.graph.tikz())
+}
 
 </script>
 
@@ -75,6 +97,12 @@ onMounted(() => {
 					class="border px-3 py-1"
 					@input="updateLayout"
 				>
+				<p
+					v-if="parameterError"
+					class="text-red-600 text-sm"
+				>
+					{{ parameterError }}
+				</p>
 				<textarea
 					id="construct"
 					v-model="code"
@@ -82,6 +110,8 @@ onMounted(() => {
 					rows="20"
 					@input="update"
 				/>
+
+        <button @click="logTikz">Log Tikz output</button>
 			</div>
 			<!-- output -->
 			<div>
@@ -89,6 +119,12 @@ onMounted(() => {
 					id="root"
 					class="bg-white rounded p-3 border"
 				/>
+				<p
+					v-if="touched"
+					class="text-sm text-gray-600 mt-1"
+				>
+					{{ touched }}
+				</p>
 
 				<div
 					v-show="showAnimation"

@@ -1,82 +1,141 @@
-import { Svg } from "@svgdotjs/svg.js";
+import { type Svg } from "@svgdotjs/svg.js";
 import '@svgdotjs/svg.draggable.js';
-import { COORDINATE_SYSTEM, type DOMAIN, type IGraphConfig, type IGraphConstructorConfig, type IGraphDisplay, type IGraphEventMap, type ILayers, type XY } from "./pidraw.common";
-import { type IPointConfig, Point } from "./figures/Point";
-import { type ILineConfig, Line } from "./figures/Line";
-import { type IPlotConfig, Plot } from "./figures/Plot";
-import { AbstractFigure } from "./figures/AbstractFigure";
-import { Circle, type ICircleConfig } from "./figures/Circle";
-import { type IPolygonConfig, Polygon } from "./figures/Polygon";
-import { Arc, type IArcConfig } from "./figures/Arc";
-import { type IParametricConfig, Parametric } from "./figures/Parametric";
-import { type IFollowConfig } from "./figures/Follow";
-import { type IFillBetweenConfig } from "./figures/FillBetween";
-import { type IRiemannConfig } from "./figures/Riemann";
-import { Path } from "./figures/Path";
-import { Bezier, type IBezierConfig } from "./figures/Bezier";
+import { type DOMAIN, type IAxisDisplay, type IFigureContext, type IGraphConfig, type IGraphConstructorConfig, type IGraphDisplay, type IGraphEventMap, type IGraphUpdate, type ILayers, LAYER_NAME, type TeXConverterType, type XY } from "./pidraw.common";
+import { Point } from "./figures/Point/Point";
+import type { IPointConfig } from "./figures/Point/Point.types";
+import { Line } from "./figures/Line/Line";
+import { Plot } from "./figures/Plot/Plot";
+import { type AxisPlacement } from "./calculus";
+import { AbstractFigure } from "./figures/AbstractFigure/AbstractFigure";
+import { Circle } from "./figures/Circle/Circle";
+import { Polygon } from "./figures/Polygon/Polygon";
+import { Grid } from "./figures/Grid/Grid";
+import { Arc } from "./figures/Arc/Arc";
+import { Axis } from "./figures/Axis/Axis";
+import { Parametric } from "./figures/Parametric/Parametric";
+import { Follow } from "./figures/Follow/Follow";
+import { FillBetween } from "./figures/FillBetween/FillBetween";
+import { Riemann } from "./figures/Riemann/Riemann";
+import { Path } from "./figures/Path/Path";
+import { Bezier } from "./figures/Bezier/Bezier";
 import { Animate } from "./Animate";
-export type IDraggableFollow = ((x: number, y: number) => XY) | AbstractFigure | string;
+export type IDraggableFollow = ((x: number, y: number) => XY) | AbstractFigure;
 export interface IDraggableConfig {
+    along?: 'x' | 'y';
     bounds?: {
         x?: DOMAIN;
         y?: DOMAIN;
     };
-    callback?: (figure: AbstractFigure) => void;
-    follow?: (IDraggableFollow)[];
+    callback?: (point: Point) => void;
+    follow?: IDraggableFollow[];
     grid?: boolean;
-    target?: AbstractFigure;
+    target?: Point;
+}
+interface ILayoutFigures {
+    axes: {
+        x: Axis;
+        y: Axis;
+    };
+    drawn: {
+        x: Axis;
+        y: Axis;
+    };
 }
 export declare class Graph extends EventTarget {
-    protected _Animate: Animate | null;
+    protected _animation: Animate | null;
+    protected _layout: ILayoutFigures;
+    protected _decor: AbstractFigure[];
+    protected _lines: Map<string, Axis>;
+    protected _held: Set<AbstractFigure>;
+    protected _total: number;
+    protected _links: Map<AbstractFigure, {
+        config: object;
+        dependencies: AbstractFigure[];
+    }>;
+    protected _dependents: Map<AbstractFigure, AbstractFigure[]> | null;
     constructor(id: string | HTMLElement, config?: IGraphConstructorConfig);
+    protected _wrapper: HTMLElement;
     protected _config: IGraphConfig;
     get config(): IGraphConfig;
-    set config(value: IGraphConfig);
     protected _display: IGraphDisplay;
     get display(): IGraphDisplay;
-    set display(value: IGraphDisplay);
     protected _figures: Record<string, AbstractFigure>;
     get figures(): Record<string, AbstractFigure>;
     protected _layers: ILayers;
     get layers(): ILayers;
     protected _rootSVG: Svg;
     get rootSVG(): Svg;
-    protected _toTex: (value: string) => string;
-    get toTex(): (value: string) => string;
+    protected _toTex: TeXConverterType | undefined;
+    get toTex(): TeXConverterType | undefined;
     get create(): {
         point: (coordinates: XY | IPointConfig, name: string, label?: {
             html: boolean;
         }) => Point;
-        line: (constraints: ILineConfig, name: string) => Line;
-        path: (constraints: string, name: string) => Path;
-        bezier: (constraints: IBezierConfig, name: string) => Bezier;
-        plot: (constraints: IPlotConfig, name: string) => Plot;
-        parametric: (constraints: IParametricConfig, name: string) => Parametric;
-        circle: (constraints: ICircleConfig, name: string) => Circle;
-        polygon: (values: IPolygonConfig, name: string) => Polygon;
-        arc: (values: IArcConfig, name: string) => Arc;
-        follow: (values: IFollowConfig, name: string) => AbstractFigure;
-        fillbetween: (values: IFillBetweenConfig, name: string) => AbstractFigure;
-        riemann: (values: IRiemannConfig, name: string) => AbstractFigure;
+        line: (config: import(".").ILineConfig, name: string) => Line;
+        path: (config: import(".").IPathConfig, name: string) => Path;
+        bezier: (config: import(".").IBezierConfig, name: string) => Bezier;
+        plot: (config: import(".").IPlotConfig, name: string) => Plot;
+        parametric: (config: import(".").IParametricConfig, name: string) => Parametric;
+        circle: (config: import(".").ICircleConfig, name: string) => Circle;
+        polygon: (config: import(".").IPolygonConfig, name: string) => Polygon;
+        arc: (config: import(".").IArcConfig, name: string) => Arc;
+        follow: (config: import(".").IFollowConfig, name: string) => Follow;
+        fillbetween: (config: import(".").IFillBetweenConfig, name: string) => FillBetween;
+        grid: (config: import(".").IGridConfig | undefined, name: string) => Grid;
+        axis: (config: import(".").IAxisConfig, name: string) => Axis;
+        riemann: (config: import(".").IRiemannConfig, name: string) => Riemann;
     };
     get animation(): Animate;
+    protected _mainGrid: Grid | null;
+    get mainGrid(): Grid | null;
+    get axes(): {
+        x: Axis;
+        y: Axis;
+    };
+    get drawnAxes(): {
+        x: Axis;
+        y: Axis;
+    };
+    remove(name: string, options?: {
+        cascade?: boolean;
+    }): string[];
     clear(): void;
-    coordinate_system(system: COORDINATE_SYSTEM): AbstractFigure;
-    draggable(figure: AbstractFigure, options?: IDraggableConfig): AbstractFigure;
-    follow(value: string, obj: AbstractFigure): (x: number, y: number) => XY;
-    grid(name: string, gridConfig: {
-        x: XY;
-        y: XY;
-    }): AbstractFigure;
-    subgrid(name: string, subdivision: number): AbstractFigure;
-    toPixels<T>(pixels: T, axis?: 'x' | 'y'): T;
-    toCoordinates<T>(pixels: T, axis?: 'x' | 'y'): T;
-    update(except?: string[], forceUpdate?: boolean): void;
-    updateLabels(except: string[], forceUpdate?: boolean): void;
-    updateLayout(): void;
+    dispose(): void;
+    draggable(figure: Point, options?: IDraggableConfig): Point;
+    toPixels(value: number, axis?: 'x' | 'y'): number;
+    toPixels(value: DOMAIN, axis?: 'x' | 'y'): DOMAIN;
+    toPixels(value: XY): XY;
+    toCoordinates(value: number, axis?: 'x' | 'y'): number;
+    toCoordinates(value: DOMAIN, axis?: 'x' | 'y'): DOMAIN;
+    toCoordinates(value: XY): XY;
+    update(changed?: AbstractFigure | readonly AbstractFigure[], forceUpdate?: boolean): IGraphUpdate;
+    updateLayout(config?: IGraphConfig, display?: IGraphDisplay): void;
     on<K extends keyof IGraphEventMap>(event: K, handler: (e: CustomEvent<IGraphEventMap[K]>) => void): this;
     off<K extends keyof IGraphEventMap>(event: K, handler: (e: CustomEvent<IGraphEventMap[K]>) => void): this;
-    protected emit<K extends keyof IGraphEventMap>(event: K, detail: IGraphEventMap[K]): void;
-    protected _makeLayout(): void;
+    tikz(): string;
+    tikzPreamble(): string;
+    protected _fitSvg(): void;
+    protected _emit<K extends keyof IGraphEventMap>(event: K, detail: IGraphEventMap[K]): void;
+    protected _refresh(figure: AbstractFigure, forceUpdate?: boolean): boolean;
+    protected _gridStep(): {
+        x: number;
+        y: number;
+    };
+    protected _checkDraggable(figure: unknown, options: IDraggableConfig): void;
+    protected _detach(figure: AbstractFigure): void;
+    protected _dependentsMap(): Map<AbstractFigure, AbstractFigure[]>;
+    protected _affectedBy(sources: readonly AbstractFigure[]): AbstractFigure[];
+    protected _clearLayout(): void;
+    protected _makeLayout(): ILayoutFigures;
+    protected _makeLayoutAxis(name: string, d: XY, display: IAxisDisplay | false, where: AxisPlacement): {
+        line: Axis;
+        drawn: Axis;
+    };
+    protected _makeAxis(name: string, d: XY, A: XY, display: IAxisDisplay | false, side: 'left' | 'right', kept?: boolean): Axis;
+    protected _decorate<F extends AbstractFigure>(figure: F, layer: LAYER_NAME): F;
+    protected _maker<C, F extends AbstractFigure>(Figure: new (context: IFigureContext, name: string, config: C) => F, layer: LAYER_NAME): (config: C, name: string) => F;
+    protected _make<F extends AbstractFigure>(name: string, layer: LAYER_NAME, build: () => F): F;
+    protected _checkName(name: string): void;
 }
+export {};
 //# sourceMappingURL=Graph.d.ts.map

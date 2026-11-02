@@ -1,13 +1,21 @@
-import {type PARSER} from "piparser"
-import {AbstractFigure} from "../figures/AbstractFigure"
-import {type buildInterface, type IGraphConfig} from "../pidraw.common"
-import {buildArc, buildCircle} from "./buildCircle"
-import {buildLine} from "./buildLine"
-import {buildFillBetween, buildFollow, buildParametric, buildPlot, buildQuad, buildRiemann} from "./buildPlot"
-import {buildPoint} from "./buildPoint"
-import {buildPolygon} from "./buildPolygon"
-import {buildBezier} from "./buildBezier"
-import {buildIntersection} from "./buildIntersection"
+import type {PARSER} from "piparser"
+import {AbstractFigure} from "../figures/AbstractFigure/AbstractFigure"
+import type {buildInterface, IGraphConfig} from "../pidraw.common"
+import {buildArc} from "../figures/Arc/Arc.parser"
+import {buildAxis} from "../figures/Axis/Axis.parser"
+import {buildCircle} from "../figures/Circle/Circle.parser"
+import {buildLine} from "../figures/Line/Line.parser"
+import {buildFillBetween} from "../figures/FillBetween/FillBetween.parser"
+import {buildGrid} from "../figures/Grid/Grid.parser"
+import {buildFollow} from "../figures/Follow/Follow.parser"
+import {buildParametric} from "../figures/Parametric/Parametric.parser"
+import {buildPath} from "../figures/Path/Path.parser"
+import {buildPlot} from "../figures/Plot/Plot.parser"
+import {buildRiemann} from "../figures/Riemann/Riemann.parser"
+import {buildIntersection, buildPoint} from "../figures/Point/Point.parser"
+import {buildPolygon} from "../figures/Polygon/Polygon.parser"
+import {buildBezier} from "../figures/Bezier/Bezier.parser"
+import {ALTERNATIVE} from "./parser.common"
 
 // TODO: add the build and create parameters to make it easily accessible and extensible.
 // TODO: ajouter l'ellipse
@@ -135,38 +143,31 @@ export const parser_config: Record<string, parser_item> = {
     },
     bis: {
         name: 'bisector',
-        description: 'Create the bisector of an angle',
-        code: 'd=bis <point>,<point>,<point>',
+        description: `Create the bisector of an angle (three points), or of two lines or axes (a last ${ALTERNATIVE} for the other bisector)`,
+        code: `d=bis <point>,<point>,<point> | d=bis <line>,<line>[,${ALTERNATIVE}]`,
         parameters: [],
         build: buildLine
     },
     circ: {
         name: 'circle',
-        description: 'Create a circle',
-        code: 'c=circ <point>,<radius>',
+        description: `Create a circle: from its center and its radius (a number, a point or A:B), from three points (a last ${ALTERNATIVE} for the inscribed circle), from a center and a tangent line, or from a diameter A:B`,
+        code: `c=circ <point>,<radius> | c=circ <point>,<line> | c=circ <point>,<point>,<point>[,${ALTERNATIVE}] | c=circ <point>:<point>`,
         parameters: [],
         build: buildCircle,
     },
     arc: {
         name: 'arc',
-        description: 'Create an arc',
-        code: 'c=arc <point>,<point>,<point>[,<number>]',
+        description: `Create an arc: the angle BAC from three points, a center with a radius and two angles, or a point turned around a center by an angle (a last ${ALTERNATIVE} for the other arc)`,
+        code: `a=arc <point>,<point>,<point>[,<radius>][,${ALTERNATIVE}] | a=arc <point>,<number>,<number>,<number>[,${ALTERNATIVE}] | a=arc <point>,<point>,<number>[,<radius>][,${ALTERNATIVE}]`,
         parameters: ['sector', 'square', 'acute'],
         build: buildArc,
     },
     plot: {
         name: 'plot',
-        description: 'Plot a function',
-        code: 'f(x)=[f=plot ]<function>[@<number>,<domain>,<image>]',
+        description: 'Plot a function, or the parabola through three points (a line if they are aligned)',
+        code: 'f(x)=<function>[@<number>,<domain>,<image>] | f=plot <function>[@<number>,<domain>,<image>] | f=plot <point>,<point>,<point>[@<number>,<domain>,<image>]',
         parameters: [],
         build: buildPlot,
-    },
-    quad: {
-        name: 'quad',
-        description: 'quadrative plot through three points',
-        code: 'f=quad A,B,C[@<number>,<domain>,<image>]',
-        parameters: [],
-        build: buildQuad,
     },
     parametric: {
         name: 'parametric',
@@ -177,43 +178,57 @@ export const parser_config: Record<string, parser_item> = {
     },
     bezier: {
         name: 'bezier',
-        description: 'bezier curve through points',
-        code: 'b=bezier A,B,C,D/<CONTROL: H,V,S>/<ratio>',
+        description: `Create a Bézier curve: the smooth curve through points (a direction and a ratio at each one), or, with a last ${ALTERNATIVE}, the curve pulled by 3 or 4 control points`,
+        code: `b=bezier <point>[/<H|V|S|angle>[/<ratio>]],... | b=bezier <point>,<point>,<point>[,<point>],${ALTERNATIVE}`,
         parameters: [],
         build: buildBezier,
     },
     poly: {
         name: 'polygon',
-        description: 'Create a polygon',
-        code: 'p=poly <point>,<point>,<point>,...',
-        parameters: [],
-        build: buildPolygon,
-    },
-    reg: {
-        name: 'regular',
-        description: 'Create a regular polygon',
-        code: 'p=reg <center>,<radius>,<sides>',
+        description: 'Create a polygon: through points, or a regular polygon (and a regular star polygon with a last step) from a center and a radius, or from a side',
+        code: 'p=poly <point>,<point>,<point>,... | p=poly <point>,<radius>,<sides>[,<step>] | p=poly <point>,<point>,<sides>[,<step>]',
         parameters: [],
         build: buildPolygon,
     },
     follow: {
         name: 'follow',
-        description: 'Create a tangent that follows a function',
-        code: 'f=follow <function>,<tangent?>',
+        description: `Create a point that follows the mouse along a line, a circle or a curve (a last ${ALTERNATIVE} draws the tangent too)`,
+        code: `t=follow <figure>[,<point>][,${ALTERNATIVE}]`,
         parameters: [],
         build: buildFollow,
     },
     fill: {
         name: 'fillbetween',
-        description: 'Fill the area between two functions',
-        code: 'f=fill <function>,<function?>,<domain?>',
+        description: 'Fill the area between two plots, or between a plot and the x axis',
+        code: 'z=fill <plot>[,<plot>][,<domain>]',
         parameters: [],
         build: buildFillBetween,
     },
+    path: {
+        name: 'path',
+        description: 'Draw an SVG path, written in units of the coordinate system',
+        code: 'p=path M 0,0 L 2,1 Q 3,3 4,0 Z',
+        parameters: [],
+        build: buildPath,
+    },
+    grid: {
+        name: 'grid',
+        description: 'Draw a grid: on the whole drawing, or on a part of it. It does not change the grid of the graph',
+        code: 'g=grid [<x interval>,<y interval>][,<step>]',
+        parameters: [],
+        build: buildGrid,
+    },
+    axis: {
+        name: 'axis',
+        description: 'Draw a graduated line through two points: the first is its zero, the second its unit. It does not change the axes of the graph',
+        code: 'a=axis <point>,<point>[,<step>]',
+        parameters: [],
+        build: buildAxis,
+    },
     riemann: {
         name: 'riemann',
-        description: 'Create a Riemann sum',
-        code: 'f=riemann <function>,<domain>,<number>,<position>',
+        description: 'Create the Riemann sum of a plot: rectangles from the x axis to its graph',
+        code: 'r=riemann <plot>[,<domain>][,<rectangles>][,<position>]',
         parameters: [],
         build: buildRiemann,
     }
