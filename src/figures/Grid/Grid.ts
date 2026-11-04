@@ -23,7 +23,7 @@ function segmentsPath(lines: [XY, XY][]): string {
  * optionally lines that cut each step in equal parts.
  *
  * It follows the axes of the graph as they are when it is computed, so it is right for axes that are not orthogonal. Lines that would
- * be closer than {@link MIN_SPACING} pixels are not drawn (the subdivisions are dropped on their own when they are too close), and a
+ * be closer than `MIN_SPACING` pixels are not drawn (the subdivisions are dropped on their own when they are too close), and a
  * grid without any line is not drawn at all (`visibility="hidden"`): it is drawn again when the drawing is zoomed in.
  *
  * The subdivisions have the color, the width and the dashes of the grid, with half of its opacity.

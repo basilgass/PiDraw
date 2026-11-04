@@ -1,22 +1,17 @@
 import {type Box, SVG, type Svg} from "@svgdotjs/svg.js"
 import '@svgdotjs/svg.draggable.js'
 
-import {
-    AXIS,
-    type DOMAIN,
-    type IAxisDisplay,
-    type IFigureContext,
-    type IGraphConfig,
-    type IGraphConstructorConfig,
-    type IGraphDisplay,
-    type IGraphEventMap,
-    type IGraphUpdate,
-    type ILayers,
-    isXY,
-    LAYER_NAME,
-    type TeXConverterType,
-    type XY
-} from "./pidraw.common"
+import {Axes, type Domain, type IFigureContext, type IGraphConfig, isXY, LayerName, type XY} from "./pidraw.common"
+import type {
+    IAxisDisplay,
+    IGraphConstructorConfig,
+    IGraphController,
+    IGraphDisplay,
+    IGraphEventMap,
+    IGraphUpdate,
+    Layers,
+    TeXConverterType
+} from "./Graph.types"
 import {Point} from "./figures/Point/Point"
 import type {IPointConfig} from "./figures/Point/Point.types"
 import {Line} from "./figures/Line/Line"
@@ -25,6 +20,7 @@ import {
     type AxisPlacement,
     axisPlacement,
     checkGraphConfig,
+    isDefinedPosition,
     constrainDrag,
     resolveGraphConfig,
     toCoordinates as pixelsToCoordinates,
@@ -46,12 +42,11 @@ import {FillBetween} from "./figures/FillBetween/FillBetween"
 import {Riemann} from "./figures/Riemann/Riemann"
 import {Path} from "./figures/Path/Path"
 import {Bezier} from "./figures/Bezier/Bezier"
-import {Animate} from "./Animate"
 
 /** The names of the figures of the layout (the grid and the axes, with the ones at the border): a figure of the graph cannot have one. */
 const MAIN_GRID = 'MAINGRID'
 const EDGE = '-edge'
-const LAYOUT_NAMES: string[] = [MAIN_GRID, AXIS.X, AXIS.Y, `${AXIS.X}${EDGE}`, `${AXIS.Y}${EDGE}`]
+const LAYOUT_NAMES: string[] = [MAIN_GRID, Axes.X, Axes.Y, `${Axes.X}${EDGE}`, `${Axes.Y}${EDGE}`]
 
 /** A way to limit where a point that is dragged goes: a function from the position in pixels to the one it takes, or a figure to stay on. */
 export type IDraggableFollow = ((x: number, y: number) => XY) | AbstractFigure
@@ -62,8 +57,8 @@ export interface IDraggableConfig {
     along?: 'x' | 'y',
     /** The part of each axis the point stays in, in units of the coordinate system. */
     bounds?: {
-        x?: DOMAIN
-        y?: DOMAIN
+        x?: Domain
+        y?: Domain
     }
     /** Called with the point each time it moves, before the other figures are drawn again. */
     callback?: (point: Point) => void
@@ -113,8 +108,8 @@ interface ILayoutFigures {
  * draggable by `draggable`, and the graph tells what happens by events (`on`). `dispose` takes it out of the page.
  */
 export class Graph extends EventTarget {
-    /** The animation of the points of the graph, made when it is asked for. */
-    protected _animation: Animate | null = null
+    /** The controllers attached to the graph (see {@link attach}), in the order they were attached. */
+    protected _controllers: IGraphController[] = []
 
     protected _layout: ILayoutFigures
 
@@ -133,6 +128,9 @@ export class Graph extends EventTarget {
     /** The figures that the user holds (dragged), which an update leaves where they are. */
     protected _held = new Set<AbstractFigure>()
 
+    /** How each point that can be dragged is: by the point that is held, and by its target. */
+    protected _drags = new Map<Point, { figure: Point, options: IDraggableConfig }>()
+
     /** How many figures the graph has. */
     protected _total = 0
 
@@ -143,7 +141,7 @@ export class Graph extends EventTarget {
     protected _dependents: Map<AbstractFigure, AbstractFigure[]> | null = null
 
     /**
-     * Draw a graph in a container. A unit is a centimeter by default (see {@link resolveGraphConfig}).
+     * Draw a graph in a container. A unit is a centimeter by default (see `resolveGraphConfig`).
      * @param id the container, or the `id` of an element of the page.
      * @throws InvalidArgumentError if the container does not exist, or the size, the origin or an axis of `config` is not valid.
      * @throws NotImplementedError if the coordinate system of `config` is not the cartesian one.
@@ -180,9 +178,9 @@ export class Graph extends EventTarget {
         // The defs come first, so that looking for them (for a marker) stops at once, without crossing the figures.
         this._rootSVG.defs()
 
-        this._layers = {} as ILayers
+        this._layers = {} as Layers
 
-        Object.values(LAYER_NAME).forEach((key) => {
+        Object.values(LayerName).forEach((key) => {
             this._layers[key] = this._rootSVG
                 .group()
                 .attr('id', `LAYER_${key}`)
@@ -229,10 +227,10 @@ export class Graph extends EventTarget {
         return this._figures
     }
 
-    protected _layers: ILayers
+    protected _layers: Layers
 
-    /** The groups of the svg that the figures are in, from the back of the drawing to the front (see `LAYER_NAME`). */
-    get layers(): ILayers {
+    /** The groups of the svg that the figures are in, from the back of the drawing to the front (see `LayerName`). */
+    get layers(): Layers {
         return this._layers
     }
 
@@ -259,36 +257,29 @@ export class Graph extends EventTarget {
         return {
             point: (coordinates: XY | IPointConfig, name: string, label?: { html: boolean }) => {
                 const config: IPointConfig = isXY(coordinates) ? {coordinates} : coordinates
-                const point = this._make(name, LAYER_NAME.POINTS, () => new Point(this, name, config))
+                const point = this._make(name, LayerName.POINTS, () => new Point(this, name, config))
 
                 if (label) {
                     // The label of a point is its name.
-                    point.addLabel(name, label.html, this._toTex)
+                    point.addLabel(name, {asHtml: label.html, ...(this._toTex === undefined ? {} : {texConverter: this._toTex})})
                 }
 
                 return point
             },
-            line: this._maker(Line, LAYER_NAME.MAIN),
-            path: this._maker(Path, LAYER_NAME.MAIN),
-            bezier: this._maker(Bezier, LAYER_NAME.MAIN),
-            plot: this._maker(Plot, LAYER_NAME.PLOTS),
-            parametric: this._maker(Parametric, LAYER_NAME.PLOTS),
-            circle: this._maker(Circle, LAYER_NAME.MAIN),
-            polygon: this._maker(Polygon, LAYER_NAME.MAIN),
-            arc: this._maker(Arc, LAYER_NAME.MAIN),
-            follow: this._maker(Follow, LAYER_NAME.PLOTS_FOREGROUND),
-            fillbetween: this._maker(FillBetween, LAYER_NAME.PLOTS_BACKGROUND),
-            grid: this._maker(Grid, LAYER_NAME.GRIDS),
-            axis: this._maker(Axis, LAYER_NAME.MAIN),
-            riemann: this._maker(Riemann, LAYER_NAME.PLOTS_BACKGROUND)
+            line: this._maker(Line, LayerName.MAIN),
+            path: this._maker(Path, LayerName.MAIN),
+            bezier: this._maker(Bezier, LayerName.MAIN),
+            plot: this._maker(Plot, LayerName.PLOTS),
+            parametric: this._maker(Parametric, LayerName.PLOTS),
+            circle: this._maker(Circle, LayerName.MAIN),
+            polygon: this._maker(Polygon, LayerName.MAIN),
+            arc: this._maker(Arc, LayerName.MAIN),
+            follow: this._maker(Follow, LayerName.PLOTS_FOREGROUND),
+            fillbetween: this._maker(FillBetween, LayerName.PLOTS_BACKGROUND),
+            grid: this._maker(Grid, LayerName.GRIDS),
+            axis: this._maker(Axis, LayerName.MAIN),
+            riemann: this._maker(Riemann, LayerName.PLOTS_BACKGROUND)
         }
-    }
-
-    /** The animation of the points that have one (the option `animate` of a point): the same object each time. */
-    get animation(): Animate {
-        this._animation ??= new Animate(this)
-
-        return this._animation
     }
 
     protected _mainGrid: Grid | null = null
@@ -342,24 +333,64 @@ export class Graph extends EventTarget {
             this._detach(removing)
         })
 
-        return removed.map(removing => removing.name)
+        const names = removed.map(removing => removing.name)
+        this._notifyRemoved(names)
+
+        return names
     }
 
-    /** Remove every figure of the graph, but not the layout, and stop the animation, which was of these figures. */
+    /**
+     * Attach a controller to the graph: a module that acts on the drawing from outside (the animation, a zoom, the slides), made by
+     * the program with `new Animate(graph)`. The graph tells it when figures are removed (`remove`, `clear`) and when it is taken out of the page
+     * (`dispose`), so that it stops what it does.
+     * @returns the controller.
+     * @throws InvalidArgumentError if a controller of the same class is already attached: two of them would act on the same figures.
+     */
+    attach<T extends IGraphController>(controller: T): T {
+        if (this._controllers.some(attached => attached.constructor === controller.constructor)) {
+            throw new InvalidArgumentError(`A ${controller.constructor.name} is already attached to this graph`)
+        }
+
+        this._controllers.push(controller)
+
+        return controller
+    }
+
+    /** Remove every figure of the graph, but not the layout. The attached controllers are told which figures were removed (`onFiguresRemoved`). */
     clear(): void {
-        this._animation?.stop()
+        const names = Object.keys(this._figures)
 
         Object.values(this._figures).forEach((figure) => {
             this._detach(figure)
         })
+
+        this._notifyRemoved(names)
+    }
+
+    /** Tell the attached controllers that these figures are gone from the graph. Nothing is said for no figure. */
+    protected _notifyRemoved(names: string[]): void {
+        if (names.length === 0) {
+            return
+        }
+
+        this._controllers.forEach((controller) => {
+            controller.onFiguresRemoved?.(names)
+        })
     }
 
     /**
-     * Take the graph out of the page: stop the animation, remove every figure (the ones that keep a listener let it go) and the layout, and
-     * remove from its container the element that the graph made. The graph is not used afterward; calling this again does nothing.
+     * Take the graph out of the page: remove every figure (the ones that keep a listener let it go) and the layout, and
+     * remove from its container the element that the graph made. The attached controllers are disposed, and detached. The graph is not used
+     * afterward; calling this again does nothing.
      */
     dispose(): void {
         this.clear()
+
+        this._controllers.forEach((controller) => {
+            controller.dispose()
+        })
+        this._controllers = []
+
         this._clearLayout()
 
         this._lines.forEach((axis) => {
@@ -369,6 +400,88 @@ export class Graph extends EventTarget {
         this._lines.clear()
 
         this._wrapper.remove()
+    }
+
+    /**
+     * Make a point draggable by a handle: a large pale disc, on the layer of the interactions, that follows the point and moves it when it is
+     * dragged. The user reaches a point that is small, or hidden.
+     *
+     * @returns the handle, which is a figure of the graph named `<point>_drag`.
+     * @throws InvalidArgumentError as `draggable` does, or if the name of the handle is taken. Nothing is left in the graph in case of an error.
+     */
+    handle(target: Point, options: IDraggableConfig = {}): Point {
+        const handle = this.create.point({x: 0, y: 0}, `${target.name}_drag`)
+
+        try {
+            handle.pixels = target.pixels
+            handle.asCircle(30).fill({color: 'white', opacity: 0.8})
+            this.layers.interactive.add(handle.element)
+
+            return this.draggable(handle, {target, ...options})
+        } catch (error) {
+            this.remove(handle.name)
+            throw error
+        }
+    }
+
+    /**
+     * Put a point that can be dragged where it would be if the mouse had dragged it to `pixels`: the rules of its drag apply (along an axis, on the
+     * grid, in bounds, on a figure it follows), then the figures that depend on it are drawn again. No event is emitted.
+     *
+     * @param point the point that is held (the handle), or its `target`.
+     * @param pixels where the mouse would be, in pixels.
+     * @throws InvalidArgumentError if the point cannot be dragged.
+     */
+    dragTo(point: Point, pixels: XY): void {
+        const drag = this._drags.get(point)
+
+        if (drag === undefined) {
+            throw new InvalidArgumentError(`The point "${point.name}" cannot be dragged: make it draggable first`)
+        }
+
+        this._dragMove(drag.figure, drag.options, pixels)
+    }
+
+    /**
+     * Move the point that is dragged to where the mouse is, under the rules of its drag, and draw again what depends on it.
+     * @param figure the point that is held.
+     * @param options the rules of its drag.
+     * @param mouse the position of the mouse in pixels, which is put inside the drawing.
+     * @returns what the update did, `null` if the point did not move.
+     */
+    protected _dragMove(figure: Point, options: IDraggableConfig, mouse: XY): IGraphUpdate | null {
+        const {along, bounds, callback, follow = [], grid, target} = options
+
+        const inside = {
+            x: Math.max(0, Math.min(mouse.x, this._config.width)),
+            y: Math.max(0, Math.min(mouse.y, this._config.height))
+        }
+
+        let position = constrainDrag(inside, {
+            ...(along ? {along: {axis: along, keep: (target ?? figure).pixels}} : {}),
+            ...(bounds ? {bounds} : {}),
+            ...(grid ? {step: this._gridStep()} : {})
+        }, this._config)
+
+        for (const limit of follow) {
+            position = limit instanceof AbstractFigure ? limit.follow(position.x, position.y) : limit(position.x, position.y)
+        }
+
+        if (figure.pixels.x === position.x && figure.pixels.y === position.y) {
+            return null
+        }
+
+        figure.pixels = position
+
+        if (target) {
+            target.pixels = position
+        }
+
+        if (callback) {
+            callback(figure)
+        }
+
+        return this.update(target ? [figure, target] : [figure])
     }
 
     /**
@@ -382,7 +495,7 @@ export class Graph extends EventTarget {
     draggable(figure: Point, options: IDraggableConfig = {}): Point {
         this._checkDraggable(figure, options)
 
-        const {along, bounds, callback, follow = [], grid, target} = options
+        const target = options.target ?? figure
 
         const dragmove = (e: Event & { detail: { box: Box } }): void => {
             // The plugin would move the shape by itself: the point moves it, through its position.
@@ -390,46 +503,22 @@ export class Graph extends EventTarget {
 
             // The box is the one of the shape, and the point is at its center.
             const {box} = e.detail
-            const inside = {
-                x: Math.max(0, Math.min(box.x + box.width / 2, this._config.width)),
-                y: Math.max(0, Math.min(box.y + box.height / 2, this._config.height))
-            }
-
-            let position = constrainDrag(inside, {
-                ...(along ? {along: {axis: along, keep: (target ?? figure).pixels}} : {}),
-                ...(bounds ? {bounds} : {}),
-                ...(grid ? {step: this._gridStep()} : {})
-            }, this._config)
-
-            for (const limit of follow) {
-                position = limit instanceof AbstractFigure ? limit.follow(position.x, position.y) : limit(position.x, position.y)
-            }
+            const report = this._dragMove(figure, options, {x: box.x + box.width / 2, y: box.y + box.height / 2})
 
             // Nothing moved (the rules put the point where it was): nothing to draw again.
-            if (figure.pixels.x === position.x && figure.pixels.y === position.y) {
-                return
+            if (report !== null) {
+                this._emit('dragmove', {graph: this, figure, target, ...report})
             }
+        }
 
-            figure.pixels = position
-
-            if (target) {
-                target.pixels = position
-            }
-
-            if (callback) {
-                callback(figure)
-            }
-
-            const report = this.update(target ? [figure, target] : [figure])
-
-            this._emit('dragmove', {graph: this, figure, ...report})
+        this._drags.set(figure, {figure, options})
+        if (options.target) {
+            this._drags.set(options.target, {figure, options})
         }
 
         // The user holds the figure and its target: a full update leaves them where they are.
         this._held.add(figure)
-        if (target) {
-            this._held.add(target)
-        }
+        this._held.add(target)
 
         // Move the figure to the top layer.
         this._layers.interactive.add(figure.element)
@@ -437,9 +526,9 @@ export class Graph extends EventTarget {
         figure.isDraggable = true
         figure.shape
             .draggable()
-            .on('dragstart', () => { this._emit('dragstart', {graph: this, figure}) })
+            .on('dragstart', () => { this._emit('dragstart', {graph: this, figure, target}) })
             .on('dragmove', dragmove as EventListener)
-            .on('dragend', () => { this._emit('dragend', {graph: this, figure}) })
+            .on('dragend', () => { this._emit('dragend', {graph: this, figure, target}) })
 
         return figure
     }
@@ -451,11 +540,11 @@ export class Graph extends EventTarget {
      */
     toPixels(value: number, axis?: 'x' | 'y'): number
 
-    toPixels(value: DOMAIN, axis?: 'x' | 'y'): DOMAIN
+    toPixels(value: Domain, axis?: 'x' | 'y'): Domain
 
     toPixels(value: XY): XY
 
-    toPixels(value: number | DOMAIN | XY, axis?: 'x' | 'y'): number | DOMAIN | XY {
+    toPixels(value: number | Domain | XY, axis?: 'x' | 'y'): number | Domain | XY {
         return coordToPixels(value, this.config, axis)
     }
 
@@ -466,11 +555,11 @@ export class Graph extends EventTarget {
      */
     toCoordinates(value: number, axis?: 'x' | 'y'): number
 
-    toCoordinates(value: DOMAIN, axis?: 'x' | 'y'): DOMAIN
+    toCoordinates(value: Domain, axis?: 'x' | 'y'): Domain
 
     toCoordinates(value: XY): XY
 
-    toCoordinates(value: number | DOMAIN | XY, axis?: 'x' | 'y'): number | DOMAIN | XY {
+    toCoordinates(value: number | Domain | XY, axis?: 'x' | 'y'): number | Domain | XY {
         return pixelsToCoordinates(value, this.config, axis)
     }
 
@@ -519,14 +608,24 @@ export class Graph extends EventTarget {
      *
      * @param config the new configuration, whole. The one of the graph stays by default.
      * @param display what the layout shows, as it is (without the defaults of the constructor). The one of the graph stays by default.
-     * @throws InvalidArgumentError if `config` is not valid (see {@link checkGraphConfig}), or `display` cannot be drawn.
+     * @throws InvalidArgumentError if `config` is not valid (see `checkGraphConfig`), or `display` cannot be drawn.
      * @throws NotImplementedError if the coordinate system of `config` is not the cartesian one.
+     * @throws MathError if the position of a moved point cannot be read in the coordinate system of the graph as it is now.
      * The graph is left as it was in case of an error.
+     *
+     * A point that was moved (dragged, animated: see `Point.isMoved`) keeps its place in the coordinate system, not in pixels: it is put
+     * where the same coordinates are in the new layout, and what depends on it is drawn again. The attached controllers are told afterward
+     * (`onLayoutChanged`).
      */
     updateLayout(config?: IGraphConfig, display?: IGraphDisplay): void {
         if (config !== undefined) {
             checkGraphConfig(config)
         }
+
+        // Read before anything changes: an error leaves the graph as it was.
+        const moved = Object.values(this._figures)
+            .filter((figure): figure is Point => figure instanceof Point && figure.isMoved())
+            .map(point => ({point, coordinates: point.coordinates}))
 
         const previous = {config: this._config, display: this._display}
 
@@ -548,6 +647,21 @@ export class Graph extends EventTarget {
 
         // The figures hold what they computed from the old layout, the static ones too: draw them all again.
         this.update(undefined, true)
+
+        // The moved points were put back at the place of their constraint: they go to their coordinates in the new layout.
+        const placed = moved.filter(({coordinates}) => isDefinedPosition(coordinates))
+
+        placed.forEach(({point, coordinates}) => {
+            point.pixels = this.toPixels(coordinates)
+        })
+
+        if (placed.length > 0) {
+            this.update(placed.map(({point}) => point))
+        }
+
+        this._controllers.forEach((controller) => {
+            controller.onLayoutChanged?.(this._config)
+        })
     }
 
     /**
@@ -578,7 +692,7 @@ export class Graph extends EventTarget {
     /**
      * The graph as a whole `tikzpicture`: the grid and the axes, then the figures, in the order they are drawn on screen (layer by layer, and in
      * a layer in the order of its elements). The picture has the size of the part of the coordinate system that is drawn, which the commands are cut
-     * to (see {@link tikzPicture}). The handles of the points
+     * to (see `tikzPicture`). The handles of the points
      * the user drags are not part of the drawing, and a figure that is hidden writes nothing. The packages it needs are in {@link tikzPreamble}.
      *
      * @throws InvalidArgumentError if the appearance of a figure has no TikZ equivalent (a color that is neither hexadecimal nor a name of `xcolor`).
@@ -593,8 +707,8 @@ export class Graph extends EventTarget {
 
         const fragments: string[] = []
 
-        for (const layer of Object.values(LAYER_NAME)) {
-            if (layer === LAYER_NAME.INTERACTIVE) {
+        for (const layer of Object.values(LayerName)) {
+            if (layer === LayerName.INTERACTIVE) {
                 continue
             }
 
@@ -691,7 +805,7 @@ export class Graph extends EventTarget {
             throw new InvalidArgumentError(`The follow of the point "${figure.name}" must be a list of functions and figures`)
         }
 
-        for (const [axis, domain] of Object.entries((bounds ?? {}) as Record<string, DOMAIN | undefined>)) {
+        for (const [axis, domain] of Object.entries((bounds ?? {}) as Record<string, Domain | undefined>)) {
             if (domain !== undefined && !(Number.isFinite(domain.min) && Number.isFinite(domain.max))) {
                 throw new InvalidArgumentError(`Invalid bounds ${axis} ${JSON.stringify(domain)} for the point "${figure.name}": expected {min, max}, two finite numbers`)
             }
@@ -707,6 +821,11 @@ export class Graph extends EventTarget {
         delete this._figures[figure.name]
         this._total--
         this._held.delete(figure)
+        this._drags.forEach((drag, key) => {
+            if (key === figure || drag.figure === figure) {
+                this._drags.delete(key)
+            }
+        })
         this._links.delete(figure)
         this._dependents = null
     }
@@ -804,15 +923,15 @@ export class Graph extends EventTarget {
         this._clearLayout()
 
         const grid = this._display.grid
-        this._mainGrid = grid ? this._decorate(new Grid(this, MAIN_GRID, grid === true ? {} : grid), LAYER_NAME.GRIDS) : null
+        this._mainGrid = grid ? this._decorate(new Grid(this, MAIN_GRID, grid === true ? {} : grid), LayerName.GRIDS) : null
 
         // The axes always exist, but are drawn only when they are asked for.
         const {origin, axis, width, height} = this._config
         const wanted = axesDisplay(this._display.axis)
         const placement = axisPlacement(origin, width, height, axis)
 
-        const x = this._makeLayoutAxis(AXIS.X, axis.x, wanted.x, placement.x)
-        const y = this._makeLayoutAxis(AXIS.Y, axis.y, wanted.y, placement.y)
+        const x = this._makeLayoutAxis(Axes.X, axis.x, wanted.x, placement.x)
+        const y = this._makeLayoutAxis(Axes.Y, axis.y, wanted.y, placement.y)
 
         // The axes lie in the layer in the same order whether they were made now or before.
         new Set([x.line, x.drawn, y.line, y.drawn]).forEach((figure) => {
@@ -856,7 +975,7 @@ export class Graph extends EventTarget {
             this._layers.axis.add(axis.element)
             this._lines.set(name, axis)
         } else {
-            axis = this._decorate(new Axis(this, name, config), LAYER_NAME.AXIS)
+            axis = this._decorate(new Axis(this, name, config), LayerName.AXIS)
         }
 
         axis.static = true
@@ -865,7 +984,7 @@ export class Graph extends EventTarget {
     }
 
     /** Put a figure of the layout in a layer, and among the figures that are removed when the layout is drawn again. */
-    protected _decorate<F extends AbstractFigure>(figure: F, layer: LAYER_NAME): F {
+    protected _decorate<F extends AbstractFigure>(figure: F, layer: LayerName): F {
         this._layers[layer].add(figure.element)
         this._decor.push(figure)
 
@@ -876,7 +995,7 @@ export class Graph extends EventTarget {
      * A function that makes a figure of a class and puts it in a layer.
      * @throws InvalidArgumentError when it is called, see {@link create}.
      */
-    protected _maker<C, F extends AbstractFigure>(Figure: new (context: IFigureContext, name: string, config: C) => F, layer: LAYER_NAME): (config: C, name: string) => F {
+    protected _maker<C, F extends AbstractFigure>(Figure: new (context: IFigureContext, name: string, config: C) => F, layer: LayerName): (config: C, name: string) => F {
         return (config, name) => this._make(name, layer, () => new Figure(this, name, config))
     }
 
@@ -885,7 +1004,7 @@ export class Graph extends EventTarget {
      * this name (the `id` of its group in the svg).
      * @throws InvalidArgumentError if the name cannot be the one of a figure (see {@link create}).
      */
-    protected _make<F extends AbstractFigure>(name: string, layer: LAYER_NAME, build: () => F): F {
+    protected _make<F extends AbstractFigure>(name: string, layer: LayerName, build: () => F): F {
         this._checkName(name)
 
         const figure = build()

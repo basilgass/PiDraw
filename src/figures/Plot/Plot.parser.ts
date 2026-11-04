@@ -1,7 +1,7 @@
 import type {PARSER} from "piparser"
 import type {AbstractFigure} from "../AbstractFigure/AbstractFigure"
 import type {IPlotConfig} from "./Plot.types"
-import type {buildInterface} from "../../pidraw.common"
+import type {BuildResult} from "../../parser/parser.types"
 import {ParseError} from "../../errors"
 import {buildError, convertIdToFigure, describeValue, isPoint, PARSER_TYPE} from "../../parser/parser.common"
 import {curveValues, splitFunction} from "../../parser/parser.curve"
@@ -26,7 +26,7 @@ const EXPECTED = 'an expression or three points (the parabola through them), the
  * @throws ParseError if the key is not `plot`, or the values are none of those: no function, a value that is not a number or
  * a domain, a number of samples that is not greater than 0, more than one number or two domains.
  */
-export function buildPlot(item: PARSER, figures: Figures): buildInterface<IPlotConfig> {
+export function buildPlot(item: PARSER, figures: Figures): BuildResult<IPlotConfig> {
     if (item.key !== PARSER_TYPE.PLOT.toString()) {
         throw new ParseError(`Cannot build "${item.name}" (${item.key}): the key does not define a plot`)
     }

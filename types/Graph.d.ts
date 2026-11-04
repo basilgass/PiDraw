@@ -1,6 +1,7 @@
 import { type Svg } from "@svgdotjs/svg.js";
 import '@svgdotjs/svg.draggable.js';
-import { type DOMAIN, type IAxisDisplay, type IFigureContext, type IGraphConfig, type IGraphConstructorConfig, type IGraphDisplay, type IGraphEventMap, type IGraphUpdate, type ILayers, LAYER_NAME, type TeXConverterType, type XY } from "./pidraw.common";
+import { type Domain, type IFigureContext, type IGraphConfig, LayerName, type XY } from "./pidraw.common";
+import type { IAxisDisplay, IGraphConstructorConfig, IGraphController, IGraphDisplay, IGraphEventMap, IGraphUpdate, Layers, TeXConverterType } from "./Graph.types";
 import { Point } from "./figures/Point/Point";
 import type { IPointConfig } from "./figures/Point/Point.types";
 import { Line } from "./figures/Line/Line";
@@ -18,13 +19,12 @@ import { FillBetween } from "./figures/FillBetween/FillBetween";
 import { Riemann } from "./figures/Riemann/Riemann";
 import { Path } from "./figures/Path/Path";
 import { Bezier } from "./figures/Bezier/Bezier";
-import { Animate } from "./Animate";
 export type IDraggableFollow = ((x: number, y: number) => XY) | AbstractFigure;
 export interface IDraggableConfig {
     along?: 'x' | 'y';
     bounds?: {
-        x?: DOMAIN;
-        y?: DOMAIN;
+        x?: Domain;
+        y?: Domain;
     };
     callback?: (point: Point) => void;
     follow?: IDraggableFollow[];
@@ -42,11 +42,15 @@ interface ILayoutFigures {
     };
 }
 export declare class Graph extends EventTarget {
-    protected _animation: Animate | null;
+    protected _controllers: IGraphController[];
     protected _layout: ILayoutFigures;
     protected _decor: AbstractFigure[];
     protected _lines: Map<string, Axis>;
     protected _held: Set<AbstractFigure>;
+    protected _drags: Map<Point, {
+        figure: Point;
+        options: IDraggableConfig;
+    }>;
     protected _total: number;
     protected _links: Map<AbstractFigure, {
         config: object;
@@ -61,8 +65,8 @@ export declare class Graph extends EventTarget {
     get display(): IGraphDisplay;
     protected _figures: Record<string, AbstractFigure>;
     get figures(): Record<string, AbstractFigure>;
-    protected _layers: ILayers;
-    get layers(): ILayers;
+    protected _layers: Layers;
+    get layers(): Layers;
     protected _rootSVG: Svg;
     get rootSVG(): Svg;
     protected _toTex: TeXConverterType | undefined;
@@ -85,7 +89,6 @@ export declare class Graph extends EventTarget {
         axis: (config: import(".").IAxisConfig, name: string) => Axis;
         riemann: (config: import(".").IRiemannConfig, name: string) => Riemann;
     };
-    get animation(): Animate;
     protected _mainGrid: Grid | null;
     get mainGrid(): Grid | null;
     get axes(): {
@@ -99,14 +102,19 @@ export declare class Graph extends EventTarget {
     remove(name: string, options?: {
         cascade?: boolean;
     }): string[];
+    attach<T extends IGraphController>(controller: T): T;
     clear(): void;
+    protected _notifyRemoved(names: string[]): void;
     dispose(): void;
+    handle(target: Point, options?: IDraggableConfig): Point;
+    dragTo(point: Point, pixels: XY): void;
+    protected _dragMove(figure: Point, options: IDraggableConfig, mouse: XY): IGraphUpdate | null;
     draggable(figure: Point, options?: IDraggableConfig): Point;
     toPixels(value: number, axis?: 'x' | 'y'): number;
-    toPixels(value: DOMAIN, axis?: 'x' | 'y'): DOMAIN;
+    toPixels(value: Domain, axis?: 'x' | 'y'): Domain;
     toPixels(value: XY): XY;
     toCoordinates(value: number, axis?: 'x' | 'y'): number;
-    toCoordinates(value: DOMAIN, axis?: 'x' | 'y'): DOMAIN;
+    toCoordinates(value: Domain, axis?: 'x' | 'y'): Domain;
     toCoordinates(value: XY): XY;
     update(changed?: AbstractFigure | readonly AbstractFigure[], forceUpdate?: boolean): IGraphUpdate;
     updateLayout(config?: IGraphConfig, display?: IGraphDisplay): void;
@@ -132,9 +140,9 @@ export declare class Graph extends EventTarget {
         drawn: Axis;
     };
     protected _makeAxis(name: string, d: XY, A: XY, display: IAxisDisplay | false, side: 'left' | 'right', kept?: boolean): Axis;
-    protected _decorate<F extends AbstractFigure>(figure: F, layer: LAYER_NAME): F;
-    protected _maker<C, F extends AbstractFigure>(Figure: new (context: IFigureContext, name: string, config: C) => F, layer: LAYER_NAME): (config: C, name: string) => F;
-    protected _make<F extends AbstractFigure>(name: string, layer: LAYER_NAME, build: () => F): F;
+    protected _decorate<F extends AbstractFigure>(figure: F, layer: LayerName): F;
+    protected _maker<C, F extends AbstractFigure>(Figure: new (context: IFigureContext, name: string, config: C) => F, layer: LayerName): (config: C, name: string) => F;
+    protected _make<F extends AbstractFigure>(name: string, layer: LayerName, build: () => F): F;
     protected _checkName(name: string): void;
 }
 export {};

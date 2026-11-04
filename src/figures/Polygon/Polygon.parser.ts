@@ -1,13 +1,12 @@
 import type {PARSER} from "piparser"
 import type {AbstractFigure} from "../AbstractFigure/AbstractFigure"
 import type {IPolygonConfig, PolygonRadius} from "./Polygon.types"
-import type {buildInterface} from "../../pidraw.common"
+import type {BuildResult, IParserValues} from "../../parser/parser.types"
 import {ParseError} from "../../errors"
 import {
     buildError,
     convertIdToFigure,
     describeValue,
-    type IParserValues,
     isPoint,
     parseRadius,
     PARSER_TYPE
@@ -52,7 +51,7 @@ function radiusOf(value: IParserValues | undefined, figures: Figures): PolygonRa
  * @throws ParseError if the key is not `poly`, or the values are none of those: fewer than 3 points, a number of sides or a step
  * that is not an integer, a radius that is neither a number nor `A:B`, more values than a form has.
  */
-export function buildPolygon(item: PARSER, figures: Figures): buildInterface<IPolygonConfig> {
+export function buildPolygon(item: PARSER, figures: Figures): BuildResult<IPolygonConfig> {
     if (item.key !== PARSER_TYPE.POLYGON.toString()) {
         throw new ParseError(`Cannot build "${item.name}" (${item.key}): the key does not define a polygon`)
     }

@@ -2,7 +2,7 @@ import type {PARSER} from "piparser"
 import type {AbstractFigure} from "../AbstractFigure/AbstractFigure"
 import {Plot} from "../Plot/Plot"
 import type {ILineConfig, ILineType} from "./Line.types"
-import type {buildInterface} from "../../pidraw.common"
+import type {BuildResult, IParserValues} from "../../parser/parser.types"
 import {ParseError} from "../../errors"
 import {toNumber} from "../../calculus"
 import {
@@ -11,7 +11,6 @@ import {
     convertIdToFigure,
     describeValue,
     expectCount,
-    type IParserValues,
     isAlternative,
     isLine,
     isPoint,
@@ -150,7 +149,7 @@ const LINE_BUILDERS: Record<string, LineBuilder> = {
  *
  * @throws ParseError if the key is not one of a line, or the values are not those the key expects (number, type of figure).
  */
-export function buildLine(item: PARSER, figures: Figures): buildInterface<ILineConfig> {
+export function buildLine(item: PARSER, figures: Figures): BuildResult<ILineConfig> {
     const build = Object.hasOwn(LINE_BUILDERS, item.key) ? LINE_BUILDERS[item.key] : undefined
 
     if (build === undefined) {
@@ -160,8 +159,11 @@ export function buildLine(item: PARSER, figures: Figures): buildInterface<ILineC
     return {create, config: build(convertIdToFigure(item.values, figures), item)}
 }
 
-/** The keys that can be written without a value, so without a space after them. */
-const KEYS_ALONE: string[] = [PARSER_TYPE.GRID]
+/**
+ * The keys of the parser. A body that is one of them (`g=grid`, `f=plot`) is a line written in full, with no value (a grid has none, the
+ * other figures report the values they miss): no shorthand looks like a key, which has no capital letter.
+ */
+const KEYS: string[] = Object.values(PARSER_TYPE)
 
 /** The name of a point in a shorthand: a capital letter and digits. */
 const NAME = '[A-Z][0-9]*'
@@ -195,8 +197,8 @@ export function parseLineShorthand(keyCode: string): string | null {
     const id = keyCode.slice(0, separator)
     const body = keyCode.slice(separator + 1)
 
-    // A key that needs no value (`g=grid`) is already written in full.
-    if (KEYS_ALONE.includes(body)) {
+    // A key with no value (`g=grid`, `f=plot`) is already written in full.
+    if (KEYS.includes(body)) {
         return null
     }
 
@@ -209,6 +211,6 @@ export function parseLineShorthand(keyCode: string): string | null {
     }
 
     throw new ParseError(
-        `Cannot read "${keyCode}" as a line: expected two points, like AB, AB., [AB], AB[, [AB[ or vAB, after the "="`
+        `Cannot read "${keyCode}" as a line: expected two points, like AB, AB., [AB], AB[, [AB[, [AB or vAB, after the "="`
     )
 }

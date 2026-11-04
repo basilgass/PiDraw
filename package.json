@@ -11,6 +11,10 @@
       "types": "./types/index.d.ts",
       "import": "./dist/pidraw.js",
       "require": "./dist/pidraw.js"
+    },
+    "./codemirror": {
+      "types": "./types/codemirror/index.d.ts",
+      "import": "./dist/codemirror.js"
     }
   },
   "./types/index.d.ts": "./types/index.d.ts",
@@ -26,11 +30,13 @@
     "dev": "vite",
     "build": "tsc --p ./tsconfig-build.json && vite build",
     "preview": "vite preview",
+    "dependencies:check": "depcruise src --config .dependency-cruiser.cjs",
     "dependency-cruise": "dependency-cruise -T dot -x node_modules -v -- src/index.ts  | dot -T svg > dependencies.svg",
     "docs:api": "typedoc",
     "docs:dev": "vitepress dev docs",
-    "docs:build": "typedoc && vitepress build docs",
-    "docs:preview": "vitepress preview docs"
+    "docs:build": "npm run docs:check && typedoc && vitepress build docs",
+    "docs:preview": "vitepress preview docs",
+    "docs:check": "vitest run --mode docs"
   },
   "repository": {
     "type": "git",
@@ -54,7 +60,14 @@
     "piparser": "^0.1.1"
   },
   "devDependencies": {
+    "@codemirror/autocomplete": "^6.20.4",
+    "@codemirror/commands": "^6.11.1",
+    "@codemirror/language": "^6.13.1",
+    "@codemirror/lint": "^6.9.7",
+    "@codemirror/state": "^6.7.6",
+    "@codemirror/view": "^6.43.15",
     "@eslint/js": "^10.0.1",
+    "@lezer/highlight": "^1.2.5",
     "@tailwindcss/vite": "^4.3.3",
     "@types/eslint": "^9.6.1",
     "@types/glob": "^9.0.0",
@@ -75,5 +88,29 @@
     "vite": "^8.3.5",
     "vitepress": "^1.6.4",
     "vitest": "^5.0.5"
+  },
+  "peerDependencies": {
+    "@codemirror/autocomplete": "^6.0.0",
+    "@codemirror/language": "^6.0.0",
+    "@codemirror/state": "^6.0.0",
+    "@codemirror/view": "^6.0.0",
+    "@lezer/highlight": "^1.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@codemirror/autocomplete": {
+      "optional": true
+    },
+    "@codemirror/language": {
+      "optional": true
+    },
+    "@codemirror/state": {
+      "optional": true
+    },
+    "@codemirror/view": {
+      "optional": true
+    },
+    "@lezer/highlight": {
+      "optional": true
+    }
   }
 }

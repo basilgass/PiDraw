@@ -1,8 +1,11 @@
-import {G, Path, Shape, Svg} from "@svgdotjs/svg.js"
-import {type IFigureAnimation, type IFigureAppearanceConfig, type IFigureContext, type XY} from "../../pidraw.common"
+import type {G, Path, Shape, Svg} from "@svgdotjs/svg.js"
+import type {IFigureAppearanceConfig, IFigureContext, XY} from "../../pidraw.common"
+import {LoopStyle} from "../../animate/Animate.types"
+import type {IFigureAnimation} from "../../animate/Animate.types"
+import {EASINGS} from "../../calculus/easing"
 import {Label} from "../Label/Label"
 import {checkLabelContent, renderLabelContent} from "../Label/Label.constraints"
-import type {LabelContent, LabelFields} from "../Label/Label.types"
+import type {ILabelConfig, LabelContent, LabelFields} from "../Label/Label.types"
 import {createMarker, MARKER_SHAPES} from "../../svg/marker"
 import {InvalidArgumentError} from "../../errors"
 import {checkVector} from "./AbstractFigure.constraints"
@@ -19,51 +22,56 @@ import {
     tikzView
 } from "./AbstractFigure.tikz"
 
-type MarkerSide = 'start' | 'end' | 'both' | 'none'
+/** The end of a figure that has a marker: `'none'` removes the markers of both ends. */
+export type MarkerSide = 'start' | 'end' | 'both' | 'none'
+
+/** What a marker is made of. */
+export interface IMarkOptions {
+    /** Where to put it. Both ends by default. */
+    side?: MarkerSide
+    /** Its size, a number greater than 0. 10 by default. */
+    size?: number
+    /** Its shape: `'->'` for an arrow (default), `'x'` for a cross or `'|'` for a bar. */
+    shape?: string
+}
+
+/** How the label of a figure is made. */
+export type ILabelOptions = Partial<Pick<ILabelConfig, 'asHtml' | 'texConverter'>>
+
+const MARKER_SIDES: string[] = ['start', 'end', 'both', 'none']
+
+/** A color and its opacity, from 0 (transparent) to 1 (opaque, the default). */
+export interface IColorValue {
+    color: string
+    opacity?: number
+}
 
 /**
- * Read a color with an optional opacity, written `'color'` or `'color/opacity'` (`'red/0.5'`).
- * @throws InvalidArgumentError if the color is empty or the opacity is not a number from 0 to 1.
+ * Read a color: its name (`'red'`, `'#ff0000'`), or the name with an opacity.
+ * @throws InvalidArgumentError if the color is empty, if a name is written `'color/opacity'` (it is `{color, opacity}`), or if the opacity
+ * is not a number from 0 to 1.
  */
-function parseColor(value: string): { color: string, opacity: number } {
-    const parts = value.split('/')
-    const color = parts[0]
-    const opacity = parts[1] as string | undefined
+function readColor(value: string | IColorValue): { color: string, opacity: number } {
+    const {color, opacity} = typeof value === 'string' ? {color: value, opacity: undefined} : value
 
-    if (parts.length > 2 || color.trim() === '') {
-        throw new InvalidArgumentError(`Invalid color "${value}": expected 'color' or 'color/opacity'`)
+    if (typeof color !== 'string' || color.trim() === '') {
+        throw new InvalidArgumentError(`Invalid color ${JSON.stringify(color)}: expected the name of a color`)
+    }
+
+    // A slash is the old way to write an opacity: it would be taken for the name of the color.
+    if (typeof value === 'string' && color.includes('/')) {
+        throw new InvalidArgumentError(`Invalid color "${color}": an opacity is written {color: 'red', opacity: 0.5}`)
     }
 
     if (opacity === undefined) {
         return {color, opacity: 1}
     }
 
-    const alpha = opacity.trim() === '' ? NaN : +opacity
-    if (!(alpha >= 0 && alpha <= 1)) {
-        throw new InvalidArgumentError(`Invalid opacity "${opacity}" in "${value}": expected a number from 0 to 1`)
+    if (typeof opacity !== 'number' || !(opacity >= 0 && opacity <= 1)) {
+        throw new InvalidArgumentError(`Invalid opacity ${String(opacity)} for the color "${color}": expected a number from 0 to 1`)
     }
 
-    return {color, opacity: alpha}
-}
-
-/**
- * Read where to put the markers: `true` or nothing is both ends, `false` is none.
- * @throws InvalidArgumentError for any other value than 'start', 'end', 'both' or 'none'.
- */
-function parseMarkerSide(value: string | boolean | undefined): MarkerSide {
-    if (value === undefined || value === true) {
-        return 'both'
-    }
-
-    if (value === false) {
-        return 'none'
-    }
-
-    if (value === 'start' || value === 'end' || value === 'both' || value === 'none') {
-        return value
-    }
-
-    throw new InvalidArgumentError(`Invalid marker position "${value}": expected 'start', 'end', 'both' or 'none'`)
+    return {color, opacity}
 }
 
 /**
@@ -196,7 +204,7 @@ export abstract class AbstractFigure {
      *
      * @throws InvalidArgumentError if the figure cannot be animated (see {@link animatable}), if the duration is not a
      * finite number greater than 0, if the delay is not a finite number of 0 or more, or if the figure refuses the
-     * animation ({@link _checkAnimation}). The animation of the figure is then left unchanged.
+     * animation (`_checkAnimation`). The animation of the figure is then left unchanged.
      */
     set animate(value: IFigureAnimation | null) {
         if (value !== null) {
@@ -212,6 +220,14 @@ export abstract class AbstractFigure {
                 throw new InvalidArgumentError(`Invalid delay ${value.delay} for the animation of "${this._name}": expected a number of 0 or more`)
             }
 
+            if (!Object.hasOwn(EASINGS, value.easing)) {
+                throw new InvalidArgumentError(`Invalid easing ${value.easing} for the animation of "${this._name}": expected ${Object.keys(EASINGS).join(', ')}`)
+            }
+
+            if (!Object.values<string>(LoopStyle).includes(value.loop)) {
+                throw new InvalidArgumentError(`Invalid loop ${value.loop} for the animation of "${this._name}": expected ${Object.values(LoopStyle).join(', ')}`)
+            }
+
             this._checkAnimation(value)
         }
 
@@ -220,7 +236,7 @@ export abstract class AbstractFigure {
 
     /**
      * Whether the figure can have an animation. A figure that can be animated overrides this (and
-     * {@link _checkAnimation}), and the code that plays the animations has to know how to play it.
+     * `_checkAnimation`), and the code that plays the animations has to know how to play it.
      */
     readonly animatable: boolean = false
 
@@ -264,6 +280,17 @@ export abstract class AbstractFigure {
 
     show(): this {
         this._element.show()
+        return this
+    }
+
+    /** Hide the figure but its label (`hide()` hides both). */
+    hideShape(): this {
+        this._element.children().forEach((child) => {
+            if (child.attr('id') !== `${this._name}-label`) {
+                child.hide()
+            }
+        })
+
         return this
     }
 
@@ -312,13 +339,13 @@ export abstract class AbstractFigure {
     /**
      * Fill the figure, or apply the current fill again when called without a color.
      *
-     * @param color `'color'` or `'color/opacity'` (opacity from 0 to 1), for instance `'red/0.5'`. The opacity only
-     * concerns the fill: it is the `fill-opacity` of the shape.
+     * @param color the name of a color, or `{color, opacity}` (opacity from 0 to 1), for instance `{color: 'red', opacity: 0.5}`.
+     * The opacity only concerns the fill: it is the `fill-opacity` of the shape.
      * @throws InvalidArgumentError if the color or the opacity is invalid. The figure is then left unchanged.
      */
-    fill(color?: string): this {
+    fill(color?: string | IColorValue): this {
         if (color !== undefined) {
-            const parsed = parseColor(color)
+            const parsed = readColor(color)
             this._appearance.fill.color = parsed.color
             this._appearance.fill.opacity = parsed.opacity
         }
@@ -338,24 +365,24 @@ export abstract class AbstractFigure {
     /**
      * Stroke the figure with a color, and keep the width.
      *
-     * @param color `'color'` or `'color/opacity'` (opacity from 0 to 1), for instance `'red/0.5'`. The opacity only
-     * concerns the stroke: it is the `stroke-opacity` of the shape.
+     * @param color the name of a color, or `{color, opacity}` (opacity from 0 to 1). The opacity only concerns the stroke: it is the
+     * `stroke-opacity` of the shape.
      * @throws InvalidArgumentError if the color or the opacity is invalid. The figure is then left unchanged.
      */
-    stroke(color: string): this
+    stroke(color: string | IColorValue): this
     /** Stroke the figure with a width, and keep the color. */
     stroke(strokeWidth: number): this
     /**
      * Stroke the figure with a color and a width.
      *
-     * @param color `'color'` or `'color/opacity'` (opacity from 0 to 1), for instance `'red/0.5'`.
+     * @param color the name of a color, or `{color, opacity}`.
      * @param strokeWidth width of the stroke.
      * @throws InvalidArgumentError if the color or the opacity is invalid. The figure is then left unchanged.
      */
-    stroke(color: string, strokeWidth: number): this
-    stroke(color?: string | number, strokeWidth?: number): this {
-        if (typeof color === 'string') {
-            const parsed = parseColor(color)
+    stroke(color: string | IColorValue, strokeWidth: number): this
+    stroke(color?: string | IColorValue | number, strokeWidth?: number): this {
+        if (typeof color === 'string' || typeof color === 'object') {
+            const parsed = readColor(color)
             this._appearance.stroke.color = parsed.color
             this._appearance.stroke.opacity = parsed.opacity
             this._appearance.stroke.width = strokeWidth ?? this._appearance.stroke.width
@@ -471,8 +498,10 @@ export abstract class AbstractFigure {
      * The text is written as it is: `@` is a character like any other. By default, the name of the figure.
      * @throws InvalidArgumentError if the content has a field the figure cannot show (see {@link labelFields}), or a
      * number of digits that is not an integer of 0 or more. The figure is then left as it was.
+     * @param options `asHtml` writes the label in HTML, for the text of a `texConverter`.
      */
-    addLabel(content?: LabelContent, asHtml?: boolean, texConverter?: (value: string) => string): Label {
+    addLabel(content?: LabelContent, options: ILabelOptions = {}): Label {
+        const {asHtml, texConverter} = options
         const labelContent = content ?? this._name
         checkLabelContent(labelContent, this.labelFields(), this._name)
 
@@ -714,18 +743,18 @@ export abstract class AbstractFigure {
      * Put a marker (an arrow head, a cross or a bar) on the ends of the figure. The marker takes the color and the
      * width of the stroke, whatever the order of the calls. The other end is left as it is.
      *
-     * @param value where to put it: 'start', 'end' or 'both' (also `true` or nothing); 'none' (also `false`) removes
-     * the markers of both ends, and works on any figure.
-     * @param options a number is the size of the marker (default 10), a string is its shape: '->' for an arrow
-     * (default), 'x' for a cross or '|' for a bar.
-     * @throws InvalidArgumentError if the position, the size or the shape is invalid, or if the shape of the figure
+     * @param options the side ('start', 'end' or 'both', the default; 'none' removes the markers of both ends, and works on
+     * any figure), the size (default 10) and the shape ('->' for an arrow, the default, 'x' for a cross or '|' for a bar).
+     * @throws InvalidArgumentError if the side, the size or the shape is invalid, or if the shape of the figure
      * cannot carry a marker (only the lines, the polylines, the polygons and the paths can). The figure is then left
      * unchanged.
      */
-    mark(value?: string | boolean, options?: (string | number)[]): this {
-        const side = parseMarkerSide(value)
-        const size = options?.find(x => typeof x === 'number') ?? 10
-        const form = options?.find(x => typeof x === 'string') ?? '->'
+    mark(options: IMarkOptions = {}): this {
+        const {side = 'both', size = 10, shape: form = '->'} = options
+
+        if (!MARKER_SIDES.includes(side)) {
+            throw new InvalidArgumentError(`Invalid marker position "${side}": expected 'start', 'end', 'both' or 'none'`)
+        }
 
         if (!Number.isFinite(size) || size <= 0) {
             throw new InvalidArgumentError(`Invalid marker size ${size}: expected a number greater than 0`)

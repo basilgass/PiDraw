@@ -1,14 +1,14 @@
-import {afterEach, beforeAll, describe, expect, test, vi} from 'vitest'
+import {beforeAll, describe, expect, test, vi} from 'vitest'
 import {Graph} from '../src/Graph'
 import {Box} from '@svgdotjs/svg.js'
-import {Draw} from '../src/Draw'
-import {LOOP_STYLE} from '../src/Animate'
+import {Draw} from '../src/Draw/Draw'
+import {dragConfig} from '../src/Draw/Draw.options'
 import type {IDraggableConfig} from '../src/Graph'
-import type {IGraphDragEvent, IGraphDragMoveEvent} from '../src/pidraw.common'
+import type {IGraphController, IGraphDragEvent, IGraphDragMoveEvent} from '../src/Graph.types'
 import {TIKZ_PREAMBLE} from '../src/figures/AbstractFigure/AbstractFigure.tikz'
 import {basic_examples} from '../demo/parsing_examples/basic_examples'
 import {InvalidArgumentError, NotImplementedError} from '../src/errors'
-import {COORDINATE_SYSTEM, LAYER_NAME} from '../src/pidraw.common'
+import {CoordinateSystem, type IGraphConfig, LayerName} from '../src/pidraw.common'
 import type {AbstractFigure} from '../src/figures/AbstractFigure/AbstractFigure'
 import {Arc} from '../src/figures/Arc/Arc'
 import {Axis} from '../src/figures/Axis/Axis'
@@ -61,7 +61,7 @@ describe('Graph construction', () => {
             width: 800,
             height: 600,
             origin: {x: 400, y: 300},
-            system: COORDINATE_SYSTEM.CARTESIAN_2D,
+            system: CoordinateSystem.CARTESIAN_2D,
             axis: {x: {x: PX_PER_CM, y: 0}, y: {x: 0, y: -PX_PER_CM}}
         })
     })
@@ -103,7 +103,7 @@ describe('Graph construction', () => {
     test('refuses a coordinate system it cannot draw, and leaves nothing in the container', () => {
         const container = createContainer()
 
-        expect(() => new Graph(container, {system: COORDINATE_SYSTEM.POLAR})).toThrow(NotImplementedError)
+        expect(() => new Graph(container, {system: CoordinateSystem.POLAR})).toThrow(NotImplementedError)
         expect(container.children.length).toBe(0)
     })
 
@@ -176,7 +176,7 @@ describe('Graph layout', () => {
         const {graph} = createGraph()
 
         expect(() => { graph.updateLayout({...graph.config, width: -1}) }).toThrow(InvalidArgumentError)
-        expect(() => { graph.updateLayout({...graph.config, system: COORDINATE_SYSTEM.POLAR}) }).toThrow(NotImplementedError)
+        expect(() => { graph.updateLayout({...graph.config, system: CoordinateSystem.POLAR}) }).toThrow(NotImplementedError)
 
         expect(graph.config.width).toBe(800)
         expect(count(graph.layers.grids)).toBe(1)
@@ -215,21 +215,21 @@ function nodes(node: { childNodes?: ArrayLike<unknown> }): number {
 const O = {x: 0, y: 0}
 
 /** Each kind of figure of `create`: the layer it is put in, its class, and how to make one named `F`. */
-const FIGURES: [string, LAYER_NAME, abstract new (...args: never[]) => AbstractFigure, (graph: Graph) => AbstractFigure][] = [
-    ['point', LAYER_NAME.POINTS, Point, g => g.create.point(O, 'F')],
-    ['line', LAYER_NAME.MAIN, Line, g => g.create.line({through: {A: O, B: {x: 100, y: 50}}}, 'F')],
-    ['path', LAYER_NAME.MAIN, Path, g => g.create.path({d: 'M 0 0 L 10 10'}, 'F')],
-    ['bezier', LAYER_NAME.MAIN, Bezier, g => g.create.bezier({through: [O, {x: 100, y: 50}, {x: 200, y: 0}].map(point => ({point}))}, 'F')],
-    ['plot', LAYER_NAME.PLOTS, Plot, g => g.create.plot({expression: 'x^2'}, 'F')],
-    ['parametric', LAYER_NAME.PLOTS, Parametric, g => g.create.parametric({expressions: {x: 'cos(t)', y: 'sin(t)'}}, 'F')],
-    ['circle', LAYER_NAME.MAIN, Circle, g => g.create.circle({center: O, radius: 1}, 'F')],
-    ['polygon', LAYER_NAME.MAIN, Polygon, g => g.create.polygon({vertices: [O, {x: 100, y: 0}, {x: 0, y: 100}]}, 'F')],
-    ['arc', LAYER_NAME.MAIN, Arc, g => g.create.arc({points: {start: {x: 500, y: 300}, center: {x: 400, y: 300}, end: {x: 400, y: 200}}}, 'F')],
-    ['follow', LAYER_NAME.PLOTS_FOREGROUND, Follow, g => g.create.follow({follow: g.create.plot({expression: 'x'}, 'p')}, 'F')],
-    ['fillbetween', LAYER_NAME.PLOTS_BACKGROUND, FillBetween, g => g.create.fillbetween({plot: g.create.plot({expression: 'x'}, 'p')}, 'F')],
-    ['grid', LAYER_NAME.GRIDS, Grid, g => g.create.grid({}, 'F')],
-    ['axis', LAYER_NAME.MAIN, Axis, g => g.create.axis({director: {A: O, d: {x: 50, y: 0}}}, 'F')],
-    ['riemann', LAYER_NAME.PLOTS_BACKGROUND, Riemann, g => g.create.riemann({plot: g.create.plot({expression: 'x', domain: {min: 0, max: 4}}, 'p')}, 'F')]
+const FIGURES: [string, LayerName, abstract new (...args: never[]) => AbstractFigure, (graph: Graph) => AbstractFigure][] = [
+    ['point', LayerName.POINTS, Point, g => g.create.point(O, 'F')],
+    ['line', LayerName.MAIN, Line, g => g.create.line({through: {A: O, B: {x: 100, y: 50}}}, 'F')],
+    ['path', LayerName.MAIN, Path, g => g.create.path({d: 'M 0 0 L 10 10'}, 'F')],
+    ['bezier', LayerName.MAIN, Bezier, g => g.create.bezier({through: [O, {x: 100, y: 50}, {x: 200, y: 0}].map(point => ({point}))}, 'F')],
+    ['plot', LayerName.PLOTS, Plot, g => g.create.plot({expression: 'x^2'}, 'F')],
+    ['parametric', LayerName.PLOTS, Parametric, g => g.create.parametric({expressions: {x: 'cos(t)', y: 'sin(t)'}}, 'F')],
+    ['circle', LayerName.MAIN, Circle, g => g.create.circle({center: O, radius: 1}, 'F')],
+    ['polygon', LayerName.MAIN, Polygon, g => g.create.polygon({vertices: [O, {x: 100, y: 0}, {x: 0, y: 100}]}, 'F')],
+    ['arc', LayerName.MAIN, Arc, g => g.create.arc({points: {start: {x: 500, y: 300}, center: {x: 400, y: 300}, end: {x: 400, y: 200}}}, 'F')],
+    ['follow', LayerName.PLOTS_FOREGROUND, Follow, g => g.create.follow({follow: g.create.plot({expression: 'x'}, 'p')}, 'F')],
+    ['fillbetween', LayerName.PLOTS_BACKGROUND, FillBetween, g => g.create.fillbetween({plot: g.create.plot({expression: 'x'}, 'p')}, 'F')],
+    ['grid', LayerName.GRIDS, Grid, g => g.create.grid({}, 'F')],
+    ['axis', LayerName.MAIN, Axis, g => g.create.axis({director: {A: O, d: {x: 50, y: 0}}}, 'F')],
+    ['riemann', LayerName.PLOTS_BACKGROUND, Riemann, g => g.create.riemann({plot: g.create.plot({expression: 'x', domain: {min: 0, max: 4}}, 'p')}, 'F')]
 ]
 
 describe('Graph create', () => {
@@ -639,18 +639,18 @@ describe('Graph draggable', () => {
     })
 
     test('says how many figures a move reached, out of how many there are', () => {
-        const {graph, handle} = createHandle()
+        const {graph, handle, target} = createHandle()
         const events: IGraphDragMoveEvent[] = []
         graph.on('dragmove', (e) => { events.push(e.detail) })
 
         dragTo(handle, {x: 300, y: 200})
 
         // The handle and the target that moved, and the line that is built on the target; the handle, the target, B and the line exist.
-        expect(events).toEqual([{graph, figure: handle, updated: 3, total: 4}])
+        expect(events).toEqual([{graph, figure: handle, target, updated: 3, total: 4}])
     })
 
-    test('emits the start and the end of a drag with the point', () => {
-        const {graph, handle} = createHandle()
+    test('emits the start and the end of a drag with the point, and the point that moves with it', () => {
+        const {graph, handle, target} = createHandle()
         const started = vi.fn<(e: CustomEvent<IGraphDragEvent>) => void>()
         const ended = vi.fn<(e: CustomEvent<IGraphDragEvent>) => void>()
         graph.on('dragstart', started).on('dragend', ended)
@@ -658,8 +658,8 @@ describe('Graph draggable', () => {
         handle.shape.fire('dragstart', {event: {}, handler: {}, box: handle.shape.bbox()})
         handle.shape.fire('dragend', {event: {}, handler: {}, box: handle.shape.bbox()})
 
-        expect(started.mock.calls[0][0].detail).toEqual({graph, figure: handle})
-        expect(ended.mock.calls[0][0].detail).toEqual({graph, figure: handle})
+        expect(started.mock.calls[0][0].detail).toEqual({graph, figure: handle, target})
+        expect(ended.mock.calls[0][0].detail).toEqual({graph, figure: handle, target})
     })
 
     test('moves along the x axis only, at the height of the target', () => {
@@ -798,6 +798,118 @@ describe('Graph draggable', () => {
     })
 })
 
+describe('Graph dragTo', () => {
+    function createHandle(options?: IDraggableConfig) {
+        const {graph} = createGraph()
+        const target = graph.create.point({x: 0, y: 1}, 'A')
+        const B = graph.create.point({x: 2, y: 1}, 'B')
+        const d = graph.create.line({through: {A: target, B}}, 'd')
+        const handle = graph.handle(target, options)
+
+        return {graph, target, B, d, handle}
+    }
+
+    test('puts the point that is held and its target where the mouse would have put them, and draws what depends on them', () => {
+        const {graph, target, handle, d} = createHandle()
+        const computed = vi.spyOn(d, 'computed')
+
+        graph.dragTo(handle, {x: 300, y: 200})
+
+        expect(handle.pixels).toEqual({x: 300, y: 200})
+        expect(target.pixels).toEqual({x: 300, y: 200})
+        expect(computed).toHaveBeenCalledOnce()
+    })
+
+    test('works with the target as well as with the handle', () => {
+        const {graph, target, handle} = createHandle()
+
+        graph.dragTo(target, {x: 300, y: 200})
+
+        expect(handle.pixels).toEqual({x: 300, y: 200})
+        expect(target.pixels).toEqual({x: 300, y: 200})
+    })
+
+    test('applies the rules of the drag', () => {
+        const along = createHandle({along: 'x'})
+        const height = along.target.pixels.y
+        along.graph.dragTo(along.handle, {x: 500, y: 100})
+        expect(along.target.pixels.x).toBe(500)
+        expect(along.target.pixels.y).toBeCloseTo(height, 9)
+
+        const bounded = createHandle({bounds: {x: {min: -1, max: 1}}})
+        bounded.graph.dragTo(bounded.handle, {x: 700, y: 100})
+        expect((bounded.graph.toCoordinates(bounded.target.pixels) as { x: number }).x).toBeCloseTo(1, 9)
+    })
+
+    test('emits no event', () => {
+        const {graph, handle} = createHandle()
+        const handler = vi.fn()
+        graph.on('dragmove', handler)
+
+        graph.dragTo(handle, {x: 300, y: 200})
+
+        expect(handler).not.toHaveBeenCalled()
+    })
+
+    test('a point that cannot be dragged, or that was removed, is an InvalidArgumentError', () => {
+        const {graph, handle} = createHandle()
+        const free = graph.create.point({x: 3, y: 3}, 'C')
+
+        expect(() => { graph.dragTo(free, {x: 1, y: 1}) }).toThrow(InvalidArgumentError)
+
+        graph.remove('d')
+        graph.remove(handle.name)
+        expect(() => { graph.dragTo(handle, {x: 1, y: 1}) }).toThrow(InvalidArgumentError)
+    })
+})
+
+describe('Graph handle', () => {
+    test('puts a handle named after the point on the layer of the interactions, and the handle moves the point', () => {
+        const {graph} = createGraph()
+        const A = graph.create.point({x: 1, y: 1}, 'A')
+
+        const handle = graph.handle(A)
+
+        expect(handle.name).toBe('A_drag')
+        expect(graph.figures.A_drag).toBe(handle)
+        expect(graph.layers.interactive.has(handle.element)).toBe(true)
+
+        dragTo(handle, {x: 600, y: 100})
+
+        expect(A.pixels).toEqual({x: 600, y: 100})
+    })
+
+    test('the limits are the ones of draggable', () => {
+        const {graph} = createGraph()
+        const A = graph.create.point({x: 1, y: 2}, 'A')
+        const height = A.pixels.y
+
+        dragTo(graph.handle(A, {along: 'x'}), {x: 600, y: 100})
+
+        expect(A.pixels.x).toBe(600)
+        expect(A.pixels.y).toBeCloseTo(height, 9)
+    })
+
+    test('an error leaves no handle in the graph', () => {
+        const {graph} = createGraph()
+        const A = graph.create.point({x: 1, y: 1}, 'A')
+
+        expect(() => graph.handle(A, {along: 'z' as 'x'})).toThrow(InvalidArgumentError)
+
+        expect(Object.keys(graph.figures)).toEqual(['A'])
+        expect(graph.layers.interactive.children()).toHaveLength(0)
+    })
+
+    test('a second handle for the same point is an InvalidArgumentError and leaves the first one', () => {
+        const {graph} = createGraph()
+        const A = graph.create.point({x: 1, y: 1}, 'A')
+        const handle = graph.handle(A)
+
+        expect(() => graph.handle(A)).toThrow(InvalidArgumentError)
+        expect(graph.figures.A_drag).toBe(handle)
+    })
+})
+
 describe('Draw drag', () => {
     /** The handle of the point `A` of a drawing: the point that the mouse holds. */
     function drawWith(code: string) {
@@ -865,10 +977,7 @@ describe('Draw drag', () => {
     describe('limits of the option', () => {
         // Only the translation of the option into the limits of the drag is used: a bare instance does.
         function limits(values: unknown[], figures: Record<string, unknown> = {}) {
-            const draw = Object.create(Draw.prototype) as { graph: { figures: Record<string, unknown> }, _dragConfig(values: unknown[]): IDraggableConfig }
-            draw.graph = {figures}
-
-            return draw._dragConfig(values)
+            return dragConfig(values, figures as Record<string, AbstractFigure>)
         }
 
         test('reads grid, Ox and Oy', () => {
@@ -896,8 +1005,11 @@ describe('Draw drag', () => {
             expect(limits(['f'], {f})).toEqual({follow: [f]})
         })
 
-        test('ignores what means nothing', () => {
-            expect(limits([true, 'nothing', 3])).toEqual({})
+        test('is an InvalidArgumentError for what means nothing, but for drag alone', () => {
+            expect(limits([true])).toEqual({})
+            expect(() => limits(['nothing'])).toThrow(InvalidArgumentError)
+            expect(() => limits(['grid', 3])).toThrow(InvalidArgumentError)
+            expect(() => limits([false])).toThrow(InvalidArgumentError)
         })
     })
 })
@@ -1161,7 +1273,7 @@ describe('Graph events', () => {
         start()
 
         expect(handler).toHaveBeenCalledOnce()
-        expect(handler.mock.calls[0][0].detail).toEqual({graph, figure: point})
+        expect(handler.mock.calls[0][0].detail).toEqual({graph, figure: point, target: point})
     })
 
     test('stops calling a handler that is taken off, and returns the graph to chain', () => {
@@ -1249,40 +1361,6 @@ describe('Graph conversions', () => {
 })
 
 describe('Graph dispose', () => {
-    // The animation needs the frames of the page, which node does not have: the graph needs its document back after.
-    afterEach(() => {
-        vi.unstubAllGlobals()
-        vi.useRealTimers()
-        useDocument()
-    })
-
-    /** A graph with a point that moves from B to C, and its animation started: it asks for the next frame. */
-    function createAnimated() {
-        const frames = vi.fn(() => 7)
-        const cancelled = vi.fn()
-        vi.stubGlobal('requestAnimationFrame', frames)
-        vi.stubGlobal('cancelAnimationFrame', cancelled)
-        // Only the timer of the reset: the frames are the ones above.
-        vi.useFakeTimers({toFake: ['setTimeout', 'clearTimeout']})
-
-        const made = createGraph()
-        const {graph} = made
-        const A = graph.create.point({x: 0, y: 0}, 'A')
-        const B = graph.create.point({x: 2, y: 1}, 'B')
-        const C = graph.create.point({x: 4, y: 3}, 'C')
-        A.animate = {from: B, to: C, duration: 2, delay: 1, easing: 'linear', loop: LOOP_STYLE.RESET}
-
-        graph.animation.start()
-
-        return {...made, A, cancelled, frames}
-    }
-
-    test('is the same animation each time it is asked for', () => {
-        const {graph} = createGraph()
-
-        expect(graph.animation).toBe(graph.animation)
-    })
-
     test('takes the element of the graph out of its container', () => {
         const {graph, container} = createGraph()
         expect(container.children.length).toBe(1)
@@ -1317,40 +1395,275 @@ describe('Graph dispose', () => {
         expect(() => { graph.dispose() }).not.toThrow()
         expect(container.children.length).toBe(0)
     })
+})
 
-    test('stops the animation, and the reset that it planned', () => {
-        const {graph, cancelled} = createAnimated()
-        const update = vi.spyOn(graph, 'update')
-        expect(graph.animation.isRunning()).toBe(true)
+describe('Graph controllers', () => {
+    class Recorder implements IGraphController {
+        readonly calls: string[] = []
+        readonly removed: string[][] = []
+
+        dispose(): void {
+            this.calls.push('dispose')
+        }
+
+        onFiguresRemoved(names: string[]): void {
+            this.calls.push('onFiguresRemoved')
+            this.removed.push(names)
+        }
+    }
+
+    class Silent implements IGraphController {
+        disposed = 0
+
+        dispose(): void {
+            this.disposed++
+        }
+    }
+
+    test('attach gives the controller back', () => {
+        const {graph} = createGraph()
+        const controller = new Recorder()
+
+        expect(graph.attach(controller)).toBe(controller)
+    })
+
+    test('refuses a second controller of the same class, but accepts one of another class', () => {
+        const {graph} = createGraph()
+        graph.attach(new Recorder())
+
+        expect(() => graph.attach(new Recorder())).toThrow(InvalidArgumentError)
+        expect(() => graph.attach(new Silent())).not.toThrow()
+    })
+
+    test('refuses the same controller twice', () => {
+        const {graph} = createGraph()
+        const controller = new Recorder()
+        graph.attach(controller)
+
+        expect(() => graph.attach(controller)).toThrow(InvalidArgumentError)
+    })
+
+    test('clear gives the names of the figures that were removed, after removing them', () => {
+        const {graph} = createGraph()
+        const left: string[][] = []
+        const controller = new Recorder()
+        controller.onFiguresRemoved = () => { left.push(Object.keys(graph.figures)) }
+        graph.attach(controller)
+        graph.create.point({x: 1, y: 1}, 'A')
+
+        graph.clear()
+
+        expect(left).toEqual([[]])
+    })
+
+    test('clear names every figure', () => {
+        const {graph} = createGraph()
+        const controller = graph.attach(new Recorder())
+        graph.create.point({x: 1, y: 1}, 'A')
+        graph.create.point({x: 2, y: 2}, 'B')
+
+        graph.clear()
+
+        expect(controller.removed).toEqual([['A', 'B']])
+    })
+
+    test('remove names the figure, and the ones that depended on it', () => {
+        const {graph} = createGraph()
+        const controller = graph.attach(new Recorder())
+        const A = graph.create.point({x: 1, y: 1}, 'A')
+        const B = graph.create.point({x: 3, y: 2}, 'B')
+        graph.create.line({through: {A, B}}, 'd')
+
+        graph.remove('A', {cascade: true})
+
+        expect(controller.removed).toEqual([['d', 'A']])
+    })
+
+    test('a figure that is not removed because others depend on it tells nothing', () => {
+        const {graph} = createGraph()
+        const controller = graph.attach(new Recorder())
+        const A = graph.create.point({x: 1, y: 1}, 'A')
+        const B = graph.create.point({x: 3, y: 2}, 'B')
+        graph.create.line({through: {A, B}}, 'd')
+
+        expect(() => graph.remove('A')).toThrow(InvalidArgumentError)
+
+        expect(controller.removed).toEqual([])
+    })
+
+    test('a graph without figures tells nothing when it is cleared', () => {
+        const {graph} = createGraph()
+        const controller = graph.attach(new Recorder())
+
+        graph.clear()
+
+        expect(controller.removed).toEqual([])
+    })
+
+    test('a controller without onFiguresRemoved is told nothing and does not fail', () => {
+        const {graph} = createGraph()
+        graph.attach(new Silent())
+        graph.create.point({x: 1, y: 1}, 'A')
+
+        expect(() => { graph.clear() }).not.toThrow()
+    })
+
+    test('dispose removes the figures, then disposes the controllers', () => {
+        const {graph} = createGraph()
+        const controller = graph.attach(new Recorder())
+        graph.create.point({x: 1, y: 1}, 'A')
 
         graph.dispose()
-        vi.advanceTimersByTime(1000)
 
-        expect(cancelled).toHaveBeenCalledWith(7)
-        expect(graph.animation.isRunning()).toBe(false)
-        expect(update).not.toHaveBeenCalled()
+        expect(controller.calls).toEqual(['onFiguresRemoved', 'dispose'])
     })
 
-    test('is stopped by clear too, which removes the figures that were animated', () => {
-        const {graph, cancelled} = createAnimated()
+    test('dispose detaches the controllers: a second dispose does not call them again', () => {
+        const {graph} = createGraph()
+        const controller = new Silent()
+        graph.attach(controller)
 
-        graph.clear()
+        graph.dispose()
+        graph.dispose()
 
-        expect(cancelled).toHaveBeenCalledWith(7)
-        expect(graph.animation.isRunning()).toBe(false)
-        expect(graph.animation.canBeAnimated()).toBe(false)
+        expect(controller.disposed).toBe(1)
     })
 
-    test('lets the animation be read again from the figures that come after clear', () => {
-        const {graph} = createAnimated()
+    test('a controller that is not attached is not called', () => {
+        const {graph} = createGraph()
+        const controller = new Recorder()
 
         graph.clear()
+        graph.dispose()
+
+        expect(controller.calls).toEqual([])
+    })
+})
+
+describe('Graph layout and the points that were moved', () => {
+    /** The configuration of `graph` with a unit twice as long, around the same origin. */
+    const doubled = (graph: Graph) => {
+        const {axis, ...rest} = graph.config
+
+        return {...rest, axis: {x: {x: axis.x.x * 2, y: axis.x.y * 2}, y: {x: axis.y.x * 2, y: axis.y.y * 2}}}
+    }
+
+    test('a point that was moved keeps its coordinates when the unit changes', () => {
+        const {graph} = createGraph()
+        const A = graph.create.point({x: 1, y: 1}, 'A')
+        A.pixels = {x: A.pixels.x + 100, y: A.pixels.y - 60}
+        const {x, y} = A.coordinates
+
+        graph.updateLayout(doubled(graph))
+
+        expect(A.coordinates.x).toBeCloseTo(x, 8)
+        expect(A.coordinates.y).toBeCloseTo(y, 8)
+        expect(A.isMoved()).toBe(true)
+    })
+
+    test('a point that was not moved stays where its constraint puts it', () => {
+        const {graph} = createGraph()
+        const A = graph.create.point({x: 1, y: 2}, 'A')
+
+        graph.updateLayout(doubled(graph))
+
+        expect(A.coordinates.x).toBeCloseTo(1, 8)
+        expect(A.coordinates.y).toBeCloseTo(2, 8)
+        expect(A.isMoved()).toBe(false)
+    })
+
+    test('what depends on a point that was moved follows it', () => {
+        const {graph} = createGraph()
         const A = graph.create.point({x: 0, y: 0}, 'A')
-        const B = graph.create.point({x: 2, y: 1}, 'B')
-        expect(graph.animation.canBeAnimated()).toBe(false)
+        const B = graph.create.point({x: 4, y: 0}, 'B')
+        const M = graph.create.point({middle: {A, B}}, 'M')
+        A.pixels = {x: A.pixels.x, y: A.pixels.y - 80}
+        graph.update([A])
 
-        A.animate = {from: B, to: B, duration: 1, delay: 0, easing: 'linear', loop: LOOP_STYLE.NONE}
+        graph.updateLayout(doubled(graph))
 
-        expect(graph.animation.canBeAnimated()).toBe(true)
+        expect(M.pixels.x).toBeCloseTo((A.pixels.x + B.pixels.x) / 2, 8)
+        expect(M.pixels.y).toBeCloseTo((A.pixels.y + B.pixels.y) / 2, 8)
+    })
+
+    test('the handle of a point that is dragged keeps its place with the point', () => {
+        const {graph} = createGraph()
+        const A = graph.create.point({x: 1, y: 1}, 'A')
+        const handle = graph.handle(A)
+        A.pixels = {x: A.pixels.x + 50, y: A.pixels.y}
+        handle.pixels = A.pixels
+
+        graph.updateLayout(doubled(graph))
+
+        expect(handle.pixels.x).toBeCloseTo(A.pixels.x, 8)
+        expect(handle.pixels.y).toBeCloseTo(A.pixels.y, 8)
+    })
+
+    test('a point that was moved is where the layout of a graph made with the new scale would put the coordinates', () => {
+        const {graph} = createGraph()
+        const A = graph.create.point({x: 1, y: 1}, 'A')
+        A.pixels = {x: A.pixels.x + 100, y: A.pixels.y}
+        const {x, y} = A.coordinates
+
+        graph.updateLayout(doubled(graph))
+
+        const expected = graph.toPixels({x, y})
+        expect(A.pixels.x).toBeCloseTo(expected.x, 8)
+        expect(A.pixels.y).toBeCloseTo(expected.y, 8)
+    })
+
+    test('an invalid layout leaves the moved points where they were', () => {
+        const {graph} = createGraph()
+        const A = graph.create.point({x: 1, y: 1}, 'A')
+        A.pixels = {x: A.pixels.x + 100, y: A.pixels.y}
+        const before = A.pixels
+
+        expect(() => { graph.updateLayout({...graph.config, width: -5}) }).toThrow(InvalidArgumentError)
+
+        expect(A.pixels).toEqual(before)
+    })
+})
+
+describe('Graph controllers and the layout', () => {
+    class Watcher implements IGraphController {
+        readonly layouts: IGraphConfig[] = []
+
+        dispose(): void {
+            // Nothing to let go.
+        }
+
+        onLayoutChanged(config: IGraphConfig): void {
+            this.layouts.push(config)
+        }
+    }
+
+    test('is told after the layout was drawn again, with the configuration of the graph', () => {
+        const {graph} = createGraph()
+        const watcher = graph.attach(new Watcher())
+        const config = {...graph.config, origin: {x: 10, y: 20}}
+
+        graph.updateLayout(config)
+
+        expect(watcher.layouts).toHaveLength(1)
+        expect(watcher.layouts[0]).toBe(graph.config)
+        expect(graph.config.origin).toEqual({x: 10, y: 20})
+    })
+
+    test('is told when only the display changes', () => {
+        const {graph} = createGraph()
+        const watcher = graph.attach(new Watcher())
+
+        graph.updateLayout(undefined, {grid: false, axis: false})
+
+        expect(watcher.layouts).toHaveLength(1)
+    })
+
+    test('is told nothing when the layout is not valid', () => {
+        const {graph} = createGraph()
+        const watcher = graph.attach(new Watcher())
+
+        expect(() => { graph.updateLayout({...graph.config, width: -5}) }).toThrow(InvalidArgumentError)
+
+        expect(watcher.layouts).toEqual([])
     })
 })

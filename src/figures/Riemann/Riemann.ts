@@ -19,7 +19,7 @@ export class Riemann extends AbstractFigure {
 
     /**
      * @throws InvalidArgumentError if the plot is not a `Plot`, there is no domain, the domain, the number of rectangles or the position
-     * is not valid (see {@link checkRiemann}). Nothing is left in the svg.
+     * is not valid (see `checkRiemann`). Nothing is left in the svg.
      */
     constructor(context: IFigureContext, name: string, values: IRiemannConfig) {
         // Before the figure draws anything in the svg.

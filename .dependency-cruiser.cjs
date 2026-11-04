@@ -13,6 +13,43 @@ module.exports = {
     // },
     // log an error for all circular dependencies which consist of only 
     // dependencies that are _not_ declared as explicitly type-only
+    // The themes (animation, zoom, slides) are independent controllers: the core knows only their types (`*.types.ts`), and a theme never reads another.
+    // `index.ts` is the entry of the package and exports them.
+    {
+      name: 'core-not-to-themes',
+      severity: 'error',
+      from: {
+        path: '^src',
+        pathNot: '^src/(animate|zoom|slides)/|^src/index[.]ts$|^src/codemirror'
+      },
+      to: {
+        path: '^src/(animate|zoom|slides)/',
+        pathNot: '[.]types[.]ts$'
+      }
+    },
+    {
+      name: 'theme-not-to-theme',
+      severity: 'error',
+      from: {
+        path: '^src/(animate|zoom|slides)/'
+      },
+      to: {
+        path: '^src/(animate|zoom|slides)/',
+        pathNot: '^src/$1/'
+      }
+    },
+    // The helper of the editors reads the library; the library never reads it (and never loads @codemirror).
+    {
+      name: 'core-not-to-codemirror',
+      severity: 'error',
+      from: {
+        path: '^src',
+        pathNot: '^src/codemirror'
+      },
+      to: {
+        path: '^src/codemirror'
+      }
+    },
     {
       name: 'no-circular-at-runtime',
       severity: 'error',

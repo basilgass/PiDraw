@@ -1,116 +1,56 @@
-import {AbstractFigure} from "../figures/AbstractFigure/AbstractFigure"
-import type {TeXConverterType} from "../pidraw.common"
 import type {PARSER, PARSER_VALUES} from "piparser"
+import type {AbstractFigure} from "../figures/AbstractFigure/AbstractFigure"
 import type {CircleRadius} from "../figures/Circle/Circle.types"
 import {Line} from "../figures/Line/Line"
 import {Point} from "../figures/Point/Point"
 import {ParseError} from "../errors"
+import type {IParserValues} from "./parser.types"
 
+/** The key of a line of code (`A=mid B,C`: `mid`), with the form of its values. */
 export enum PARSER_TYPE {
-    UNKNOWN = 'unknown',        // OK
     // POINTS
-    POINT = 'pt',               // OK: (x,y)
-    MIDDLE = 'mid',             // OK: mid <point>,<point>
-    PROJECTION = 'proj',        // OK: proj <point>,<line>
-    INTERSECTION = 'inter',     // OK: inter <line>,<line> // TODO: inter <line>,<circle>
-    SYMMETRY = 'sym',           // OK: sym <point>,<point|line>
-    DIRECTION_POINT = 'dpt',    // OK: dpt <point>,<line>,<distance>,<perpendicular?>
-    VECTOR_POINT = 'vpt',       // OK: vpt <point>,<point>,<scale?>,<starting point?>
-    EVAL_FX = 'eval',            // OK:eval <function>,<x>
+    POINT = 'pt',               // (x,y)
+    MIDDLE = 'mid',             // mid <point>,<point>
+    PROJECTION = 'proj',        // proj <point>,<line>
+    INTERSECTION = 'inter',     // inter <line|circle>,<line|circle>
+    SYMMETRY = 'sym',           // sym <point>,<point|line>
+    DIRECTION_POINT = 'dpt',    // dpt <point>,<line>,<distance>,<perpendicular?>
+    VECTOR_POINT = 'vpt',       // vpt <point>,<point>,<scale?>,<starting point?>
+    EVAL_FX = 'eval',           // eval <function>,<x>
     // LINES
-    LINE = 'line',              // OK : <point><point> or line <point>,<point>
+    LINE = 'line',              // <point><point> or line <point>,<point>
     VECTOR = 'vec',
     SEGMENT = 'seg',
     RAY = 'ray',
-    PERPENDICULAR = 'perp',     // OK : perp <line>,<point>
-    PARALLEL = 'para',          // OK : para <line>,<point>
-    MEDIATOR = 'med',           // OK : med <point>,<point>
+    PERPENDICULAR = 'perp',     // perp <line>,<point>
+    PARALLEL = 'para',          // para <line>,<point>
+    MEDIATOR = 'med',           // med <point>,<point>
     TANGENT = 'tan',
     BISECTOR = 'bis',
     // CIRCLES
-    CIRCLE = 'circ',            // OK : <center>,<radius>
-    ARC = 'arc',                // OK : arc <point>,<point>,<point>[,<radius>] | arc <point>,<number>,<number>,<number> | arc <point>,<point>,<number>[,<radius>] (+ *)
+    CIRCLE = 'circ',            // <center>,<radius>
+    ARC = 'arc',                // arc <point>,<point>,<point>[,<radius>] | arc <point>,<number>,<number>,<number> | arc <point>,<point>,<number>[,<radius>] (+ *)
     // PLOTS
-    PLOT = 'plot',              // OK : plot <function>[,@<number>,<domain>,<domain>]
-    PARAMETRIC = 'parametric',  // OK : parametric <function>,<function>[,@<number>,<domain>]
+    PLOT = 'plot',              // plot <function>[,@<number>,<domain>,<domain>]
+    PARAMETRIC = 'parametric',  // parametric <function>,<function>[,@<number>,<domain>]
     // CURVES
-    BEZIER = 'bezier',          // OK : bezier <point>/<direction>/<ratio>,... | bezier <point>,<point>,<point>[,<point>],*
+    BEZIER = 'bezier',          // bezier <point>/<direction>/<ratio>,... | bezier <point>,<point>,<point>[,<point>],*
     // POLYGONS
-    POLYGON = 'poly',           // OK : poly <point>,<point>,<point>,... | poly <point>,<radius>,<sides>[,<step>] | poly <point>,<point>,<sides>[,<step>]
+    POLYGON = 'poly',           // poly <point>,<point>,<point>,... | poly <point>,<radius>,<sides>[,<step>] | poly <point>,<point>,<sides>[,<step>]
 
     // THE LAYOUT, drawn from the code (the ones of the parameters have no effect from here)
     GRID = 'grid',              // grid [<x interval>,<y interval>][,<step>]
     AXIS = 'axis',              // axis <point>,<point>[,<step>]
 
     // SPECIAL FIGURES
-    FOLLOW = 'follow',          // OK : follow <function>,<tangent?>
+    FOLLOW = 'follow',          // follow <function>,<tangent?>
     FILL_BETWEEN = 'fill',      // fill <plot>[,<plot>][,<domain>]
     RIEMANN = 'riemann',        // riemann <plot>[,<domain>][,<rectangles>][,<position>]
     PATH = "path",              // path <SVG path data, in units>
 }
 
-export type IParserValues = PARSER_VALUES | AbstractFigure
-
-export interface IParserConfig {
-    parameters?: string,
-    code?: string
-    tex?: TeXConverterType,
-}
-
-/** The options of the shape of a point: a circle (`o`), a square (`s`) or a crosshair (`*`). */
-export type PointShapeOption = 'o' | 's' | '*'
-
-/** The shape that the points of a drawing take when they do not ask for one (`points=s/12`). */
-export interface IPointsSetting {
-    shape: PointShapeOption,
-    /** Size of the shape, by default the one of the shape. */
-    size?: number
-}
-
-export interface IParserSettings {
-    label?: boolean,
-    tex?: boolean,
-    /** `false` hides the points (`no-points`). */
-    points?: false | IPointsSetting,
-}
-
-export interface IParserParameters {
-    value: IParserValues,
-    options: IParserValues[]
-}
-
-export interface IParser {
-    id: string;
-    key: PARSER_TYPE;
-    code: string[];
-    parameters: Record<string, IParserParameters>;
-}
-
-export const PARSER_BOOLEAN_VALUES = [
-    '#',    // Figure is static (no update)
-    '!',    // Hide the figure, not the label
-    '?',    // Hide the label, not the figure
-    'hide', // Hide the figure and the label
-    'ultrathin', 'thin', 'thick', 'ultrathick',
-    'dash', 'dot',
-    'tex', 'label', // TeX or Text label
-    'axis', 'grid' // Parameter for the layout
-]
-
-
-export function convertIdToFigure(options: PARSER_VALUES[], figures: Record<string, AbstractFigure>): IParserValues[] {
-    return options.map((option): IParserValues => {
-        if (typeof option === 'string' && option in figures) {
-            return figures[option]
-        }
-
-        return option
-    })
-}
-
-
-// List of color values
-export const PARSER_COLOR_VALUES = [
+/** The names of the colors that an option can be (`red`). */
+export const PARSER_COLOR_VALUES: readonly string[] = [
     'black', 'white', 'red', 'green', 'blue', 'cyan', 'magenta', 'yellow',
     'gray', 'grey', 'darkgray', 'darkgrey', 'lightgray', 'lightgrey',
     'brown', 'lime', 'olive', 'orange', 'pink', 'purple', 'teal', 'gold'
@@ -118,9 +58,11 @@ export const PARSER_COLOR_VALUES = [
 
 // What the builders (`build*`) share: guards on the values of a line of code, and the error for a line that does not fit its key.
 
+/** Whether the value is a point of the drawing. */
 export const isPoint = (value: IParserValues | undefined): value is Point => value instanceof Point
-export const isLine = (value: IParserValues | undefined): value is Line => value instanceof Line
 
+/** Whether the value is a line of the drawing (an axis is one). */
+export const isLine = (value: IParserValues | undefined): value is Line => value instanceof Line
 
 /**
  * The last value of a line of code that picks the alternative form of a construction (the inscribed circle instead of the
@@ -129,6 +71,20 @@ export const isLine = (value: IParserValues | undefined): value is Line => value
 export const ALTERNATIVE = '*'
 
 export const isAlternative = (value: IParserValues | undefined): value is typeof ALTERNATIVE => value === ALTERNATIVE
+
+/**
+ * The values of a line of code where each text that is the name of a figure of the drawing is replaced by that figure. The other
+ * values stay as they are, and a name that only the prototype of `figures` has (`toString`) is not a figure.
+ */
+export function convertIdToFigure(options: PARSER_VALUES[], figures: Record<string, AbstractFigure>): IParserValues[] {
+    return options.map((option): IParserValues => {
+        if (typeof option === 'string' && Object.hasOwn(figures, option)) {
+            return figures[option]
+        }
+
+        return option
+    })
+}
 
 /**
  * `A:B`, two points joined by a `:` (the distance between them, the segment between them).

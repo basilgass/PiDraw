@@ -33,7 +33,7 @@ const ASYMPTOTE_THRESHOLD = 10
 export class FillBetween extends AbstractFigure {
     /**
      * @throws InvalidArgumentError if a plot is not a `Plot`, the domain is not valid or the plots have no abscissa in common
-     * (see {@link checkFillBetween}). Nothing is left in the svg.
+     * (see `checkFillBetween`). Nothing is left in the svg.
      */
     constructor(context: IFigureContext, name: string, values: IFillBetweenConfig) {
         // Before the figure draws anything in the svg.

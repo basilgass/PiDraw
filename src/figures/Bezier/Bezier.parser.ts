@@ -3,7 +3,7 @@ import type {AbstractFigure} from "../AbstractFigure/AbstractFigure"
 import {Bezier} from "./Bezier"
 import type {BezierDirection, BezierPoint, IBezierConfig} from "./Bezier.types"
 import {Point} from "../Point/Point"
-import type {buildInterface} from "../../pidraw.common"
+import type {BuildResult, FigureOptionHandler} from "../../parser/parser.types"
 import {InvalidArgumentError, OptionError, ParseError} from "../../errors"
 import {ALTERNATIVE, buildError, describeValue, isAlternative, PARSER_TYPE} from "../../parser/parser.common"
 
@@ -82,7 +82,7 @@ function throughPoint(text: unknown, item: PARSER, figures: Figures): BezierPoin
  * @throws ParseError if the key is not `bezier`, or the values are none of those: fewer than 2 points, a name that is not a point of
  * the drawing, a direction or a ratio that is not valid, a number of control points that is not 3 or 4.
  */
-export function buildBezier(item: PARSER, figures: Figures): buildInterface<IBezierConfig> {
+export function buildBezier(item: PARSER, figures: Figures): BuildResult<IBezierConfig> {
     if (item.key !== PARSER_TYPE.BEZIER.toString()) {
         throw new ParseError(`Cannot build "${item.name}" (${item.key}): the key does not define a Bézier curve`)
     }
@@ -141,4 +141,9 @@ export function applyBezierOption(figure: AbstractFigure, option: BezierOption, 
 
         throw error
     }
+}
+
+/** The options of the parser that shape a Bézier curve, ready for the registry of options. */
+export const BEZIER_OPTION_HANDLERS: Record<BezierOption, FigureOptionHandler> = {
+    close: (figure, {value}) => { applyBezierOption(figure, 'close', value) }
 }

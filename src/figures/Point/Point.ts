@@ -1,5 +1,6 @@
 import type {G, Shape} from "@svgdotjs/svg.js"
-import type {XY, IFigureAnimation, IFigureContext} from "../../pidraw.common"
+import type {XY, IFigureContext} from "../../pidraw.common"
+import type {IFigureAnimation} from "../../animate/Animate.types"
 import {InvalidArgumentError} from "../../errors"
 import {AbstractFigure} from "../AbstractFigure/AbstractFigure"
 import {isDefinedPosition, numberCorrection, toCoordinates} from "../../calculus"
@@ -58,6 +59,9 @@ function optionsOf({shape = 'circle', size}: IPointOptions, name: string): Requi
 
     return {shape, size: checkSize(size ?? SHAPES[shape].size, name)}
 }
+
+/** How far a point may be from the place of its constraint, in pixels, and not be moved: the rounding of a calculation. */
+const MOVED_TOLERANCE = 1e-6
 
 /**
  * A point of the drawing: a position found from exactly one constraint (its coordinates, the middle of two points, an
@@ -221,6 +225,20 @@ export class Point extends AbstractFigure {
      * drawn again when its position comes back.
      * @throws InvalidArgumentError if the config of the point does not hold exactly one constraint.
      */
+    /**
+     * Whether the point is not where its constraint puts it: it was dragged or animated, and holds its place in `pixels` alone. A point without a
+     * place, or whose constraint gives none, is not moved.
+     */
+    isMoved(): boolean {
+        const placed = resolveConstraint(constraintOf(this._config, this.name), this._config, this.graphConfig)
+
+        if (!isDefinedPosition(placed) || !isDefinedPosition(this._pixels)) {
+            return false
+        }
+
+        return Math.hypot(placed.x - this._pixels.x, placed.y - this._pixels.y) > MOVED_TOLERANCE
+    }
+
     computed(): this {
         this.pixels = resolveConstraint(constraintOf(this._config, this.name), this._config, this.graphConfig)
 

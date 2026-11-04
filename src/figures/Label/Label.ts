@@ -1,4 +1,5 @@
-import {ForeignObject as svgHTML, G, SVG, Text as svgLabel} from "@svgdotjs/svg.js"
+import {ForeignObject as svgHTML, SVG} from "@svgdotjs/svg.js"
+import type {G, Text as svgLabel} from "@svgdotjs/svg.js"
 import type {XY} from "../../pidraw.common"
 import {labelCenter} from "./Label.constraints"
 import type {ILabelConfig, LABEL_POSITION, LabelOptions} from "./Label.types"
@@ -51,6 +52,10 @@ export class Label {
 
     protected _shape: LabelType
 
+    /**
+     * The svg element of the label.
+     * @internal
+     */
     get shape() {
         return this._shape
     }

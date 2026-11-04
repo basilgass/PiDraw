@@ -5,7 +5,7 @@ import {Line} from "../Line/Line"
 import {Plot} from "../Plot/Plot"
 import {Point} from "./Point"
 import type {IPointConfig, PointCoordinateType} from "./Point.types"
-import type {buildInterface} from "../../pidraw.common"
+import type {BuildResult, FigureOptionHandler, IParserValues, PointShapeOption} from "../../parser/parser.types"
 import {InvalidArgumentError, OptionError, ParseError} from "../../errors"
 import {
     ALTERNATIVE,
@@ -13,13 +13,11 @@ import {
     convertIdToFigure,
     describeValue,
     expectCount,
-    type IParserValues,
     isAlternative,
     isLine,
     isPoint,
     parsePointPair,
-    PARSER_TYPE,
-    type PointShapeOption
+    PARSER_TYPE
 } from "../../parser/parser.common"
 
 // Everything the parser needs to know about points: how to build them from the code before the `->`, and how to apply the
@@ -150,7 +148,7 @@ const POINT_BUILDERS: Record<string, PointBuilder> = {
  *
  * @throws ParseError if the key is not one of a point, or the values are not those the key expects (number, type, kind of figure).
  */
-export function buildPoint(item: PARSER, figures: Figures): buildInterface<IPointConfig> {
+export function buildPoint(item: PARSER, figures: Figures): BuildResult<IPointConfig> {
     const build = Object.hasOwn(POINT_BUILDERS, item.key) ? POINT_BUILDERS[item.key] : undefined
 
     if (build === undefined) {
@@ -165,7 +163,7 @@ export function buildPoint(item: PARSER, figures: Figures): buildInterface<IPoin
  *
  * @throws ParseError if the line does not give two lines or axes, a circle and a line, or two circles.
  */
-export function buildIntersection(item: PARSER, figures: Figures): buildInterface<IPointConfig>[] {
+export function buildIntersection(item: PARSER, figures: Figures): BuildResult<IPointConfig>[] {
     const expected = 'two figures: two lines or axes, a circle and a line, or two circles'
 
     if (item.key !== PARSER_TYPE.INTERSECTION.toString()) {
@@ -244,4 +242,15 @@ export function parsePointShorthand(keyCode: string): string | null {
     }
 
     return `${match[1]}=pt ${match[2].split(',').map(value => value.trim()).join(',')}`
+}
+
+const shapeHandler = (option: PointShapeOption): FigureOptionHandler => (figure, {value}) => {
+    applyPointShapeOption(figure, option, value)
+}
+
+/** The options of the parser that give a point its shape: `o` (circle), `s` (square) and `*` (crosshair), with a size or not. */
+export const POINT_OPTIONS: Record<PointShapeOption, FigureOptionHandler> = {
+    'o': shapeHandler('o'),
+    's': shapeHandler('s'),
+    '*': shapeHandler('*')
 }

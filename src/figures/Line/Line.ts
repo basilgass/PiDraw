@@ -138,6 +138,10 @@ export class Line extends AbstractFigure {
         }
     }
 
+    /**
+     * The line as a tool of calculation.
+     * @internal
+     */
     get math(): mathLine {
         return new mathLine(this.start, this.end)
     }
@@ -275,7 +279,7 @@ export class Line extends AbstractFigure {
         }
     }
 
-    /** Put the label at its place (see {@link _labelPoint}), turned along the line when it is asked to. */
+    /** Put the label at its place (see `_labelPoint`), turned along the line when it is asked to. */
     moveLabel(): this {
         // A line without a position has no place for a label.
         if (!this.label || !isDefinedPosition(this._start) || !isDefinedPosition(this._end)) {
@@ -307,7 +311,7 @@ export class Line extends AbstractFigure {
         this.shape = this.element.line(0, 0, 0, 0)
 
         // The arrow of a vector is a marker of its end like any other; the other shapes have none.
-        this.mark(this._config.shape === 'vector' ? 'end' : 'none')
+        this.mark({side: this._config.shape === 'vector' ? 'end' : 'none'})
 
         // Apply the stroke and fill.
         this.fill().stroke()

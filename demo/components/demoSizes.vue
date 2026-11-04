@@ -4,7 +4,7 @@ import {onMounted, ref} from "vue";
 import {PiDraw} from "../../../src";
 import katex from "katex";
 
-const c = `@begin:static
+const c = `
 O(0,0)
 c=circ O,10
 P0(10,0)
@@ -47,7 +47,6 @@ X4(10,-5.77)->tex=\\scriptsize -\\frac{\\sqrt{3}}{3}/mr/0.5;0
 X5(10,-10)->tex=\\scriptsize -1/mr/0.5;0
 X6(10,-17.3)->tex=\\scriptsize -\\sqrt{3}/mr/0.5;0
 t=T20P0
-@end:static
 P(7.07,7.07)->drag=c
 C=proj P,Ox->hide
 S=proj P,Oy->hide
@@ -79,8 +78,9 @@ function update(newCode: unknown) {
 }
 
 function updateLayout() {
-  draws.forEach((draw, id)=> {
+  draws.forEach((draw) => {
     draw.refreshLayout(parameter.value)
+    draw.refresh(code.value)
   })
 }
 

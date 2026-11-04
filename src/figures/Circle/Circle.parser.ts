@@ -1,14 +1,13 @@
 import type {PARSER} from "piparser"
 import type {AbstractFigure} from "../AbstractFigure/AbstractFigure"
 import type {ICircleConfig} from "./Circle.types"
-import type {buildInterface} from "../../pidraw.common"
+import type {BuildResult, IParserValues} from "../../parser/parser.types"
 import {ParseError} from "../../errors"
 import {
     ALTERNATIVE,
     buildError,
     convertIdToFigure,
     describeValue,
-    type IParserValues,
     isAlternative,
     isLine,
     isPoint,
@@ -40,7 +39,7 @@ const EXPECTED =
  * @throws ParseError if the key is not `circ`, or the values are none of those: number of values, type of figure, a name
  * that is not a point in `A:B`, a last value that is not `*`.
  */
-export function buildCircle(item: PARSER, figures: Figures): buildInterface<ICircleConfig> {
+export function buildCircle(item: PARSER, figures: Figures): BuildResult<ICircleConfig> {
     if (item.key !== PARSER_TYPE.CIRCLE.toString()) {
         throw new ParseError(`Cannot build "${item.name}" (${item.key}): the key does not define a circle`)
     }

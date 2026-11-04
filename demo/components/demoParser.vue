@@ -2,7 +2,7 @@
 
 import {onMounted, ref} from "vue"
 import katex from "katex"
-import {type IGraphDragEvent, type IGraphDragMoveEvent, PiDraw} from "../../src"
+import {Animate, type IGraphDragEvent, type IGraphDragMoveEvent, PiDraw} from "../../src"
 import {basic_examples} from "../parsing_examples/basic_examples"
 
 const id = basic_examples.length - 1
@@ -15,8 +15,11 @@ const parameterError = ref<string>('')
 const code = ref<string>(basic_examples[id].code ?? '')
 
 const showAnimation = ref<boolean>(false)
+// What is wrong with the lines of the code: the report of the last drawing.
+const lineErrors = ref<string[]>([])
 
 let draw: PiDraw
+let player: Animate
 
 function update(newCode: unknown) {
   if (typeof newCode === "string") {
@@ -29,29 +32,29 @@ function update(newCode: unknown) {
     })
   }
 
-  draw.refresh(code.value)
-  showAnimation.value = draw.graph.animation.canBeAnimated()
+  const report = draw.refresh(code.value)
+  lineErrors.value = report.errors.map(error => `Line ${error.line}: ${error.message}`)
+  showAnimation.value = player.canBeAnimated()
 }
 
 function updateLayout() {
-  try {
-    draw.refreshLayout(parameter.value)
-    parameterError.value = ''
-  } catch (error) {
-    parameterError.value = error instanceof Error ? error.message : String(error)
-  }
+  // A parameter that is not valid does not throw: the graph keeps the ones it had, and the error is given.
+  parameterError.value = draw.refreshLayout(parameter.value)?.message ?? ''
+
+  // The lines are built with the layout: they are drawn again.
+  update(undefined)
 }
 
 function animation(value: string) {
   // TODO: type correctly value.
   if (value === 'start') {
-    draw.graph.animation.start()
+    player.start()
   } else if (value === 'pause') {
-    draw.graph.animation.pause()
+    player.pause()
   } else if (value === 'continue') {
-    draw.graph.animation.resume()
+    player.start()
   } else if (value === 'stop') {
-    draw.graph.animation.cancel()
+    player.stop()
   }
 }
 
@@ -65,6 +68,11 @@ onMounted(() => {
         code: code.value
       }
   )
+
+  player = new Animate(draw.graph)
+  parameterError.value = draw.layoutError?.message ?? ''
+  lineErrors.value = draw.errors.map(error => `Line ${error.line}: ${error.message}`)
+  showAnimation.value = player.canBeAnimated()
 
   draw.graph.on('dragstart', (e: CustomEvent<IGraphDragEvent>)=>{
     console.log('MOVE', e.detail.figure.name)
@@ -110,6 +118,17 @@ function logTikz(){
 					rows="20"
 					@input="update"
 				/>
+				<ul
+					v-if="lineErrors.length > 0"
+					class="text-red-600 text-sm list-disc pl-5"
+				>
+					<li
+						v-for="message in lineErrors"
+						:key="message"
+					>
+						{{ message }}
+					</li>
+				</ul>
 
         <button @click="logTikz">Log Tikz output</button>
 			</div>

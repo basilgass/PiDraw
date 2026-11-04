@@ -58,7 +58,10 @@ export class Plot extends AbstractFigure {
 
     protected _numExp: NumExp
 
-    /** The function, compiled. It is `NaN` everywhere for a plot that does not exist. */
+    /**
+     * The function, compiled. It is `NaN` everywhere for a plot that does not exist.
+     * @internal
+     */
     get numExp(): NumExp {
         return this._numExp
     }

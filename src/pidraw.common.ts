@@ -1,35 +1,49 @@
-import type {G, Svg} from "@svgdotjs/svg.js"
-import type {parser_config} from "./parser/parser.config"
-import type {IGridConfig} from "./figures/Grid/Grid.types"
-import type {TickSelection} from "./calculus"
-import type {Point} from "./figures/Point/Point"
-import type {LOOP_STYLE} from "./Animate"
-import type {Graph} from "./Graph"
-import type {AbstractFigure} from "./figures/AbstractFigure/AbstractFigure"
+import type {Svg} from "@svgdotjs/svg.js"
 
-export type TeXConverterType = (value: string) => string
-
-export interface IGraphDragEvent {
-    graph: Graph
-    figure: AbstractFigure
+/** A position or a vector, in pixels or in units of the coordinate system according to the function that takes it. */
+export interface XY {
+    x: number,
+    y: number
 }
 
-/** What an update of the graph did: how many figures it reached, out of the figures the graph has. */
-export interface IGraphUpdate {
-    /** The figures drawn again, and the ones that were moved, whose label was put at its place. */
-    updated: number,
-    /** The figures of the graph (the grid and the axes of the layout are not among them). */
-    total: number
+/** An interval `[min, max]`, optionally about one axis only. */
+export interface Domain {
+    /** The axis the interval is about, when it matters. */
+    axis?: 'x' | 'y',
+    max: number
+    min: number,
 }
 
-/** A point was moved by the mouse: with how many figures this reached. */
-export interface IGraphDragMoveEvent extends IGraphDragEvent, IGraphUpdate {
+/** The vector of one unit of each axis, in pixels. */
+export interface AxisVectors {
+    x: XY,
+    y: XY
 }
 
-export interface IGraphEventMap {
-    'dragstart': IGraphDragEvent
-    'dragmove': IGraphDragMoveEvent
-    'dragend': IGraphDragEvent
+/**
+ * One member per key of `T`: it has that key, and forbids every other key (`?: never`). Where a plain union would accept
+ * an object that mixes the keys of several members, this one is refused by the compiler. For configurations that hold
+ * exactly one constraint among several.
+ */
+export type Exclusive<T> = { [K in keyof T]: Pick<T, K> & Partial<Record<Exclude<keyof T, K>, never>> }[keyof T]
+
+/** Whether the object has an `x` and a `y` that are not `undefined`. Their value is not checked (`NaN` passes). */
+export function isXY(obj: unknown): obj is XY {
+    return hasDefined(obj, ['x', 'y'])
+}
+
+/** Whether the object has a `min` and a `max` that are not `undefined`. Their value is not checked, and `axis` is optional. */
+export function isDomain(obj: unknown): obj is Domain {
+    return hasDefined(obj, ['min', 'max'])
+}
+
+function hasDefined(obj: unknown, keys: readonly string[]): boolean {
+    if (typeof obj !== 'object' || obj === null) {
+        return false
+    }
+
+    const fields = obj as Record<string, unknown>
+    return keys.every(key => fields[key] !== undefined)
 }
 
 /**
@@ -42,52 +56,14 @@ export interface IFigureContext {
     readonly config: IGraphConfig
 }
 
+/** The coordinate system of a graph, in pixels. */
 export interface IGraphConfig {
-    axis: {
-        x: XY,
-        y: XY
-    }
+    axis: AxisVectors,
     height: number,
+    /** Where the point (0, 0) is, in pixels from the top left corner of the drawing. */
     origin: XY,
-    system: COORDINATE_SYSTEM,
+    system: CoordinateSystem,
     width: number,
-}
-
-/** What an axis of the coordinate system shows besides its line. */
-export interface IAxisDisplay {
-    /** The step of the graduation, in units of the axis. Without it the axis is not graduated. */
-    step?: number,
-    /** What is written at the graduations: the numbers, or fractions of pi. */
-    labels?: 'numbers' | 'pi',
-    /** The name written at the end of the axis. */
-    name?: string,
-    /** Which ticks are drawn (`{every: 5}`, `{first: true}`, both): the graduation has a step of 1 when there is no step. */
-    marks?: TickSelection,
-    /** On which ticks a number is written, or `'none'`. */
-    numbers?: TickSelection | 'none',
-    /** How far the axis stops from the borders of the drawing, in pixels. */
-    padding?: number
-}
-
-/** What the graph shows besides the figures. */
-export interface IGraphDisplay {
-    /** The axes of the coordinate system: both (`true`), or each one with what it shows (`false` for one that is not drawn). */
-    axis?: boolean | { x: IAxisDisplay | false, y: IAxisDisplay | false },
-    /** The grid: `true` for a step of 1, or its config. */
-    grid?: boolean | IGridConfig,
-}
-
-export interface IGraphConstructorConfig {
-    axis?: {
-        x: XY,
-        y: XY
-    },
-    display?: IGraphDisplay,
-    height?: number,
-    origin?: XY,
-    system?: COORDINATE_SYSTEM,
-    tex?: TeXConverterType
-    width?: number,
 }
 
 export interface IFigureAppearanceConfig {
@@ -102,45 +78,8 @@ export interface IFigureAppearanceConfig {
     }
 }
 
-export interface IFigureAnimation {
-    from: Point | XY | null,
-    to: Point | XY | null,
-    duration: number, // in seconds
-    easing: 'linear' | 'inOut', // linear | inOut
-    delay: number, // in seconds
-    loop: LOOP_STYLE,
-    callback?: () => void
-}
-export interface XY {
-    x: number,
-    y: number
-}
-
-/**
- * One member per key of `T`: it has that key, and forbids every other key (`?: never`). Where a plain union would accept
- * an object that mixes the keys of several members, this one is refused by the compiler. For configurations that hold
- * exactly one constraint among several.
- */
-export type Exclusive<T> = { [K in keyof T]: Pick<T, K> & Partial<Record<Exclude<keyof T, K>, never>> }[keyof T]
-
-export function isXY(obj: unknown): obj is XY {
-    // @ts-expect-error : obj is XY
-    return obj?.x !== undefined && obj.y !== undefined
-}
-
-export function isDOMAIN(obj: unknown): obj is DOMAIN {
-    // @ts-expect-error : obj is DOMAIN
-    return obj?.min !== undefined && obj.max !== undefined
-}
-
-
-export interface DOMAIN {
-    axis?: 'x' | 'y',
-    max: number
-    min: number,
-}
-
-export enum LAYER_NAME {
+/** The layers of the drawing, from the back to the front: this is the order in which the graph creates them. */
+export enum LayerName {
     BACKGROUND = 'background',
     GRIDS = 'grids',
     AXIS = 'axis',
@@ -153,46 +92,14 @@ export enum LAYER_NAME {
     INTERACTIVE = 'interactive',
 }
 
-export type ILayers = Record<LAYER_NAME, G>
-
-export enum AXIS {
-    'X' = 'Ox',
-    'Y' = 'Oy'
+/** The names of the two axes of the graph, which no figure can take. */
+export enum Axes {
+    X = 'Ox',
+    Y = 'Oy'
 }
 
-export enum COORDINATE_SYSTEM {
-    'CARTESIAN_2D' = 'cartesian_2d',
-    'POLAR' = 'polar',
-}
-
-export enum POINTCONSTRAINT {
-    FREE = 'free',
-    FIXED = 'fixed',
-    MIDDLE = 'middle',
-    PROJECTION = 'projection',
-    INTERSECTION_LINES = 'intersection_lines',
-    FOLLOW = 'follow',
-    DIRECTION = 'direction',
-    VECTOR = 'vector',
-    INTERSECTION_CIRCLE_LINE = 'intersection_circle_line',
-    INTERSECTION_CIRCLES = 'intersection_circles',
-    SYMMETRY = 'symmetry',
-    COORDINATES = 'coordinates',
-}
-
-export enum LINECONSTRAINT {
-    FIXED = 'fixed',                    // two points
-    PARALLEL = 'parallel',              // a point and a vector
-    PERPENDICULAR = 'perpendicular',    // a point and a vector
-    TANGENT = 'tangent',                // a point and a circle
-    MEDIATOR = "mediator",              // two points
-    SLOPE = 'slope',                    // a point and a slope
-    BISECTOR = "bisector",            // two lines
-}
-
-
-
-export interface buildInterface<T> {
-    create: keyof typeof parser_config,
-    config: T
+export enum CoordinateSystem {
+    CARTESIAN_2D = 'cartesian_2d',
+    /** Accepted by the type, but a graph refuses it: it cannot be drawn yet (`NotImplementedError`). */
+    POLAR = 'polar',
 }
