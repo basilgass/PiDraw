@@ -11,6 +11,7 @@ B(-2,-1)->label
 |---|---|
 | [`x`, `y`, `box`](#the-window) | the part of the plane that is drawn |
 | [`unitX`, `unitY`](#the-size-of-a-unit) | the length of a unit |
+| [`unit`, `scale`](#the-unit-of-the-lengths) | the unit and the scale of the lengths that the labels write |
 | [`axis`, `axisX`, `axisY`, `axisXname`, `axisYname`](#axes) | the axes |
 | [`grid`, `gridX`, `gridY`](#grid) | the grid |
 | [`default.label`, `default.tex`, `default.points`](#defaults-of-the-figures) | what the figures have by default |
@@ -67,6 +68,45 @@ Math.round(draw.graph.config.height) // 152
 A(2,1)->label
 ```
 
+## The unit of the lengths
+
+| Parameter | Description |
+|---|---|
+| `unit=mm` | the symbol written after the lengths and the areas of the labels: `pm`, `nm`, `µm`, `mm`, `cm`, `dm`, `m`, `dam`, `hm`, `km`, or `u` for a unit that is not a real length. None by default: the lengths are written without a unit |
+| `scale=10`, `scale=1/10` | how long the lengths of the labels are compared with the units of the graph: a length is multiplied by `scale`, an area by its square (1 by default) |
+
+They change nothing of the drawing, of the axes or of the coordinates of the points: they are for the values that a [label shows](./options#values-in-a-label) (`@length`, `@radius`, `@perimeter`, `@area`). A unit does not give a scale, and a scale does not give a unit: `scale=1/10` alone corrects a circle drawn with a radius of 10 units, and `unit=mm` alone writes the lengths as they are, in millimeters. An angle always has its degree sign, and a slope or the coordinates of a point have no unit.
+
+The area under a curve (`fill`, `riemann`) has no unit: the vertical axis of a function is not always a length.
+
+```pidraw params="x=-1:6,y=-1:5,unit=cm"
+A(0,0)
+B(4,3)
+s=seg A,B->label=@
+c=circ A,2->label=@radius
+```
+
+```js
+const draw = new PiDraw(container, {
+    code: 'O(0,0)\nc=circ O,2->label=@radius\nA(1,1)\nB(4,1)\nC(1,4)\na=arc B,A,C->label=@',
+    parameters: 'unit=mm,scale=10'
+})
+const {c, a} = draw.graph.figures
+
+c.label.displayName // 20 mm
+a.label.displayName // 90°
+```
+
+With `scale=10`, a unit of the graph is worth 10 millimeters: the lengths are multiplied by 10 and the areas by 100.
+
+```pidraw params="x=-1:6,y=-1:5,unit=mm,scale=10"
+A(0,0)
+B(4,0)
+C(4,3)
+s=seg A,C->label=@
+p=poly A,B,C->label=@area,fill=orange/0.3
+```
+
 ## Axes
 
 The axes of the graph are called `Ox` and `Oy`. They are lines like the others, shown or not, and any figure can be built on them (`P=inter d,Ox`, `H=proj A,Oy`, `p=perp Ox,A`, `c=circ O,Ox`, `b=bis Ox,d`). These two names are reserved: a figure cannot have them.
@@ -106,7 +146,7 @@ A(1,1)
 
 Here `axis` has the options `red` and `thick`, `grid=2` has `gray`, and `unitX=0.9` is an entry. The options of `axis` are given to both axes, the ones of `axisX` or `axisY` are added to its own for one axis.
 
-Three options are for the graduation: `ticks`, `numbers` and `padding`. They are the ones of the graduated line [`axis`](./grids-axes#axis-a-graduated-line), and so are `name` and `side`.
+Four options are for the graduation and the extent of an axis: `ticks`, `numbers`, `padding` and `range`. They are the ones of the graduated line [`axis`](./grids-axes#axis-a-graduated-line), and so are `name` and `side`.
 
 ```pidraw params="x=-6:6,axis->ticks=first"
 A(2,1)
@@ -117,6 +157,12 @@ A(10,1)
 ```
 
 ```pidraw params="x=-6:6,axisX=pi/2->numbers=2,,axisY->ticks=first"
+A(2,1)
+```
+
+`range` limits the part of an axis that is drawn, in units from its zero: `range=-2:3` draws the axis from -2 to 3, and `range=3` is `-3:3`. The arrow is at the end of the range. The axis is also cut by the window and by `padding`. The range is written after `->`, and the `,,` ends the options, so that the next entry (`axisX` here) is not one of them:
+
+```pidraw params="x=-6:6,y=-4:4,axisY->range=-2:3,,axisX"
 A(2,1)
 ```
 

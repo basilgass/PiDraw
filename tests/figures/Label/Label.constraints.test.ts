@@ -1,11 +1,16 @@
 import {describe, expect, test} from 'vitest'
 import {InvalidArgumentError} from '../../../src/errors'
 import {
+    alignementDirection,
     checkLabelContent,
     labelAlignementToward,
+    labelAwayGap,
     labelBesideWay,
     labelCenter,
-    renderLabelContent
+    labelCenterToward,
+    labelPush,
+    renderLabelContent,
+    unitDirection
 } from '../../../src/figures/Label/Label.constraints'
 
 describe('labelAlignementToward', () => {
@@ -112,12 +117,103 @@ describe('renderLabelContent', () => {
     })
 
     test('the parts are written one after the other, the fields with their digits', () => {
-        const fields = {length: (digits: number) => (Math.PI).toFixed(digits)}
+        const fields = {length: (digits: number | undefined) => (Math.PI).toFixed(digits)}
 
         expect(renderLabelContent(['AB = ', {field: 'length', digits: 2}, ' cm'], fields)).toBe('AB = 3.14 cm')
     })
 
     test('a field that is not offered is an InvalidArgumentError', () => {
         expect(() => renderLabelContent([{field: 'sum', digits: 1}], {})).toThrow(InvalidArgumentError)
+    })
+})
+
+describe('alignementDirection', () => {
+    test.each([
+        ['tl', {x: -1, y: -1}],
+        ['tc', {x: 0, y: -1}],
+        ['tr', {x: 1, y: -1}],
+        ['ml', {x: -1, y: 0}],
+        ['mr', {x: 1, y: 0}],
+        ['bl', {x: -1, y: 1}],
+        ['bc', {x: 0, y: 1}],
+        ['br', {x: 1, y: 1}]
+    ] as const)('%s lies toward %j on the screen', (position, expected) => {
+        expect(alignementDirection(position)).toEqual(expected)
+    })
+
+    test('a label centered on its anchor lies on no side', () => {
+        expect(alignementDirection('mc')).toBeNull()
+    })
+})
+
+describe('unitDirection', () => {
+    test('has a length of 1', () => {
+        expect(unitDirection({x: 3, y: 4})).toEqual({x: 0.6, y: 0.8})
+    })
+
+    test.each([{x: 0, y: 0}, {x: NaN, y: 1}, {x: Infinity, y: 0}])('%j has no direction', (vector) => {
+        expect(unitDirection(vector)).toBeNull()
+    })
+})
+
+describe('labelCenterToward', () => {
+    const anchor = {x: 100, y: 100}
+
+    test('puts the side of the box that faces the anchor on the anchor', () => {
+        expect(labelCenterToward(anchor, {x: 0, y: 1}, 40, 20)).toEqual({x: 100, y: 110})
+        expect(labelCenterToward(anchor, {x: 0, y: -1}, 40, 20)).toEqual({x: 100, y: 90})
+    })
+
+    test('keeps a label that lies to a side a little away, like ml and mr', () => {
+        expect(labelCenterToward(anchor, {x: 1, y: 0}, 40, 20)).toEqual({x: 130, y: 100})
+        expect(labelCenterToward(anchor, {x: -1, y: 0}, 40, 20)).toEqual({x: 70, y: 100})
+    })
+
+    test('puts the corner of the box on the anchor for the diagonal of the box', () => {
+        const {x, y} = labelCenterToward(anchor, {x: 2, y: 1}, 40, 20)
+        const unit = {x: 2 / Math.sqrt(5), y: 1 / Math.sqrt(5)}
+        const gap = 10 * unit.x ** 2
+
+        // The diagonal of a box of 40 x 20 goes to its corner: the center is 20 to the right and 10 down, and the gap is along the direction.
+        expect(x).toBeCloseTo(120 + gap * unit.x, 6)
+        expect(y).toBeCloseTo(110 + gap * unit.y, 6)
+    })
+
+    test('a null direction puts the label on the anchor', () => {
+        expect(labelCenterToward(anchor, {x: 0, y: 0}, 40, 20)).toEqual(anchor)
+    })
+
+    test('does not move the anchor it is given', () => {
+        const given = {x: 5, y: 5}
+
+        labelCenterToward(given, {x: 1, y: 1}, 10, 10)
+
+        expect(given).toEqual({x: 5, y: 5})
+    })
+})
+
+describe('labelAwayGap', () => {
+    test('is the whole gap to a side, and none above or below', () => {
+        expect(labelAwayGap({x: 1, y: 0})).toEqual({x: 10, y: 0})
+        expect(labelAwayGap({x: 0, y: 1})).toEqual({x: 0, y: 0})
+    })
+
+    test('is half the gap on a diagonal, along the direction', () => {
+        const gap = labelAwayGap({x: 1, y: 1})
+
+        expect(gap.x).toBeCloseTo(Math.SQRT1_2 * 5, 6)
+        expect(gap.y).toBeCloseTo(Math.SQRT1_2 * 5, 6)
+    })
+})
+
+describe('labelPush', () => {
+    test('is the distance along the direction', () => {
+        expect(labelPush({x: 0, y: 5}, 10)).toEqual({x: 0, y: 10})
+        expect(labelPush({x: 3, y: 4}, 10)).toEqual({x: 6, y: 8})
+    })
+
+    test('is null for no direction', () => {
+        expect(labelPush(null, 10)).toEqual({x: 0, y: 0})
+        expect(labelPush({x: 0, y: 0}, 10)).toEqual({x: 0, y: 0})
     })
 })

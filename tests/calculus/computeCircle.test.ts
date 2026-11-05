@@ -1,5 +1,5 @@
 import {describe, expect, test} from 'vitest'
-import {circleTangentTo, circleWithDiameter, circumcircle, incircle} from '../../src/calculus/computeCircle'
+import {circleArea, circlePerimeter, circleTangentTo, circleWithDiameter, circumcircle, incircle} from '../../src/calculus/computeCircle'
 import type {CircleDefinition} from '../../src/calculus/computeCircle'
 
 function expectCircle(circle: CircleDefinition, x: number, y: number, radius: number) {
@@ -105,5 +105,12 @@ describe('circleTangentTo', () => {
         ['a line that is not a number', {x: 0, y: 0}, {x: NaN, y: 1}, {x: 1, y: 1}]
     ])('with %s does not exist', (_, center, start, end) => {
         expectNowhere(circleTangentTo(center, start, end))
+    })
+})
+
+describe('circlePerimeter and circleArea', () => {
+    test('are the length and the area of a circle of a given radius', () => {
+        expect(circlePerimeter(2)).toBeCloseTo(4 * Math.PI, 9)
+        expect(circleArea(2)).toBeCloseTo(4 * Math.PI, 9)
     })
 })

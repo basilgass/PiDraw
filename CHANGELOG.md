@@ -11,6 +11,7 @@ All the changes of PiDraw that a user or a program can see. The details of what 
 - **Animation**: `Animate` is a controller made with the graph (`new Animate(graph)`) with the events `start`, `pause`, `end` and `stop`. `easing=inOut` and `loop` are applied and checked.
 - **TikZ export**: `graph.tikz()` writes a complete `tikzpicture` for every figure, and `graph.tikzPreamble()` gives the lines to put before `\begin{document}`. The curves use `pgfplots`.
 - **CodeMirror**: the entry `pidraw/codemirror` (language, highlighting, names of the figures, suggestions) for CodeMirror 6.
+- **Comments**: a line that starts with `%` is a comment. A line that starts with `$` is still ignored, but it is for something else than PiDraw; the editor colors it apart (`tok-meta`).
 - **Errors**: a report for each drawing (`draw.refresh(code)` returns the errors and the state of each line), the line being typed keeps its last valid figure (`{editing}`), and typed errors (`ParseError`, `OptionError`, `InvalidArgumentError`, `MathError`, `NotImplementedError`, `UnsupportedOperationError`).
 - **Figures and syntax**:
   - `g=grid` and `a=axis` in the code, graduated axes (`ticks`, `numbers`, `name`), axes drawn at the edge when the origin is outside the window.
@@ -21,6 +22,11 @@ All the changes of PiDraw that a user or a program can see. The details of what 
   - `path` (an SVG path in units of the coordinate system), `fill` between two plots or to the x axis, `riemann` with a position.
   - Equations of a line (`y=1/2`, `3x=6`, `2x-3y+6=0`), `bis d1,d2` and its other bisector, `drag` along an axis, on the grid, in a domain.
   - Parameters of the graph: `box`, `unitX`, `unitY` in centimeters, `axisX`, `axisY`, `gridX`, `gridY`, `default.label`, `default.tex`, `default.points`.
+- **Values in a label**: `@` alone is the most classical value of the figure (point: coordinates, segment: length, arc: angle in degrees), and `@name` is another one (`@slope`, `@length`, `@radius`, `@perimeter`, `@area`). The slope is a fraction when it is exact, the angle of an arc always has its degree sign, `@@` is a `@` of the text, and the editor suggests the fields after a `@`.
+- **The position of a label** can be written with its two letters in either order: `label=A/rm` is `label=A/mr`.
+- **Labels pushed away from a figure**: `label=A/>O` puts the label on the side of `A` that is opposite to `O` (a point, a circle, an arc, a polygon), at any angle, and it follows when they move. A number after the position (`label=A/ml/1`, `label=A/>O/0.3`) pushes the label further. The label of an arc lies on the side of its middle direction, at any angle; the label of a circle is at its center; the label of a point that has a drag handle is kept clear of the handle.
+- **Unit and scale of the lengths**: the parameters `unit=mm` (the symbol written after the lengths and the areas of the labels) and `scale=10` or `scale=1/10` (a length is multiplied by it, an area by its square). They change nothing of the drawing. A label in TeX writes them as a formula.
+- **Range of an axis**: the option `range=-10:10` (or `range=10`) of an axis, of `axis`, `axisX` and `axisY`, and of a line `a=axis A,B`, draws only the part of the axis between these units from its zero. The arrow, the graduation and the TikZ export follow.
 - **Documentation**: a guide with examples checked at each build, a reference of the keys made from the parser, and `PiDraw.documentation()` with the forms of each key.
 
 ### Changed
@@ -33,9 +39,12 @@ All the changes of PiDraw that a user or a program can see. The details of what 
 - The figures depend on each other through their configuration, and `graph.update(changed)` redraws only the figures that depend on the ones that moved.
 - `Graph.updateLayout` keeps the points that were dragged or animated at their coordinates, and `refresh` keeps the figures of the lines that did not change.
 - The classes of the figures are exported as types only.
+- `dash` without a value is a pattern in pixels (6, then a gap of 4) and no longer half a unit of the x axis, so it looks the same at any scale or zoom. `dash=xs|sm|md|lg|xl` are sizes.
 - The label text (`label`, `tex`) runs up to the next option and can hold commas.
+- A `@` followed by letters in a label is the name of a field: it is an error when the figure does not have it, and `@` alone is an error for a line, a ray, a vector, a circle and a polygon.
 - Several constants and types are renamed (`AXIS` to `Axes`, `DOMAIN` to `Domain`, `LAYER_NAME` to `LayerName`…).
 - `piparser` 0.2.1 or later is required.
+- **TikZ colors**: a color name is defined with `\definecolor` from its CSS shade, so the PDF has the colors of the screen (`green`, `orange`, `purple`, `lightgray`… no longer take the shade of `xcolor`). Every name of CSS is exported, `gold`, `grey`, `darkgrey` and `lightgrey` included, and the definitions are gathered once at the start of the `tikzpicture`.
 
 ### Removed
 

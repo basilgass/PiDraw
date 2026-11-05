@@ -46,6 +46,7 @@ export type {TickLabel, TickSelection} from "./calculus/computeAxis"
 export type {BezierSegment} from "./calculus/computeBezier"
 export type {PathCommand} from "./calculus/computePath"
 export type {RiemannRectangle} from "./calculus/computeRiemann"
+export type {IMeasure, LengthUnit} from "./calculus/units"
 
 // Animation (a controller: made with the graph, `new Animate(graph)`)
 export * from "./animate/Animate.types"

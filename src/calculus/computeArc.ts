@@ -41,3 +41,13 @@ export function nearestOnArc(center: XY, radius: number, from: number, sweep: nu
 
     return distanceAB(start, position) <= distanceAB(end, position) ? start : end
 }
+
+/** The length of an arc of a given radius that covers `sweep` degrees. */
+export function arcLength(radius: number, sweep: number): number {
+    return radius * sweep * Math.PI / 180
+}
+
+/** The area of the sector of a given radius that covers `sweep` degrees. */
+export function sectorArea(radius: number, sweep: number): number {
+    return radius * radius * sweep * Math.PI / 360
+}

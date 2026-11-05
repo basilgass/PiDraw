@@ -81,6 +81,7 @@ export const RIEMANN_ITEMS: ParserItems = {
         description: 'Create the Riemann sum of a plot: rectangles from the x axis to its graph',
         forms: ['r=riemann <plot>[,<domain>][,<rectangles>][,<position>]'],
         summary: 'r=riemann f — Riemann sum',
+        labelFields: ['sum', 'rectangles'],
         build: buildRiemann
     }
 }

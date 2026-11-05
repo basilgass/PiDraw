@@ -71,6 +71,7 @@ export const FILL_BETWEEN_ITEMS: ParserItems = {
         description: 'Fill the area between two plots, or between a plot and the x axis',
         forms: ['z=fill <plot>[,<plot>][,<domain>]'],
         summary: 'z=fill f,g — area between curves',
+        labelFields: ['area'],
         build: buildFillBetween
     }
 }

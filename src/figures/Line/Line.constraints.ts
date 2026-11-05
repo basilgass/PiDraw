@@ -3,14 +3,19 @@ import {InvalidArgumentError} from "../../errors"
 import {
     bisectorOfAngle,
     bisectorOfLines,
+    fractionToTex,
+    fractionToText,
     type LineDefinition,
     mathLine,
     mediatorOf,
     parseLinearEquation,
     toCoordinates,
+    toFraction,
     toPixels
 } from "../../calculus"
 import {constraintIn, resolveIn} from "../constraints"
+import {fieldNumber} from "../Label/Label.constraints"
+import type {LabelFormat} from "../Label/Label.types"
 import type {Line} from "./Line"
 import type {ILineConfig, LineConstraints} from "./Line.types"
 
@@ -53,6 +58,34 @@ export function mathLineOf(line: Line): mathLine {
 
     throw new InvalidArgumentError(`Invalid line (${typeof candidate}): expected a line or an axis`)
 }
+
+/**
+ * The slope of a line as the text of a label, from the vector that goes along it in units of the coordinate system.
+ *
+ * @param exact whether the vector comes from numbers that were given (a slope, two points with numbers): the slope is then written
+ * as a fraction (`\frac{3}{2}` in TeX, `3/2` in a text) when it is one with a denominator of 100 at most, unless the label asks for
+ * decimals.
+ * @param digits the decimals that the label asks for; 2 by default.
+ * @param format how the label is written.
+ * @returns the infinity (`\infty` in TeX, `∞` in a text) for a vertical line.
+ */
+export function slopeText(dx: number, dy: number, exact: boolean, digits: number | undefined, format: LabelFormat): string {
+    if (Math.abs(dx) <= VERTICAL_EPSILON * Math.hypot(dx, dy)) {
+        return format.tex ? '\\infty' : '∞'
+    }
+
+    const slope = dy / dx
+    const fraction = exact && digits === undefined ? toFraction(slope) : null
+
+    if (fraction === null) {
+        return fieldNumber(slope, digits)
+    }
+
+    return format.tex ? fractionToTex(fraction) : fractionToText(fraction)
+}
+
+/** A vector is vertical when its horizontal part is this small compared to its length: floating point noise from the pixels. */
+const VERTICAL_EPSILON = 1e-9
 
 /** How far to the sides the slope of a curve is read (units of the coordinate system). */
 const STEP = 1e-4

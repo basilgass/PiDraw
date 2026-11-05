@@ -1,19 +1,12 @@
 import {InvalidArgumentError} from "../../errors"
 import {AbstractFigure} from "../AbstractFigure/AbstractFigure"
 import type {XY, IFigureContext} from "../../pidraw.common"
-import type {LabelFields} from "../Label/Label.types"
+import {fieldLength} from "../Label/Label.constraints"
+import type {LabelFieldName, LabelFields} from "../Label/Label.types"
+import type {Point} from "../Point/Point"
 import type {Line as svgLine, Shape} from "@svgdotjs/svg.js"
-import {
-    clipSegment,
-    computeLine,
-    distanceAB,
-    isDefinedPosition,
-    mathLine,
-    nowhere,
-    numberCorrection,
-    toCoordinates
-} from "../../calculus"
-import {constraintOf, type LineFound, resolveConstraint} from "./Line.constraints"
+import {clipSegment, computeLine, distanceAB, isDefinedPosition, mathLine, nowhere, toCoordinates} from "../../calculus"
+import {constraintOf, type LineFound, resolveConstraint, slopeText} from "./Line.constraints"
 import type {ILineConfig, ILineResolvedConfig, ILineType} from "./Line.types"
 
 const SHAPES: readonly ILineType[] = ['segment', 'ray', 'line', 'vector']
@@ -156,20 +149,52 @@ export class Line extends AbstractFigure {
         }
     }
 
-    /** The length of a segment, in units of the coordinate system. The other lines have no length. */
+    /**
+     * The slope of the line, and the length of a segment, in units of the coordinate system (the length is written with the unit and
+     * the scale of the graph, see {@link IGraphConfig.measure}). The slope is a fraction when it is exact and the label asks for no
+     * decimals (see `slopeText`).
+     */
     override labelFields(): LabelFields {
-        if (this._config.shape !== 'segment') {
-            return {}
-        }
-
-        return {
-            length: (digits) => {
+        const slope: LabelFields = {
+            slope: (digits, format) => {
                 const A = toCoordinates(this._start, this.graphConfig)
                 const B = toCoordinates(this._end, this.graphConfig)
 
-                return numberCorrection(distanceAB(A, B), digits).toString()
+                return slopeText(B.x - A.x, B.y - A.y, this._slopeIsExact(), digits, format)
             }
         }
+
+        if (this._config.shape !== 'segment') {
+            return slope
+        }
+
+        return {
+            ...slope,
+            length: (digits, format) => {
+                const A = toCoordinates(this._start, this.graphConfig)
+                const B = toCoordinates(this._end, this.graphConfig)
+
+                return fieldLength(distanceAB(A, B), digits, this.graphConfig.measure, format)
+            }
+        }
+    }
+
+    /** `@` is the length of a segment. The slope of the other lines is `@slope`: a line has no most classical value. */
+    override defaultLabelField(): LabelFieldName | null {
+        return this._config.shape === 'segment' ? 'length' : null
+    }
+
+    /** Whether the slope comes from numbers that were given: the slope of the line, or two points that are given by numbers. */
+    protected _slopeIsExact(): boolean {
+        const {slope, through} = this._config
+
+        if (slope !== undefined) {
+            return true
+        }
+
+        const byNumbers = (point: XY) => (point as Partial<Point>).givenByNumbers === true
+
+        return through !== undefined && byNumbers(through.A) && byNumbers(through.B)
     }
 
     /**

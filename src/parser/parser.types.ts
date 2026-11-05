@@ -3,6 +3,7 @@ import type {IGraphConfig} from "../pidraw.common"
 import type {PARSER_TYPE} from "./parser.common"
 import type {IControlsFigure, IControlsGraph} from "../controls/controls.types"
 import type {AbstractFigure} from "../figures/AbstractFigure/AbstractFigure"
+import type {LabelFieldName} from "../figures/Label/Label.types"
 import type {Graph} from "../Graph"
 import type {TeXConverterType} from "../Graph.types"
 
@@ -36,6 +37,8 @@ export interface ParserItem {
     name: string,
     /** One line for the suggestions of the editor: an example of the key, and what it makes (`A=mid A,B — middle`). */
     summary: string,
+    /** The fields that the label of the figure can show with `@name` (see `labelFields()` of the figure): the editor suggests them. None by default. */
+    labelFields?: readonly LabelFieldName[],
 }
 
 /** The kinds of figures that a parser describes, by key of the syntax. */

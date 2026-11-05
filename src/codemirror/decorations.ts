@@ -15,9 +15,9 @@ const DEFINITION = /^([A-Za-z][A-Za-z0-9]*)(?=[=(])/
 const EXPRESSION = /^[A-Za-z][A-Za-z0-9]*\([xt]\)\s*=/
 const COORDINATE = /([A-Za-z][A-Za-z0-9]*)\.[xy]/g
 
-/** Whether the line is read by the parser at all: not empty, not a comment, not reserved. */
+/** Whether the line is read by the parser at all: not empty, not a comment, not for something else, not reserved. */
 function isCode(text: string): boolean {
-    return text !== '' && !/^[$@]/.test(text)
+    return text !== '' && !/^[%$@]/.test(text)
 }
 
 /**

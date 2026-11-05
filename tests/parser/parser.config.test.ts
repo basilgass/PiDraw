@@ -66,9 +66,17 @@ describe('documentation of the entries', () => {
         expect(new Set(forms).size).toBe(forms.length)
     })
 
-    test('an entry has nothing but its build and what documents it', () => {
+    test('an entry has nothing but its build, what documents it and the fields of its label', () => {
         for (const item of Object.values(PARSER_CONFIG)) {
-            expect(Object.keys(item).sort()).toEqual(['build', 'description', 'forms', 'name', 'summary'])
+            expect(Object.keys(item).filter(key => key !== 'labelFields').sort()).toEqual(['build', 'description', 'forms', 'name', 'summary'])
+        }
+    })
+
+    test('the fields of the label of an entry are not written twice', () => {
+        for (const item of Object.values(PARSER_CONFIG)) {
+            const fields = item.labelFields ?? []
+
+            expect(new Set(fields).size).toBe(fields.length)
         }
     })
 })

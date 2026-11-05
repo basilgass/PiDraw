@@ -1,4 +1,5 @@
 import type { Svg } from "@svgdotjs/svg.js";
+import type { IMeasure } from "./calculus/units";
 export interface XY {
     x: number;
     y: number;
@@ -26,6 +27,7 @@ export interface IGraphConfig {
     axis: AxisVectors;
     height: number;
     origin: XY;
+    measure?: IMeasure;
     system: CoordinateSystem;
     width: number;
 }

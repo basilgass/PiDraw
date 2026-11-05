@@ -62,7 +62,8 @@ describe('Graph construction', () => {
             height: 600,
             origin: {x: 400, y: 300},
             system: CoordinateSystem.CARTESIAN_2D,
-            axis: {x: {x: PX_PER_CM, y: 0}, y: {x: 0, y: -PX_PER_CM}}
+            axis: {x: {x: PX_PER_CM, y: 0}, y: {x: 0, y: -PX_PER_CM}},
+            measure: {unit: null, scale: 1}
         })
     })
 
@@ -88,7 +89,7 @@ describe('Graph construction', () => {
     test('does not keep the display and the converter in its config', () => {
         const {graph} = createGraph({display: {grid: false}, tex: (value) => value})
 
-        expect(Object.keys(graph.config).sort()).toEqual(['axis', 'height', 'origin', 'system', 'width'])
+        expect(Object.keys(graph.config).sort()).toEqual(['axis', 'height', 'measure', 'origin', 'system', 'width'])
     })
 
     test.each([
@@ -1134,10 +1135,11 @@ describe('Graph tikz', () => {
 
         expect(graph.tikz()).toBe([
             '\\begin{tikzpicture}[x=37.5pt, y=37.5pt]',
+            '\\definecolor{pidraw-lightgray}{HTML}{D3D3D3}',
             '\\path (-8,-6) rectangle (8,6);',
             '\\begin{scope}',
             '\\clip (-8,-6) rectangle (8,6);',
-            '\\draw[draw=lightgray, line width=0.75pt] (-8,-6) grid[xstep=1, ystep=1] (8,6);',
+            '\\draw[draw=pidraw-lightgray, line width=0.75pt] (-8,-6) grid[xstep=1, ystep=1] (8,6);',
             '\\draw[draw=black, line width=0.75pt, ->] (-7.6,0) -- (7.6,0);',
             '\\draw[draw=black, line width=0.75pt, ->] (0,-5.6) -- (0,5.6);',
             '\\end{scope}',
@@ -1246,7 +1248,7 @@ describe('Graph tikz', () => {
 
     test('refuses a figure whose appearance has no TikZ equivalent', () => {
         const {graph} = createGraph(NICE)
-        graph.create.circle({center: {x: 400, y: 300}, radius: 50}, 'c').stroke('gold')
+        graph.create.circle({center: {x: 400, y: 300}, radius: 50}, 'c').stroke('periwinkle')
 
         expect(() => graph.tikz()).toThrow(InvalidArgumentError)
     })
@@ -1678,5 +1680,153 @@ describe('Graph controllers and the layout', () => {
         expect(() => { graph.updateLayout({...graph.config, width: -5}) }).toThrow(InvalidArgumentError)
 
         expect(watcher.layouts).toEqual([])
+    })
+})
+
+describe('Graph measure of the lengths', () => {
+    test('a graph writes the lengths of its labels as they are, without a unit', () => {
+        const {graph} = createGraph()
+        const O = graph.create.point({x: 0, y: 0}, 'O')
+        const c = graph.create.circle({center: O, radius: 2}, 'c')
+
+        c.addLabel([{field: 'radius'}])
+
+        expect(c.computeLabel()).toBe('2')
+    })
+
+    test('updateLayout with another measure writes the labels again, and nothing else of the drawing changes', () => {
+        const {graph} = createGraph()
+        const O = graph.create.point({x: 0, y: 0}, 'O')
+        const c = graph.create.circle({center: O, radius: 2}, 'c')
+        c.addLabel([{field: 'radius'}])
+        const before = c.shape.attr('r') as number
+
+        graph.updateLayout({...graph.config, measure: {unit: 'mm', scale: 10}})
+
+        expect(c.label?.displayName).toBe('20 mm')
+        expect(c.shape.attr('r')).toBe(before)
+    })
+
+    test('a measure that is not valid is an InvalidArgumentError and leaves the graph as it was', () => {
+        const {graph} = createGraph({measure: {unit: 'mm', scale: 2}})
+
+        expect(() => { graph.updateLayout({...graph.config, measure: {unit: 'mm', scale: 0}}) }).toThrow(InvalidArgumentError)
+        expect(graph.config.measure).toEqual({unit: 'mm', scale: 2})
+    })
+
+    test('the constructor takes a unit and a scale, and a missing one is the default', () => {
+        expect(createGraph({measure: {unit: 'cm'}}).graph.config.measure).toEqual({unit: 'cm', scale: 1})
+        expect(createGraph({measure: {scale: 3}}).graph.config.measure).toEqual({unit: null, scale: 3})
+    })
+})
+
+describe('Graph labels pushed away from a figure', () => {
+    function setup() {
+        const {graph} = createGraph()
+        const O = graph.create.point({x: 0, y: 0}, 'O')
+        const A = graph.create.point({x: 2, y: 0}, 'A')
+        A.setLabelReference(O)
+        A.addLabel('A')
+
+        return {graph, O, A}
+    }
+
+    test('the label of a figure follows its reference when the reference moves', () => {
+        const {graph, O, A} = setup()
+
+        expect(A.label?.config.away).toEqual({x: 1, y: 0})
+
+        O.pixels = {x: O.pixels.x, y: O.pixels.y + 100}
+        graph.update([O])
+
+        // O is now 100 pixels below A: the label lies up and to the right of A.
+        const away = A.label?.config.away
+        expect(away?.x).toBeGreaterThan(0)
+        expect(away?.y).toBeLessThan(0)
+    })
+
+    test('the label follows when the reference is drawn again because of what it depends on', () => {
+        const {graph} = createGraph()
+        const P = graph.create.point({x: 0, y: 0}, 'P')
+        const Q = graph.create.point({x: 4, y: 0}, 'Q')
+        const M = graph.create.point({middle: {A: P, B: Q}}, 'M')
+        const A = graph.create.point({x: 2, y: 2}, 'A')
+        A.setLabelReference(M)
+        A.addLabel('A')
+
+        expect(A.label?.config.away?.x).toBeCloseTo(0, 6)
+        expect(A.label?.config.away?.y).toBeCloseTo(-1, 6)
+
+        Q.pixels = {x: Q.pixels.x - 200, y: Q.pixels.y}
+        graph.update([Q])
+
+        // M is now at (1, 0) in units: A is up and to the right of it.
+        expect(A.label?.config.away?.x).toBeGreaterThan(0)
+    })
+
+    test('a reference that depends on the figure whose label it pushes makes no cycle', () => {
+        const {graph} = createGraph()
+        const P = graph.create.point({x: 0, y: 0}, 'P')
+        const Q = graph.create.point({x: 4, y: 0}, 'Q')
+        const M = graph.create.point({middle: {A: P, B: Q}}, 'M')
+        P.setLabelReference(M)
+        P.addLabel('P')
+
+        expect(() => graph.update([Q])).not.toThrow()
+        expect(() => graph.update()).not.toThrow()
+    })
+
+    test('the layout drawn again moves the labels with their references', () => {
+        const {graph, A} = setup()
+        const before = A.label?.config.away
+
+        graph.updateLayout({...graph.config, origin: {x: graph.config.origin.x + 50, y: graph.config.origin.y + 50}})
+
+        expect(A.label?.config.away).toEqual(before)
+    })
+
+    test('a label no longer follows a figure that is removed', () => {
+        const {graph, A} = setup()
+
+        graph.remove('O')
+
+        expect(A.labelReference).toBeNull()
+        expect(A.label?.config.away).toBeNull()
+    })
+})
+
+describe('Graph labels of the points that have a drag handle', () => {
+    test('the label of a point under a handle is kept clear of the disc, wherever the label was made', () => {
+        const {graph} = createGraph()
+        const A = graph.create.point({x: 1, y: 1}, 'A')
+        const B = graph.create.point({x: 2, y: 1}, 'B')
+
+        A.addLabel('A')
+        graph.handle(A)
+        graph.handle(B)
+        B.addLabel('B')
+
+        expect(A.label?.config.clearance).toBe(15)
+        expect(B.label?.config.clearance).toBe(15)
+    })
+
+    test('a point without a handle keeps its label close', () => {
+        const {graph} = createGraph()
+        const A = graph.create.point({x: 1, y: 1}, 'A')
+
+        A.addLabel('A')
+
+        expect(A.label?.config.clearance).toBe(0)
+    })
+
+    test('the label is close again when the handle is removed', () => {
+        const {graph} = createGraph()
+        const A = graph.create.point({x: 1, y: 1}, 'A')
+
+        A.addLabel('A')
+        graph.handle(A)
+        graph.remove('A_drag')
+
+        expect(A.label?.config.clearance).toBe(0)
     })
 })

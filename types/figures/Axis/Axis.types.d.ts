@@ -11,6 +11,10 @@ export interface IAxisTicks {
 }
 export interface IAxisOptions {
     padding?: number;
+    range?: {
+        min: number;
+        max: number;
+    };
     ticks?: IAxisTicks;
     name?: string;
     side?: 'left' | 'right';

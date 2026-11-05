@@ -154,6 +154,22 @@ describe('splitAxisOptions', () => {
     })
 
     test.each([
+        ['an interval', parameter({min: -10, max: 10}), {min: -10, max: 10}],
+        ['an interval written as text', parameter('0:2pi'), {min: 0, max: 6.2831853072}],
+        ['one number, for -n:n', parameter(10), {min: -10, max: 10}]
+    ])('range is %s', (_, value, range) => {
+        expect(splitAxisOptions({range: value}).extra).toEqual({range})
+    })
+
+    test.each([
+        ['a range that is reversed', parameter({min: 3, max: -3})],
+        ['a range that is text', parameter('big')],
+        ['a range with an option', parameter({min: -1, max: 1}, 2)]
+    ])('%s is a ParseError', (_, value) => {
+        expect(() => splitAxisOptions({range: value})).toThrow(ParseError)
+    })
+
+    test.each([
         ['name', 'axisXname'],
         ['side', 'inside']
     ])('%s is a ParseError that says what to do', (key, advice) => {
@@ -260,6 +276,15 @@ describe('applyAxisOption', () => {
         expect(a.padding).toBe(40)
     })
 
+    test('a range is kept, and cuts the axis', () => {
+        const a = axis()
+
+        applyAxisOption(a, 'range', parameter({min: -2, max: 2}))
+
+        expect(a.config.range).toEqual({min: -2, max: 2})
+        expect(a.end.x).toBeLessThan(axis().end.x)
+    })
+
     test('an option keeps the other options', () => {
         const a = axis()
 
@@ -275,7 +300,8 @@ describe('applyAxisOption', () => {
         ['a name that is empty', 'name', parameter(' ')],
         ['a name with an option', 'name', parameter('t', 2)],
         ['a side that does not exist', 'side', parameter('up')],
-        ['a padding that is negative', 'padding', parameter(-4)]
+        ['a padding that is negative', 'padding', parameter(-4)],
+        ['a range that is reversed', 'range', parameter({min: 3, max: -3})]
     ] as const)('%s is an OptionError that names the option, and the axis is left as it was', (_, option, value) => {
         const a = axis()
         const ticks = a.ticks.length

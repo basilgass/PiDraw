@@ -226,6 +226,25 @@ describe('buildLayout axes with a selection of ticks', () => {
         expect(display.axis).toEqual({x: {padding: 40}, y: false})
     })
 
+    test('a range is for the axes it is written for', () => {
+        expect(layout('axisY->range=-10:10,,axisX').display.axis).toEqual({x: {}, y: {range: {min: -10, max: 10}}})
+        expect(layout('axis->range=5').display.axis).toEqual({x: {range: {min: -5, max: 5}}, y: {range: {min: -5, max: 5}}})
+    })
+
+    test('the range of axisX or axisY wins over the one of axis when it is written after', () => {
+        expect(layout('axis->range=-10:10,,axisY->range=-5:5').display.axis).toEqual({
+            x: {range: {min: -10, max: 10}},
+            y: {range: {min: -5, max: 5}}
+        })
+    })
+
+    test('the range of axis written after axisY replaces its range', () => {
+        expect(layout('axisY->range=-5:5,,axis->range=-10:10').display.axis).toEqual({
+            x: {range: {min: -10, max: 10}},
+            y: {range: {min: -10, max: 10}}
+        })
+    })
+
     test('the style stays an option of the axis', () => {
         const {options} = layout('axis->ticks=5,color=red,w=3')
 
@@ -238,7 +257,8 @@ describe('buildLayout axes with a selection of ticks', () => {
         ['side', 'axisX->side=left', /inside/],
         ['ticks that are not valid', 'axis->ticks=0', /ticks/],
         ['numbers that are text', 'axis->numbers=all', /numbers/],
-        ['a padding that is negative', 'axis->padding=-3', /padding/]
+        ['a padding that is negative', 'axis->padding=-3', /padding/],
+        ['a range that is text', 'axisY->range=big', /range/]
     ])('%s is a ParseError', (_, text, message) => {
         expect(() => layout(text)).toThrow(ParseError)
         expect(() => layout(text)).toThrow(message)
@@ -368,5 +388,39 @@ describe('parsePointsSetting', () => {
     ])('%s is an OptionError that names points', (_, value) => {
         expect(() => parsePointsSetting(value)).toThrow(OptionError)
         expect(() => parsePointsSetting(value)).toThrow(/"points"/)
+    })
+})
+
+describe('unit and scale of the lengths', () => {
+    test('are none and 1 by default', () => {
+        expect(layout('x=-5:5').measure).toEqual({unit: null, scale: 1})
+    })
+
+    test('unit is the symbol written after a length, and gives no scale', () => {
+        expect(layout('unit=mm').measure).toEqual({unit: 'mm', scale: 1})
+        expect(layout('unit=u').measure).toEqual({unit: 'u', scale: 1})
+        expect(layout('unit=um').measure).toEqual({unit: 'µm', scale: 1})
+    })
+
+    test('scale is a number or a fraction, and gives no unit', () => {
+        expect(layout('scale=10').measure).toEqual({unit: null, scale: 10})
+        expect(layout('scale=1/10').measure).toEqual({unit: null, scale: 0.1})
+        expect(layout('unit=cm,scale=0.5').measure).toEqual({unit: 'cm', scale: 0.5})
+    })
+
+    test('do not change the size of the drawing', () => {
+        expect(layout('unit=mm,scale=10,unitX=2').unit).toEqual({x: 2, y: 2})
+    })
+
+    test.each(['unit=inch', 'unit=5', 'unit', 'unit=mm/2'])('%s is a ParseError', (text) => {
+        expect(() => layout(text)).toThrow(ParseError)
+    })
+
+    test.each(['scale=0', 'scale=-2', 'scale=mm', 'scale', 'scale=1/0', 'scale=2/3/4'])('%s is a ParseError', (text) => {
+        expect(() => layout(text)).toThrow(ParseError)
+    })
+
+    test('the message of a unit that does not exist lists the units', () => {
+        expect(() => layout('unit=inch')).toThrow(/mm/)
     })
 })

@@ -3,10 +3,11 @@ import type {IFigureAppearanceConfig, IFigureContext, XY} from "../../pidraw.com
 import type {IControlsFigure} from "../../controls/controls.types"
 import {Label} from "../Label/Label"
 import {checkLabelContent, renderLabelContent} from "../Label/Label.constraints"
-import type {ILabelConfig, LabelContent, LabelFields} from "../Label/Label.types"
+import type {ILabelConfig, LabelContent, LabelFieldName, LabelFields} from "../Label/Label.types"
 import {createMarker, MARKER_SHAPES} from "../../svg/marker"
 import {InvalidArgumentError} from "../../errors"
 import {checkVector} from "./AbstractFigure.constraints"
+import {isDefinedPosition} from "../../calculus"
 import {
     tikzAxis,
     tikzCoordinates,
@@ -37,6 +38,9 @@ export interface IMarkOptions {
 export type ILabelOptions = Partial<Pick<ILabelConfig, 'asHtml' | 'texConverter'>>
 
 const MARKER_SIDES: string[] = ['start', 'end', 'both', 'none']
+
+/** The dash pattern of `dash()` without a value, in pixels (a dash, then a gap): the same at any scale, resolution or zoom. */
+export const DEFAULT_DASH = '6 4'
 
 /** A color and its opacity, from 0 (transparent) to 1 (opaque, the default). */
 export interface IColorValue {
@@ -186,6 +190,17 @@ export abstract class AbstractFigure {
     /** What the label shows: a text, or texts and fields that the figure computes (see {@link labelFields}). */
     protected _labelContent: LabelContent
 
+    /** The figure that the label is pushed away from, if it was asked (`label=A/>O`). */
+    protected _labelReference: AbstractFigure | null = null
+
+    /** The figure that the label is pushed away from (see {@link setLabelReference}), or `null`. */
+    get labelReference(): AbstractFigure | null {
+        return this._labelReference
+    }
+
+    /** How far the label is kept from the figure when it was asked no push of its own, in pixels (see {@link setLabelClearance}). */
+    protected _labelClearance = 0
+
     get label() {
         return this._label
     }
@@ -227,6 +242,21 @@ export abstract class AbstractFigure {
      * this too, and `Follow` accepts only such figures.
      */
     readonly followable: boolean = false
+
+    /**
+     * Whether the label of another figure can be pushed away from this one (see {@link setLabelReference}): whether
+     * {@link referenceAnchorPoint} puts a position on it. A figure that overrides that overrides this too.
+     */
+    readonly referenceable: boolean = false
+
+    /**
+     * The point of the figure that a label is pushed away from, in pixels: the position of a point, the center of a circle or an arc, the
+     * center of the vertices of a polygon.
+     * @returns `null` for a figure that is not {@link referenceable}, or that has no position now.
+     */
+    referenceAnchorPoint(): XY | null {
+        return null
+    }
 
     get graphConfig() {
         return this._context.config
@@ -303,6 +333,7 @@ export abstract class AbstractFigure {
         this._label?.shape.remove()
         this._label = null
         this._labelContent = this._name
+        this._labelReference = null
 
         this._isDraggable = false
 
@@ -430,12 +461,12 @@ export abstract class AbstractFigure {
      * a new shape keeps its dashes.
      *
      * @param dasharray lengths of the dashes and of the gaps, in pixels (`'5'`, `'5 2'`, `'5,2,1'`), or 'none' for a
-     * continuous stroke. By default, half of a unit of the x axis.
+     * continuous stroke. By default, `DEFAULT_DASH`: pixels, so the dashes look the same at any scale, resolution or zoom.
      * @throws InvalidArgumentError if the pattern is not made of positive numbers. The figure is then left unchanged.
      */
     dash(dasharray?: string | number): this {
         // The parser gives a number for "dash=5".
-        const pattern = String(dasharray ?? this.graphConfig.axis.x.x / 2).trim()
+        const pattern = String(dasharray ?? DEFAULT_DASH).trim()
 
         if (!/^(none|\d+(\.\d+)?([\s,]+\d+(\.\d+)?)*)$/.test(pattern)) {
             throw new InvalidArgumentError(`Invalid dash pattern "${pattern}": expected 'none' or lengths like '5' or '5 2'`)
@@ -510,7 +541,7 @@ export abstract class AbstractFigure {
             this._element,
             this._name,
             {
-                text: renderLabelContent(labelContent, this.labelFields()),
+                text: renderLabelContent(labelContent, this.labelFields(), {tex: asHtml ?? false}),
                 asHtml: asHtml ?? false,
                 ...(texConverter === undefined ? {} : {texConverter})
             })
@@ -685,8 +716,69 @@ export abstract class AbstractFigure {
 
         // Move the label position
         this.moveLabel()
+        this._orientLabel()
 
         return this
+    }
+
+    /**
+     * Push the label away from another figure: it lies on the side of its anchor that is opposite to the reference, wherever the reference
+     * is (a point of a circle, away from the center). The label follows the reference when it moves (`Graph.update`). Without a
+     * reference, the label goes back to the side that the figure chooses for it.
+     *
+     * @param reference the figure, or `null` for none. A figure whose position changes the label stays the one it was built on: it is not
+     * a dependency, so a reference never makes a cycle.
+     * @throws InvalidArgumentError if the figure has no point to be pushed away from (a line, a curve: see {@link referenceable}).
+     */
+    setLabelReference(reference: AbstractFigure | null): this {
+        if (reference !== null && !reference.referenceable) {
+            throw new InvalidArgumentError(
+                `The figure "${reference.name}" cannot be the reference of a label: expected a point, a circle, an arc or a polygon`
+            )
+        }
+
+        // A label that lost its reference lies where the figure puts it again.
+        if (reference === null && this._labelReference !== null) {
+            this._label?.setAway(null)
+        }
+
+        this._labelReference = reference
+        this.updateLabel()
+
+        return this
+    }
+
+    /**
+     * Keep the label this far from the figure, in pixels, in the direction where it lies, when the label was asked no push of its own.
+     * A point that has a drag handle (a disc over the point) needs it: the handle is over its label.
+     */
+    setLabelClearance(pixels: number): this {
+        this._labelClearance = pixels
+        this._label?.setClearance(pixels)
+
+        return this
+    }
+
+    /**
+     * Turn the label to the side opposite to its reference, once the figure has put its anchor. A label whose anchor is the point it is
+     * pushed from (a circle, whose label is at its center) lies in no direction and is left where it is.
+     */
+    protected _orientLabel(): void {
+        const label = this._label
+
+        if (!label) {
+            return
+        }
+
+        label.setClearance(this._labelClearance)
+
+        const from = this._labelReference?.referenceAnchorPoint()
+
+        if (from === undefined || from === null || !isDefinedPosition(from) || !isDefinedPosition({x: label.x, y: label.y})) {
+            return
+        }
+
+        label.setAway({x: label.x - from.x, y: label.y - from.y})
     }
 
     /**
@@ -699,12 +791,35 @@ export abstract class AbstractFigure {
     }
 
     /**
+     * The field that a `@` alone shows in a label: the most classical value of the figure (the coordinates of a point, the
+     * length of a segment, the angle of an arc). `null` when there is a doubt, and `@` then has to name its field (`@area`).
+     * It is one of {@link labelFields}.
+     */
+    defaultLabelField(): LabelFieldName | null {
+        return null
+    }
+
+    /**
+     * The first field of the content of the label, `null` when it is a text without a field. A figure that has more than one
+     * place for its label (the sector of an arc, the inside of a polygon) chooses it with this field.
+     */
+    protected _firstLabelField(): LabelFieldName | null {
+        if (typeof this._labelContent === 'string') {
+            return null
+        }
+
+        const first = this._labelContent.find(part => typeof part !== 'string')
+
+        return first === undefined || typeof first === 'string' ? null : first.field
+    }
+
+    /**
      * The text of the label: its content, with the fields computed from the current state of the figure. The name of
      * the figure without a label.
      * @throws InvalidArgumentError if the label has a field that the figure no longer offers.
      */
     computeLabel(): string {
-        return this._label ? renderLabelContent(this._labelContent, this.labelFields()) : this._name
+        return this._label ? renderLabelContent(this._labelContent, this.labelFields(), {tex: this._label.asHtml}) : this._name
     }
 
     /**

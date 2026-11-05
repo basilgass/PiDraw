@@ -1,7 +1,14 @@
 import {ForeignObject as svgHTML, SVG} from "@svgdotjs/svg.js"
 import type {G, Text as svgLabel} from "@svgdotjs/svg.js"
 import type {XY} from "../../pidraw.common"
-import {DEFAULT_LABEL_POSITION, labelCenter} from "./Label.constraints"
+import {
+    alignementDirection,
+    DEFAULT_LABEL_POSITION,
+    labelCenter,
+    labelCenterToward,
+    labelPush,
+    unitDirection
+} from "./Label.constraints"
 import type {ILabelConfig, LABEL_POSITION, LabelOptions} from "./Label.types"
 
 type LabelType = svgLabel | svgHTML
@@ -33,6 +40,9 @@ export class Label {
         this._config = {
             asHtml: options.asHtml ?? false,
             alignement: options.alignement ?? DEFAULT_LABEL_POSITION,
+            away: options.away ?? null,
+            push: options.push ?? null,
+            clearance: options.clearance ?? 0,
             offset: options.offset ?? {x: 0, y: 0},
             rotate: options.rotate ?? 0,
             size: options.size ?? 'inherit',
@@ -176,21 +186,25 @@ export class Label {
 
     /** Everything that decides where the label is and how it looks, as one text, to see whether it has to be drawn again. */
     protected _state(): string {
-        const {alignement, offset, rotate, size} = this._config
+        const {alignement, away, push, clearance, offset, rotate, size} = this._config
 
-        return JSON.stringify([this._x, this._y, alignement, offset.x, offset.y, rotate, size, this._displayName])
+        return JSON.stringify([this._x, this._y, alignement, away, push, clearance, offset.x, offset.y, rotate, size, this._displayName])
     }
 
     /**
      * Align the label to its anchor and draw it. What is not given stays what the label has.
      *
-     * @param alignement which part of the label is at the anchor, for example `tl`: the label is above and to the left of it.
+     * @param alignement on which side of the anchor the label lies, for example `tl`: the label is above the anchor and to its left.
      * @param offset added to the place, in pixels, the y axis pointing up. A value that is not a number is 0.
      * @param rotate the angle around the anchor, in degrees clockwise on the screen.
+     * @param push how far the label is pushed from its anchor, in pixels, in the direction where it lies; `null` asks none, and the
+     * label is then pushed by its `clearance`.
      */
-    position(alignement?: LABEL_POSITION, offset?: XY, rotate?: number): this {
+    position(alignement?: LABEL_POSITION, offset?: XY, rotate?: number, push?: number | null): this {
         if (alignement !== undefined) {
             this._alignementGiven = true
+            // A position that is asked for replaces a direction that a figure chose.
+            this._config.away = null
         }
 
         const wanted = offset ?? this._config.offset
@@ -198,6 +212,7 @@ export class Label {
         this._config.alignement = alignement ?? this._config.alignement
         this._config.offset = {x: Number.isNaN(wanted.x) ? 0 : wanted.x, y: Number.isNaN(wanted.y) ? 0 : wanted.y}
         this._config.rotate = rotate ?? this._config.rotate
+        this._config.push = push === undefined ? this._config.push : push
 
         this._draw()
 
@@ -220,13 +235,45 @@ export class Label {
         return {width: this._shape.length(), height: this._shape.bbox().h}
     }
 
+    /**
+     * Make the label lie on the side of its anchor that a direction points to, instead of the one of its alignement. The label is drawn
+     * again if that changes something.
+     * @param direction on the screen (the y axis points down), not necessarily of length 1; `null` (or a null vector) gives the alignement back.
+     */
+    setAway(direction: XY | null): this {
+        this._config.away = direction === null ? null : unitDirection(direction)
+        this._drawIfChanged()
+
+        return this
+    }
+
+    /**
+     * Keep the label this far from its anchor, in pixels, when it was asked no push of its own: a drag handle is over the figure, and its label
+     * would be under it. The label is drawn again if that changes something.
+     */
+    setClearance(pixels: number): this {
+        this._config.clearance = pixels
+        this._drawIfChanged()
+
+        return this
+    }
+
+    /** Draw the label again if what decides where it is changed since it was drawn. Nothing if it was never drawn. */
+    protected _drawIfChanged(): void {
+        if (this._applied !== null && this._applied !== this._state()) {
+            this._draw()
+        }
+    }
+
     /** Put the label at its place, turned as it is asked. */
     protected _draw(): void {
-        const {alignement, offset, rotate} = this._config
+        const {alignement, away, push, clearance, offset, rotate} = this._config
         const {width, height} = this._size()
-        const center = labelCenter(alignement, {x: this._x, y: this._y}, width, height)
+        const anchor = {x: this._x, y: this._y}
+        const center = away === null ? labelCenter(alignement, anchor, width, height) : labelCenterToward(anchor, away, width, height)
+        const pushed = labelPush(away ?? alignementDirection(alignement), push ?? clearance)
 
-        this._shape.center(center.x + offset.x, center.y - offset.y)
+        this._shape.center(center.x + offset.x + pushed.x, center.y - offset.y + pushed.y)
         this.rotate(rotate)
         this._applied = this._state()
     }

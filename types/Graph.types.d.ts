@@ -1,6 +1,6 @@
 import type { G } from "@svgdotjs/svg.js";
 import type { IControlsGraph } from "./controls/controls.types";
-import type { TickSelection } from "./calculus";
+import type { IMeasure, TickSelection } from "./calculus";
 import type { IGridConfig } from "./figures/Grid/Grid.types";
 import type { Point } from "./figures/Point/Point";
 import type { AbstractFigure } from "./figures/AbstractFigure/AbstractFigure";
@@ -38,6 +38,10 @@ export interface IAxisDisplay {
     marks?: TickSelection;
     numbers?: TickSelection | 'none';
     padding?: number;
+    range?: {
+        min: number;
+        max: number;
+    };
 }
 export interface IGraphDisplay {
     axis?: boolean | {
@@ -50,6 +54,7 @@ export interface IGraphConstructorConfig {
     axis?: AxisVectors;
     display?: IGraphDisplay;
     height?: number;
+    measure?: Partial<IMeasure>;
     origin?: XY;
     system?: CoordinateSystem;
     tex?: TeXConverterType;

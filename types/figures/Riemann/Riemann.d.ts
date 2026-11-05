@@ -1,6 +1,6 @@
 import { AbstractFigure } from "../AbstractFigure/AbstractFigure";
 import type { IFigureContext, XY } from "../../pidraw.common";
-import type { LabelFields } from "../Label/Label.types";
+import type { LabelFieldName, LabelFields } from "../Label/Label.types";
 import { type RiemannRectangle } from "../../calculus";
 import type { IRiemannConfig } from "./Riemann.types";
 export declare class Riemann extends AbstractFigure {
@@ -21,6 +21,7 @@ export declare class Riemann extends AbstractFigure {
     protected _path(): string;
     protected _labelPlace(): XY | null;
     labelFields(): LabelFields;
+    defaultLabelField(): LabelFieldName;
     moveLabel(): this;
     tikz(): string;
     _makeShape(): import("@svgdotjs/svg.js").Shape;

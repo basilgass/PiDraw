@@ -11,7 +11,7 @@ export interface IAxisParameters {
     axisXname?: IParserParameters;
     axisYname?: IParserParameters;
 }
-export type IAxisExtra = Pick<IAxisDisplay, 'marks' | 'numbers' | 'padding'>;
+export type IAxisExtra = Pick<IAxisDisplay, 'marks' | 'numbers' | 'padding' | 'range'>;
 export declare function parseSelection({ value, options }: IParserParameters, key: string, allowNone: true): TickSelection | 'none';
 export declare function parseSelection({ value, options }: IParserParameters, key: string, allowNone: false): TickSelection;
 export declare function splitAxisOptions(options: Record<string, IParserParameters>): {
@@ -26,7 +26,7 @@ export declare function buildAxes(parameters: IAxisParameters, extra?: {
     y: IAxisDisplay | false;
 };
 export declare function buildAxis(item: PARSER, figures: Record<string, AbstractFigure>): BuildResult<IAxisConfig>;
-export type AxisOption = 'ticks' | 'numbers' | 'name' | 'side' | 'padding';
+export type AxisOption = 'ticks' | 'numbers' | 'name' | 'side' | 'padding' | 'range';
 export declare function applyAxisOption(figure: AbstractFigure, option: AxisOption, parameter: IParserParameters): void;
 export declare const AXIS_OPTION_HANDLERS: Record<AxisOption, FigureOptionHandler>;
 export declare const AXIS_ITEMS: ParserItems;

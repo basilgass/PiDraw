@@ -2,9 +2,10 @@ import type {G, Shape} from "@svgdotjs/svg.js"
 import type {XY, IFigureContext} from "../../pidraw.common"
 import {InvalidArgumentError} from "../../errors"
 import {AbstractFigure} from "../AbstractFigure/AbstractFigure"
-import {isDefinedPosition, numberCorrection, toCoordinates} from "../../calculus"
+import {isDefinedPosition, toCoordinates} from "../../calculus"
 import {constraintOf, resolveConstraint} from "./Point.constraints"
-import type {LabelFields} from "../Label/Label.types"
+import {fieldNumber} from "../Label/Label.constraints"
+import type {LabelFieldName, LabelFields} from "../Label/Label.types"
 import type {IPointConfig, IPointOptions, IPointResolvedConfig, PointShape} from "./Point.types"
 
 /**
@@ -124,6 +125,16 @@ export class Point extends AbstractFigure {
         this.updateLabel()
     }
 
+    /**
+     * Whether the point is given by two numbers (`A(3,4)`), and not found from other figures (an intersection, a projection, the
+     * abscissa of another point). A line through such points has a slope that is exact, and a label shows it as a fraction.
+     */
+    get givenByNumbers(): boolean {
+        const coordinates = this._config.coordinates
+
+        return coordinates !== undefined && typeof coordinates.x === 'number' && typeof coordinates.y === 'number'
+    }
+
     protected _pixels: Readonly<XY>
 
     /**
@@ -203,9 +214,20 @@ export class Point extends AbstractFigure {
             coordinates: (digits) => {
                 const {x, y} = this.coordinates
 
-                return `(${numberCorrection(x, digits)};${numberCorrection(y, digits)})`
+                return `(${fieldNumber(x, digits)};${fieldNumber(y, digits)})`
             }
         }
+    }
+
+    override defaultLabelField(): LabelFieldName {
+        return 'coordinates'
+    }
+
+    override readonly referenceable = true
+
+    /** The position of the point. `null` when it has none. */
+    override referenceAnchorPoint(): XY | null {
+        return isDefinedPosition(this._pixels) ? {x: this._pixels.x, y: this._pixels.y} : null
     }
 
     /**

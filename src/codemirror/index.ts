@@ -8,8 +8,8 @@
  * extensions: [pidrawParameters()]  // the parameters of the graph: x=-10:10,axis,grid
  * ```
  *
- * The colors are classes (`tok-keyword`, `tok-string`, `tok-number`, `tok-comment`, `tok-function`, `tok-class`, `tok-invalid`),
- * the same ones as PiMath: the page gives them their color. The names of the figures use `cm-pidraw-def`, `cm-pidraw-dup` and
+ * The colors are classes (`tok-keyword`, `tok-string`, `tok-number`, `tok-comment`, `tok-meta`, `tok-function`, `tok-class`, `tok-invalid`),
+ * the same ones as PiMath (except `tok-meta`, the lines for something else than PiDraw): the page gives them their color. The names of the figures use `cm-pidraw-def`, `cm-pidraw-dup` and
  * `cm-pidraw-ref`.
  *
  * `@codemirror/*` and `@lezer/highlight` are peer dependencies, needed only by whoever imports this module.

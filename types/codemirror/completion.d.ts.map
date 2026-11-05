@@ -1,1 +1,1 @@
-{"version":3,"file":"completion.d.ts","sourceRoot":"","sources":["../../src/codemirror/completion.ts"],"names":[],"mappings":"AAAA,OAAO,KAAK,EAAkD,gBAAgB,EAAC,MAAM,0BAA0B,CAAA;AAC/G,OAAO,KAAK,EAAC,UAAU,EAAC,MAAM,YAAY,CAAA;AA8D1C,wBAAgB,gBAAgB,CAAC,IAAI,GAAE,UAAmB,GAAG,gBAAgB,CAc5E"}
+{"version":3,"file":"completion.d.ts","sourceRoot":"","sources":["../../src/codemirror/completion.ts"],"names":[],"mappings":"AAAA,OAAO,KAAK,EAAkD,gBAAgB,EAAC,MAAM,0BAA0B,CAAA;AAC/G,OAAO,KAAK,EAAC,UAAU,EAAC,MAAM,YAAY,CAAA;AAgF1C,wBAAgB,gBAAgB,CAAC,IAAI,GAAE,UAAmB,GAAG,gBAAgB,CAgB5E"}

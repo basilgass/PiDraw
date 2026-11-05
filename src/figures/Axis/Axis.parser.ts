@@ -8,10 +8,11 @@ import {InvalidArgumentError, OptionError, ParseError} from "../../errors"
 import type {BuildResult, FigureOptionHandler, IParserParameters, ParserItems} from "../../parser/parser.types"
 import type {IAxisDisplay} from "../../Graph.types"
 import {given, parseStep, parseStepValue} from "../../parser/parser.step"
+import {readInterval} from "../../parser/parser.interval"
 import {buildError, convertIdToFigure, describeValue, isPoint, PARSER_TYPE} from "../../parser/parser.common"
 
 // Everything the parser needs to know about axes: how to read the line of code that draws a graduated line (`a=axis A,B,0.5`), the
-// parameters `axis`, `axisX`, `axisY`, `axisXname` and `axisYname` of the layout (and the options `ticks`, `numbers` and `padding` of
+// parameters `axis`, `axisX`, `axisY`, `axisXname` and `axisYname` of the layout (and the options `ticks`, `numbers`, `padding` and `range` of
 // the entries `axis`), and the options of an axis. The figure never reads the syntax of the parser: it gets a config.
 
 /** The parameters of the layout that concern the axes. */
@@ -24,7 +25,7 @@ export interface IAxisParameters {
 }
 
 /** What the options of an entry `axis` say about one axis, besides its step. */
-export type IAxisExtra = Pick<IAxisDisplay, 'marks' | 'numbers' | 'padding'>
+export type IAxisExtra = Pick<IAxisDisplay, 'marks' | 'numbers' | 'padding' | 'range'>
 
 /** The name of an axis: a text, or a number. */
 function nameOf(parameter: IParserParameters, key: string): string {
@@ -75,7 +76,8 @@ export function parseSelection({value, options}: IParserParameters, key: string,
  * The options of an entry `axis` that are for the graduation of the axes of the graph, and the other options (the style).
  * - `ticks=5`, `ticks=first`, `ticks=5/first`: which ticks are drawn (see {@link parseSelection});
  * - `numbers=2`, `numbers=5/first`, `numbers=none`: on which ticks a number is written;
- * - `padding=40`: how far the axis stops from the borders, in pixels.
+ * - `padding=40`: how far the axis stops from the borders, in pixels;
+ * - `range=-10:10`, `range=10`: the part of the axis that is drawn, in units from its zero (`10` is `-10:10`).
  *
  * @throws ParseError if one of them is not valid, or is `name` or `side` (the name is `axisXname`, and the graph chooses the side).
  */
@@ -90,6 +92,8 @@ export function splitAxisOptions(options: Record<string, IParserParameters>): { 
             extra.numbers = parseSelection(parameter, key, true)
         } else if (key === 'padding') {
             extra.padding = paddingOf(parameter)
+        } else if (key === 'range') {
+            extra.range = rangeOf(parameter)
         } else if (key === 'name' || key === 'side') {
             throw new ParseError(`The option "${key}" is for an axis drawn from the code, not for the axes of the graph: ${key === 'name' ? 'use axisXname or axisYname' : 'the graph puts the numbers inside of the drawing'}`)
         } else {
@@ -107,6 +111,15 @@ function paddingOf({value, options}: IParserParameters): number {
     }
 
     return value
+}
+
+/** The part of an axis that is drawn: an interval (`-10:10`), or one number for `-n:n`. */
+function rangeOf({value, options}: IParserParameters): { min: number, max: number } {
+    if (options.length > 0) {
+        throw new ParseError(`Cannot read the option "range=${[value, ...options].map(item => describeValue(item)).join('/')}": expected min:max, or one number for -n:n`)
+    }
+
+    return readInterval(value, 'range')
 }
 
 /**
@@ -189,7 +202,7 @@ export function buildAxis(item: PARSER, figures: Record<string, AbstractFigure>)
 }
 
 /** The options of an axis. */
-export type AxisOption = 'ticks' | 'numbers' | 'name' | 'side' | 'padding'
+export type AxisOption = 'ticks' | 'numbers' | 'name' | 'side' | 'padding' | 'range'
 
 /**
  * Apply an option to an axis:
@@ -197,7 +210,9 @@ export type AxisOption = 'ticks' | 'numbers' | 'name' | 'side' | 'padding'
  * - `numbers=2`, `numbers=5/first`, `numbers=none`: on which ticks a number is written;
  * - `name=t`: the name written beyond the arrow;
  * - `side=left` or `side=right`: the side of the axis that has the numbers;
- * - `padding=40`: how far the axis stops from the borders, in pixels.
+ * - `padding=40`: how far the axis stops from the borders, in pixels;
+ * - `range=-10:10`, `range=10`: the part of the axis that is drawn, in units from its zero (the axis needs a zero: two points or a point
+ *   and a vector).
  *
  * @throws OptionError if the figure is not an axis, or the value is not valid.
  */
@@ -221,6 +236,9 @@ export function applyAxisOption(figure: AbstractFigure, option: AxisOption, para
                 break
             case 'padding':
                 next = {...config, padding: paddingOf(parameter)}
+                break
+            case 'range':
+                next = {...config, range: rangeOf(parameter)}
                 break
             case 'name':
                 if ((typeof value !== 'string' && typeof value !== 'number') || options.length > 0 || String(value).trim() === '') {
@@ -262,7 +280,8 @@ export const AXIS_OPTION_HANDLERS: Record<AxisOption, FigureOptionHandler> = {
     numbers: axisHandler('numbers'),
     name: axisHandler('name'),
     side: axisHandler('side'),
-    padding: axisHandler('padding')
+    padding: axisHandler('padding'),
+    range: axisHandler('range')
 }
 
 /** The kind of axis of the syntax, by key. */

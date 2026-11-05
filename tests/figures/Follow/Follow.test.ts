@@ -442,8 +442,8 @@ describe('Follow TikZ', () => {
         const {line, follow} = create()
         const t = follow('t', {follow: line('d', at(-4, 1), at(4, 1)), at: at(2, 0), tangent: true, size: 20}).stroke('red').fill('blue')
 
-        expect(t.tikz()).toContain('\\draw[draw=red, line width=0.75pt] (-8,1) -- (8,1);')
-        expect(t.tikz()).toContain('\\fill[fill=blue] (2,1) circle[radius=7.5pt];')
+        expect(t.tikz()).toContain('\\draw[draw=pidraw-red, line width=0.75pt] (-8,1) -- (8,1);')
+        expect(t.tikz()).toContain('\\fill[fill=pidraw-blue] (2,1) circle[radius=7.5pt];')
     })
 
     test('the label is a node beside the point', () => {

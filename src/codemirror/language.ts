@@ -20,8 +20,9 @@ const WORD = /^[a-zA-Z][a-zA-Z0-9]*/
 /** A parameter of the graph can have a dot (`default.label`). */
 const PARAMETER = /^[a-zA-Z][a-zA-Z0-9]*(\.[a-zA-Z][a-zA-Z0-9]*)?/
 
-/** The first character of a line that is a comment, and the one of a command. */
-const COMMENT = '$'
+/** The first character of a line that is a comment, of a line for something else than PiDraw, and of a command. */
+const COMMENT = '%'
+const FOREIGN = '$'
 const RESERVED = '@'
 
 /** The commands of the code that the themes give (`@pause`, `@slides=<2-4,6>`...): a line that is none of them is not valid. */
@@ -45,6 +46,10 @@ function reader(mode: PidrawMode): (stream: StringStream, state: IPidrawState) =
             if (first === COMMENT) {
                 stream.skipToEnd()
                 return 'comment'
+            }
+            if (first === FOREIGN) {
+                stream.skipToEnd()
+                return 'meta'
             }
             if (first === RESERVED) {
                 // A command is one word, in the code of the figures: the parameters of the graph have none.

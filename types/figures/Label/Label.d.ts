@@ -30,11 +30,14 @@ export declare class Label {
     protected _alignementGiven: boolean;
     protected _applied: string | null;
     protected _state(): string;
-    position(alignement?: LABEL_POSITION, offset?: XY, rotate?: number): this;
+    position(alignement?: LABEL_POSITION, offset?: XY, rotate?: number, push?: number | null): this;
     protected _size(): {
         width: number;
         height: number;
     };
+    setAway(direction: XY | null): this;
+    setClearance(pixels: number): this;
+    protected _drawIfChanged(): void;
     protected _draw(): void;
     protected _html(): string;
     protected _style(): string;

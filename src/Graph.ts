@@ -71,6 +71,9 @@ export interface IDraggableConfig {
     target?: Point,
 }
 
+/** The diameter of the disc that a drag handle is, in pixels. */
+const HANDLE_SIZE = 30
+
 /** How deep `figuresIn` goes into a configuration: the figures are in objects and lists nested a few levels (`{through: [{point}]}`). */
 const CONFIG_DEPTH = 5
 
@@ -454,10 +457,15 @@ export class Graph extends EventTarget {
 
         try {
             handle.pixels = target.pixels
-            handle.asCircle(30).fill({color: 'white', opacity: 0.8})
+            handle.asCircle(HANDLE_SIZE).fill({color: 'white', opacity: 0.8})
             this.layers.interactive.add(handle.element)
 
-            return this.draggable(handle, {target, ...options})
+            const dragged = this.draggable(handle, {target, ...options})
+
+            // The handle is over the label of the point: the label is kept clear of it.
+            target.setLabelClearance(HANDLE_SIZE / 2)
+
+            return dragged
         } catch (error) {
             this.remove(handle.name)
             throw error
@@ -630,14 +638,23 @@ export class Graph extends EventTarget {
         }
 
         const sources = changed instanceof AbstractFigure ? [changed] : changed
+        const affected = this._affectedBy(sources)
 
-        this._affectedBy(sources).forEach((figure) => {
+        affected.forEach((figure) => {
             updated += this._refresh(figure, forceUpdate) ? 1 : 0
         })
 
         const moved = new Set(sources)
         moved.forEach((figure) => {
             figure.updateLabel()
+        })
+
+        // The labels that are pushed away from a figure that moved or was drawn again follow it.
+        const touched = new Set([...moved, ...affected])
+        Object.values(this._figures).forEach((figure) => {
+            if (figure.labelReference !== null && touched.has(figure.labelReference)) {
+                figure.updateLabel()
+            }
         })
 
         return {updated: updated + moved.size, total: this._total}
@@ -859,6 +876,18 @@ export class Graph extends EventTarget {
 
     /** Take a figure out of the graph: its svg, its name and the links to the figures it depends on. */
     protected _detach(figure: AbstractFigure): void {
+        // The point under a handle that goes has its label back close to it, and a label no longer follows the figure that goes.
+        const drag = figure instanceof Point ? this._drags.get(figure) : undefined
+        if (drag?.figure === figure) {
+            drag.options.target?.setLabelClearance(0)
+        }
+
+        Object.values(this._figures).forEach((other) => {
+            if (other.labelReference === figure) {
+                other.setLabelReference(null)
+            }
+        })
+
         figure.dispose()
         figure.element.remove()
 

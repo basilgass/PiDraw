@@ -2,6 +2,7 @@ import type {PiParse} from "piparser"
 import {OptionError, ParseError} from "../errors"
 import type {IGraphDisplay} from "../Graph.types"
 import {isDomain} from "../pidraw.common"
+import {DEFAULT_MEASURE, type IMeasure, LENGTH_UNITS, lengthUnitOf, type LengthUnit} from "../calculus/units"
 import {buildAxes, type IAxisExtra, splitAxisOptions} from "../figures/Axis/Axis.parser"
 import {buildGridParameters} from "../figures/Grid/Grid.parser"
 import {given} from "./parser.step"
@@ -14,7 +15,7 @@ import {type Interval, readInterval} from "./parser.interval"
 
 /** The names of the parameters. */
 export const LAYOUT_KEYS = [
-    'x', 'y', 'box', 'unitX', 'unitY',
+    'x', 'y', 'box', 'unitX', 'unitY', 'unit', 'scale',
     'axis', 'axisX', 'axisY', 'axisXname', 'axisYname',
     'grid', 'gridX', 'gridY',
     'default.label', 'default.tex', 'default.points'
@@ -45,6 +46,8 @@ export interface ILayout {
     window: { x: Interval, y: Interval },
     /** The length of a unit of each axis, in cm. */
     unit: { x: number, y: number },
+    /** How the labels write a length: the unit and the scale. */
+    measure: IMeasure,
     /** What the graph shows. */
     display: IGraphDisplay,
     /** What the figures are given when they do not ask for something else. */
@@ -123,6 +126,37 @@ function length(parameter: IParserParameters | undefined, key: string): number |
     return value
 }
 
+/** The unit of the lengths that the labels write: one of {@link LENGTH_UNITS}. */
+function unitOf(parameter: IParserParameters | undefined): LengthUnit | null {
+    if (!given(parameter)) {
+        return null
+    }
+
+    const {value, options} = parameter
+    const unit = typeof value === 'string' && options.length === 0 ? lengthUnitOf(value) : null
+
+    if (unit === null) {
+        throw new ParseError(`Cannot read the parameter "unit=${describeValue(value)}": expected ${LENGTH_UNITS.join(', ')} (unit=mm)`)
+    }
+
+    return unit
+}
+
+/** The scale of the lengths that the labels write: a number greater than 0, or a fraction (`1/10`, that the parser reads as a number). */
+function scaleOf(parameter: IParserParameters | undefined): number | null {
+    if (!given(parameter)) {
+        return null
+    }
+
+    const {value, options} = parameter
+
+    if (typeof value !== 'number' || options.length > 0 || !(Number.isFinite(value) && value > 0)) {
+        throw new ParseError(`Cannot read the parameter "scale=${describeValue(value)}": expected a number greater than 0, or a fraction (scale=10, scale=1/10)`)
+    }
+
+    return value
+}
+
 /** A word alone: `true`, or `false` when it is not there. */
 function flag(parameter: IParserParameters | undefined, key: string): boolean {
     if (!given(parameter)) {
@@ -191,6 +225,8 @@ function readEntry(entry: string, parser: PiParse): { key: string, parameter: IP
  * Read the parameters of a graph:
  * - the window: `x=-10:10`, `y=-8:8` (a bound can be `2pi`), `x=6` for `x=-6:6`, `box=5` for both (`box=8;6`, or an interval); -8:8 by default;
  * - the length of a unit in cm: `unitX=2`, `unitY=3` (`unitY` is `unitX` when it is alone); 1 by default;
+ * - how the labels write a length: the unit (`unit=mm`, none by default) and the scale (`scale=10`, `scale=1/10`, 1 by default); they change nothing of
+ *   the drawing, and giving a unit does not give a scale;
  * - the axes: `axis`, `axisX`, `axisY`, `axisXname=x` (see {@link buildAxes});
  * - the grid: `grid`, `gridX`, `gridY` (see {@link buildGrid}), whose option `subgrid` cuts the steps;
  * - the defaults of the figures: `default.label`, `default.tex`, `default.points=no` or a shape (`o`, `s`, `*`) and a size (`o/12`).
@@ -220,7 +256,7 @@ export function buildLayout(text: string, parser: PiParse): ILayout {
             throw new ParseError(`The parameter "${key}" has no options, got ${Object.keys(entryOptions).join(', ')} after "->"`)
         }
 
-        // The options of `axis`, `grid`... go to the axes and the grid. For an axis, `ticks`, `numbers` and `padding` say what the graph
+        // The options of `axis`, `grid`... go to the axes and the grid. For an axis, `ticks`, `numbers`, `padding` and `range` say what the graph
         // draws; the others are its style.
         const forX = key === 'axis' || key === 'axisX' || key === 'axisXname'
         const forY = key === 'axis' || key === 'axisY' || key === 'axisYname'
@@ -258,6 +294,7 @@ export function buildLayout(text: string, parser: PiParse): ILayout {
     return {
         window: view,
         unit: {x: unitX ?? 1, y: unitY ?? unitX ?? 1},
+        measure: {unit: unitOf(entries.unit), scale: scaleOf(entries.scale) ?? DEFAULT_MEASURE.scale},
         display: {
             axis: buildAxes(entries, extras),
             grid: grid ?? false

@@ -645,7 +645,7 @@ describe('Line vector', () => {
     test('the arrow takes the color of the line', () => {
         const v = through('vector').stroke('red')
 
-        expect(v.tikz()).toContain('draw=red')
+        expect(v.tikz()).toContain('draw=pidraw-red')
     })
 })
 
@@ -676,11 +676,11 @@ describe('Line tikz', () => {
     test('the appearance of the line is written as options', () => {
         const tikz = through('segment').stroke('blue', 2).dash('4 2').tikz()
 
-        expect(tikz).toContain('draw=blue, line width=1.5pt, dash pattern=on 3pt off 1.5pt')
+        expect(tikz).toContain('draw=pidraw-blue, line width=1.5pt, dash pattern=on 3pt off 1.5pt')
     })
 
     test('a color that has no equivalent in LaTeX is an InvalidArgumentError', () => {
-        const d = through('segment').stroke('steelblue')
+        const d = through('segment').stroke('periwinkle')
 
         expect(() => d.tikz()).toThrow(InvalidArgumentError)
     })
@@ -757,5 +757,142 @@ describe('Line follow', () => {
         const d = line('d', {through: {A, B: A}})
 
         expect(d.follow(123, 456)).toEqual({x: 123, y: 456})
+    })
+})
+
+describe('Line label fields', () => {
+    const labelOf = (d: Line, field: 'slope' | 'length', digits?: number) => {
+        d.addLabel([{field, ...(digits === undefined ? {} : {digits})}], {asHtml: true})
+
+        return d.computeLabel()
+    }
+
+    test('the slope of a line through two points given by numbers is a fraction in TeX', () => {
+        const {point, line} = create()
+        const d = line('d', {through: {A: point('A', 0, 0), B: point('B', 2, 3)}})
+
+        expect(labelOf(d, 'slope')).toBe('\\frac{3}{2}')
+    })
+
+    test('a negative slope has its sign in front of the fraction, and a whole slope is a number', () => {
+        const {point, line} = create()
+
+        expect(labelOf(line('d', {through: {A: point('A', 0, 0), B: point('B', 4, -2)}}), 'slope')).toBe('-\\frac{1}{2}')
+        expect(labelOf(line('e', {through: {A: point('C', 0, 0), B: point('D', 1, 2)}}), 'slope')).toBe('2')
+    })
+
+    test('the slope with decimals asked is a decimal number', () => {
+        const {point, line} = create()
+        const d = line('d', {through: {A: point('A', 0, 0), B: point('B', 2, 3)}})
+
+        expect(labelOf(d, 'slope', 2)).toBe('1.5')
+        expect(labelOf(d, 'slope', 0)).toBe('2')
+    })
+
+    test('the slope of a line given by a slope is a fraction', () => {
+        const {point, line} = create()
+
+        expect(labelOf(line('d', {slope: {A: point('A', 1, 1), slope: 0.75}}), 'slope')).toBe('\\frac{3}{4}')
+    })
+
+    test('a slope that is no fraction with a denominator of 100 at most is a decimal number', () => {
+        const {point, line} = create()
+
+        expect(labelOf(line('d', {slope: {A: point('A', 1, 1), slope: 0.123456}}), 'slope')).toBe('0.12')
+    })
+
+    test('the slope of a vertical line is infinite', () => {
+        const {point, line} = create()
+
+        expect(labelOf(line('d', {through: {A: point('A', 1, 0), B: point('B', 1, 3)}}), 'slope')).toBe('\\infty')
+    })
+
+    test('the slope is a decimal number when a point is found from other figures', () => {
+        const {context, point, line} = create()
+        const middle = new Point(context, 'M', {middle: {A: point('A', 0, 0), B: point('B', 2, 1)}})
+        const d = line('d', {through: {A: point('O', 0, 0), B: middle}})
+
+        expect(labelOf(d, 'slope')).toBe('0.5')
+    })
+
+    test('the slope is in units of the coordinate system when the scales differ', () => {
+        const base = graphConfig()
+        const {point, line} = create({...base, axis: {x: {x: 50, y: 0}, y: {x: 0, y: -100}}})
+        const d = line('d', {through: {A: point('A', 0, 0), B: point('B', 2, 3)}})
+
+        expect(labelOf(d, 'slope')).toBe('\\frac{3}{2}')
+    })
+
+    test('the length of a segment is in units of the coordinate system, and it is the default field', () => {
+        const {point, line} = create()
+        const d = line('d', {through: {A: point('A', 0, 0), B: point('B', 3, 4)}, shape: 'segment'})
+
+        expect(labelOf(d, 'length')).toBe('5')
+        expect(d.defaultLabelField()).toBe('length')
+    })
+
+    test.each(['line', 'ray', 'vector'] as const)('a %s has a slope, no length and no default field', (shape) => {
+        const {point, line} = create()
+        const d = line('d', {through: {A: point('A', 0, 0), B: point('B', 1, 1)}, shape})
+
+        expect(Object.keys(d.labelFields())).toEqual(['slope'])
+        expect(d.defaultLabelField()).toBeNull()
+    })
+})
+
+describe('Line label slope in TikZ', () => {
+    test('the fraction of a TeX label is a formula between $', () => {
+        const {point, line} = create()
+        const d = line('d', {through: {A: point('A', 0, 0), B: point('B', 2, 3)}})
+
+        d.addLabel([{field: 'slope'}], {asHtml: true})
+
+        expect(d.tikz()).toContain('{$\\frac{3}{2}$};')
+    })
+})
+
+describe('Line label with a unit and a scale', () => {
+    const segment = (unit: 'mm' | null, scale: number) => {
+        const {point, line} = create({...graphConfig(), measure: {unit, scale}})
+
+        return line('d', {through: {A: point('A', 0, 0), B: point('B', 3, 4)}, shape: 'segment'})
+    }
+
+    test('the length of a segment is multiplied by the scale and followed by the unit', () => {
+        const d = segment('mm', 10)
+
+        d.addLabel([{field: 'length'}])
+
+        expect(d.computeLabel()).toBe('50 mm')
+    })
+
+    test('the slope has no unit and does not depend on the scale', () => {
+        const d = segment('mm', 10)
+
+        d.addLabel([{field: 'slope'}])
+
+        expect(d.computeLabel()).toBe('4/3')
+    })
+})
+
+describe('Line label slope in a text', () => {
+    const slopeOf = (through: [number, number], asHtml: boolean) => {
+        const {point, line} = create()
+        const d = line('d', {through: {A: point('A', 0, 0), B: point('B', ...through)}})
+
+        d.addLabel([{field: 'slope'}], {asHtml})
+
+        return d.computeLabel()
+    }
+
+    test('a fraction is written with a slash in a text and with \\frac in TeX', () => {
+        expect(slopeOf([2, 3], false)).toBe('3/2')
+        expect(slopeOf([2, 3], true)).toBe('\\frac{3}{2}')
+        expect(slopeOf([4, -2], false)).toBe('-1/2')
+    })
+
+    test('the infinity is a sign in a text and \\infty in TeX', () => {
+        expect(slopeOf([0, 3], false)).toBe('∞')
+        expect(slopeOf([0, 3], true)).toBe('\\infty')
     })
 })

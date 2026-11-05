@@ -17,4 +17,8 @@ export declare function axisConfigOf(director: {
     d: XY;
 }, side: 'left' | 'right', display: IAxisDisplay | false): IAxisConfig;
 export declare function insetEnds(start: XY, end: XY, padding: number): [XY, XY] | null;
+export declare function clampToRange(start: XY, end: XY, zero: XY, unit: XY, range: {
+    min: number;
+    max: number;
+}): [XY, XY] | null;
 //# sourceMappingURL=Axis.constraints.d.ts.map

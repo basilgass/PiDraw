@@ -1,6 +1,7 @@
+import {DEFAULT_MEASURE, type IMeasure, numberCorrection, scaled, withDegree, withUnit} from "../../calculus"
 import {InvalidArgumentError} from "../../errors"
 import type {XY} from "../../pidraw.common"
-import type {LABEL_POSITION, LabelContent, LabelFields} from "./Label.types"
+import type {LABEL_POSITION, LabelContent, LabelFields, LabelFormat} from "./Label.types"
 
 /** From this part of a direction (its sine or its cosine), a label is put on that side. */
 const SIDE = 0.38
@@ -43,6 +44,32 @@ export function labelBesideWay(point: XY, direction: XY, gap: number): { point: 
     }
 }
 
+/** The number of decimals of a field when the label does not ask for any (`@` and not `@.3`). */
+export const DEFAULT_LABEL_DIGITS = 2
+
+/** A number as the text of a field: rounded to `digits` decimals, or to {@link DEFAULT_LABEL_DIGITS} when none is asked. */
+export function fieldNumber(value: number, digits: number | undefined): string {
+    return numberCorrection(value, digits ?? DEFAULT_LABEL_DIGITS).toString()
+}
+
+/**
+ * A length (`power` 1) or an area (`power` 2) of the coordinate system as the text of a field: multiplied by the scale of the graph, rounded,
+ * and followed by its unit if the graph has one.
+ * @param measure the unit and the scale of the graph (`IGraphConfig.measure`): no unit and a scale of 1 without it.
+ */
+export function fieldLength(
+    value: number, digits: number | undefined, measure: IMeasure | undefined, format: LabelFormat, power: 1 | 2 = 1
+): string {
+    const used = measure ?? DEFAULT_MEASURE
+
+    return withUnit(fieldNumber(scaled(value, used, power), digits), used.unit, power, format.tex)
+}
+
+/** An angle in degrees as the text of a field: it always has the degree sign, which does not depend on the scale of the graph. */
+export function fieldAngle(degrees: number, digits: number | undefined, format: LabelFormat): string {
+    return withDegree(fieldNumber(degrees, digits), format.tex)
+}
+
 /**
  * Check that a figure can show the content of a label.
  * @param fields the fields the figure can show.
@@ -67,7 +94,7 @@ export function checkLabelContent(content: LabelContent, fields: LabelFields, na
             )
         }
 
-        if (!Number.isInteger(part.digits) || part.digits < 0) {
+        if (part.digits !== undefined && (!Number.isInteger(part.digits) || part.digits < 0)) {
             throw new InvalidArgumentError(
                 `Invalid number of digits ${part.digits} for the field "${part.field}" of the label of "${name}": expected an integer of 0 or more`
             )
@@ -78,9 +105,10 @@ export function checkLabelContent(content: LabelContent, fields: LabelFields, na
 /**
  * The text of a label.
  * @param fields how the figure computes the fields of the content.
+ * @param format how the label is written; plain text by default.
  * @throws InvalidArgumentError if the content has a field that is not one of `fields` (see {@link checkLabelContent}).
  */
-export function renderLabelContent(content: LabelContent, fields: LabelFields): string {
+export function renderLabelContent(content: LabelContent, fields: LabelFields, format: LabelFormat = {tex: false}): string {
     if (typeof content === 'string') {
         return content
     }
@@ -95,8 +123,73 @@ export function renderLabelContent(content: LabelContent, fields: LabelFields): 
             throw new InvalidArgumentError(`The label cannot show the field "${part.field}"`)
         }
 
-        return compute(part.digits)
+        return compute(part.digits, format)
     }).join('')
+}
+
+/**
+ * The direction on the screen (the y axis points down) where a label lies from its anchor, from its alignement: `br` is down and to the
+ * right, `ml` is to the left. The vector is not normalized.
+ * @returns `null` for `mc`, which lies on no side.
+ */
+export function alignementDirection(alignement: LABEL_POSITION): XY | null {
+    const [vertical, horizontal] = alignement
+    const x = horizontal === 'l' ? -1 : horizontal === 'r' ? 1 : 0
+    const y = vertical === 't' ? -1 : vertical === 'b' ? 1 : 0
+
+    return x === 0 && y === 0 ? null : {x, y}
+}
+
+/** The vector of a direction, with a length of 1. @returns `null` for the null vector or a vector that is not finite. */
+export function unitDirection(direction: XY): XY | null {
+    const length = Math.hypot(direction.x, direction.y)
+
+    return Number.isFinite(length) && length > 0 ? {x: direction.x / length, y: direction.y / length} : null
+}
+
+/**
+ * How much further from the anchor a label that lies in a direction is put, in pixels, along that direction: its horizontal part (a
+ * label on the left or the right of a figure would touch it otherwise, like the `ml` and `mr` of {@link labelCenter}).
+ */
+export function labelAwayGap(direction: XY): XY {
+    const unit = unitDirection(direction)
+
+    return unit === null ? {x: 0, y: 0} : {x: unit.x * SIDE_GAP * unit.x ** 2, y: unit.y * SIDE_GAP * unit.x ** 2}
+}
+
+/**
+ * Where the center of a label is when it lies in a direction from its anchor: the side of its box that faces the anchor is touched by
+ * it (the corner for the diagonal of the box), whatever the angle.
+ *
+ * @param anchor the position in pixels.
+ * @param direction on the screen (the y axis points down); a null vector puts the label on the anchor.
+ * @param width the size of the label in pixels.
+ */
+export function labelCenterToward(anchor: XY, direction: XY, width: number, height: number): XY {
+    const unit = unitDirection(direction)
+
+    if (unit === null) {
+        return {x: anchor.x, y: anchor.y}
+    }
+
+    // How far the center of the box is from the point of its border that the anchor is on, along the direction.
+    const reach = Math.min(
+        unit.x === 0 ? Infinity : width / 2 / Math.abs(unit.x),
+        unit.y === 0 ? Infinity : height / 2 / Math.abs(unit.y)
+    )
+    const gap = labelAwayGap(unit)
+
+    return {x: anchor.x + unit.x * reach + gap.x, y: anchor.y + unit.y * reach + gap.y}
+}
+
+/**
+ * The vector that a label is pushed by, in pixels on the screen: `distance` further in the direction where it lies.
+ * @returns the null vector for a label that lies in no direction (`mc`).
+ */
+export function labelPush(direction: XY | null, distance: number): XY {
+    const unit = direction === null ? null : unitDirection(direction)
+
+    return unit === null ? {x: 0, y: 0} : {x: unit.x * distance, y: unit.y * distance}
 }
 
 /** Where a label can be put in relation to its anchor: top, middle or bottom, then left, center or right. */

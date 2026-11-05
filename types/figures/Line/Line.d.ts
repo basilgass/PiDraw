@@ -1,6 +1,6 @@
 import { AbstractFigure } from "../AbstractFigure/AbstractFigure";
 import type { XY, IFigureContext } from "../../pidraw.common";
-import type { LabelFields } from "../Label/Label.types";
+import type { LabelFieldName, LabelFields } from "../Label/Label.types";
 import type { Shape } from "@svgdotjs/svg.js";
 import { mathLine } from "../../calculus";
 import { type LineFound } from "./Line.constraints";
@@ -21,6 +21,8 @@ export declare class Line extends AbstractFigure {
     get math(): mathLine;
     get normal(): XY;
     labelFields(): LabelFields;
+    defaultLabelField(): LabelFieldName | null;
+    protected _slopeIsExact(): boolean;
     computed(): this;
     protected _place({ start, direction, end }: LineFound): this;
     readonly followable = true;

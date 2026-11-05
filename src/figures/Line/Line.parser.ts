@@ -222,6 +222,7 @@ export const LINE_ITEMS: ParserItems = {
         description: 'Create a line through two points, through a point with a slope, or from its equation',
         forms: ['d=AB', 'd=line <point>,<point>', 'd=line <point>,<slope>', 'd=line <equation>'],
         summary: 'd=line A,B — line (or d=AB)',
+        labelFields: ['slope'],
         build: buildLine
     },
     [PARSER_TYPE.VECTOR]: {
@@ -229,6 +230,7 @@ export const LINE_ITEMS: ParserItems = {
         description: 'Create a vector: a segment with an arrow at its end',
         forms: ['v=vAB', 'v=vec <point>,<point>'],
         summary: 'v=vec A,B — vector (or v=vAB)',
+        labelFields: ['slope'],
         build: buildLine
     },
     [PARSER_TYPE.SEGMENT]: {
@@ -236,6 +238,7 @@ export const LINE_ITEMS: ParserItems = {
         description: 'Create a segment through two points',
         forms: ['s=AB.', 's=[AB]', 's=seg <point>,<point>'],
         summary: 's=seg A,B — segment (or s=AB.)',
+        labelFields: ['length', 'slope'],
         build: buildLine
     },
     [PARSER_TYPE.RAY]: {
@@ -243,6 +246,7 @@ export const LINE_ITEMS: ParserItems = {
         description: 'Create a ray: it starts at the first point and goes through the second',
         forms: ['r=AB[', 'r=[AB[', 'r=[AB', 'r=ray <point>,<point>'],
         summary: 'r=ray A,B — ray (or r=AB[)',
+        labelFields: ['slope'],
         build: buildLine
     },
     [PARSER_TYPE.PERPENDICULAR]: {
@@ -250,6 +254,7 @@ export const LINE_ITEMS: ParserItems = {
         description: 'Create the perpendicular of a line from a point',
         forms: ['d=perp <line>,<point>'],
         summary: 'p=perp d,A — perpendicular',
+        labelFields: ['slope'],
         build: buildLine
     },
     [PARSER_TYPE.PARALLEL]: {
@@ -257,6 +262,7 @@ export const LINE_ITEMS: ParserItems = {
         description: 'Create a parallel line from a point',
         forms: ['d=para <line>,<point>'],
         summary: 'p=para d,A — parallel',
+        labelFields: ['slope'],
         build: buildLine
     },
     [PARSER_TYPE.MEDIATOR]: {
@@ -264,6 +270,7 @@ export const LINE_ITEMS: ParserItems = {
         description: 'Create the mediator of two points',
         forms: ['d=med <point>,<point>'],
         summary: 'm=med A,B — perpendicular bisector',
+        labelFields: ['slope'],
         build: buildLine
     },
     [PARSER_TYPE.TANGENT]: {
@@ -271,6 +278,7 @@ export const LINE_ITEMS: ParserItems = {
         description: 'Create a tangent line from a <circle|plot> by a Point',
         forms: ['d=tan <circle|plot>,<point>'],
         summary: 't=tan f,A — tangent',
+        labelFields: ['slope'],
         build: buildLine
     },
     [PARSER_TYPE.BISECTOR]: {
@@ -278,6 +286,7 @@ export const LINE_ITEMS: ParserItems = {
         description: `Create the bisector of an angle (three points), or of two lines or axes (a last ${ALTERNATIVE} for the other bisector)`,
         forms: ['d=bis <point>,<point>,<point>', `d=bis <line>,<line>[,${ALTERNATIVE}]`],
         summary: 'b=bis d1,d2 — angle bisector',
+        labelFields: ['slope'],
         build: buildLine
     }
 }

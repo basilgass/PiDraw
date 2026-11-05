@@ -3,7 +3,7 @@ import {labelEvery, nowhere, pathNumber, selects, tickLabel, type TickLabel, tic
 import type {LABEL_POSITION} from "../Label/Label.types"
 import {labelAlignementToward} from "../Label/Label.constraints"
 import type {IFigureContext, XY} from "../../pidraw.common"
-import {AXIS_PADDING, checkAxis, insetEnds, ticksOf} from "./Axis.constraints"
+import {AXIS_PADDING, checkAxis, clampToRange, insetEnds, ticksOf} from "./Axis.constraints"
 import type {IAxisConfig, IAxisOptions} from "./Axis.types"
 import {Line} from "../Line/Line"
 import {constraintOf, type LineFound} from "../Line/Line.constraints"
@@ -170,8 +170,12 @@ export class Axis extends Line {
         }
 
         const inset = insetEnds(this._start, this._end, this.padding)
+        const range = this._config.range
+        const ends = inset === null || range === undefined || this._unit === null
+            ? inset
+            : clampToRange(inset[0], inset[1], found.start, this._unit, range)
 
-        if (inset === null) {
+        if (ends === null) {
             this._start = nowhere()
             this._end = nowhere()
             this._setDefined(false)
@@ -179,7 +183,7 @@ export class Axis extends Line {
             return this._graduate(found, false)
         }
 
-        [this._start, this._end] = inset
+        [this._start, this._end] = ends
         ;(this.shape as svgLine).plot(this._start.x, this._start.y, this._end.x, this._end.y)
 
         return this._graduate(found, true)

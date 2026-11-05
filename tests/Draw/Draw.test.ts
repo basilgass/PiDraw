@@ -354,7 +354,8 @@ describe('Draw options of an axis', () => {
         ['numbers', option('none'), (axis: Axis) => axis.config.ticks?.numbers, 'none'],
         ['name', option('t'), (axis: Axis) => axis.config.name, 't'],
         ['side', option('left'), (axis: Axis) => axis.config.side, 'left'],
-        ['padding', option(40), (axis: Axis) => axis.config.padding, 40]
+        ['padding', option(40), (axis: Axis) => axis.config.padding, 40],
+        ['range', option(10), (axis: Axis) => axis.config.range, {min: -10, max: 10}]
     ] as const)('%s is given to the axis', (key, value, read, expected) => {
         const draw = createLayoutDraw()
 

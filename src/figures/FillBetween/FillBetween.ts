@@ -1,7 +1,8 @@
 import type {Path} from "@svgdotjs/svg.js"
 import {AbstractFigure} from "../AbstractFigure/AbstractFigure"
 import type {IFigureContext, XY} from "../../pidraw.common"
-import type {LabelFields} from "../Label/Label.types"
+import {fieldNumber} from "../Label/Label.constraints"
+import type {LabelFieldName, LabelFields} from "../Label/Label.types"
 import {
     type FillBetweenRun,
     fillBetweenArea,
@@ -134,8 +135,12 @@ export class FillBetween extends AbstractFigure {
     /** The area can be shown in the label. */
     override labelFields(): LabelFields {
         return {
-            area: (digits) => numberCorrection(this.area, digits).toString()
+            area: (digits) => fieldNumber(this.area, digits)
         }
+    }
+
+    override defaultLabelField(): LabelFieldName {
+        return 'area'
     }
 
     /** Where the label is, in pixels: the middle of the area. `null` when nothing is drawn. */

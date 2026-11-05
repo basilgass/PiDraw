@@ -52,7 +52,13 @@ export interface IDrawCode {
 }
 
 /** The first character of a line that is a comment. */
-const COMMENT = '$'
+const COMMENT = '%'
+
+/**
+ * The first character of a line that is not for PiDraw: it is skipped like a comment, but it is meant for something else that reads the same
+ * code (the parameters of an application, for example), which tells it from a comment.
+ */
+const FOREIGN = '$'
 
 /** The first character of a line that is a command. */
 const COMMAND = '@'
@@ -77,7 +83,8 @@ function commandThemes(): [string, ICommandSyntax][] {
 }
 
 /**
- * Read the code, line by line. The empty lines and the comments (`$ ...`) are skipped, but they count: `number` is the position in the code.
+ * Read the code, line by line. The empty lines, the comments (`% ...`) and the lines for something else (`$ ...`) are skipped, but they count:
+ * `number` is the position in the code.
  *
  * A line that starts with `@` is a command (see {@link IDrawCommand}); what the commands give is in the `controls` of the lines of figures after
  * them, worked out here from the lines before: nothing else than the code before a line decides it.
@@ -100,7 +107,7 @@ export function readCode(input: string, parse: (text: string) => PARSER, parser:
         const text = raw.trim()
         const indent = raw.length - raw.trimStart().length
 
-        if (text === '' || text.startsWith(COMMENT)) {
+        if (text === '' || text.startsWith(COMMENT) || text.startsWith(FOREIGN)) {
             return
         }
 

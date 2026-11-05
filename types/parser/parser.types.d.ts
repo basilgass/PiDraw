@@ -3,6 +3,7 @@ import type { IGraphConfig } from "../pidraw.common";
 import type { PARSER_TYPE } from "./parser.common";
 import type { IControlsFigure, IControlsGraph } from "../controls/controls.types";
 import type { AbstractFigure } from "../figures/AbstractFigure/AbstractFigure";
+import type { LabelFieldName } from "../figures/Label/Label.types";
 import type { Graph } from "../Graph";
 import type { TeXConverterType } from "../Graph.types";
 export type IParserValues = PARSER_VALUES | AbstractFigure;
@@ -17,6 +18,7 @@ export interface ParserItem {
     forms: string[];
     name: string;
     summary: string;
+    labelFields?: readonly LabelFieldName[];
 }
 export type ParserItems = Partial<Record<PARSER_TYPE, ParserItem>>;
 export interface IParserConfig {

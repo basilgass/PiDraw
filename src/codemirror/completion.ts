@@ -1,9 +1,19 @@
 import type {Completion, CompletionContext, CompletionResult, CompletionSource} from '@codemirror/autocomplete'
 import type {PidrawMode} from './language'
-import {COLOR_OPTIONS, KEY_DETAILS, OPTION_DETAILS, OPTION_VALUES, PARAMETER_DETAILS, readVocabulary} from './vocabulary'
+import {
+    COLOR_OPTIONS,
+    KEY_DETAILS,
+    LABEL_FIELD_DETAILS,
+    labelFieldsOf,
+    OPTION_DETAILS,
+    OPTION_VALUES,
+    PARAMETER_DETAILS,
+    readVocabulary
+} from './vocabulary'
 
 const WORD = /[a-zA-Z][a-zA-Z0-9]*/
 const VALID_FOR = /^[a-zA-Z0-9]*$/
+const FIELD = /@[a-zA-Z]*/
 
 function entries(names: readonly string[], type: string, details: Readonly<Record<string, string>>): Completion[] {
     return names.map(label => ({label, type, detail: details[label]}))
@@ -23,7 +33,7 @@ function options(context: CompletionContext, mode: PidrawMode): Completion[] | n
         }
 
         // The name of a figure is typed before the sign `=`: nothing to suggest there.
-        if (!before.includes('=') || /^\s*[$@]/.test(before)) {
+        if (!before.includes('=') || /^\s*[%$@]/.test(before)) {
             return null
         }
 
@@ -36,6 +46,14 @@ function options(context: CompletionContext, mode: PidrawMode): Completion[] | n
     }
 
     const segment = before.slice(arrow + 2).split(',').at(-1) ?? ''
+
+    // The text of a label, after a `@`: the fields of the figure. Its kind is the word after the `=` of the definition, if there is one.
+    if (/^\s*(?:label|tex)=[^/]*@[a-zA-Z]*$/.test(segment)) {
+        const key = /^[^=]*=\s*([a-z]+)\s/.exec(before.slice(0, arrow))?.[1]
+
+        return entries(labelFieldsOf(key), 'property', LABEL_FIELD_DETAILS)
+    }
+
     const value = /^\s*([a-zA-Z]+)=[a-zA-Z0-9]*$/.exec(segment)
 
     if (value) {
@@ -68,11 +86,13 @@ export function pidrawCompletion(mode: PidrawMode = 'code'): CompletionSource {
             return null
         }
 
+        // The fields start right after a `@`, which is not part of the word: they are suggested as soon as it is typed.
+        const field = context.matchBefore(FIELD)
         const word = context.matchBefore(WORD)
-        if (word === null && !context.explicit) {
+        if (word === null && field === null && !context.explicit) {
             return null
         }
 
-        return {from: word?.from ?? context.pos, options: found, validFor: VALID_FOR}
+        return {from: field ? field.from + 1 : word?.from ?? context.pos, options: found, validFor: VALID_FOR}
     }
 }

@@ -779,7 +779,7 @@ describe('Point tikz', () => {
     test('the appearance of the point is written as options', () => {
         const tikz = create().fill({color: 'red', opacity: 0.5}).stroke('blue', 2).dash('4 2').tikz()
 
-        expect(tikz).toContain('draw=blue, line width=1.5pt, fill=red, fill opacity=0.5, dash pattern=on 3pt off 1.5pt')
+        expect(tikz).toContain('draw=pidraw-blue, line width=1.5pt, fill=pidraw-red, fill opacity=0.5, dash pattern=on 3pt off 1.5pt')
     })
 
     test('a point without a fill is not filled, like in the drawing', () => {
@@ -787,7 +787,7 @@ describe('Point tikz', () => {
     })
 
     test('a color that has no equivalent in LaTeX is an InvalidArgumentError', () => {
-        const point = create().fill('steelblue')
+        const point = create().fill('periwinkle')
 
         expect(() => point.tikz()).toThrow(InvalidArgumentError)
     })

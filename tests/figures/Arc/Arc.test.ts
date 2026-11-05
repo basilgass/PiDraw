@@ -431,7 +431,7 @@ describe('Arc TikZ', () => {
         const a = arc('a', points())
         a.addLabel('$\\theta$')
 
-        expect(a.tikz()).toMatch(/\\node\[above right\] at \(1\.\d+,1\.\d+\) \{\$\\theta\$\};/)
+        expect(a.tikz()).toMatch(/\\node\[anchor=-?\d+(\.\d+)?, xshift=[\d.]+pt, yshift=[\d.]+pt\] at \(1\.\d+,1\.\d+\) \{\$\\theta\$\};/)
     })
 
     test('an arc that is hidden or does not exist writes nothing', () => {
@@ -447,3 +447,184 @@ describe('Arc TikZ', () => {
 function nowhere(): XY {
     return {x: NaN, y: NaN}
 }
+
+describe('Arc label fields', () => {
+    const quarter = (alternative = false) => {
+        const {arc} = create()
+
+        return arc('a', {points: {start: at(2, 0), center: at(0, 0), end: at(0, 2)}, ...(alternative ? {alternative} : {})})
+    }
+    const labelOf = (a: Arc, field: 'angle' | 'length' | 'radius' | 'area', digits?: number) => {
+        a.addLabel([{field, ...(digits === undefined ? {} : {digits})}])
+
+        return a.computeLabel()
+    }
+
+    test('the angle is in degrees, always with the degree sign, and it is the default field', () => {
+        const a = quarter()
+
+        expect(a.defaultLabelField()).toBe('angle')
+        expect(labelOf(a, 'angle')).toBe('90°')
+    })
+
+    test('the angle of the alternative arc is the rest of the turn', () => {
+        expect(labelOf(quarter(true), 'angle')).toBe('270°')
+    })
+
+    test('the angle takes the decimals that the label asks for', () => {
+        const {arc} = create()
+        const a = arc('a', {points: {start: at(2, 0), center: at(0, 0), end: at(2, 1)}})
+
+        expect(labelOf(a, 'angle', 1)).toBe('26.6°')
+    })
+
+    test('its length, its radius and the area of its sector are in units of the coordinate system', () => {
+        const a = quarter()
+
+        expect(labelOf(a, 'radius')).toBe('2')
+        expect(labelOf(a, 'length')).toBe('3.14')
+        expect(labelOf(a, 'area')).toBe('3.14')
+        expect(labelOf(quarter(true), 'area')).toBe('9.42')
+    })
+
+    test('the area is written inside of the sector, centered', () => {
+        const a = quarter()
+
+        labelOf(a, 'area')
+
+        expect(a.label?.alignement).toBe('mc')
+        // Halfway along the middle radius: 45 degrees, 1 unit from the center.
+        expect(a.label?.x).toBeCloseTo(400 + 50 * Math.SQRT1_2, 6)
+        expect(a.label?.y).toBeCloseTo(300 - 50 * Math.SQRT1_2, 6)
+    })
+
+    test('the area keeps the alignment that was asked for', () => {
+        const a = quarter()
+
+        labelOf(a, 'area')
+        a.label?.position('tl')
+        a.moveLabel()
+
+        expect(a.label?.alignement).toBe('tl')
+    })
+
+    test('the angle is written outside of the arc', () => {
+        const a = quarter()
+
+        labelOf(a, 'angle')
+
+        expect(a.label?.alignement).toBe('tr')
+    })
+})
+
+describe('Arc label with a unit and a scale', () => {
+    const measured = (unit: 'mm' | null, scale: number) => {
+        const {arc} = create({...graphConfig(), measure: {unit, scale}})
+
+        return arc('a', {points: {start: at(2, 0), center: at(0, 0), end: at(0, 2)}})
+    }
+    const labelOf = (a: Arc, field: 'angle' | 'length' | 'radius' | 'area', asHtml = false) => {
+        a.addLabel([{field}], {asHtml})
+
+        return a.computeLabel()
+    }
+
+    test('the lengths are multiplied by the scale and followed by the unit', () => {
+        const a = measured('mm', 10)
+
+        expect(labelOf(a, 'radius')).toBe('20 mm')
+        expect(labelOf(a, 'length')).toBe('31.42 mm')
+    })
+
+    test('the area is multiplied by the square of the scale and followed by the square of the unit', () => {
+        expect(labelOf(measured('mm', 10), 'area')).toBe('314.16 mm²')
+    })
+
+    test('a scale without a unit writes the number only', () => {
+        expect(labelOf(measured(null, 0.1), 'radius')).toBe('0.2')
+    })
+
+    test('a unit without a scale writes the lengths as they are', () => {
+        expect(labelOf(measured('mm', 1), 'radius')).toBe('2 mm')
+    })
+
+    test('the angle has the degree sign whatever the unit and the scale', () => {
+        expect(labelOf(measured(null, 1), 'angle')).toBe('90°')
+        expect(labelOf(measured('mm', 10), 'angle')).toBe('90°')
+    })
+
+    test('a label in TeX is written as a formula', () => {
+        const a = measured('mm', 10)
+
+        expect(labelOf(a, 'angle', true)).toBe('90^\\circ')
+        expect(labelOf(a, 'radius', true)).toBe('20\\,\\mathrm{mm}')
+        expect(labelOf(a, 'area', true)).toBe('314.16\\,\\mathrm{mm}^2')
+    })
+})
+
+describe('Arc label on the side of its middle direction', () => {
+    const quarter = () => {
+        const {arc} = create()
+
+        return arc('a', {points: {start: at(2, 0), center: at(0, 0), end: at(0, 2)}})
+    }
+
+    test('lies in the middle direction of the arc, at any angle', () => {
+        const a = quarter()
+
+        a.addLabel('a')
+
+        // The middle of a quarter from 0 to 90 degrees is 45 degrees: up and to the right on the screen.
+        expect(a.label?.config.away?.x).toBeCloseTo(Math.SQRT1_2, 6)
+        expect(a.label?.config.away?.y).toBeCloseTo(-Math.SQRT1_2, 6)
+    })
+
+    test('follows the angle when the arc turns', () => {
+        const {arc} = create()
+        const a = arc('a', {points: {start: at(2, 0), center: at(0, 0), end: at(2, 1)}})
+
+        a.addLabel('a')
+
+        const away = a.label?.config.away
+
+        expect(Math.atan2(-(away?.y ?? 0), away?.x ?? 0) * 180 / Math.PI).toBeCloseTo(Math.atan2(1, 2) * 90 / Math.PI, 6)
+    })
+
+    test('is on the anchor of the area, with no direction', () => {
+        const a = quarter()
+
+        a.addLabel([{field: 'area'}])
+
+        expect(a.label?.config.away).toBeNull()
+        expect(a.label?.alignement).toBe('mc')
+    })
+
+    test('keeps the position that is asked for, with no direction', () => {
+        const a = quarter()
+
+        a.addLabel('a').position('tl')
+        a.moveLabel()
+
+        expect(a.label?.alignement).toBe('tl')
+        expect(a.label?.config.away).toBeNull()
+    })
+
+    test('is pushed away from another figure when it is asked to', () => {
+        const {arc, point} = create()
+        const O = point('O', 4, 0)
+        const a = arc('a', {points: {start: at(2, 0), center: at(0, 0), end: at(0, 2)}})
+
+        a.setLabelReference(O)
+        a.addLabel('a')
+
+        // O is at (600, 300) and the anchor of the label is up and to the right of the center, to the left of O.
+        expect(a.label?.config.away?.x).toBeLessThan(0)
+    })
+
+    test('is a reference: the center of the arc', () => {
+        const a = quarter()
+
+        expect(a.referenceable).toBe(true)
+        expect(a.referenceAnchorPoint()).toEqual({x: 400, y: 300})
+    })
+})

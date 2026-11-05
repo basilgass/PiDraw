@@ -104,3 +104,31 @@ export function polygonPath(shape: PolygonShape): string {
         .map(cycle => cycle.map((index, i) => `${i === 0 ? 'M' : 'L'} ${pathNumber(shape.vertices[index].x)} ${pathNumber(shape.vertices[index].y)}`).join(' ') + ' Z')
         .join(' ')
 }
+
+/**
+ * The length of the outline of a polygon: its closed paths, one after the other. A star made of several polygons counts each of them.
+ */
+export function polygonPerimeter(shape: PolygonShape): number {
+    return shape.cycles.reduce((total, cycle) => total + cycle.reduce((sum, index, i) => {
+        const next = shape.vertices[cycle[(i + 1) % cycle.length]]
+
+        return sum + distanceAB(shape.vertices[index], next)
+    }, 0), 0)
+}
+
+/**
+ * The area that the outline of a polygon goes round, from the shoelace formula, one closed path after the other. A part that the
+ * outline goes round twice counts twice (the center of the pentagram `{5/2}`).
+ */
+export function polygonArea(shape: PolygonShape): number {
+    return shape.cycles.reduce((total, cycle) => {
+        const twice = cycle.reduce((sum, index, i) => {
+            const a = shape.vertices[index]
+            const b = shape.vertices[cycle[(i + 1) % cycle.length]]
+
+            return sum + a.x * b.y - b.x * a.y
+        }, 0)
+
+        return total + Math.abs(twice) / 2
+    }, 0)
+}

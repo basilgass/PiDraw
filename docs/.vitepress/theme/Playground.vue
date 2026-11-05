@@ -294,6 +294,7 @@ onBeforeUnmount(() => {
 .pd-editor :deep(.tok-string) { color: var(--vp-c-green-1); }
 .pd-editor :deep(.tok-number) { color: var(--vp-c-purple-1); }
 .pd-editor :deep(.tok-comment) { color: var(--vp-c-text-3); font-style: italic; }
+.pd-editor :deep(.tok-meta) { color: var(--vp-c-warning-1); font-style: italic; }
 .pd-editor :deep(.tok-function) { color: var(--vp-c-indigo-1); }
 .pd-editor :deep(.tok-class) { color: var(--vp-c-yellow-1); }
 .pd-editor :deep(.tok-invalid) { color: var(--vp-c-danger-1); }

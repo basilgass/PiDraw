@@ -1,7 +1,18 @@
 import type {Path} from "@svgdotjs/svg.js"
 import {AbstractFigure} from "../AbstractFigure/AbstractFigure"
 import type {IFigureContext, XY} from "../../pidraw.common"
-import {nearestOnPolygon, nowhere, type PolygonShape, polygonCentroid, polygonPath} from "../../calculus"
+import {
+    nearestOnPolygon,
+    nowhere,
+    type PolygonShape,
+    polygonArea,
+    polygonCentroid,
+    polygonPath,
+    polygonPerimeter,
+    toCoordinates
+} from "../../calculus"
+import {fieldLength} from "../Label/Label.constraints"
+import type {LabelFields} from "../Label/Label.types"
 import {constructionOf, resolveConstraint} from "./Polygon.constraints"
 import type {IPolygonConfig} from "./Polygon.types"
 
@@ -67,6 +78,33 @@ export class Polygon extends AbstractFigure {
     /** The center of the vertices, in pixels: `NaN` when the polygon does not exist. */
     get centroid(): XY {
         return this._polygon === null ? nowhere() : polygonCentroid(this._polygon.vertices)
+    }
+
+    /**
+     * What a polygon can show in its label, in units of the coordinate system and with the unit and the scale of the graph (see
+     * {@link IGraphConfig.measure}): its perimeter and its area (see `polygonArea` for a star). There is no default field: `@`
+     * alone is refused.
+     */
+    override labelFields(): LabelFields {
+        const inUnits = (): PolygonShape => {
+            const shape = this._polygon ?? {vertices: [], cycles: []}
+
+            return {...shape, vertices: shape.vertices.map(vertex => toCoordinates(vertex, this.graphConfig))}
+        }
+
+        const measure = () => this.graphConfig.measure
+
+        return {
+            perimeter: (digits, format) => fieldLength(polygonPerimeter(inUnits()), digits, measure(), format),
+            area: (digits, format) => fieldLength(polygonArea(inUnits()), digits, measure(), format, 2)
+        }
+    }
+
+    override readonly referenceable = true
+
+    /** The center of the vertices. `null` when the polygon does not exist. */
+    override referenceAnchorPoint(): XY | null {
+        return this._polygon === null ? null : this.centroid
     }
 
     /** Find the polygon from its construction and draw it. A polygon that does not exist is not drawn (see the class). */

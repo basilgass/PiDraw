@@ -1,4 +1,5 @@
 import {themeOptionDetails, themeOptionValues} from '../controls/controls'
+import type {LabelFieldName} from '../figures/Label/Label.types'
 import {optionNames} from '../Draw/Draw.options'
 import {LAYOUT_KEYS} from '../parser/buildLayout'
 import {PARSER_COLOR_VALUES, PARSER_TYPE} from '../parser/parser.common'
@@ -48,11 +49,36 @@ export const OPTION_DETAILS: Readonly<Record<string, string>> = {
     label: 'label=A/tl',
     tex: 'tex=A/br',
     drag: 'drag=grid|Ox|Oy|figure',
+    range: 'part of an axis: range=-10:10',
     ultrathin: 'width 0.5',
     thin: 'width 0.75',
     thick: 'width 2.5',
     ultrathick: 'width 4',
     ...themeOptionDetails()
+}
+
+/** What each field of a label is, after `@`. Typed by the fields: a new one without a description does not compile. */
+export const LABEL_FIELD_DETAILS: Readonly<Record<LabelFieldName, string>> = {
+    coordinates: 'coordinates (x;y)',
+    length: 'length of a segment, of an arc',
+    angle: 'angle of an arc, in degrees',
+    radius: 'radius',
+    perimeter: 'perimeter',
+    area: 'area',
+    slope: 'slope of a line',
+    sum: 'sum of the rectangles',
+    rectangles: 'number of rectangles'
+}
+
+/**
+ * The fields that a label can show for a kind of figure (`@area`), from the `labelFields` of its parser. Every field of the language for a key that is
+ * unknown (a shorthand such as `A(1,2)` or `d=AB` has none).
+ */
+export function labelFieldsOf(key: string | undefined): readonly LabelFieldName[] {
+    const item = key === undefined ? undefined : PARSER_CONFIG[key]
+    const items = item === undefined ? Object.values(PARSER_CONFIG) : [item]
+
+    return [...new Set(items.flatMap(found => found.labelFields ?? []))]
 }
 
 /** Short descriptions of the parameters of the graph. */
@@ -62,6 +88,8 @@ export const PARAMETER_DETAILS: Readonly<Record<string, string>> = {
     box: 'box=-10:10,-5:5 — window',
     unitX: 'unitX=1 — cm for one unit',
     unitY: 'unitY=1 — cm for one unit',
+    unit: 'unit=mm — unit written after the lengths of the labels',
+    scale: 'scale=10 or 1/10 — scale of the lengths of the labels',
     axis: 'axes',
     grid: 'grid',
     'default.label': 'label of the figures',

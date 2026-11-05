@@ -1,6 +1,6 @@
 import type {G} from "@svgdotjs/svg.js"
 import type {IControlsGraph} from "./controls/controls.types"
-import type {TickSelection} from "./calculus"
+import type {IMeasure, TickSelection} from "./calculus"
 import type {IGridConfig} from "./figures/Grid/Grid.types"
 import type {Point} from "./figures/Point/Point"
 import type {AbstractFigure} from "./figures/AbstractFigure/AbstractFigure"
@@ -84,7 +84,9 @@ export interface IAxisDisplay {
     /** On which ticks a number is written, or `'none'`. */
     numbers?: TickSelection | 'none',
     /** How far the axis stops from the borders of the drawing, in pixels. */
-    padding?: number
+    padding?: number,
+    /** The part of the axis that is drawn, in units from the zero. */
+    range?: { min: number, max: number }
 }
 
 /** What the graph shows besides the figures. */
@@ -105,6 +107,8 @@ export interface IGraphConstructorConfig {
     display?: IGraphDisplay,
     /** In pixels (default 600). */
     height?: number,
+    /** How the labels write a length (default: as they are, without a unit). */
+    measure?: Partial<IMeasure>,
     /** Where the point (0, 0) is, in pixels from the top left corner of the drawing (default: the middle). */
     origin?: XY,
     system?: CoordinateSystem,

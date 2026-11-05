@@ -54,7 +54,7 @@ A.coordinates.x.toFixed(2) // 1.00
 Object.keys(graph.create).join(' ') // point line path bezier plot parametric circle polygon arc follow fillbetween grid axis riemann
 ```
 
-`width` and `height` are in pixels (800 by 600 by default), `origin` is where the origin of the plane is, and `axis` the vectors of the two axes: `PiDraw` sets all of them from its parameters, and a `PiGraph` alone is for those who want to set them. `tex` is the function of the labels in TeX.
+`width` and `height` are in pixels (800 by 600 by default), `origin` is where the origin of the plane is, and `axis` the vectors of the two axes: `PiDraw` sets all of them from its parameters, and a `PiGraph` alone is for those who want to set them. `tex` is the function of the labels in TeX. `measure: {unit: 'mm', scale: 10}` sets the unit and the scale of the lengths that the labels write (the parameters `unit` and `scale`, see [the unit of the lengths](./graph#the-unit-of-the-lengths)); `graph.updateLayout({...graph.config, measure})` changes them.
 
 ### Update
 
@@ -255,7 +255,8 @@ The colors are classes, the same ones as [PiMath](https://basilgass.github.io/Pi
 | `tok-function` | the options (`w`, `label`) |
 | `tok-string` | the colors (`red`) |
 | `tok-number` | numbers |
-| `tok-comment` | a comment (`$ ...`) |
+| `tok-comment` | a comment (`% ...`) |
+| `tok-meta` | a line for something else than PiDraw (`$ ...`) |
 | `tok-invalid` | a line that starts with `@` |
 
 ```css
@@ -264,6 +265,7 @@ The colors are classes, the same ones as [PiMath](https://basilgass.github.io/Pi
 .cm-editor .tok-string { color: #16a34a; }
 .cm-editor .tok-number { color: #9333ea; }
 .cm-editor .tok-comment { color: #64748b; font-style: italic; }
+.cm-editor .tok-meta { color: #b45309; font-style: italic; }
 .cm-editor .tok-invalid { color: #dc2626; }
 ```
 

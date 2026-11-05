@@ -128,6 +128,7 @@ export const ARC_ITEMS: ParserItems = {
             `a=arc <point>,<point>,<number>[,<radius>][,${ALTERNATIVE}]`
         ],
         summary: 'a=arc B,A,C — arc',
+        labelFields: ['angle', 'length', 'radius', 'area'],
         build: buildArc
     }
 }

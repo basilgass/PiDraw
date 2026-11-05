@@ -22,6 +22,14 @@ describe('Draw report', () => {
         expect(names(d)).toEqual(['A', 'B', 's'])
     })
 
+    test('comments (%) and lines for something else ($) draw the same figures as code without them', () => {
+        const d = draw('% the points\nA(1,2)\n$a=1,2,3/0.1=1\n%B(9,9)\nB(3,4)\ns=seg A,B')
+
+        expect(d.errors).toEqual([])
+        expect(d.report.lines).toEqual([{line: 2, status: 'ok'}, {line: 5, status: 'ok'}, {line: 6, status: 'ok'}])
+        expect(names(d)).toEqual(['A', 'B', 's'])
+    })
+
     test('refresh gives the same report as the draw keeps', () => {
         const d = draw('A(1,2)')
         const report = d.refresh('A(1,2)\nB(3,')

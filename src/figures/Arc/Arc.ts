@@ -1,9 +1,10 @@
 import type {Path as svgPath} from "@svgdotjs/svg.js"
 import {AbstractFigure} from "../AbstractFigure/AbstractFigure"
 import type {IFigureContext, XY} from "../../pidraw.common"
-import type {LABEL_POSITION} from "../Label/Label.types"
-import {labelAlignementToward} from "../Label/Label.constraints"
+import type {LABEL_POSITION, LabelFieldName, LabelFields} from "../Label/Label.types"
+import {fieldAngle, fieldLength, labelAlignementToward} from "../Label/Label.constraints"
 import {
+    arcLength,
     cartesianToAngle,
     counterclockwiseSweep,
     distanceAB,
@@ -11,7 +12,9 @@ import {
     nearestOnArc,
     nowhere,
     numberCorrection,
-    polarToCartesian
+    polarToCartesian,
+    sectorArea,
+    toCoordinates
 } from "../../calculus"
 import {constructionOf, resolveConstraint} from "./Arc.constraints"
 import type {ArcDefinition} from "./Arc.constraints"
@@ -115,6 +118,28 @@ export class Arc extends AbstractFigure {
     /** Whether the arc covers a right angle. A corner is then drawn instead of the arc if the config asks for it. */
     get isSquare(): boolean {
         return Math.abs(this._sweep - 90) < RIGHT_ANGLE_EPSILON
+    }
+
+    /**
+     * What an arc can show in its label: its angle in degrees, always with the degree sign (the arc `*` covers the rest of the turn),
+     * its length, its radius and the area of its sector, in units of the coordinate system and with the unit and the scale of the graph
+     * (see {@link IGraphConfig.measure}). The radius is measured along the x axis, like in TikZ.
+     */
+    override labelFields(): LabelFields {
+        const radius = () => Math.abs(toCoordinates(this._radius, this.graphConfig))
+
+        const measure = () => this.graphConfig.measure
+
+        return {
+            angle: (digits, format) => fieldAngle(this._sweep, digits, format),
+            length: (digits, format) => fieldLength(arcLength(radius(), this._sweep), digits, measure(), format),
+            radius: (digits, format) => fieldLength(radius(), digits, measure(), format),
+            area: (digits, format) => fieldLength(sectorArea(radius(), this._sweep), digits, measure(), format, 2)
+        }
+    }
+
+    override defaultLabelField(): LabelFieldName {
+        return 'angle'
     }
 
     /** Close the arc with its two radii, so that it can be filled like a slice. */
@@ -238,21 +263,35 @@ export class Arc extends AbstractFigure {
     }
 
     /**
-     * Where the label is, in pixels, and how it is aligned to be outside of the arc: on the middle direction of what is drawn,
-     * a little further than the arc (or than the corner of a square), on the side that this direction points to.
+     * Where the label is, in pixels, and on which side of that place it lies to be outside of the arc: on the middle direction of what is
+     * drawn, a little further than the arc (or than the corner of a square), on the side that this direction points to. `away` is that
+     * direction on the screen (the y axis points down), whatever its angle; `alignement` is the nearest of the nine positions.
      */
-    protected _labelPlace(): { point: XY, alignement: LABEL_POSITION } {
+    protected _labelPlace(): { point: XY, alignement: LABEL_POSITION, away: XY | null } {
         const direction = this._directionAt(0.5)
+
+        // The area of the sector is written inside of it, halfway along the middle radius.
+        if (this._firstLabelField() === 'area') {
+            return {point: this._pointAt(direction, this._radius / 2), alignement: 'mc', away: null}
+        }
+
         const reach = this._drawnAsSquare() ? this._radius * Math.SQRT1_2 : this._radius
         const point = this._pointAt(direction, reach + this._labelGap)
+        const away = {x: Math.cos(direction * Math.PI / 180), y: -Math.sin(direction * Math.PI / 180)}
 
-        // The direction on screen: y points down.
-        return {point, alignement: labelAlignementToward(Math.cos(direction * Math.PI / 180), -Math.sin(direction * Math.PI / 180))}
+        return {point, alignement: labelAlignementToward(away.x, away.y), away}
+    }
+
+    override readonly referenceable = true
+
+    /** The center of the arc. `null` when the arc does not exist. */
+    override referenceAnchorPoint(): XY | null {
+        return Number.isNaN(this._sweep) ? null : {x: this._center.x, y: this._center.y}
     }
 
     /**
      * Put the label outside of the arc, on the middle of its angle. The alignment that was asked for (`label=θ/tl`) is kept;
-     * without one, it is the side of the middle direction.
+     * without one, the label lies on the side of the middle direction, whatever its angle.
      */
     moveLabel(): this {
         // An arc that does not exist has no place for a label.
@@ -260,10 +299,11 @@ export class Arc extends AbstractFigure {
             return this
         }
 
-        const {point, alignement} = this._labelPlace()
+        const {point, alignement, away} = this._labelPlace()
 
         if (!this.label.alignementGiven) {
             this.label.config.alignement = alignement
+            this.label.config.away = away
         }
 
         this.label.move(point.x, point.y)

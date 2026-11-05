@@ -209,7 +209,7 @@ describe('Grid TikZ', () => {
         const {grid} = create()
         const tikz = grid({step: {x: 8, y: 6}}).tikz()
 
-        expect(tikz).toMatch(/^\\draw\[.*\] \(-8,-6\) grid\[xstep=8, ystep=6\] \(8,6\);$/s)
+        expect(tikz).toMatch(/^\\definecolor\{pidraw-lightgray\}\{HTML\}\{D3D3D3\}\n\\draw\[.*\] \(-8,-6\) grid\[xstep=8, ystep=6\] \(8,6\);$/s)
         expect(tikz.match(/\\draw/g)).toHaveLength(1)
     })
 
@@ -260,7 +260,7 @@ describe('Grid TikZ', () => {
     test('has the color of the lines', () => {
         const {grid} = create()
 
-        expect(grid({step: {x: 8, y: 6}}).stroke('red').tikz()).toContain('draw=red')
+        expect(grid({step: {x: 8, y: 6}}).stroke('red').tikz()).toContain('draw=pidraw-red')
     })
 
     test('is nothing when the grid is hidden or not drawn', () => {

@@ -263,7 +263,7 @@ describe('Parametric curve TikZ', () => {
 
         expect(tikz).toContain('\\begin{axis}[hide axis, scale only axis, trig format plots=deg, unbounded coords=jump, x=37.5pt, y=37.5pt, at={(-300pt,-225pt)}, anchor=south west, xmin=-8, xmax=8, ymin=-6, ymax=6, restrict x to domain=-24:24, restrict y to domain=-18:18]')
         expect(tikz).toContain('\\addplot[domain=0:6.28319, samples=')
-        expect(tikz).toContain('draw=red, line width=0.75pt] ({cos(deg(x))}, {sin(deg(x))});')
+        expect(tikz).toContain('draw=pidraw-red, line width=0.75pt] ({cos(deg(x))}, {sin(deg(x))});')
         expect(tikz).toContain('\\end{axis}')
     })
 

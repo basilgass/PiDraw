@@ -26,7 +26,11 @@ describe('pidraw language: code', () => {
     })
 
     test('a comment is a whole line', () => {
-        expect(tokens('$ the vertices, seg A,B')).toEqual(['$ the vertices, seg A,B:comment'])
+        expect(tokens('% the vertices, seg A,B')).toEqual(['% the vertices, seg A,B:comment'])
+    })
+
+    test('a line for something else than PiDraw is a whole line, told from a comment', () => {
+        expect(tokens('$a=1,2,3/0.1=1')).toEqual(['$a=1,2,3/0.1=1:meta'])
     })
 
     test('a line that starts with @ is invalid unless it is a command', () => {

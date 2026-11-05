@@ -166,7 +166,8 @@ describe('resolveGraphConfig', () => {
             height: 600,
             origin: {x: 400, y: 300},
             system: CoordinateSystem.CARTESIAN_2D,
-            axis: {x: {x: PX_PER_CM, y: 0}, y: {x: 0, y: -PX_PER_CM}}
+            axis: {x: {x: PX_PER_CM, y: 0}, y: {x: 0, y: -PX_PER_CM}},
+            measure: {unit: null, scale: 1}
         })
         expect(display).toEqual({grid: true, axis: true})
     })
@@ -178,7 +179,7 @@ describe('resolveGraphConfig', () => {
     test('keeps only the keys of the configuration, and ignores the ones that are undefined', () => {
         const {config, display} = resolveGraphConfig({width: undefined, display: {axis: false, grid: undefined}, tex: (value) => value})
 
-        expect(Object.keys(config).sort()).toEqual(['axis', 'height', 'origin', 'system', 'width'])
+        expect(Object.keys(config).sort()).toEqual(['axis', 'height', 'measure', 'origin', 'system', 'width'])
         expect(config.width).toBe(800)
         expect(display).toEqual({grid: true, axis: false})
     })

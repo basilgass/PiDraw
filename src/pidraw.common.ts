@@ -1,4 +1,5 @@
 import type {Svg} from "@svgdotjs/svg.js"
+import type {IMeasure} from "./calculus/units"
 
 /** A position or a vector, in pixels or in units of the coordinate system according to the function that takes it. */
 export interface XY {
@@ -67,6 +68,11 @@ export interface IGraphConfig {
     height: number,
     /** Where the point (0, 0) is, in pixels from the top left corner of the drawing. */
     origin: XY,
+    /**
+     * How the labels write a length: a unit and a scale (see {@link IMeasure}). They change nothing of the drawing, and a graph that is
+     * given none writes the lengths as they are, without a unit.
+     */
+    measure?: IMeasure,
     system: CoordinateSystem,
     width: number,
 }

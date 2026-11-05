@@ -678,9 +678,10 @@ describe('AbstractFigure dash', () => {
         expect(dasharray(figure)).toBe('5 2')
     })
 
-    test('the default pattern is half a unit of the x axis', () => {
-        expect(dasharray(createFigure().dash())).toBe('25')
-        expect(dasharray(createFigure(graphConfig({axis: {x: {x: 40, y: 0}, y: {x: 0, y: -40}}})).dash())).toBe('20')
+    test('the default pattern is in pixels, whatever the scale of the graph', () => {
+        expect(dasharray(createFigure().dash())).toBe('6 4')
+        expect(dasharray(createFigure(graphConfig({axis: {x: {x: 400, y: 0}, y: {x: 0, y: -400}}})).dash())).toBe('6 4')
+        expect(dasharray(createFigure(graphConfig({axis: {x: {x: 4, y: 0}, y: {x: 0, y: -4}}})).dash())).toBe('6 4')
     })
 
     test('dot is dashes of 3 pixels', () => {
@@ -764,7 +765,7 @@ describe('AbstractFigure tikz', () => {
     })
 
     test('the color and the opacity of the stroke become draw and draw opacity', () => {
-        expect(draw(createFigure().stroke({color: 'red', opacity: 0.5}))).toContain('draw=red, line width=0.75pt, draw opacity=0.5')
+        expect(draw(createFigure().stroke({color: 'red', opacity: 0.5}))).toContain('draw=pidraw-red, line width=0.75pt, draw opacity=0.5')
     })
 
     test('a stroke that is transparent draws nothing', () => {
@@ -772,7 +773,7 @@ describe('AbstractFigure tikz', () => {
     })
 
     test('the color and the opacity of the fill become fill and fill opacity', () => {
-        expect(draw(createFigure().fill({color: 'blue', opacity: 0.25}))).toContain('fill=blue, fill opacity=0.25')
+        expect(draw(createFigure().fill({color: 'blue', opacity: 0.25}))).toContain('fill=pidraw-blue, fill opacity=0.25')
     })
 
     test('a fill that is transparent writes no fill', () => {
@@ -802,13 +803,17 @@ describe('AbstractFigure tikz', () => {
     })
 
     test('a color with no equivalent in LaTeX is refused', () => {
-        const figure = createFigure().fill('steelblue')
+        const figure = createFigure().fill('periwinkle')
 
         expect(() => figure.tikz()).toThrow(InvalidArgumentError)
     })
 
     test('the dashes become a dash pattern in points', () => {
         expect(draw(createFigure().dash('5 2'))).toContain('dash pattern=on 3.75pt off 1.5pt')
+    })
+
+    test('the default dashes are 6 pixels and a gap of 4', () => {
+        expect(draw(createFigure().dash())).toContain('dash pattern=on 4.5pt off 3pt')
     })
 
     test('a dash pattern of one length alternates dashes and gaps of that length', () => {
@@ -915,7 +920,7 @@ describe('AbstractFigure label content', () => {
     // A figure that can show one field in its label: `c` followed by the number of digits.
     class FieldFigure extends TestFigure {
         override labelFields() {
-            return {coordinates: (digits: number) => `c${digits}`}
+            return {coordinates: (digits: number | undefined) => `c${String(digits)}`}
         }
     }
 

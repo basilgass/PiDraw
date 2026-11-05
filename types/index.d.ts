@@ -34,6 +34,7 @@ export type { TickLabel, TickSelection } from "./calculus/computeAxis";
 export type { BezierSegment } from "./calculus/computeBezier";
 export type { PathCommand } from "./calculus/computePath";
 export type { RiemannRectangle } from "./calculus/computeRiemann";
+export type { IMeasure, LengthUnit } from "./calculus/units";
 export * from "./animate/Animate.types";
 export { Animate } from "./animate/Animate";
 export { setAnimation } from "./animate/animation";

@@ -292,8 +292,8 @@ describe('Path TikZ', () => {
         const {path} = create()
         const tikz = path({d: 'M 0 0 L 2 0 L 2 2 Z', units: true}).stroke('red').fill({color: 'green', opacity: 0.4}).tikz()
 
-        expect(tikz).toContain('draw=red')
-        expect(tikz).toContain('fill=green, fill opacity=0.4')
+        expect(tikz).toContain('draw=pidraw-red')
+        expect(tikz).toContain('fill=pidraw-green, fill opacity=0.4')
     })
 
     test('has its label at the middle', () => {

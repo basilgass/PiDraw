@@ -1,6 +1,7 @@
-import {numberCorrection, toCoordinates} from "../../calculus"
+import {CSS_COLORS, numberCorrection, toCoordinates} from "../../calculus"
 import {InvalidArgumentError, NotImplementedError} from "../../errors"
 import type {IFigureAppearanceConfig, IGraphConfig, XY} from "../../pidraw.common"
+import {alignementDirection, labelAwayGap, labelPush, unitDirection} from "../Label/Label.constraints"
 import type {ILabelConfig} from "../Label/Label.types"
 
 // How a figure is written in TikZ: pure functions from what the figure keeps (its appearance, its label, the graph it is in) to the text of
@@ -9,14 +10,8 @@ import type {ILabelConfig} from "../Label/Label.types"
 /** A pixel of the svg is 0.75 pt: the conversion of the widths and the lengths to TikZ. */
 const PX_TO_PT = 0.75
 
-/**
- * The colors that `xcolor` knows without an option. The name is the same in svg and in LaTeX, the shade is not for all of them
- * (`green`, `orange`, `purple`...): a limit of the export, written in the guide.
- */
-const TIKZ_COLOR_NAMES = [
-    'black', 'blue', 'brown', 'cyan', 'darkgray', 'gray', 'green', 'lightgray', 'lime', 'magenta', 'olive', 'orange',
-    'pink', 'purple', 'red', 'teal', 'violet', 'white', 'yellow'
-]
+/** The names that LaTeX shades like CSS, the default colors of the figures: they are written as they are, without a definition. */
+const TIKZ_SAME_COLORS = ['black', 'white']
 
 /** The TikZ arrow tip of a marker shape, on the end (`'>'`) or the start (`'<'`) of a path. */
 const TIKZ_TIPS: Record<string, { start: string, end: string }> = {
@@ -39,9 +34,11 @@ export function tikzLength(pixels: number): string {
 }
 
 /**
- * The TikZ name of a svg color, and the `\definecolor` it needs (`null` when the name is already known by LaTeX).
+ * The TikZ name of a svg color, and the `\definecolor` it needs (`null` for the names that LaTeX shades like CSS). A named color is
+ * defined from its CSS shade (`pidraw-green`), not left to `xcolor`, which gives `green`, `orange`, `purple`... other shades and does
+ * not know `gold`.
  * `null` for a color that paints nothing ('transparent', 'none').
- * @throws InvalidArgumentError if the color is neither a hexadecimal color, an `rgb(r, g, b)`, nor a color name of `xcolor`.
+ * @throws InvalidArgumentError if the color is neither a hexadecimal color, an `rgb(r, g, b)`, nor a color name of CSS.
  */
 export function tikzColor(value: string): { name: string, definition: string | null } | null {
     const color = value.trim().toLowerCase()
@@ -64,17 +61,22 @@ export function tikzColor(value: string): { name: string, definition: string | n
     }
 
     if (hex !== null) {
-        const name = `pidraw-${hex}`
-        return {name, definition: `\\definecolor{${name}}{HTML}{${hex.toUpperCase()}}`}
+        return definedColor(`pidraw-${hex}`, hex)
     }
 
-    if (TIKZ_COLOR_NAMES.includes(color)) {
+    if (TIKZ_SAME_COLORS.includes(color)) {
         return {name: color, definition: null}
     }
 
-    throw new InvalidArgumentError(
-        `The color "${value}" has no TikZ equivalent: use a hexadecimal color ('#rrggbb') or one of ${TIKZ_COLOR_NAMES.join(', ')}`
-    )
+    if (Object.hasOwn(CSS_COLORS, color)) {
+        return definedColor(`pidraw-${color}`, CSS_COLORS[color])
+    }
+
+    throw new InvalidArgumentError(`The color "${value}" has no TikZ equivalent: use a hexadecimal color ('#rrggbb') or a name of CSS`)
+}
+
+function definedColor(name: string, hex: string): { name: string, definition: string } {
+    return {name, definition: `\\definecolor{${name}}{HTML}{${hex.toUpperCase()}}`}
 }
 
 /** A position in pixels as a TikZ coordinate, in units of the coordinate system and with 5 decimals at most: `1.5,-2`. */
@@ -223,10 +225,15 @@ export function tikzStyle(
 
 /**
  * The text of a label in TikZ. A label written in TeX (`tex`) is a formula (`A_1`, `\theta`): it is put between `$`, unless it has some
- * already, because LaTeX does not accept a subscript or a command of mathematics in a text.
+ * already, because LaTeX does not accept a subscript or a command of mathematics in a text. In a text, the infinity sign of a slope is
+ * the formula `$\infty$`: `pdflatex` has no character for it.
  */
 export function tikzLabelText(text: string, isTex: boolean): string {
-    return isTex && !text.includes('$') ? `$${text}$` : text
+    if (!isTex) {
+        return text.replaceAll('∞', '$\\infty$')
+    }
+
+    return text.includes('$') ? text : `$${text}$`
 }
 
 /**
@@ -234,18 +241,30 @@ export function tikzLabelText(text: string, isTex: boolean): string {
  * @param at where the figure puts its label, in the units of the coordinate system (`'1,2'`).
  * @param text the text of the node, as it is written (see {@link tikzLabelText}).
  */
-export function tikzLabelNode(config: Pick<ILabelConfig, 'alignement' | 'offset' | 'rotate'>, at: string, text: string): string {
-    const {alignement, offset, rotate} = config
+export function tikzLabelNode(
+    config: Pick<ILabelConfig, 'alignement' | 'offset' | 'rotate'> & Partial<Pick<ILabelConfig, 'away' | 'push' | 'clearance'>>,
+    at: string,
+    text: string
+): string {
+    const {alignement, offset, rotate, away = null, push = null, clearance = 0} = config
+    const direction = away === null ? null : unitDirection(away)
     const vertical = {t: 'above', b: 'below', m: ''}[alignement[0] as 't' | 'b' | 'm']
     const horizontal = {l: 'left', r: 'right', c: ''}[alignement[1] as 'l' | 'r' | 'c']
-    const options = [`${vertical} ${horizontal}`.trim()]
+    // A label that lies on the side that a direction points to (any angle) has the point of its border that faces the anchor on the node: the
+    // angle of that point, from the center of the box, is the opposite of the direction (y points up in TikZ, down on the screen).
+    const options = [direction === null ? `${vertical} ${horizontal}`.trim() : `anchor=${tikzNumber(Math.atan2(direction.y, -direction.x) * 180 / Math.PI)}`]
 
+    // The push, and the gap of a label that lies in a direction, are in pixels on the screen: further along the direction where it lies.
+    const gap = direction === null ? {x: 0, y: 0} : labelAwayGap(direction)
+    const pushed = labelPush(direction ?? alignementDirection(alignement), push ?? clearance)
     // The offset is in pixels with y pointing up, the rotation is clockwise in svg and counterclockwise in TikZ.
-    if (offset.x) {
-        options.push(`xshift=${tikzNumber(offset.x * PX_TO_PT)}pt`)
+    const shift = {x: offset.x + pushed.x + gap.x, y: offset.y - pushed.y - gap.y}
+
+    if (Math.abs(shift.x) > 1e-9) {
+        options.push(`xshift=${tikzNumber(shift.x * PX_TO_PT)}pt`)
     }
-    if (offset.y) {
-        options.push(`yshift=${tikzNumber(offset.y * PX_TO_PT)}pt`)
+    if (Math.abs(shift.y) > 1e-9) {
+        options.push(`yshift=${tikzNumber(shift.y * PX_TO_PT)}pt`)
     }
     if (rotate) {
         options.push(`rotate=${tikzNumber(-rotate)}`)
@@ -303,7 +322,17 @@ export function tikzPicture(graph: IGraphConfig, fragments: string[]): string {
         }
     }
 
-    for (const fragment of fragments.filter(fragment => fragment !== '')) {
+    // The colors are defined once, at the start: a fragment keeps its own `\definecolor` to be usable alone, the picture gathers them.
+    const definitions = new Set<string>()
+    const withoutDefinitions = (fragment: string) => fragment.split('\n').filter(line => {
+        if (!line.startsWith('\\definecolor')) {
+            return true
+        }
+        definitions.add(line)
+        return false
+    }).join('\n')
+
+    for (const fragment of fragments.map(withoutDefinitions).filter(fragment => fragment !== '')) {
         if (fragment.includes('\\begin{axis}')) {
             flush()
             body.push(fragment)
@@ -316,6 +345,7 @@ export function tikzPicture(graph: IGraphConfig, fragments: string[]): string {
 
     return [
         `\\begin{tikzpicture}[x=${unit.x}, y=${unit.y}]`,
+        ...definitions,
         `\\path ${window};`,
         ...body,
         '\\end{tikzpicture}'

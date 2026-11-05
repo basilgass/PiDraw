@@ -158,9 +158,35 @@ describe('Draw options of the appearance', () => {
             return line.shape.node.getAttribute('stroke-dasharray')
         }
 
-        expect(dashed(true)).toBe('25')
+        expect(dashed(true)).toBe('6 4')
         expect(dashed('5 2')).toBe('5 2')
         expect(dashed(4)).toBe('4')
+    })
+
+    test('dash accepts a size, a pattern in pixels', () => {
+        const {graph, context} = createGraph()
+        const dashed = (value: IParserParameters['value']) => {
+            const line = new Line(context, 'd', {through: {A: new Point(context, 'A', {coordinates: {x: 0, y: 0}}), B: new Point(context, 'B', {coordinates: {x: 1, y: 1}})}})
+
+            applyOptions({dash: option(value)}, line, graph)
+
+            return line.shape.node.getAttribute('stroke-dasharray')
+        }
+
+        expect(dashed('xs')).toBe('2 2')
+        expect(dashed('sm')).toBe('4 3')
+        expect(dashed('md')).toBe('6 4')
+        expect(dashed('lg')).toBe('10 6')
+        expect(dashed('xl')).toBe('16 8')
+    })
+
+    test('dash with an unknown size is an option error', () => {
+        const {graph, context} = createGraph()
+        const line = new Line(context, 'd', {through: {A: new Point(context, 'A', {coordinates: {x: 0, y: 0}}), B: new Point(context, 'B', {coordinates: {x: 1, y: 1}})}})
+
+        expect(() => {
+            applyOptions({dash: option('xxl')}, line, graph)
+        }).toThrow(OptionError)
     })
 
     test('dot is a dotted stroke', () => {
@@ -221,7 +247,7 @@ describe('Draw option label', () => {
         expect(point.label?.config.alignement).toBe(position)
     })
 
-    test.each([['x'], ['top'], ['tt'], ['lt'], [3]])('the position %s is an OptionError: it is none of the nine positions, nor one letter of them', (position) => {
+    test.each([['x'], ['top'], ['tt'], ['tlr'], [3]])('the position %s is an OptionError: it is none of the nine positions, nor one letter of them', (position) => {
         const {graph, point} = createPoint()
 
         expect(() => {
@@ -249,6 +275,36 @@ describe('Draw option label', () => {
 
         expect(() => {
             applyOptions({label: value}, point, graph)
+        }).toThrow(OptionError)
+    })
+
+    test('@ followed by the name of a field the figure has is written in the label', () => {
+        const {graph, context} = createGraph()
+        const A = new Point(context, 'A', {coordinates: {x: 0, y: 0}})
+        const B = new Point(context, 'B', {coordinates: {x: 2, y: 3}})
+        const d = new Line(context, 'd', {through: {A, B}})
+
+        applyOptions({label: option('m=@slope')}, d, graph)
+        expect(d.label?.displayName).toBe('m=3/2')
+
+        applyOptions({tex: option('m=@slope')}, d, graph)
+        expect(d.label?.displayName).toBe('m=\\frac{3}{2}')
+
+        applyOptions({label: option('@slope.1')}, d, graph)
+        expect(d.label?.displayName).toBe('1.5')
+    })
+
+    test.each([
+        ['a field the figure does not have', option('@area')],
+        ['a @ alone for a figure that has no default field', option('@')]
+    ])('%s is an OptionError', (_, value) => {
+        const {graph, context} = createGraph()
+        const A = new Point(context, 'A', {coordinates: {x: 0, y: 0}})
+        const B = new Point(context, 'B', {coordinates: {x: 2, y: 3}})
+        const d = new Line(context, 'd', {through: {A, B}})
+
+        expect(() => {
+            applyOptions({label: value}, d, graph)
         }).toThrow(OptionError)
     })
 })
@@ -474,5 +530,112 @@ describe('Draw options with the defaults of the graph', () => {
         withDefaults(options, {label: true, points: {shape: '*'}}, point())
 
         expect(Object.keys(options)).toEqual(['red'])
+    })
+})
+
+describe('Draw option label pushed away from a figure', () => {
+    function setup() {
+        const figures: Record<string, AbstractFigure> = {}
+        const {graph, context} = createGraph(figures)
+        const O = new Point(context, 'O', {coordinates: {x: 0, y: 0}})
+        const A = new Point(context, 'A', {coordinates: {x: 2, y: 3}})
+        const d = new Line(context, 'd', {through: {A: O, B: A}})
+        figures.O = O
+        figures.A = A
+        figures.d = d
+
+        return {graph, context, O, A, d}
+    }
+
+    test('>O puts the label on the side of its anchor that is opposite to O, and keeps O as its reference', () => {
+        const {graph, O, A} = setup()
+
+        applyOptions({label: option('A', '>O')}, A, graph)
+
+        expect(A.labelReference).toBe(O)
+        // A is at (500, 150) and O at (400, 300): the label lies up and to the right.
+        const away = A.label?.config.away
+
+        expect(away?.x).toBeCloseTo(100 / Math.hypot(100, 150), 6)
+        expect(away?.y).toBeCloseTo(-150 / Math.hypot(100, 150), 6)
+    })
+
+    test('the label that follows O is not asked a position: the alignement stays the one of the figure', () => {
+        const {graph, A} = setup()
+
+        applyOptions({label: option('A', '>O')}, A, graph)
+
+        expect(A.label?.alignementGiven).toBe(false)
+    })
+
+    test('a distance after >O is in units of the x axis, and pushes the label further', () => {
+        const {graph, A} = setup()
+
+        applyOptions({label: option('A', '>O', 0.5)}, A, graph)
+
+        expect(A.label?.config.push).toBeCloseTo(25, 6)
+    })
+
+    test('a distance alone pushes the label further where its position puts it', () => {
+        const {graph, A} = setup()
+
+        applyOptions({label: option('A', 'tl', 0.2)}, A, graph)
+
+        expect(A.label?.alignement).toBe('tl')
+        expect(A.label?.config.push).toBeCloseTo(10, 6)
+        expect(A.label?.config.offset).toEqual({x: 0, y: 0})
+    })
+
+    test('a distance alone is allowed when the position is not written, whatever the position of the figure', () => {
+        const {graph, A} = setup()
+
+        applyOptions({label: option('A', true, 1)}, A, graph)
+
+        expect(A.label?.config.push).toBeCloseTo(50, 6)
+    })
+
+    test('a position that lies on no side has no direction for a distance', () => {
+        const {graph, A} = setup()
+
+        expect(() => {
+            applyOptions({label: option('A', 'mc', 1)}, A, graph)
+        }).toThrow(OptionError)
+    })
+
+    test('a shift by a pair is still a shift, with no push', () => {
+        const {graph, A} = setup()
+
+        applyOptions({label: option('A', 'tl', {x: 2, y: 3})}, A, graph)
+
+        expect(A.label?.config.push).toBeNull()
+        expect(A.label?.config.offset.x).toBeCloseTo(100, 6)
+    })
+
+    test('a figure that does not exist, or that has no point, cannot be the reference', () => {
+        const {graph, A} = setup()
+
+        expect(() => {
+            applyOptions({label: option('A', '>Z')}, A, graph)
+        }).toThrow(OptionError)
+        expect(() => {
+            applyOptions({label: option('A', '>d')}, A, graph)
+        }).toThrow(/point, a circle, an arc or a polygon/)
+    })
+
+    test('a wrong position still names the three kinds of values', () => {
+        const {graph, A} = setup()
+
+        expect(() => {
+            applyOptions({label: option('A', 'xx')}, A, graph)
+        }).toThrow(/figure/)
+    })
+
+    test('a label without >O has no reference, even after one', () => {
+        const {graph, A} = setup()
+
+        applyOptions({label: option('A', '>O')}, A, graph)
+        applyOptions({label: option('A', 'tl')}, A, graph)
+
+        expect(A.labelReference).toBeNull()
     })
 })

@@ -335,3 +335,109 @@ describe('Draw points that were dragged', () => {
         expect(point(d, 'A').pixels).toEqual({x: 300, y: 200})
     })
 })
+
+describe('Draw with a unit and a scale', () => {
+    const code = 'O(0,0)\nc=circ O,2->label=@radius\nA(1,1)\nB(4,1)\nC(1,4)\na=arc B,A,C->label=@'
+
+    test('the labels write the lengths with the unit and the scale of the parameters', () => {
+        const d = draw('O(0,0)\nc=circ O,2->label=@radius', 'unit=mm,scale=10')
+
+        expect(d.graph.figures.c.label?.displayName).toBe('20 mm')
+    })
+
+    test('the angle has the degree sign without any parameter', () => {
+        const d = draw(code)
+
+        expect(d.graph.figures.a.label?.displayName).toBe('90°')
+    })
+
+    test('a drawing with the parameters refreshed is the one of a new drawing, and the unit does not change the shapes', () => {
+        const plain = draw(code, 'x=-3:6,y=-3:6')
+        const measured = draw(code, 'x=-3:6,y=-3:6,unit=cm,scale=2')
+        const refreshed = draw(code, 'x=-3:6,y=-3:6')
+
+        refreshed.refreshLayout('x=-3:6,y=-3:6,unit=cm,scale=2')
+        refreshed.refresh(code)
+
+        expect(drawing(refreshed)).toBe(drawing(measured))
+        expect(refreshed.graph.figures.c.label?.displayName).toBe('4 cm')
+        expect(plain.graph.figures.c.label?.displayName).toBe('2')
+        expect(problems(refreshed)).toEqual([])
+    })
+
+    test('a unit that does not exist is a layout error and the lengths stay as they were', () => {
+        const d = draw('O(0,0)\nc=circ O,2->label=@radius', 'unit=mm')
+        const error = d.refreshLayout('unit=inch')
+
+        expect(error).not.toBeNull()
+        expect(d.graph.figures.c.label?.displayName).toBe('2 mm')
+    })
+})
+
+describe('Draw with labels pushed away from a figure', () => {
+    const code = 'O(0,0)\nc=circ O,4\nA(0,4)->drag=c,label=@/>O'
+
+    test('the label of a point on a circle lies on the side opposite to the center', () => {
+        const d = draw(code, 'x=-6:6,y=-6:6')
+        const away = point(d, 'A').label?.config.away
+
+        expect(away?.x).toBeCloseTo(0, 6)
+        expect(away?.y).toBeCloseTo(-1, 6)
+        expect(problems(d)).toEqual([])
+    })
+
+    test('the label turns around the point when it is dragged on the circle', () => {
+        const d = draw(code, 'x=-6:6,y=-6:6')
+        const target = d.graph.toPixels({x: 4, y: 0})
+
+        mouseTo(point(d, 'A_drag'), target)
+
+        const away = point(d, 'A').label?.config.away
+
+        expect(away?.x).toBeCloseTo(1, 6)
+        expect(away?.y).toBeCloseTo(0, 6)
+    })
+
+    test('a point with a drag handle keeps its label clear of the handle, and the distance that is written replaces it', () => {
+        const d = draw('A(1,1)->drag,label=A\nB(2,2)->label=B/tr/0.2,drag', 'x=-6:6,y=-6:6')
+
+        expect(point(d, 'A').label?.config.clearance).toBe(15)
+        expect(point(d, 'A').label?.config.push).toBeNull()
+        expect(point(d, 'B').label?.config.clearance).toBe(15)
+        expect(point(d, 'B').label?.config.push).toBeGreaterThan(0)
+    })
+
+    test('the order of drag and label does not matter', () => {
+        const d = draw('A(1,1)->label=A,drag', 'x=-6:6,y=-6:6')
+
+        expect(point(d, 'A').label?.config.clearance).toBe(15)
+    })
+
+    test('a name that does not exist is an error of the line, and the others are drawn', () => {
+        const d = draw('A(1,1)->label=A/>Z\nB(2,2)', 'x=-6:6,y=-6:6')
+
+        expect(problems(d)).toHaveLength(1)
+        expect(names(d)).toContain('B')
+    })
+
+    test('a drawing refreshed is the one of a new drawing', () => {
+        const fresh = draw(code, 'x=-6:6,y=-6:6')
+        const refreshed = draw('O(0,0)\nc=circ O,4\nA(0,4)->drag=c', 'x=-6:6,y=-6:6')
+
+        refreshed.refresh(code)
+
+        expect(drawing(refreshed)).toBe(drawing(fresh))
+        expect(point(refreshed, 'A').label?.config.away).toEqual(point(fresh, 'A').label?.config.away)
+    })
+
+    test('the label of a point follows another point that is dragged', () => {
+        const d = draw('O(0,0)->drag\nA(0,4)->label=@/>O', 'x=-6:6,y=-6:6')
+
+        expect(point(d, 'A').label?.config.away?.y).toBeCloseTo(-1, 6)
+
+        mouseTo(point(d, 'O_drag'), d.graph.toPixels({x: 4, y: 4}))
+
+        // O is now level with A, to the right: the label lies to the left of A.
+        expect(point(d, 'A').label?.config.away?.x).toBeCloseTo(-1, 6)
+    })
+})

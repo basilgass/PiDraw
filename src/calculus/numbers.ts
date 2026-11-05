@@ -15,6 +15,50 @@ export function numberCorrection(value: number, number_of_digits = 10): number {
     return Math.round(scaled) / factor + 0
 }
 
+/** A fraction in lowest terms: the sign is the one of the numerator. */
+export interface Fraction {
+    numerator: number,
+    denominator: number
+}
+
+/** The tolerance of {@link toFraction}: floating point noise, not a rounding. */
+const FRACTION_EPSILON = 1e-9
+
+/**
+ * The fraction in lowest terms that is `value`, with a denominator of `maxDenominator` at most.
+ * @returns `null` if no such fraction is equal to `value` (`0.333` is not `1/3`), or if `value` is not finite.
+ */
+export function toFraction(value: number, maxDenominator = 100): Fraction | null {
+    if (!Number.isFinite(value)) {
+        return null
+    }
+
+    // The first denominator that fits is the smallest one: the fraction is in lowest terms.
+    for (let denominator = 1; denominator <= maxDenominator; denominator++) {
+        const numerator = Math.round(value * denominator)
+
+        if (Math.abs(value - numerator / denominator) <= FRACTION_EPSILON) {
+            return {numerator: numerator + 0, denominator}
+        }
+    }
+
+    return null
+}
+
+/** A fraction in TeX: `3`, `\frac{3}{2}`, `-\frac{1}{4}`. */
+export function fractionToTex({numerator, denominator}: Fraction): string {
+    if (denominator === 1) {
+        return String(numerator)
+    }
+
+    return `${numerator < 0 ? '-' : ''}\\frac{${Math.abs(numerator)}}{${denominator}}`
+}
+
+/** A fraction as a plain text: `3`, `3/2`, `-1/4`. */
+export function fractionToText({numerator, denominator}: Fraction): string {
+    return denominator === 1 ? String(numerator) : `${numerator}/${denominator}`
+}
+
 /**
  * A number, or a fraction written as a string (`'2/3'`).
  *

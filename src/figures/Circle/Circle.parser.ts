@@ -98,6 +98,7 @@ export const CIRCLE_ITEMS: ParserItems = {
         description: `Create a circle: from its center and its radius (a number, a point or A:B), from three points (a last ${ALTERNATIVE} for the inscribed circle), from a center and a tangent line, or from a diameter A:B`,
         forms: ['c=circ <point>,<radius>', 'c=circ <point>,<line>', `c=circ <point>,<point>,<point>[,${ALTERNATIVE}]`, 'c=circ <point>:<point>'],
         summary: 'c=circ O,r — circle',
+        labelFields: ['radius', 'perimeter', 'area'],
         build: buildCircle
     }
 }

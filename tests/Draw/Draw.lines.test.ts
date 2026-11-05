@@ -55,9 +55,26 @@ describe('readCode lines', () => {
         expect(lines.map(line => [line.number, line.item?.name])).toEqual([[2, 'A'], [5, 'C']])
     })
 
+    test('that are comments (%) are skipped, and still counted, even when indented or holding code', () => {
+        const lines = read('% the points\nA(1,2)\n   % indented\n%B(3,4)\nC(5,6)')
+
+        expect(lines.map(line => [line.number, line.item?.name])).toEqual([[2, 'A'], [5, 'C']])
+    })
+
+    test('a % inside a line is not a comment', () => {
+        expect(read('A(1,2)->label=50%')[0].item?.name).toBe('A')
+        expect(read('A(1,2) % here')[0].error).toBeDefined()
+    })
+
+    test('that start with $ are skipped like comments, and still counted', () => {
+        const lines = read('$a=1,2,3/0.1=1\nA(1,2)\n  $tex=f(x)\nC(5,6)')
+
+        expect(lines.map(line => [line.number, line.item?.name])).toEqual([[2, 'A'], [4, 'C']])
+    })
+
     test('without code give nothing', () => {
         expect(read('')).toEqual([])
-        expect(read('\n  \n$ nothing')).toEqual([])
+        expect(read('\n  \n% nothing\n$ nothing')).toEqual([])
     })
 })
 

@@ -92,3 +92,13 @@ export function circleTangentTo(center: XY, start: XY, end: XY): CircleDefinitio
 
     return {center: {x: center.x, y: center.y}, radius}
 }
+
+/** The length of a circle of a given radius. */
+export function circlePerimeter(radius: number): number {
+    return 2 * Math.PI * radius
+}
+
+/** The area of a disc of a given radius. */
+export function circleArea(radius: number): number {
+    return Math.PI * radius * radius
+}

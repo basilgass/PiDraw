@@ -181,8 +181,3 @@ Points connus, acceptés pour l'instant, à traiter plus tard. Une entrée par s
 
 - **Contexte** : un `TODO: ajouter l'ellipse` était en tête de `parser.config.ts`, retiré du code.
 - **Ce qui manque** : une figure `Ellipse` (suivre « Créer une nouvelle figure » du guideline) : clé de la syntaxe, config, contraintes, `tikz()`, page du guide.
-
-## 2026-11-05 : couleurs nommées de l'export TikZ
-
-- **Contexte** : `tikzColor` écrit un nom de couleur tel quel, et `xcolor` lui donne une autre teinte que CSS pour `green`, `lime`, `orange`, `pink`, `purple`, `teal`, `olive`, `brown`, `darkgray`, `lightgray`, `violet`. `grey`, `darkgrey`, `lightgrey` et `gold` (acceptés par `PARSER_COLOR_VALUES`) lèvent `InvalidArgumentError` à l'export. Limite documentée dans `docs/guide/tikz.md`.
-- **Ce qui manque** : une table CSS vers hexadécimal et un `\definecolor{pidraw-rrggbb}` pour chaque nom (piste écartée pour l'instant : on ne veut pas de `\definecolor` pour des noms), ou au minimum l'ajout des 4 noms refusés.

@@ -3,9 +3,11 @@ import {
     gcd,
     nearestOnPolygon,
     nowhere,
+    polygonArea,
     polygonCentroid,
     polygonCycles,
     polygonPath,
+    polygonPerimeter,
     regularPolygon,
     regularPolygonOnSide
 } from '../../src/calculus'
@@ -210,5 +212,27 @@ describe('nearestOnPolygon', () => {
 
         expect(star.cycles).toHaveLength(2)
         expect(Math.hypot(found.x, found.y)).toBeCloseTo(50, 6)
+    })
+})
+
+describe('polygonPerimeter and polygonArea', () => {
+    const triangle = {vertices: [{x: 0, y: 0}, {x: 3, y: 0}, {x: 0, y: 4}], cycles: [[0, 1, 2]]}
+
+    test('are the length of the outline and the area it goes round', () => {
+        expect(polygonPerimeter(triangle)).toBeCloseTo(12, 9)
+        expect(polygonArea(triangle)).toBeCloseTo(6, 9)
+    })
+
+    test('do not depend on the way the vertices go round', () => {
+        const reversed = {vertices: triangle.vertices, cycles: [[2, 1, 0]]}
+
+        expect(polygonArea(reversed)).toBeCloseTo(6, 9)
+    })
+
+    test('add up the closed paths of a star made of several polygons', () => {
+        const star = exists(regularPolygon({x: 0, y: 0}, 2, 6, 2))
+
+        expect(polygonArea(star)).toBeCloseTo(2 * Math.sqrt(3) / 4 * 12, 9)
+        expect(polygonPerimeter(star)).toBeCloseTo(6 * 2 * Math.sqrt(3), 9)
     })
 })

@@ -1,1 +1,1 @@
-{"version":3,"file":"language.d.ts","sourceRoot":"","sources":["../../src/codemirror/language.ts"],"names":[],"mappings":"AAAA,OAAO,EAAC,cAAc,EAAoB,MAAM,sBAAsB,CAAA;AAKtE,MAAM,MAAM,UAAU,GAAG,MAAM,GAAG,YAAY,CAAA;AAuI9C,wBAAgB,cAAc,CAAC,IAAI,GAAE,UAAmB,GAAG,cAAc,CAAC,OAAO,CAAC,CAOjF"}
+{"version":3,"file":"language.d.ts","sourceRoot":"","sources":["../../src/codemirror/language.ts"],"names":[],"mappings":"AAAA,OAAO,EAAC,cAAc,EAAoB,MAAM,sBAAsB,CAAA;AAKtE,MAAM,MAAM,UAAU,GAAG,MAAM,GAAG,YAAY,CAAA;AA4I9C,wBAAgB,cAAc,CAAC,IAAI,GAAE,UAAmB,GAAG,cAAc,CAAC,OAAO,CAAC,CAOjF"}

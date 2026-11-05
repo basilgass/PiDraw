@@ -22,8 +22,10 @@ An option that does not exist (`->colr=red`), that is not made for the figure (`
 | `color=red`, `red` | the color of the stroke. A color name alone is the same as `color=` |
 | `color=red/0.5` | the color of the stroke with an opacity, from 0 to 1 |
 | `fill=blue`, `fill=blue/0.3` | the color of the fill, with an opacity or not |
-| `dash`, `dash=5`, `dash=5 2`, `dash=none` | a dashed stroke: half a unit by default, or lengths in pixels (the dash, then the gap), or `none` for a continuous stroke |
-| `dot` | a dotted stroke |
+| `dash`, `dash=lg`, `dash=5`, `dash=5 2`, `dash=none` | a dashed stroke. `dash` alone is the size `md`; a size is `xs`, `sm`, `md`, `lg` or `xl` (a dash and a gap of 2 2, 4 3, 6 4, 10 6 or 16 8 pixels); a number gives lengths in pixels (the dash, then the gap); `none` is a continuous stroke |
+| `dot` | a dotted stroke, of 3 pixels |
+
+The dashes are in pixels, not in units: they look the same at any scale of the graph, resolution or zoom.
 | `mark` | an arrow, or another marker, on the ends: see [markers](#markers) |
 
 ```pidraw params="x=-1:7,y=-1:5"
@@ -74,6 +76,21 @@ F(6,4)
 a=seg A,B->dash,red
 b=seg C,D->dash=3 6,blue
 c=seg E,F->dot,green
+```
+
+```pidraw params="x=-1:7,y=-1:6"
+A(1,1)
+B(6,1)
+C(1,2)
+D(6,2)
+E(1,3)
+F(6,3)
+G(1,4)
+H(6,4)
+a=seg A,B->dash=xs
+b=seg C,D->dash=sm
+c=seg E,F->dash=lg
+d=seg G,H->dash=xl
 ```
 
 ### Markers
@@ -210,7 +227,55 @@ C(5,1)->label=l/l
 D(1,2.5)->label=c/c
 ```
 
+The two letters can be written in either order, since a height and a side cannot be mistaken: `rm` is `mr` and `lt` is `tl`.
+
+```pidraw params="x=-1:5,y=-1:3"
+A(1,1)->label=A/rm
+B(3,1)->label=B/lt
+```
+
 Any other position is an error. Without a position, the figure keeps its own (`br`, or the one it chooses from where its label lies).
+
+The letters say on which side of the figure the label lies: with `ml`, the label is to the left of the point, and with `tl`, above it and to the left.
+
+### Away from a figure
+
+A position can also be `>` and the name of a figure defined before: `label=A/>O`. The label then lies on the side of the figure that is opposite to `O`, whatever the angle, and it follows when `A` or `O` moves. It is the way to keep the label of a point that is dragged around a circle outside of it.
+
+```pidraw params="x=-5:5,y=-5:5"
+O(0,0)
+c=circ O,3
+A(0,3)->drag=c,label=A/>O
+B(3,0)->drag=c,label=B/>O
+C(-2,-2)->drag=c,label=C/>O
+```
+
+`O` can be a point, a circle (its center), an arc (its center) or a polygon (the center of its vertices). A label that is at the place of `O` itself lies on no side: the label of a circle is exactly at its center. A line, a curve or a figure that does not exist cannot be the reference.
+
+```pidraw params="x=-5:5,y=-5:5" errors="2,3"
+O(0,0)
+A(1,1)->label=A/>Z
+B(2,2)->label=B/>Ox
+```
+
+The arc is pushed away from its own center when it has no position, so its label is on the side of the middle of the angle, whatever the angle.
+
+#### A distance
+
+A number after the position (or after `>O`) pushes the label further from the figure, in the direction where it lies. It is in units of the graph, measured along the x axis like a radius: `label=A/ml/1` puts the label to the left of the point and moves it one unit more to the left. A position that lies on no side (`mc`) has no direction for a distance, and is an error.
+
+```pidraw params="x=-5:5,y=-3:5"
+O(0,0)
+A(-2,2)->label=A/ml/1
+B(2,2)->label=B/tr/0.5
+C(0,-1)->label=C/>O/0.5
+```
+
+A shift by a pair (`label=A/tl/0.5;0.5`) is still a shift of the label, in units, and it is added to the push.
+
+#### A point that is dragged
+
+The disc of the drag handle is over the point and over its label. A point that has a handle (`drag`) keeps its label this far from it, 15 pixels more in the direction where the label lies, wherever `drag` is written among the options. A distance that you write replaces it (`label=A/br/0` puts the label back against the point).
 
 ### Shift and rotation
 
@@ -226,16 +291,22 @@ d=line C,D->label=d/tc/0;0/
 
 ### Values in a label
 
-In the text, `@` is a value that the figure computes. It is kept up to date when the figure moves (dragging, animation).
+In the text, `@` is a value that the figure computes. It is kept up to date when the figure moves (dragging, animation). `@` alone is the most classical value of the figure; `@name` is another one. When there is a doubt, `@` alone is not valid: the name is needed.
 
-| Figure | Value of `@` |
-|---|---|
-| point | its coordinates: `(x;y)` |
-| segment | its length, in units of the graph |
-| area (`fill`) | the area |
-| Riemann sum (`riemann`) | the sum |
+| Figure | `@` | `@name` |
+|---|---|---|
+| point | its coordinates: `(x;y)` | |
+| segment | its length (`@length`) | `@slope` |
+| line, ray, vector | not valid alone | `@slope` |
+| arc | its angle in degrees, with the degree sign (`@angle`) | `@length`, `@radius`, `@area` (of the sector) |
+| circle | not valid alone | `@radius`, `@perimeter`, `@area` |
+| polygon | not valid alone | `@perimeter`, `@area` |
+| area (`fill`) | the area (`@area`) | |
+| Riemann sum (`riemann`) | the sum (`@sum`) | `@rectangles` |
 
-`@.n` writes `n` decimals (2 by default). Every `@` of the text is replaced. On the other figures (a line, a circle...), `@` is a character like another.
+The values are in units of the graph, multiplied by the `scale` of the graph and followed by its `unit` when it has them (see [the unit of the lengths](./graph#the-unit-of-the-lengths)). The radius of a circle is measured along the x axis, as TikZ does. The area of a star polygon counts a part that the outline goes round twice for two (the center of the pentagram).
+
+`@.n` and `@name.n` write `n` decimals (2 by default). Every `@` of the text is replaced; `@@` is a `@` that stays in the text. A figure that has no value (a plot, a Bezier curve...) leaves its text as it is, `@` included. A name the figure does not have is an error.
 
 ```pidraw params="x=-1:7,y=-1:5"
 A(1.23456,2)->label=A@
@@ -244,14 +315,53 @@ C(2,4)
 s=seg A,C->label=@.1
 ```
 
+The angle of an arc is a number of degrees, always followed by the degree sign (`60°`, in TeX `60^\circ`). The arc `*` is the other arc between the same directions, and its angle is the rest of the turn. The area of the sector is written inside of it.
+
+```pidraw params="x=-1:7,y=-1:5"
+A(1,1)
+B(4,1)
+C(1,4)
+a=arc B,A,C->label=@
+b=arc B,A,C,0.5,*->label=@.0
+c=arc B,A,C,1.5->label=@area
+```
+
+The slope of a line is written as a fraction when it is exact: the line was given by a slope, or goes through two points given by numbers, and the slope is a fraction with a denominator of 100 at most (`3/2`, and `\frac{3}{2}` with `tex`). Write the decimals (`@slope.2`) to get a decimal number instead. The slope of a vertical line is the infinity (`∞`, and `\infty` with `tex`).
+
+```pidraw params="x=-1:7,y=-1:5"
+A(0,0)
+B(4,3)
+d=line A,B->tex=@slope
+e=line A,B->tex=@slope.2/br
+```
+
+The circle and the polygon give their radius, their perimeter and their area. The area is written at the center.
+
+```pidraw params="x=-4:5,y=-4:4"
+O(0,0)
+c=circ O,2->label=@area
+A(2,1)
+B(4,1)
+C(3,3)
+t=poly A,B,C->label=@perimeter
+```
+
+`@` alone, or a name that the figure does not have, is an error in the option.
+
+```pidraw params="x=-4:5,y=-4:4" errors="2,3"
+O(0,0)
+c=circ O,2->label=@
+d=circ O,1->label=@width
+```
+
 ```js
-const draw = new PiDraw(container, {code: 'A(1.23456,2)->label=A@\nB(4,2)->label=B@.4\nC(0,0)\ns=seg A,C->label=@.1\nd=line A,B->label=@'})
-const {A, B, s, d} = draw.graph.figures
+const draw = new PiDraw(container, {code: 'A(1.23456,2)->label=A@\nB(4,2)->label=B@.4\nC(0,0)\ns=seg A,C->label=@.1\nc=circ C,2->label=@radius@@'})
+const {A, B, s, c} = draw.graph.figures
 
 A.label.displayName // A(1.23;2)
 B.label.displayName // B(4;2)
 s.label.displayName // 2.4
-d.label.displayName // @
+c.label.displayName // 2@
 ```
 
 ### Letters and subscripts
@@ -310,7 +420,7 @@ l=circ A,1->sector
 | 2 | `w` is a number |
 | 3 | an opacity is from 0 to 1 |
 | 4 | `color` needs a color |
-| 5 | a dash is a number, two numbers, or `none` |
+| 5 | a dash is a size (`xs`, `sm`, `md`, `lg`, `xl`), a number, two numbers, or `none` |
 | 6 | a marker is at `start`, `end`, `both` or `none` |
 | 7 | `x` is not a position: a position is two letters (`tl`) or one of `t`, `m`, `b`, `l`, `c`, `r` |
 | 8, 9 | a move or a scale is a number, or a pair `x;y` |

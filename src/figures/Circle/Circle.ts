@@ -2,7 +2,17 @@ import type {Circle as svgCircle, Shape} from "@svgdotjs/svg.js"
 import {AbstractFigure} from "../AbstractFigure/AbstractFigure"
 import type {IFigureContext, XY} from "../../pidraw.common"
 import type {CircleDefinition} from "../../calculus"
-import {intersectionCircleCircle, intersectionCircleLine, isDefinedPosition, nowhere} from "../../calculus"
+import {
+    circleArea,
+    circlePerimeter,
+    intersectionCircleCircle,
+    intersectionCircleLine,
+    isDefinedPosition,
+    nowhere,
+    toCoordinates
+} from "../../calculus"
+import {fieldLength} from "../Label/Label.constraints"
+import type {LabelFields} from "../Label/Label.types"
 import {constructionOf, resolveConstraint} from "./Circle.constraints"
 import type {ICircleConfig} from "./Circle.types"
 import type {Line} from "../Line/Line"
@@ -101,6 +111,12 @@ export class Circle extends AbstractFigure {
         // A circle that does not exist has no place for a label.
         if (this.label && Number.isFinite(this._radius)) {
             const {x, y} = this._labelPoint()
+
+            // The label is centered on the center. The alignment that was asked for (`label=c/tl`) is kept.
+            if (!this.label.alignementGiven) {
+                this.label.config.alignement = 'mc'
+            }
+
             this.label.move(x, y)
         }
 
@@ -164,9 +180,33 @@ export class Circle extends AbstractFigure {
         return this
     }
 
-    /** Where the label is, in pixels: inside the circle, at the top right. */
+    /**
+     * What a circle can show in its label, in units of the coordinate system and with the unit and the scale of the graph (see
+     * {@link IGraphConfig.measure}): its radius (measured along the x axis, like in TikZ), its perimeter and its area. There is no
+     * default field: `@` alone is refused.
+     */
+    override labelFields(): LabelFields {
+        const radius = () => Math.abs(toCoordinates(this._radius, this.graphConfig))
+
+        const measure = () => this.graphConfig.measure
+
+        return {
+            radius: (digits, format) => fieldLength(radius(), digits, measure(), format),
+            perimeter: (digits, format) => fieldLength(circlePerimeter(radius()), digits, measure(), format),
+            area: (digits, format) => fieldLength(circleArea(radius()), digits, measure(), format, 2)
+        }
+    }
+
+    override readonly referenceable = true
+
+    /** The center of the circle. `null` when the circle does not exist. */
+    override referenceAnchorPoint(): XY | null {
+        return Number.isFinite(this._radius) ? {x: this._center.x, y: this._center.y} : null
+    }
+
+    /** Where the label is, in pixels: exactly at the center. */
     protected _labelPoint(): XY {
-        return {x: this._center.x + this._radius / 2, y: this._center.y - this._radius / 2}
+        return {x: this._center.x, y: this._center.y}
     }
 
     /** Draw the circle again, empty: `computed` gives it its size and its place. */

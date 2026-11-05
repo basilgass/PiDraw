@@ -262,6 +262,7 @@ export const POINT_ITEMS: ParserItems = {
         description: 'Create a point',
         forms: ['A(3,4)'],
         summary: 'A=pt x,y — point',
+        labelFields: ['coordinates'],
         build: buildPoint
     },
     [PARSER_TYPE.VECTOR_POINT]: {
@@ -269,6 +270,7 @@ export const POINT_ITEMS: ParserItems = {
         description: 'Create a point from a vector defined by two points and a starting point',
         forms: ['A=vpt <point>,<point>,<scale?>,<starting point?>'],
         summary: 'P=vpt A,B,scale — point from a vector',
+        labelFields: ['coordinates'],
         build: buildPoint
     },
     [PARSER_TYPE.DIRECTION_POINT]: {
@@ -276,6 +278,7 @@ export const POINT_ITEMS: ParserItems = {
         description: 'Create a point from a line and a starting point',
         forms: ['A=dpt <point>,<line>,<distance>,<perpendicular?>'],
         summary: 'P=dpt A,d,3 — point along a line',
+        labelFields: ['coordinates'],
         build: buildPoint
     },
     [PARSER_TYPE.MIDDLE]: {
@@ -283,6 +286,7 @@ export const POINT_ITEMS: ParserItems = {
         description: 'Create the middle of two points',
         forms: ['A=mid <point>,<point>'],
         summary: 'M=mid A,B — middle',
+        labelFields: ['coordinates'],
         build: buildPoint
     },
     [PARSER_TYPE.PROJECTION]: {
@@ -290,6 +294,7 @@ export const POINT_ITEMS: ParserItems = {
         description: 'Create the projection of a point on a line',
         forms: ['A=proj <point>,<line>'],
         summary: 'H=proj A,d — projection',
+        labelFields: ['coordinates'],
         build: buildPoint
     },
     [PARSER_TYPE.INTERSECTION]: {
@@ -297,6 +302,7 @@ export const POINT_ITEMS: ParserItems = {
         description: 'Create the intersection of two lines',
         forms: ['A=inter <line|circle>,<line|circle>'],
         summary: 'P=inter d1,d2 — intersection',
+        labelFields: ['coordinates'],
         build: buildIntersection
     },
     [PARSER_TYPE.SYMMETRY]: {
@@ -304,6 +310,7 @@ export const POINT_ITEMS: ParserItems = {
         description: 'Create the symmetry of a point',
         forms: ['A=sym <point>,<point|line>'],
         summary: 'S=sym A,B — symmetry',
+        labelFields: ['coordinates'],
         build: buildPoint
     },
     [PARSER_TYPE.EVAL_FX]: {
@@ -311,6 +318,7 @@ export const POINT_ITEMS: ParserItems = {
         description: 'Create the point of a function at a value',
         forms: ['A=eval f,3'],
         summary: 'P=eval f,x — point of a function',
+        labelFields: ['coordinates'],
         build: buildPoint
     }
 }

@@ -2,7 +2,7 @@ import type { G, Shape, Svg } from "@svgdotjs/svg.js";
 import type { IFigureAppearanceConfig, IFigureContext, XY } from "../../pidraw.common";
 import type { IControlsFigure } from "../../controls/controls.types";
 import { Label } from "../Label/Label";
-import type { ILabelConfig, LabelContent, LabelFields } from "../Label/Label.types";
+import type { ILabelConfig, LabelContent, LabelFieldName, LabelFields } from "../Label/Label.types";
 export type MarkerSide = 'start' | 'end' | 'both' | 'none';
 export interface IMarkOptions {
     side?: MarkerSide;
@@ -10,6 +10,7 @@ export interface IMarkOptions {
     shape?: string;
 }
 export type ILabelOptions = Partial<Pick<ILabelConfig, 'asHtml' | 'texConverter'>>;
+export declare const DEFAULT_DASH = "6 4";
 export interface IColorValue {
     color: string;
     opacity?: number;
@@ -37,6 +38,9 @@ export declare abstract class AbstractFigure {
     set isDraggable(value: boolean);
     protected _label: Label | null;
     protected _labelContent: LabelContent;
+    protected _labelReference: AbstractFigure | null;
+    get labelReference(): AbstractFigure | null;
+    protected _labelClearance: number;
     get label(): Label | null;
     protected _controls: Partial<IControlsFigure>;
     get controls(): Readonly<Partial<IControlsFigure>>;
@@ -44,6 +48,8 @@ export declare abstract class AbstractFigure {
     protected _hiders: Set<string>;
     protected _defined: boolean;
     readonly followable: boolean;
+    readonly referenceable: boolean;
+    referenceAnchorPoint(): XY | null;
     get graphConfig(): import("../..").IGraphConfig;
     abstract computed(): this;
     abstract get config(): object;
@@ -106,7 +112,12 @@ export declare abstract class AbstractFigure {
     protected _tikzLabelText(): string;
     protected readonly _labelGap: number;
     updateLabel(): this;
+    setLabelReference(reference: AbstractFigure | null): this;
+    setLabelClearance(pixels: number): this;
+    protected _orientLabel(): void;
     labelFields(): LabelFields;
+    defaultLabelField(): LabelFieldName | null;
+    protected _firstLabelField(): LabelFieldName | null;
     computeLabel(): string;
     move(pos: number): this;
     move(pos: XY): this;

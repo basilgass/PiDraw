@@ -72,7 +72,8 @@ Z=inter c2,l
 j=Y1Y2->red,w=3`,
     },
     {
-        name: 'trigonometric circle',
+        name: 'trigonometric circle (circle radius=10)',
+        parameters: 'scale=1/10,x=12,y=18,axis->range=-11:11',
         code: `
 O(0,0)
 c=circ O,10
@@ -119,15 +120,74 @@ t=T20P0
 P(7.07,7.07)->drag=c
 C=proj P,Ox->hide
 S=proj P,Oy->hide
-c=PC.->dash
-s=PS.->dash
+c=PC.->dash,tex=@
+s=PS.->dash,tex=@
 p0=PO->dot
 p=PO.->w=3
 c1=OC.->green,w=5
 s1=OS.->red,w=5
 a=arc P0,O,P,1->tex=\\theta/mc
 T=inter p,t
-t1=P0T.->gold,w=5`,
+t1=P0T.->gold,w=5,tex=@`,
+    },
+    {
+        name: 'trigonometric circle (circle radius=1)',
+        parameters: 'unitX=10,unitY=10,x=1.2,y=1.8,axis->range=-1.1:1.1',
+        code: `
+O(0,0)
+c=circ O,1
+P0(1,0)
+P1(0.867,0.5)->tex=\\frac{\\pi}{6}/mr/0.05;0
+P2(0.707,0.707)->tex=\\frac{\\pi}{4}/mr/0.05;0.04
+P3(0.5,0.867)->tex=\\frac{\\pi}{3}/tr/0.05;0
+P4(0,1)->tex=\\frac{\\pi}{2}/tl/-0.05;0.02
+P7(-0.867,0.5)->tex=\\frac{5\\pi}{6}/ml/-0.05;0
+P6(-0.707,0.707)->tex=\\frac{3\\pi}{4}/ml/-0.05;0.04
+P5(-0.5,0.867)->tex=\\frac{2\\pi}{3}/tl/-0.05;0
+P8(-1,0)->tex=\\frac{3\\pi}{2}/tl/-0.05;0.03
+P9(0.867,-0.5)->tex=\\frac{11\\pi}{6}/mr/0.05;0
+P10(0.707,-0.707)->tex=\\frac{7\\pi}{4}/br/0.05;0
+P311(0.5,-0.867)->tex=\\frac{5\\pi}{3}/br/0.05;0
+P12(0,-1)->tex=\\frac{3\\pi}{2}/bl/-0.05;-0.03
+P13(-0.867,-0.5)->tex=\\frac{7\\pi}{6}/ml/-0.05;0
+P14(-0.707,-0.707)->tex=\\frac{5\\pi}{4}/bl/-0.05;0
+P15(-0.5,-0.867)->tex=\\frac{4\\pi}{3}/bl/-0.05;0
+T1(0.5,0)->tex=\\scriptsize\\frac{1}{2}/bc/0;-0.05
+T2(0.707,0)->tex=\\scriptsize\\frac{\\sqrt{2}}{2}/bc/0;-0.05
+T3(0.86,0)->tex=\\scriptsize\\frac{\\sqrt{3}}{2}/bc/0;-0.05
+T4(1,0)->tex=\\scriptsize 1/br/0.04;0
+T5(0,0.5)->tex=\\scriptsize\\frac{1}{2}/mr/0.05;0
+T6(0,0.707)->tex=\\scriptsize\\frac{\\sqrt{2}}{2}/mr/0.05;0
+T7(0,0.86)->tex=\\scriptsize\\frac{\\sqrt{3}}{2}/mr/0.05;0
+T9(0,1)->tex=\\scriptsize 1/tr/0.05;0
+T11(-0.5,0)->tex=\\scriptsize-\\frac{1}{2}/bc/0;-0.05
+T12(-0.707,0)->tex=\\scriptsize-\\frac{\\sqrt{2}}{2}/bc/0;-0.05
+T13(-0.86,0)->tex=\\scriptsize-\\frac{\\sqrt{3}}{2}/bc/0;-0.05
+T14(-1,0)->tex=\\scriptsize -1/bl/-0.04;0
+T15(0,-0.5)->tex=\\scriptsize-\\frac{1}{2}/mr/0.05;0
+T16(0,-0.707)->tex=\\scriptsize-\\frac{\\sqrt{2}}{2}/mr/0.05;0
+T17(0,-0.86)->tex=\\scriptsize-\\frac{\\sqrt{3}}{2}/mr/0.05;0
+T19(0,-1)->tex=\\scriptsize -1/br/0.05;0
+T20(1,1)->hide
+X1(1,0.577)->tex=\\scriptsize \\frac{\\sqrt{3}}{3}/mr/0.05;0
+X2(1,1)->tex=\\scriptsize 1/mr/0.05;0
+X3(1,1.73)->tex=\\scriptsize \\sqrt{3}/mr/0.05;0
+X4(1,-0.577)->tex=\\scriptsize -\\frac{\\sqrt{3}}{3}/mr/0.05;0
+X5(1,-1)->tex=\\scriptsize -1/mr/0.05;0
+X6(1,-1.73)->tex=\\scriptsize -\\sqrt{3}/mr/0.05;0
+t=T20P0
+P(0.707,0.707)->drag=c
+C=proj P,Ox->hide
+S=proj P,Oy->hide
+c=PC.->dash,tex=@
+s=PS.->dash,tex=@
+p0=PO->dot
+p=PO.->w=3
+c1=OC.->green,w=5
+s1=OS.->red,w=5
+a=arc P0,O,P,0.1->tex=\\theta/mc
+T=inter p,t
+t1=P0T.->gold,w=5,tex=@`,
     },
     {
         name: 'ara fill',
@@ -262,5 +322,67 @@ cg=CG.
 bf=BF.
 hg=HG.
 gf=GF.`
+    },
+    {
+        name: 'label values: arcs',
+        parameters: 'x=-1:9,y=-1:7',
+        code: `A(1,1)->drag=grid
+B(7,1)->drag=grid
+C(3,6)->drag=grid
+s=seg A,B
+t=seg A,C
+a=arc B,A,C,1.5->label=@
+b=arc B,A,C,*->dash,label=@.0
+c=arc B,A,C,3.5->sector,fill=orange/0.3,label=@area
+l=arc B,A,C,2.5->blue,label=@length`
+    },
+    {
+        name: 'label values: slopes and lengths',
+        parameters: 'axis,x=-1:9,y=-1:7',
+        code: `A(0,0)->drag=grid
+B(4,3)->drag=grid
+C(8,1)->drag=grid
+d=line A,B->tex=m=@slope
+e=line B,C->tex=@slope.2/tl
+s=seg A,C->color=green,label=@
+t=seg B,C->color=red,label=@.1/tr`
+    },
+    {
+        name: 'label values: circles and polygons',
+        parameters: 'x=-5:9,y=-4:6',
+        code: `O(0,0)->drag=grid
+c=circ O,2->label=@area
+d=circ O,3->dash,label=@perimeter/tr
+A(4,-2)->drag=grid
+B(8,-2)->drag=grid
+C(6,2)->drag=grid
+p=poly A,B,C->fill=teal/0.3,label=@area
+q=poly A,B,C->!,label=@perimeter/br`
+    },
+    {
+        name: 'labels pushed away from a figure',
+        parameters: 'x=-6:8,y=-5:6',
+        code: `O(0,0)->drag=grid
+c=circ O,3
+A(0,3)->drag=c,label=@/>O
+B(3,0)->drag=c,label=@/>O/0.3
+C(-2,-2)->drag=grid,label=@/ml/1
+P(5,3)->drag=grid
+Q(7,3)->drag=grid
+R(6,5)->drag=grid
+t=poly P,Q,R->fill=teal/0.3
+S(6,3.5)->drag=t,label=@/>t
+a=arc P,O,A,1.5->label=@`
+    },
+    {
+        name: 'label values: unit and scale',
+        parameters: 'x=-1:7,y=-1:5,unit=mm,scale=10',
+        code: `A(0,0)->drag=grid
+B(4,0)->drag=grid
+C(4,3)->drag=grid
+s=seg A,C->label=@
+t=poly A,B,C->fill=orange/0.3,label=@area
+c=circ A,1->label=@radius
+a=arc B,A,C,1.5->label=@`
     }
 ]

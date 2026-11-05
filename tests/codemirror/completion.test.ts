@@ -53,6 +53,7 @@ describe('completion of the code', () => {
     })
 
     test('nothing is suggested in a comment', () => {
+        expect(suggested('% A=p')).toBeNull()
         expect(suggested('$ A=p')).toBeNull()
     })
 
@@ -72,5 +73,53 @@ describe('completion of the parameters', () => {
 
     test('a value is not completed', () => {
         expect(suggested('x=1', 'parameters')).toBeNull()
+    })
+})
+
+describe('completion of the fields of a label', () => {
+    test('the fields of the kind of figure follow a @ in a label', () => {
+        expect(suggested('a=arc B,A,C->label=@')).toEqual(['angle', 'length', 'radius', 'area'])
+        expect(suggested('c=circ O,2->tex=r=@ra')).toEqual(['radius', 'perimeter', 'area'])
+        expect(suggested('p=poly A,B,C->color=red,label=@')).toEqual(['perimeter', 'area'])
+        expect(suggested('s=seg A,B->label=@')).toEqual(['length', 'slope'])
+        expect(suggested('d=line A,B->tex=@')).toEqual(['slope'])
+    })
+
+    test('a kind of figure with no field has none to suggest', () => {
+        expect(suggested('f=plot x^2->label=@')).toEqual([])
+    })
+
+    test('every field is suggested when the kind of figure is not written (a shorthand)', () => {
+        expect(suggested('A(1,2)->label=@')).toEqual(expect.arrayContaining(['coordinates', 'slope', 'area']))
+    })
+
+    test('the fields are not suggested once the position of the label is being written', () => {
+        expect(suggested('a=arc B,A,C->label=@/t')).toBeNull()
+    })
+
+    test('every field has a description for the editor', () => {
+        const options = pidrawCompletion('code')(new CompletionContext(EditorState.create({doc: 'a=arc B,A,C->label=@'}), 20, false)) as unknown as {
+            options: { label: string, detail?: string }[]
+        }
+
+        expect(options.options.every(option => option.detail !== undefined)).toBe(true)
+    })
+})
+
+describe('completion of the range of an axis', () => {
+    const detail = (before: string, mode: PidrawMode) => {
+        const state = EditorState.create({doc: before})
+        const result = pidrawCompletion(mode)(new CompletionContext(state, before.length, false)) as unknown as {
+            options: { label: string, detail?: string }[]
+        }
+
+        return result.options.find(option => option.label === 'range')?.detail
+    }
+
+    test('range is suggested with its description after -> in the code and in the parameters', () => {
+        expect(suggested('a=axis A,B->ran')).toContain('range')
+        expect(suggested('axisY->ran', 'parameters')).toContain('range')
+        expect(detail('a=axis A,B->ran', 'code')).toBe('part of an axis: range=-10:10')
+        expect(detail('axisY->ran', 'parameters')).toBe('part of an axis: range=-10:10')
     })
 })

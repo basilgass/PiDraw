@@ -160,7 +160,8 @@ export class Draw {
             // Update the layout
             this.graph.updateLayout({
                 ...layoutGeometry({...layout.window, unit: layout.unit}),
-                system: CoordinateSystem.CARTESIAN_2D
+                system: CoordinateSystem.CARTESIAN_2D,
+                measure: layout.measure
             }, layout.display)
             this._settings = layout.defaults
             this._applyLayoutOptions(layout.options)

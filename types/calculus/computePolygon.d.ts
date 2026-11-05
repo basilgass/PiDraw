@@ -10,4 +10,6 @@ export declare function regularPolygonOnSide(A: XY, B: XY, sides: number, step?:
 export declare function polygonCentroid(vertices: XY[]): XY;
 export declare function nearestOnPolygon(shape: PolygonShape, position: XY): XY;
 export declare function polygonPath(shape: PolygonShape): string;
+export declare function polygonPerimeter(shape: PolygonShape): number;
+export declare function polygonArea(shape: PolygonShape): number;
 //# sourceMappingURL=computePolygon.d.ts.map

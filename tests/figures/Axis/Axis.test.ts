@@ -63,6 +63,79 @@ describe('Axis', () => {
         expect(ox({padding: 5}).padding).toBe(5)
     })
 
+    test('a range cuts the axis to the units it gives, from its zero', () => {
+        const {axis} = create()
+        const vertical = axis({director: {A: origin, d: {x: 0, y: -50}}, range: {min: -3, max: 5}}, 'Oy')
+        const horizontal = axis({director: {A: origin, d: {x: 50, y: 0}}, range: {min: 0, max: 4}})
+
+        expect(vertical.start).toEqual({x: 400, y: 450})
+        expect(vertical.end).toEqual({x: 400, y: 50})
+        expect(horizontal.start).toEqual({x: 400, y: 300})
+        expect(horizontal.end).toEqual({x: 600, y: 300})
+    })
+
+    test('a range that goes past the borders is cut by them and by the padding', () => {
+        const {axis} = create()
+        const wide = axis({director: {A: origin, d: {x: 50, y: 0}}, range: {min: -100, max: 100}})
+
+        expect(wide.start).toEqual({x: 20, y: 300})
+        expect(wide.end).toEqual({x: 780, y: 300})
+    })
+
+    test('the arrow is at the end of the range, and the axis goes the same way', () => {
+        const {axis} = create()
+        const back = axis({director: {A: origin, d: {x: -50, y: 0}}, range: {min: -2, max: 3}})
+
+        expect(back.start).toEqual({x: 500, y: 300})
+        expect(back.end).toEqual({x: 250, y: 300})
+        expect(back.shape.attr('marker-end')).toBeTruthy()
+    })
+
+    test('a range that is outside of the drawing leaves the axis undrawn', () => {
+        const {axis} = create()
+        const away = axis({director: {A: origin, d: {x: 50, y: 0}}, range: {min: 50, max: 60}})
+
+        expect(Number.isNaN(away.start.x)).toBe(true)
+        expect(away.element.attr('visibility')).toBe('hidden')
+    })
+
+    test('the graduation stays in the range', () => {
+        const {axis} = create()
+        const graduated = axis({director: {A: origin, d: {x: 50, y: 0}}, ticks: {}, range: {min: -2, max: 2}})
+        const values = graduated.ticks.map(tick => tick.value)
+
+        expect(values.length).toBeGreaterThan(0)
+        expect(Math.min(...values)).toBeGreaterThanOrEqual(-2)
+        expect(Math.max(...values)).toBeLessThanOrEqual(2)
+    })
+
+    test('the tikz of an axis with a range ends where the range does', () => {
+        const {axis} = create()
+        const full = axis({director: {A: origin, d: {x: 50, y: 0}}})
+        const cut = axis({director: {A: origin, d: {x: 50, y: 0}}, range: {min: -2, max: 2}})
+
+        expect(cut.tikz()).not.toBe(full.tikz())
+        expect(cut.tikz()).toContain('(-2,0) -- (2,0)')
+    })
+
+    test.each([
+        ['a range that is reversed', {min: 3, max: -3}],
+        ['a range that is empty', {min: 1, max: 1}],
+        ['a bound that is not finite', {min: 0, max: Infinity}]
+    ])('%s is an InvalidArgumentError', (_, range) => {
+        const {axis} = create()
+
+        expect(() => axis({director: {A: origin, d: {x: 50, y: 0}}, range}, 'h')).toThrow(InvalidArgumentError)
+        expect(() => axis({director: {A: origin, d: {x: 50, y: 0}}, range}, 'h')).toThrow(/range/)
+    })
+
+    test('an axis that has no zero cannot have a range', () => {
+        const {axis} = create()
+
+        expect(() => axis({slope: {A: origin, slope: 1}, range: {min: -1, max: 1}}, 'h')).toThrow(InvalidArgumentError)
+        expect(() => axis({slope: {A: origin, slope: 1}, range: {min: -1, max: 1}}, 'h')).toThrow(/zero/)
+    })
+
     test('the margin is measured along an axis that is oblique', () => {
         const {axis} = create()
         const d = {x: 50, y: -50}
@@ -581,8 +654,8 @@ describe('Axis graduation TikZ', () => {
     test('the numbers have the color of the axis', () => {
         const tikz = graduated({step: 7}).stroke('red').tikz()
 
-        expect(tikz).toContain('\\node[below, text=red] at (0,-0.14) {$0$};')
-        expect(tikz).toContain('draw=red')
+        expect(tikz).toContain('\\node[below, text=pidraw-red] at (0,-0.14) {$0$};')
+        expect(tikz).toContain('draw=pidraw-red')
     })
 
     test('an axis that is not graduated is only its line', () => {

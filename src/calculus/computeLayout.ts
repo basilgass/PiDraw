@@ -1,4 +1,5 @@
 import {InvalidArgumentError, NotImplementedError} from "../errors"
+import {checkMeasure, DEFAULT_MEASURE} from "./units"
 import {CoordinateSystem, type Domain, type IGraphConfig, type XY} from "../pidraw.common"
 import type {IGraphConstructorConfig, IGraphDisplay} from "../Graph.types"
 
@@ -35,6 +36,7 @@ export function resolveGraphConfig(config?: IGraphConstructorConfig): { config: 
         height,
         origin: {...(config?.origin ?? {x: width / 2, y: height / 2})},
         system: config?.system ?? CoordinateSystem.CARTESIAN_2D,
+        measure: {...DEFAULT_MEASURE, ...defined(config?.measure)},
         axis: {
             x: {...(config?.axis?.x ?? {x: PX_PER_CM, y: 0})},
             y: {...(config?.axis?.y ?? {x: 0, y: -PX_PER_CM})}
@@ -48,8 +50,8 @@ export function resolveGraphConfig(config?: IGraphConstructorConfig): { config: 
 
 /**
  * Check the configuration of a graph.
- * @throws InvalidArgumentError if the width or the height is not a finite number greater than 0, the origin is not a finite position, or
- * an axis is not a finite vector with a length.
+ * @throws InvalidArgumentError if the width or the height is not a finite number greater than 0, the origin is not a finite position,
+ * an axis is not a finite vector with a length, or the measure has a unit that does not exist or a scale that is not greater than 0.
  * @throws NotImplementedError if the coordinate system is not the cartesian one: it cannot be drawn yet.
  */
 export function checkGraphConfig(config: IGraphConfig): void {
@@ -73,6 +75,10 @@ export function checkGraphConfig(config: IGraphConfig): void {
         if (!finite(vector) || Math.hypot(vector.x, vector.y) === 0) {
             throw fail(`vector of the axis ${name}`, vector, 'a finite vector that is not null')
         }
+    }
+
+    if (config.measure !== undefined) {
+        checkMeasure(config.measure)
     }
 
     if (config.system !== CoordinateSystem.CARTESIAN_2D) {

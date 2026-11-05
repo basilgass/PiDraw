@@ -16,6 +16,7 @@ import {
     tikzUnits,
     tikzView
 } from '../../../src/figures/AbstractFigure/AbstractFigure.tikz'
+import {PARSER_COLOR_VALUES} from '../../../src/parser/parser.common'
 import {graphConfig} from '../../helpers/figure'
 
 // The graph of the tests: 800 x 600 pixels, 50 pixels per unit, the origin in the middle.
@@ -38,8 +39,21 @@ describe('tikzLength', () => {
 })
 
 describe('tikzColor', () => {
-    test.each(['red', 'Teal', ' blue '])('the name %s of xcolor needs no definition', (name) => {
-        expect(tikzColor(name)).toEqual({name: name.trim().toLowerCase(), definition: null})
+    test.each([['red', 'FF0000'], ['Teal', '008080'], [' blue ', '0000FF']])('the name %s is defined from its CSS shade', (name, hex) => {
+        const lower = name.trim().toLowerCase()
+
+        expect(tikzColor(name)).toEqual({name: `pidraw-${lower}`, definition: `\\definecolor{pidraw-${lower}}{HTML}{${hex}}`})
+    })
+
+    test.each([['green', '008000'], ['orange', 'FFA500'], ['gold', 'FFD700'], ['grey', '808080'], ['lightblue', 'ADD8E6']])(
+        '%s has the shade of CSS, not the one of xcolor', (name, hex) => {
+            expect(tikzColor(name)?.definition).toBe(`\\definecolor{pidraw-${name}}{HTML}{${hex}}`)
+        })
+
+    test('every color suggested by the parser is a name of CSS', () => {
+        for (const name of PARSER_COLOR_VALUES) {
+            expect(() => tikzColor(name), name).not.toThrow()
+        }
     })
 
     test.each([['#f00', 'ff0000'], ['#1A2b3C', '1a2b3c'], ['rgb(255, 0, 16)', 'ff0010']])('%s is defined as pidraw-%s', (value, hex) => {
@@ -50,7 +64,7 @@ describe('tikzColor', () => {
         expect(tikzColor(value)).toBeNull()
     })
 
-    test.each(['salmon', '#12', 'rgb(256, 0, 0)'])('%s has no equivalent: InvalidArgumentError', (value) => {
+    test.each(['periwinkle', 'constructor', '#12', 'rgb(256, 0, 0)'])('%s has no equivalent: InvalidArgumentError', (value) => {
         expect(() => tikzColor(value)).toThrow(InvalidArgumentError)
     })
 })
@@ -103,13 +117,13 @@ describe('tikzAxis', () => {
 describe('tikzStyle', () => {
     test('writes the stroke, with the width in points', () => {
         expect(tikzStyle({...appearance, stroke: {color: 'red', width: 2, opacity: 1}}, null, none).options)
-            .toEqual(['draw=red', 'line width=1.5pt'])
+            .toEqual(['draw=pidraw-red', 'line width=1.5pt'])
     })
 
     test('writes the opacities and the fill', () => {
         const {options} = tikzStyle({stroke: {color: 'red', width: 1, opacity: 0.5}, fill: {color: 'green', opacity: 0.25}}, null, none)
 
-        expect(options).toEqual(['draw=red', 'line width=0.75pt', 'draw opacity=0.5', 'fill=green', 'fill opacity=0.25'])
+        expect(options).toEqual(['draw=pidraw-red', 'line width=0.75pt', 'draw opacity=0.5', 'fill=pidraw-green', 'fill opacity=0.25'])
     })
 
     test('a stroke that paints nothing is draw=none, without a width', () => {
@@ -145,6 +159,11 @@ describe('tikzLabelText', () => {
 
     test('a text is left as it is', () => {
         expect(tikzLabelText('A1', false)).toBe('A1')
+        expect(tikzLabelText('60° et 5 mm²', false)).toBe('60° et 5 mm²')
+    })
+
+    test('the infinity sign of a text is a formula, because pdflatex has no character for it', () => {
+        expect(tikzLabelText('m=∞', false)).toBe('m=$\\infty$')
     })
 })
 
@@ -160,6 +179,32 @@ describe('tikzLabelNode', () => {
     test('the offset is in points and the rotation counterclockwise', () => {
         expect(tikzLabelNode({...config, offset: {x: 4, y: -8}, rotate: 30}, '0,0', 'A'))
             .toBe('\\node[below right, xshift=3pt, yshift=-6pt, rotate=-30] at (0,0) {A};')
+    })
+
+    test('a label that lies on the side of a direction is anchored by the angle of its border that faces the anchor', () => {
+        // To the right on the screen: the left border of the node is on the anchor, with the gap of a side.
+        expect(tikzLabelNode({...config, away: {x: 1, y: 0}}, '0,0', 'A')).toBe('\\node[anchor=180, xshift=7.5pt] at (0,0) {A};')
+        // Up on the screen (the y axis points down there): the bottom border is on the anchor.
+        expect(tikzLabelNode({...config, away: {x: 0, y: -1}}, '0,0', 'A')).toBe('\\node[anchor=-90] at (0,0) {A};')
+    })
+
+    test('the angle of the direction is the one of a TeX node, whatever its length', () => {
+        expect(tikzLabelNode({...config, away: {x: 3, y: 3}}, '0,0', 'A')).toMatch(/^\\node\[anchor=135, xshift=2\.652pt, yshift=-2\.652pt\]/)
+    })
+
+    test('a push is further in the direction where the label lies, in points', () => {
+        expect(tikzLabelNode({...config, alignement: 'mr', push: 20}, '0,0', 'A')).toBe('\\node[right, xshift=15pt] at (0,0) {A};')
+        expect(tikzLabelNode({...config, alignement: 'tc', push: 8}, '0,0', 'A')).toBe('\\node[above, yshift=6pt] at (0,0) {A};')
+    })
+
+    test('a label centered on its anchor is not pushed', () => {
+        expect(tikzLabelNode({...config, alignement: 'mc', push: 20}, '0,0', 'A')).toBe('\\node at (0,0) {A};')
+    })
+
+    test('the clearance pushes a label that was asked no push, and a push that is asked replaces it', () => {
+        expect(tikzLabelNode({...config, alignement: 'mr', clearance: 20}, '0,0', 'A')).toBe('\\node[right, xshift=15pt] at (0,0) {A};')
+        expect(tikzLabelNode({...config, alignement: 'mr', clearance: 20, push: 4}, '0,0', 'A')).toBe('\\node[right, xshift=3pt] at (0,0) {A};')
+        expect(tikzLabelNode({...config, alignement: 'mr', clearance: 20, push: 0}, '0,0', 'A')).toBe('\\node[right] at (0,0) {A};')
     })
 })
 
@@ -185,6 +230,24 @@ describe('tikzPicture', () => {
 
     test('is only the window without a figure', () => {
         expect(tikzPicture(graph, [])).toBe('\\begin{tikzpicture}[x=37.5pt, y=37.5pt]\n\\path (-8,-6) rectangle (8,6);\n\\end{tikzpicture}')
+    })
+
+    test('gathers the definitions of the colors at the start, once each', () => {
+        const red = '\\definecolor{pidraw-red}{HTML}{FF0000}'
+        const green = '\\definecolor{pidraw-green}{HTML}{008000}'
+        const axis = `${green}\n\\begin{axis}[hide axis]\n\\end{axis}`
+        const picture = tikzPicture(graph, [`${red}\n\\draw[draw=pidraw-red] (1);`, `${green}\n\\draw[draw=pidraw-green] (2);`, `${red}\n\\draw[draw=pidraw-red] (3);`, axis])
+
+        expect(picture.split('\n')).toEqual([
+            '\\begin{tikzpicture}[x=37.5pt, y=37.5pt]',
+            red, green,
+            '\\path (-8,-6) rectangle (8,6);',
+            '\\begin{scope}', '\\clip (-8,-6) rectangle (8,6);',
+            '\\draw[draw=pidraw-red] (1);', '\\draw[draw=pidraw-green] (2);', '\\draw[draw=pidraw-red] (3);',
+            '\\end{scope}',
+            '\\begin{axis}[hide axis]', '\\end{axis}',
+            '\\end{tikzpicture}'
+        ])
     })
 
     test('leaves out the figures that write nothing', () => {

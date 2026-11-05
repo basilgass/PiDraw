@@ -96,7 +96,7 @@ a=axis A,B,pi/2->green
 
 ### Options
 
-The colors, the width and the dashes are the common options, and the numbers and the name have the color of the line. Five more options set the graduation:
+The colors, the width and the dashes are the common options, and the numbers and the name have the color of the line. Six more options set the graduation and the extent:
 
 | Option | Description |
 |---|---|
@@ -105,6 +105,7 @@ The colors, the width and the dashes are the common options, and the numbers and
 | `name=t` | the name written at the end of the arrow, on the side without numbers |
 | `side=left` | the numbers are on the other side (`right`: under a line that goes to the right) |
 | `padding=40` | the distance to the edges of the window, in pixels (20 by default) |
+| `range=-2:5`, `range=3` | the part of the line that is drawn, in units from its zero (`3` is `-3:3`). The arrow is at the end of the range, and the graduation stays inside of it |
 
 A selection without a step graduates the line with a step of 1. Without `numbers`, the numbers are thinned out when they would touch, and a selection that you write is taken as it is.
 
@@ -121,6 +122,12 @@ a=axis A,B->ticks=first
 b=axis C,D->numbers=5/first,red
 c=axis E,F->ticks=2,name=t,blue
 d=axis G,H->side=left,padding=40,green
+```
+
+```pidraw params="x=-1:9,y=-1:3"
+A(0,0)
+B(1,0)
+a=axis A,B->range=-0.5:5,ticks=1
 ```
 
 ```pidraw params="x=-1:9,y=-1:3"

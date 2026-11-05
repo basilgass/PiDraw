@@ -1,5 +1,5 @@
 import {describe, expect, test} from 'vitest'
-import {numberCorrection, toNumber} from '../../src/calculus/numbers'
+import {fractionToTex, numberCorrection, toFraction, toNumber} from '../../src/calculus/numbers'
 import {ParseError} from '../../src/errors'
 
 describe('numberCorrection', () => {
@@ -52,5 +52,48 @@ describe('toNumber', () => {
         ['2/x'],
     ])('"%s" is a ParseError', (value) => {
         expect(() => toNumber(value)).toThrow(ParseError)
+    })
+})
+
+describe('toFraction', () => {
+    test('is the fraction in lowest terms', () => {
+        expect(toFraction(1.5)).toEqual({numerator: 3, denominator: 2})
+        expect(toFraction(-0.25)).toEqual({numerator: -1, denominator: 4})
+        expect(toFraction(4 / 6)).toEqual({numerator: 2, denominator: 3})
+        expect(toFraction(2)).toEqual({numerator: 2, denominator: 1})
+    })
+
+    test('forgives the floating point noise', () => {
+        expect(toFraction(0.1 + 0.2)).toEqual({numerator: 3, denominator: 10})
+        expect(toFraction(1 / 3 + 1e-13)).toEqual({numerator: 1, denominator: 3})
+    })
+
+    test('zero is 0 over 1, and a negative zero too', () => {
+        expect(toFraction(0)).toEqual({numerator: 0, denominator: 1})
+        expect(toFraction(-0)).toEqual({numerator: 0, denominator: 1})
+    })
+
+    test('is null for a number that is no fraction with a denominator of 100 at most', () => {
+        expect(toFraction(0.123456)).toBeNull()
+        expect(toFraction(Math.PI)).toBeNull()
+        expect(toFraction(1 / 101)).toBeNull()
+        expect(toFraction(1 / 101, 101)).toEqual({numerator: 1, denominator: 101})
+    })
+
+    test('is null for a number that is not finite', () => {
+        expect(toFraction(NaN)).toBeNull()
+        expect(toFraction(Infinity)).toBeNull()
+    })
+})
+
+describe('fractionToTex', () => {
+    test('writes a whole number as it is, and the others as a TeX fraction', () => {
+        expect(fractionToTex({numerator: 4, denominator: 1})).toBe('4')
+        expect(fractionToTex({numerator: 3, denominator: 2})).toBe('\\frac{3}{2}')
+    })
+
+    test('puts the sign of a negative fraction in front', () => {
+        expect(fractionToTex({numerator: -1, denominator: 4})).toBe('-\\frac{1}{4}')
+        expect(fractionToTex({numerator: -3, denominator: 1})).toBe('-3')
     })
 })

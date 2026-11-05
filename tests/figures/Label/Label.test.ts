@@ -48,7 +48,9 @@ describe('Label', () => {
         const label = new Label(createSvg().group(), 'B')
 
         expect(label.displayName).toBe('B')
-        expect(label.config).toEqual({asHtml: false, alignement: 'br', offset: {x: 0, y: 0}, rotate: 0, size: 'inherit'})
+        expect(label.config).toEqual({
+            asHtml: false, alignement: 'br', away: null, push: null, clearance: 0, offset: {x: 0, y: 0}, rotate: 0, size: 'inherit'
+        })
     })
 
     test('has the font size that it is given, in both modes', () => {
@@ -248,5 +250,122 @@ describe('Label rotation', () => {
 
     test('is not turned along its figure unless the figure asks', () => {
         expect(create().label.autoRotate).toBe(false)
+    })
+})
+
+describe('Label that lies on a side of its anchor', () => {
+    test('a direction puts the label on that side: the side of its box that faces the anchor touches it', () => {
+        const {label, center} = create()
+
+        label.move(100, 100)
+        label.setAway({x: 1, y: 0})
+
+        // To the right: the left side of the box (a width of 40, a gap of 10) is at the anchor.
+        expect(center).toHaveBeenLastCalledWith(130, 100)
+
+        label.setAway({x: 0, y: -1})
+
+        // Above: the bottom side of the box (a height of 20) is at the anchor.
+        expect(center).toHaveBeenLastCalledWith(100, 90)
+    })
+
+    test('any angle works, not only the nine positions', () => {
+        const {label, center} = create()
+
+        label.move(0, 0)
+        label.setAway({x: 3, y: 4})
+
+        const [x, y] = center.mock.lastCall as number[]
+
+        // Down and to the right, at an angle that is none of the positions of the box: the label is not centered on the anchor or at a corner.
+        expect(x).toBeGreaterThan(0)
+        expect(y).toBeGreaterThan(10)
+        expect(Math.atan2(y, x)).toBeCloseTo(Math.atan2(4, 3), 6)
+    })
+
+    test('a null direction gives the alignement back', () => {
+        const {label, center} = create()
+
+        label.move(100, 100)
+        label.setAway({x: 1, y: 0})
+        label.setAway({x: 0, y: 0})
+
+        expect(label.config.away).toBeNull()
+        expect(center).toHaveBeenLastCalledWith(120, 110)
+    })
+
+    test('a position that is asked for replaces the direction', () => {
+        const {label} = create()
+
+        label.setAway({x: 1, y: 0})
+        label.position('tl')
+
+        expect(label.config.away).toBeNull()
+        expect(label.alignement).toBe('tl')
+    })
+})
+
+describe('Label that is pushed', () => {
+    test('a distance pushes the label further in the direction where it lies', () => {
+        const {label, center} = create()
+
+        label.move(100, 100)
+        label.position('mr', undefined, undefined, 15)
+
+        // `mr` puts the center 20 to the right and 10 for the side; the push is 15 more to the right.
+        expect(center).toHaveBeenLastCalledWith(145, 100)
+    })
+
+    test('the push of a diagonal position is along the diagonal', () => {
+        const {label, center} = create()
+
+        label.move(0, 0)
+        label.position('br', undefined, undefined, Math.SQRT2 * 10)
+
+        // br is the center at (20, 10); the push is 10 to the right and 10 down.
+        expect(center).toHaveBeenLastCalledWith(30, 20)
+    })
+
+    test('a label centered on its anchor has no direction to be pushed in', () => {
+        const {label, center} = create()
+
+        label.move(50, 50)
+        label.position('mc', undefined, undefined, 30)
+
+        expect(center).toHaveBeenLastCalledWith(50, 50)
+    })
+
+    test('the clearance pushes a label that was asked no push, and a push that is asked replaces it', () => {
+        const {label, center} = create()
+
+        label.move(0, 0)
+        label.position('mr')
+        label.setClearance(15)
+
+        expect(center).toHaveBeenLastCalledWith(45, 0)
+
+        label.position('mr', undefined, undefined, 0)
+
+        expect(center).toHaveBeenLastCalledWith(30, 0)
+    })
+
+    test('a push of null asks none again', () => {
+        const {label, center} = create()
+
+        label.move(0, 0)
+        label.position('mr', undefined, undefined, 5)
+        label.setClearance(15)
+        label.position('mr', undefined, undefined, null)
+
+        expect(center).toHaveBeenLastCalledWith(45, 0)
+    })
+
+    test('the shift by a pair is added to the push', () => {
+        const {label, center} = create()
+
+        label.move(0, 0)
+        label.position('mr', {x: 5, y: -5}, undefined, 10)
+
+        expect(center).toHaveBeenLastCalledWith(45, 5)
     })
 })

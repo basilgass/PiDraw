@@ -10,12 +10,13 @@ s=seg A,B->red,mark=end
 
 ```latex
 \begin{tikzpicture}[x=28.453pt, y=28.453pt]
+\definecolor{pidraw-red}{HTML}{FF0000}
 \path (-1,-1) rectangle (5,4);
 \begin{scope}
 \clip (-1,-1) rectangle (5,4);
 \draw[draw=black, line width=0.75pt, ->] (-0.47281,0) -- (4.47281,0);
 \draw[draw=black, line width=0.75pt, ->] (0,-0.47281) -- (0,3.47281);
-\draw[draw=red, line width=0.75pt, ->] (1,1) -- (4,3);
+\draw[draw=pidraw-red, line width=0.75pt, ->] (1,1) -- (4,3);
 \draw[draw=black, line width=0.75pt] (1,1) circle[radius=1.875pt];
 \node[below right] at (1,1) {A};
 \draw[draw=black, line width=0.75pt] (4,3) circle[radius=1.875pt];
@@ -26,6 +27,7 @@ s=seg A,B->red,mark=end
 The text of a `latex` block that follows a drawing is checked against the library each time the documentation is built.
 
 - **The coordinates are in units of the graph**, not in pixels. The scale of the picture is `x=…, y=…`: a unit is as long as it is on the screen, `unitX` centimeters (28.453 points for a centimeter).
+- **The colors** are defined once, at the start of the picture (`\definecolor`).
 - **The window** is the rectangle `\path (-1,-1) rectangle (5,4);`: the picture has the size of the part of the plane that is drawn.
 - **The figures** come in the order they are on the screen, layer by layer. They are cut to the window by a `\clip` in a `scope`.
 - **The widths and the lengths in pixels** are written in points: 1 pixel is 0.75 point.
@@ -51,13 +53,15 @@ shown('A(1,1)->drag').includes('A_drag') // false
 
 ## Colors
 
-A color given as a hexadecimal number (`#ff8800`) is defined in the picture with `\definecolor`, and so are the opacities. The other colors are written by their name, and the names that LaTeX knows are the ones of `xcolor`. An appearance that has no equivalent in TikZ is an error, and it is never left out silently: the color `lightblue`, which CSS has, is not an `xcolor` name.
+Every color is defined in the picture with `\definecolor`, so that the PDF has the shade of the screen: a hexadecimal color (`#ff8800`) as `pidraw-ff8800`, and a name of CSS (`green`, `gold`, `lightblue`…) as `pidraw-green`, with the shade that CSS gives it. `black` and `white` are written as they are. LaTeX alone would give `green`, `orange`, `purple` or `lightgray` other shades, and does not know `gold`. The opacities are written as options. An appearance that has no equivalent in TikZ is an error, and it is never left out silently: a color that CSS does not know is an `InvalidArgumentError`.
 
 ```js
 const shown = code => new PiDraw(container, {code}).graph.tikz()
 
 shown('A(1,1)->color=#ff8800').includes('pidraw-ff8800') // true
-shown('A(1,1)->color=lightblue') // throws InvalidArgumentError
+shown('A(1,1)->color=green').includes('\\definecolor{pidraw-green}{HTML}{008000}') // true
+shown('A(1,1)->color=gold').includes('pidraw-gold') // true
+shown('A(1,1)->color=periwinkle') // throws InvalidArgumentError
 ```
 
 ## Functions
@@ -71,9 +75,10 @@ A(2,1)->label
 
 ```latex
 \begin{tikzpicture}[x=28.453pt, y=28.453pt]
+\definecolor{pidraw-blue}{HTML}{0000FF}
 \path (-4,-1) rectangle (4,5);
 \begin{axis}[hide axis, scale only axis, trig format plots=deg, unbounded coords=jump, x=28.453pt, y=28.453pt, at={(-113.811pt,-28.453pt)}, anchor=south west, xmin=-4, xmax=4, ymin=-1, ymax=5, restrict y to domain=-7:11]
-\addplot[domain=-5:5, samples=191, draw=blue, line width=0.75pt] {((x^2)/4)};
+\addplot[domain=-5:5, samples=191, draw=pidraw-blue, line width=0.75pt] {((x^2)/4)};
 \end{axis}
 \begin{scope}
 \clip (-4,-1) rectangle (4,5);
@@ -111,15 +116,9 @@ A whole document is then:
 
 - The axes of the graph must go to the right and up: a graph with oblique or reversed axes is a `NotImplementedError`.
 - A picture that is larger than what TeX can hold (16 383 points) is an `InvalidArgumentError`.
-- A color name is written as it is, and LaTeX reads it with the shade of `xcolor`, not the one of CSS: `green`, `lime`, `orange`, `pink`, `purple`, `teal`, `olive`, `brown`, `darkgray`, `lightgray` and `violet` look different in the PDF than in the drawing. Write the hexadecimal color to get the same one.
-- `grey`, `darkgrey`, `lightgrey` and `gold` are accepted in the code but are not `xcolor` names: the export is an `InvalidArgumentError`.
+- A color that is neither hexadecimal nor a name of CSS is an `InvalidArgumentError`.
 
 ```js
-const named = code => new PiDraw(container, {code}).graph.tikz()
-
-named('A(1,1)->color=green').includes('pidraw-') // false
-named('A(1,1)->color=gold') // throws InvalidArgumentError
-
 const oblique = new PiGraph(container, {axis: {x: {x: 50, y: 10}, y: {x: 0, y: -50}}})
 oblique.tikz() // throws NotImplementedError
 

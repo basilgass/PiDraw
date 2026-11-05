@@ -274,7 +274,7 @@ describe('Bezier TikZ', () => {
         const c = curve('b', {through: through(at(0, 0), at(4, 0))}).stroke('red')
         c.addLabel('$b$')
 
-        expect(c.tikz()).toMatch(/^\\draw\[draw=red, line width=0.75pt\] .*;\n\\node\[above\] at \(2,0\.\d+\) \{\$b\$\};$/)
+        expect(c.tikz()).toMatch(/^\\definecolor\{pidraw-red\}\{HTML\}\{FF0000\}\n\\draw\[draw=pidraw-red, line width=0.75pt\] .*;\n\\node\[above\] at \(2,0\.\d+\) \{\$b\$\};$/)
     })
 
     test('a curve that is hidden or does not exist writes nothing', () => {

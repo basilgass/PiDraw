@@ -16,13 +16,16 @@ import {BEZIER_OPTION_HANDLERS} from "../figures/Bezier/Bezier.parser"
 import {AXIS_OPTION_HANDLERS} from "../figures/Axis/Axis.parser"
 import {GRID_OPTION_HANDLERS} from "../figures/Grid/Grid.parser"
 import {parseLabelPosition, parseLabelText} from "../figures/Label/Label.parser"
-import {DEFAULT_LABEL_POSITION, LABEL_POSITIONS} from "../figures/Label/Label.constraints"
+import {alignementDirection, DEFAULT_LABEL_POSITION, LABEL_POSITIONS} from "../figures/Label/Label.constraints"
 import {InvalidArgumentError, OptionError} from "../errors"
 
 export type {IOptionContext, OptionHandler, Options}
 
 /** The width of the stroke that the options without a value give. */
 const STROKE_WIDTHS = {ultrathin: 0.5, thin: 0.75, thick: 2.5, ultrathick: 4}
+
+/** The sizes of `dash=…`, as patterns in pixels (a dash, then a gap). `md` is the pattern of `dash` alone. */
+const DASH_SIZES: Record<string, string> = {xs: '2 2', sm: '4 3', md: '6 4', lg: '10 6', xl: '16 8'}
 
 /** The options a point takes when it does not ask for a shape (`o`, `s` or `*`). */
 const SHAPE_KEYS = Object.keys(POINT_OPTIONS)
@@ -62,6 +65,27 @@ function markOf(figure: AbstractFigure, {value, options}: IParserParameters): IM
     return {side: side as MarkerSide, ...(size === undefined ? {} : {size}), ...(shape === undefined ? {} : {shape})}
 }
 
+/** The sign before the name of a figure, in the position of a label, that pushes the label away from it (`label=A/>O`). */
+const AWAY = '>'
+
+/**
+ * The figure that a label is pushed away from (`label=A/>O`).
+ * @throws OptionError if there is no such figure, or if it has no point to be pushed away from.
+ */
+function referenceOf(key: string, figure: AbstractFigure, name: string, figures: Record<string, AbstractFigure>): AbstractFigure {
+    const reference = Object.hasOwn(figures, name) ? figures[name] : undefined
+
+    if (reference === undefined) {
+        throw invalidOption(key, figure, `${AWAY}${name}`, `${AWAY} followed by the name of a figure that is defined before`)
+    }
+
+    if (!reference.referenceable) {
+        throw invalidOption(key, figure, `${AWAY}${name}`, `${AWAY} followed by a point, a circle, an arc or a polygon (${name} is none of them)`)
+    }
+
+    return reference
+}
+
 function applyLabel(key: 'label' | 'tex'): OptionHandler {
     return (figure, {value, options}, {graph}) => {
         let text = figure.name // default value
@@ -75,28 +99,40 @@ function applyLabel(key: 'label' | 'tex'): OptionHandler {
             text = text[0] + '_' + text[1]
         }
 
-        // Without a position, the figure keeps its own (`br`, or the one it chooses from where the label lies).
+        // Without a position, the figure keeps its own (`br`, or the one it chooses from where the label lies). `>O` is not a position: the
+        // label is pushed away from the figure `O`.
         const given = options[0] as (typeof options)[0] | undefined
-        const alignement = typeof given === 'boolean' || given === undefined ? undefined : typeof given === 'string' ? parseLabelPosition(given) : null
+        const reference = typeof given === 'string' && given.startsWith(AWAY) ? referenceOf(key, figure, given.slice(AWAY.length), graph.figures) : null
+        const alignement = typeof given === 'boolean' || given === undefined || reference !== null ? undefined : typeof given === 'string' ? parseLabelPosition(given) : null
         const offsetGiven = options[1]
         const rotate = options[2] as number | boolean | undefined
 
         if (alignement === null) {
-            throw invalidOption(key, figure, given, `a position (${LABEL_POSITIONS.join(', ')}), or one letter (t, m, b, l, c, r) that replaces the same part of ${DEFAULT_LABEL_POSITION}`)
+            throw invalidOption(key, figure, given, `a position (${LABEL_POSITIONS.join(', ')}), one letter (t, m, b, l, c, r) that replaces the same part of ${DEFAULT_LABEL_POSITION}, or ${AWAY}<figure> to push the label away from a figure`)
         }
 
-        if (offsetGiven !== undefined && typeof offsetGiven !== 'boolean' && !(typeof offsetGiven === 'object' && 'x' in offsetGiven && 'y' in offsetGiven)) {
-            throw invalidOption(key, figure, offsetGiven, 'a shift in units (0.5;0)')
+        if (offsetGiven !== undefined && typeof offsetGiven !== 'boolean' && typeof offsetGiven !== 'number'
+            && !(typeof offsetGiven === 'object' && 'x' in offsetGiven && 'y' in offsetGiven)) {
+            throw invalidOption(key, figure, offsetGiven, 'a shift in units (0.5;0), or a distance in units (0.5)')
+        }
+
+        // A distance alone pushes the label further in the direction where it lies: a position that lies in no direction (mc) has none.
+        if (typeof offsetGiven === 'number' && alignement !== undefined && alignementDirection(alignement) === null) {
+            throw invalidOption(key, figure, given, `a position that lies on a side (${alignement} has none) for the distance ${offsetGiven}`)
         }
 
         if (rotate !== undefined && rotate !== true && typeof rotate !== 'number') {
             throw invalidOption(key, figure, rotate, 'an angle in degrees, or nothing to turn the label with a line')
         }
 
+        figure.setLabelReference(reference)
         figure.addLabel(parseLabelText(text, figure), {asHtml: key === 'tex', ...(graph.toTex === undefined ? {} : {texConverter: graph.toTex})})
 
         if (figure.label) {
             const offsetAsUnits = typeof offsetGiven === 'object' ? offsetGiven : {x: 0, y: 0}
+            const axisX = graph.config.axis.x
+            // A distance alone is in units of the x axis, like a radius.
+            const push = typeof offsetGiven === 'number' ? offsetGiven * Math.hypot(axisX.x, axisX.y) : undefined
             const offset = {
                 x: offsetAsUnits.x * graph.config.axis.x.x,
                 y: -offsetAsUnits.y * graph.config.axis.y.y
@@ -107,7 +143,8 @@ function applyLabel(key: 'label' | 'tex'): OptionHandler {
             figure.label.position(
                 alignement,
                 offset,
-                typeof rotate === 'number' ? rotate : 0
+                typeof rotate === 'number' ? rotate : 0,
+                push
             )
         }
     }
@@ -197,10 +234,12 @@ const OPTIONS = registry(
         dash: (figure, {value}) => {
             if (value === true) {
                 figure.dash()
+            } else if (typeof value === 'string' && Object.hasOwn(DASH_SIZES, value)) {
+                figure.dash(DASH_SIZES[value])
             } else if (typeof value === 'string' || typeof value === 'number') {
                 figure.dash(value)
             } else {
-                throw invalidOption('dash', figure, value, 'a pattern, like dash=5 or dash=5 2')
+                throw invalidOption('dash', figure, value, 'a pattern or a size (xs, sm, md, lg, xl), like dash=5, dash=5 2 or dash=lg')
             }
         },
         dot: (figure) => { figure.dot() },

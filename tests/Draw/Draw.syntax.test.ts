@@ -63,8 +63,15 @@ describe('the text of a label', () => {
         }
     })
 
-    test.each(['x', 'tt', 'tlr', 'lt'])('refuses the position %s', (position) => {
+    test.each(['x', 'tt', 'tlr', 'll'])('refuses the position %s', (position) => {
         expect(problems(draw(`A(1,1)->label=A/${position}`))).toHaveLength(1)
+    })
+
+    test.each([['rm', 'mr'], ['lt', 'tl'], ['cb', 'bc']])('accepts the letters of the position in either order: %s is %s', (written, expected) => {
+        const d = draw(`A(1,1)->label=A/${written}`)
+
+        expect(problems(d)).toHaveLength(0)
+        expect(d.graph.figures.A.label?.config.alignement).toBe(expected)
     })
 
     test('may have a comma that is escaped, as before', () => {

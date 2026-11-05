@@ -12,6 +12,7 @@ export function pidrawHighlight(): Extension {
         {tag: [tags.string, tags.special(tags.string)], class: 'tok-string'},
         {tag: [tags.number, tags.bool, tags.null], class: 'tok-number'},
         {tag: [tags.lineComment, tags.blockComment, tags.comment], class: 'tok-comment'},
+        {tag: [tags.meta, tags.processingInstruction], class: 'tok-meta'},
         {tag: [tags.function(tags.variableName), tags.propertyName], class: 'tok-function'},
         {tag: tags.className, class: 'tok-class'},
         {tag: tags.invalid, class: 'tok-invalid'}

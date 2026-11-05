@@ -243,8 +243,8 @@ describe('Riemann sum TikZ', () => {
         const c = create()
         const tikz = c.riemann({plot: line(c)}).stroke('red').fill({color: 'green', opacity: 0.4}).tikz()
 
-        expect(tikz).toContain('draw=red')
-        expect(tikz).toContain('fill=green, fill opacity=0.4')
+        expect(tikz).toContain('draw=pidraw-red')
+        expect(tikz).toContain('fill=pidraw-green, fill opacity=0.4')
     })
 
     test('the label is a node above the rectangles', () => {

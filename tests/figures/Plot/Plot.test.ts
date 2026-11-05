@@ -339,7 +339,7 @@ describe('Plot TikZ', () => {
         const tikz = plot('f', {expression: 'x^2'}).stroke('red').tikz()
 
         expect(tikz).toContain('\\begin{axis}[hide axis, scale only axis, trig format plots=deg, unbounded coords=jump, x=37.5pt, y=37.5pt, at={(-300pt,-225pt)}, anchor=south west, xmin=-8, xmax=8, ymin=-6, ymax=6, restrict y to domain=-18:18]')
-        expect(tikz).toContain('\\addplot[domain=-9:9, samples=451, draw=red, line width=0.75pt] {(x^2)};')
+        expect(tikz).toContain('\\addplot[domain=-9:9, samples=451, draw=pidraw-red, line width=0.75pt] {(x^2)};')
         expect(tikz).toContain('\\end{axis}')
     })
 

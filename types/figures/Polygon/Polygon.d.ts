@@ -1,6 +1,7 @@
 import { AbstractFigure } from "../AbstractFigure/AbstractFigure";
 import type { IFigureContext, XY } from "../../pidraw.common";
 import { type PolygonShape } from "../../calculus";
+import type { LabelFields } from "../Label/Label.types";
 import type { IPolygonConfig } from "./Polygon.types";
 export declare class Polygon extends AbstractFigure {
     constructor(context: IFigureContext, name: string, values: IPolygonConfig);
@@ -11,6 +12,9 @@ export declare class Polygon extends AbstractFigure {
     protected _polygon: PolygonShape | null;
     get vertices(): XY[];
     get centroid(): XY;
+    labelFields(): LabelFields;
+    readonly referenceable = true;
+    referenceAnchorPoint(): XY | null;
     computed(): this;
     protected _place(shape: PolygonShape | null): this;
     readonly followable = true;

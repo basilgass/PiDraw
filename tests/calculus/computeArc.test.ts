@@ -1,5 +1,5 @@
 import {describe, expect, test} from 'vitest'
-import {counterclockwiseSweep, nearestOnArc} from '../../src/calculus'
+import {arcLength, counterclockwiseSweep, nearestOnArc, sectorArea} from '../../src/calculus'
 import type {XY} from '../../src/pidraw.common'
 
 const center: XY = {x: 400, y: 300}
@@ -66,5 +66,14 @@ describe('nearestOnArc', () => {
 
         expect(found.x).toBeNaN()
         expect(found.y).toBeNaN()
+    })
+})
+
+describe('arcLength and sectorArea', () => {
+    test('are the part of the circle that the angle covers', () => {
+        expect(arcLength(2, 90)).toBeCloseTo(Math.PI, 9)
+        expect(sectorArea(2, 90)).toBeCloseTo(Math.PI, 9)
+        expect(arcLength(1, 360)).toBeCloseTo(2 * Math.PI, 9)
+        expect(sectorArea(1, 360)).toBeCloseTo(Math.PI, 9)
     })
 })

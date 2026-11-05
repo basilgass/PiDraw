@@ -38,6 +38,8 @@ The general rule of this version: **a wrong input is an error, no longer a silen
 - **An option written twice is an error** (`->red,red`, `->w=2,w=3`). The last one used to win.
 - **The values are checked**: `w=red`, `mark=3`, `loop=revers`, `easing=foo`, `drag` on a figure that is not a point, or `from`/`to` without `animate`.
 - **`easing=inOut` now eases the movement.** The option was accepted and had no effect.
+- **A `@` in a label is a field.** `@name` is the field of this name (`@area`, `@slope`), `@@` is a `@` of the text, and `@` followed by letters that are no field of the figure is an error (`a@b` on a circle used to be left as it was, `@m` used to be the value followed by `m`). `@` alone is an error when the figure has no most classical value: a line, a ray, a vector, a circle, a polygon. The figures with no field (a plot, a Bezier curve...) still keep their text as it is. **The angle of an arc has its degree sign** (`60°`, in TeX `60^circ`): a label that wrote `@°` now has it twice.
+- **Where the labels are.** The label of a **circle** is exactly at its center (it was inside the circle, at the top right). The label of an **arc** lies on the side of its middle direction at any angle (it was one of the nine positions), and the label of a point that has a **drag handle** is 15 pixels further from the point, so that the handle does not cover it; write a distance (`label=A/br/0`) to put it back. A position can be written `>O` (see [away from a figure](./options#away-from-a-figure)), and a number after it is a distance.
 - **A label text can hold commas**: `label=Hello, world,red`. The text runs up to the next option, so a word after it that is not an option is part of the text.
 - **The size of a point shape** is `o=8`, `s=12`, `*=6` (and `points=s/12` for the whole drawing). `o/8` and `o:8` never worked.
 
@@ -134,8 +136,11 @@ These changes are visible without any error. Compare the drawings of a page you 
 | Bézier `H` and `V` | `H` always starts to the right, `V` downward | the direction follows the path |
 | Oblique axes | treated as horizontal and vertical | the intersections, grids and projections are right |
 | Drag of a point | off by half the size of its shape | follows the mouse to the pixel; `drag=grid` follows the subdivisions of the grid (`subgrid`) |
+| `dash` without a value | dashes of half a unit of the x axis: huge on a graph with few units | dashes of 6 pixels and a gap of 4 (`dash=md`), at any scale or zoom |
 | Right angle mark (`square`) of an arc | whenever the sides were perpendicular | only for an arc of 90 degrees |
 
 ## TikZ
 
 `graph.tikz()` writes a complete `tikzpicture` (the scale, the window, the grid and the axes, then the figures in the order of the screen), and `graph.tikzPreamble()` gives the lines to put before `\begin{document}`. See [TikZ export](./tikz).
+
+The colors are defined in the picture (`\definecolor{pidraw-green}{HTML}{008000}`) with the shade of CSS, the one of the screen: if you had written the hexadecimal color to avoid the shades of `xcolor`, the name is now enough, and a PDF that was made before may change its `green`, `orange`, `purple`, `lightgray`… Every name of CSS is exported, `gold` and `grey` too.

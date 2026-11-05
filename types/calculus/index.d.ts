@@ -20,4 +20,6 @@ export * from "./computePolygon";
 export * from "./computeRiemann";
 export * from "./easing";
 export * from "./computeZoom";
+export * from "./units";
+export * from "./colors";
 //# sourceMappingURL=index.d.ts.map

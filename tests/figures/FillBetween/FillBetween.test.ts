@@ -255,8 +255,8 @@ describe('FillBetween TikZ', () => {
         const c = create()
         const tikz = c.fill({plot: c.plot('x', {min: 0, max: 1})}).stroke('red').fill({color: 'green', opacity: 0.4}).tikz()
 
-        expect(tikz).toContain('\\addplot[draw=red, ')
-        expect(tikz).toContain('fill=green, fill opacity=0.4')
+        expect(tikz).toContain('\\addplot[draw=pidraw-red, ')
+        expect(tikz).toContain('fill=pidraw-green, fill opacity=0.4')
     })
 
     test('the label is a node at the middle', () => {

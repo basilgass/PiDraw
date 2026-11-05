@@ -1,5 +1,5 @@
 import {describe, expect, test} from 'vitest'
-import {axesDisplay, axisConfigOf} from '../../../src/figures/Axis/Axis.constraints'
+import {axesDisplay, axisConfigOf, clampToRange} from '../../../src/figures/Axis/Axis.constraints'
 
 describe('axesDisplay', () => {
     test('shows both axes, each with nothing more than its line, for true', () => {
@@ -30,6 +30,10 @@ describe('axisConfigOf', () => {
         expect(axisConfigOf(director, 'right', {padding: 5, name: 't'})).toEqual({director, side: 'right', padding: 5, name: 't'})
     })
 
+    test('gives the range of the display', () => {
+        expect(axisConfigOf(director, 'right', {range: {min: -1, max: 1}})).toEqual({director, side: 'right', range: {min: -1, max: 1}})
+    })
+
     test('graduates the axis from a step, leaving the zero to the other axis', () => {
         expect(axisConfigOf(director, 'right', {step: 2})).toEqual({
             director,
@@ -46,5 +50,26 @@ describe('axisConfigOf', () => {
 
     test('has no graduation without a step', () => {
         expect(axisConfigOf(director, 'right', {labels: 'pi', marks: {every: 5}}).ticks).toBeUndefined()
+    })
+})
+
+describe('clampToRange', () => {
+    const zero = {x: 400, y: 300}
+    const unit = {x: 50, y: 0}
+
+    test('cuts the segment to the range, from the zero', () => {
+        expect(clampToRange({x: 20, y: 300}, {x: 780, y: 300}, zero, unit, {min: -1, max: 2})).toEqual([{x: 350, y: 300}, {x: 500, y: 300}])
+    })
+
+    test('keeps a segment that is inside of the range', () => {
+        expect(clampToRange({x: 350, y: 300}, {x: 450, y: 300}, zero, unit, {min: -10, max: 10})).toEqual([{x: 350, y: 300}, {x: 450, y: 300}])
+    })
+
+    test('keeps the order of the ends of a segment that goes backward', () => {
+        expect(clampToRange({x: 780, y: 300}, {x: 20, y: 300}, zero, unit, {min: -1, max: 2})).toEqual([{x: 500, y: 300}, {x: 350, y: 300}])
+    })
+
+    test('is null when the range does not meet the segment', () => {
+        expect(clampToRange({x: 20, y: 300}, {x: 780, y: 300}, zero, unit, {min: 20, max: 30})).toBeNull()
     })
 })

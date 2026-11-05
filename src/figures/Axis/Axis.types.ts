@@ -35,6 +35,11 @@ export interface IAxisOptions {
      * How far the drawn axis stops from the borders of the drawing, in pixels, measured along the axis. 20 by default.
      */
     padding?: number,
+    /**
+     * The part of the axis that is drawn, in units of the axis from its zero (`{min: -10, max: 10}`). The axis is also cut by the borders
+     * of the drawing and by `padding`. The whole axis by default. The axis must have a zero (`director` or `through`).
+     */
+    range?: { min: number, max: number },
     /** The graduation. None by default. */
     ticks?: IAxisTicks,
     /** The name of the axis, written beyond its arrow, on the side that has no numbers. None by default. */

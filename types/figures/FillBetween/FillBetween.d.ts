@@ -1,6 +1,6 @@
 import { AbstractFigure } from "../AbstractFigure/AbstractFigure";
 import type { IFigureContext, XY } from "../../pidraw.common";
-import type { LabelFields } from "../Label/Label.types";
+import type { LabelFieldName, LabelFields } from "../Label/Label.types";
 import { type FillBetweenRun } from "../../calculus";
 import type { IFillBetweenConfig } from "./FillBetween.types";
 export declare class FillBetween extends AbstractFigure {
@@ -18,6 +18,7 @@ export declare class FillBetween extends AbstractFigure {
     get area(): number;
     computed(): this;
     labelFields(): LabelFields;
+    defaultLabelField(): LabelFieldName;
     protected _labelPlace(): XY | null;
     moveLabel(): this;
     tikz(): string;

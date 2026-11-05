@@ -2,6 +2,7 @@ import type { Shape } from "@svgdotjs/svg.js";
 import { AbstractFigure } from "../AbstractFigure/AbstractFigure";
 import type { IFigureContext, XY } from "../../pidraw.common";
 import type { CircleDefinition } from "../../calculus";
+import type { LabelFields } from "../Label/Label.types";
 import type { ICircleConfig } from "./Circle.types";
 import type { Line } from "../Line/Line";
 export declare class Circle extends AbstractFigure {
@@ -21,6 +22,9 @@ export declare class Circle extends AbstractFigure {
     intersectionWithLine(line: Line): XY[] | null;
     intersectionWithCircle(circle: Circle): XY[] | null;
     protected _place({ center, radius }: CircleDefinition): this;
+    labelFields(): LabelFields;
+    readonly referenceable = true;
+    referenceAnchorPoint(): XY | null;
     protected _labelPoint(): XY;
     protected _makeShape(): Shape;
 }

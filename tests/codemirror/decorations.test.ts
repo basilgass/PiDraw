@@ -44,8 +44,8 @@ describe('names of the figures', () => {
         expect(marked('A(1,1)->label=A')).toEqual(['A:def'])
     })
 
-    test('a comment and an invalid line make no figure', () => {
-        expect(marked('$ A=pt 1,1\n@ A=pt 1,1\nA(1,1)')).toEqual(['A:def'])
+    test('a comment, a line for something else and an invalid line make no figure', () => {
+        expect(marked('% A=pt 1,1\n$ A=pt 1,1\n@ A=pt 1,1\nA(1,1)')).toEqual(['A:def'])
     })
 
     test('the ranges are in the text, with its indent', () => {

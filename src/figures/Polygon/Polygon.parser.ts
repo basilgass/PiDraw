@@ -89,6 +89,7 @@ export const POLYGON_ITEMS: ParserItems = {
         description: 'Create a polygon: through points, or a regular polygon (and a regular star polygon with a last step) from a center and a radius, or from a side',
         forms: ['p=poly <point>,<point>,<point>,...', 'p=poly <point>,<radius>,<sides>[,<step>]', 'p=poly <point>,<point>,<sides>[,<step>]'],
         summary: 'p=poly A,B,C — polygon',
+        labelFields: ['perimeter', 'area'],
         build: buildPolygon
     }
 }

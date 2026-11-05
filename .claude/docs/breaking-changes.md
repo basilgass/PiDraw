@@ -848,3 +848,62 @@ Fichiers : `src/parser/parser.types.ts` (`ParserItem`, `ParserItems`), `src/pars
 - **Contenu corrigé** : les formes de `parametric` disent le domaine et les échantillons (`[,<domain>][@<number>]`), qui manquaient.
 - **Interne** : chaque `*.parser.ts` exporte la table de ses clés (`POINT_ITEMS`, `LINE_ITEMS`...) ; `PARSER_CONFIG` ne fait que les joindre (une clé en double lève au chargement). `KEY_DETAILS` de l'éditeur est lu dans `summary` : plus de copie à tenir.
 
+
+## 2026-11-05 : valeurs d'un label (`@nom`)
+
+Fichiers : `src/figures/Label/Label.parser.ts`, `Label.types.ts`, `Label.constraints.ts`, `src/figures/AbstractFigure/AbstractFigure.ts`, `Line`, `Arc`, `Circle`, `Polygon`, `Point`, `Riemann`, `FillBetween`, `src/calculus/numbers.ts`, `src/parser/parser.types.ts`, `src/codemirror/`, `docs/guide/options.md`.
+
+- **Changement de syntaxe (parser)** : `@nom` (lettres minuscules collées) est le champ de ce nom (`@area`, `@slope`, `@length`, `@radius`, `@perimeter`, `@angle`, `@sum`, `@rectangles`, `@coordinates`). Avant, `@m` valait la valeur suivie de `m` ; c'est maintenant une `OptionError` si la figure n'a pas ce champ.
+- **`@` seul** n'est plus « le premier champ du tableau » : c'est `defaultLabelField()` de la figure (point : `coordinates`, segment : `length`, arc : `angle`, `Riemann` : `sum`, `FillBetween` : `area`). Il est refusé (`OptionError`) pour une droite, une demi-droite, un vecteur, un cercle et un polygone, dont les champs sont à nommer. Une figure sans aucun champ garde toujours son texte tel quel.
+- **`@@`** est un `@` du texte, pour les figures qui ont des champs.
+- **Nouveaux champs** : droite (`slope`, aussi pour segment et vecteur), arc (`angle`, `length`, `radius`, `area`), cercle (`radius`, `perimeter`, `area`), polygone (`perimeter`, `area`). La pente est une fraction TeX (`\frac{3}{2}`) quand elle est exacte (contrainte `slope`, ou `through` entre deux points à coordonnées numériques) et que `@slope` n'a pas de décimales ; `\infty` pour une verticale.
+- **Changement de type** : `LabelField.digits` est facultatif (`@` ne l'écrit plus : le défaut, 2 décimales, est celui du champ) ; `LabelFields` reçoit `number | undefined`. `AbstractFigure` gagne `defaultLabelField(): LabelFieldName | null`. `LabelFieldName` gagne `angle`, `radius`, `perimeter`, `slope`. Un arc ou un cercle qui montre `@area` écrit son label à l'intérieur (`mc`) : au milieu du secteur, au centre.
+- **Interne** : `ParserItem.labelFields` (champs suggérés par l'éditeur après un `@`), `toFraction` et `fractionToTex` dans `calculus/numbers.ts`, `Point.givenByNumbers`, `fieldNumber` et `DEFAULT_LABEL_DIGITS` dans `Label.constraints.ts`.
+
+## 2026-11-05 : `dash` par défaut en pixels, tailles `xs` à `xl`
+
+Fichiers : `src/figures/AbstractFigure/AbstractFigure.ts`, `src/Draw/Draw.options.ts`, `docs/guide/options.md`.
+
+- **Changement de sémantique (silencieux)** : `dash` sans valeur (option du parser et `figure.dash()`) donnait la moitié d'une unité de l'axe x, en pixels, donc des tirets énormes sur un graphe à peu d'unités. C'est maintenant `DEFAULT_DASH` (`6 4` : un tiret de 6 px, un espace de 4), le même à toute échelle, résolution et zoom. Le TikZ du défaut change de même (`on 4.5pt off 3pt`).
+- **Syntaxe ajoutée** : `dash=xs|sm|md|lg|xl` (`2 2`, `4 3`, `6 4`, `10 6`, `16 8`), traduite par `Draw.options.ts` ; `dash=md` est `dash`. Une figure ne reçoit que des motifs en pixels. `dot` reste de 3 px.
+
+## 2026-11-05 : unité et échelle des longueurs d'un label (`unit`, `scale`), format texte ou TeX
+
+Fichiers : `src/calculus/units.ts` (nouveau), `src/pidraw.common.ts` (`IGraphConfig.measure`), `src/Graph.types.ts`, `src/calculus/computeLayout.ts`, `src/parser/buildLayout.ts`, `src/Draw/Draw.ts`, `src/figures/Label/`, `Line`, `Arc`, `Circle`, `Polygon`, `src/codemirror/vocabulary.ts`, `docs/guide/graph.md`, `options.md`.
+
+- **Nouveaux paramètres du graphe** : `unit=<unité>` (`pm nm µm mm cm dm m dam hm km u`, `um` est `µm`) et `scale=<nombre>` ou fraction (`10`, `1/10`). Un nom d'unité inconnu ou une échelle qui n'est pas un nombre fini supérieur à 0 est une `ParseError`. `unit` ne donne pas d'échelle et `scale` ne donne pas d'unité ; ni l'un ni l'autre ne touche au dessin, aux axes, aux coordonnées, à `unitX` / `unitY`. Sans eux, les longueurs sont écrites telles quelles, sans unité.
+- **Ce qui est mesuré** : `length`, `radius`, `perimeter` (valeur × `scale`, unité) et `area` (valeur × `scale²`, unité²). Ne sont pas mesurés : `slope`, `coordinates`, et l'aire d'une courbe (`FillBetween`, `Riemann`).
+- **Changement de sémantique visible** : l'angle d'un arc (`@`, `@angle`) s'écrit toujours avec le degré (`60°`, `60^\circ` en TeX). Un label qui écrivait déjà `@°` l'a maintenant en double.
+- **Changement de format** : un champ est écrit selon le label. En texte brut, la pente est `3/2` (et non plus `\frac{3}{2}`) et la verticale `∞` ; en TeX (`tex=`), `\frac{3}{2}` et `\infty`.
+- **Changement de type** : `LabelFields` : `(digits, format: LabelFormat) => string` avec `LabelFormat = {tex}` ; `renderLabelContent(content, fields, format?)` ; `IGraphConfig.measure?: IMeasure` et `IGraphConstructorConfig.measure?: Partial<IMeasure>` (ajouts : `resolveGraphConfig` renvoie toujours `measure`, `{unit: null, scale: 1}` par défaut) ; `ILayout.measure`. `checkGraphConfig` vérifie la mesure (`InvalidArgumentError`).
+
+## 2026-11-05 : commentaires `%`, lignes `$` pour un autre consommateur
+
+Fichiers : `src/Draw/Draw.lines.ts`, `src/codemirror/language.ts`, `decorations.ts`, `completion.ts`, `highlight.ts`, `docs/guide/syntax.md`, `code.md`.
+
+- **Syntaxe ajoutée** : une ligne qui commence par `%` (après les espaces) est un commentaire : ignorée, mais comptée dans les numéros de lignes. Avant, c'était une `ParseError`. Seule la ligne entière est un commentaire ; un `%` après le code d'une figure reste dans la ligne.
+- **Sémantique précisée** : une ligne qui commence par `$` est toujours ignorée, mais n'est plus « le commentaire » : c'est une ligne pour un autre consommateur du même code (les paramètres de Scolcours, `$a=1,2,3/0.1=1`), qu'il distingue d'un commentaire. Aucun changement de comportement pour `Draw`.
+- **Éditeur** : `%` est le commentaire de CodeMirror (`commentTokens`, token `comment`, classe `tok-comment`) ; `$` a le token `meta` et la classe `tok-meta` (nouvelle : la page lui donne une couleur). Les suggestions et les noms de figures ignorent les deux.
+
+## 2026-11-05 : position d'un label, lettres dans n'importe quel ordre
+
+Fichiers : `src/figures/Label/Label.parser.ts` (`parseLabelPosition`), `docs/guide/options.md`.
+
+- **Changement de syntaxe (parser), élargissement** : `label=A/rm`, `lt`, `cb`... sont acceptés (la hauteur et le côté ne se confondent pas) et valent `mr`, `tl`, `bc`. Avant, une position à deux lettres dans l'autre ordre était une `OptionError`. Un code valide ne change pas.
+
+## 2026-11-05 : label repoussé par une figure (`>O`), distance, marge de la poignée
+
+Fichiers : `src/figures/Label/` (`Label.ts`, `Label.types.ts`, `Label.constraints.ts`), `src/figures/AbstractFigure/AbstractFigure.ts` et `AbstractFigure.tikz.ts`, `Point`, `Circle`, `Arc`, `Polygon`, `src/Graph.ts`, `src/Draw/Draw.options.ts`, `docs/guide/options.md`.
+
+- **Nouvelle syntaxe (parser)** : la position d'un label peut être `>Nom` (`label=A/>O`) : le label est du côté de l'ancre opposé à la figure `Nom`, à n'importe quel angle. `Nom` est un point, un cercle, un arc ou un polygone défini avant ; sinon `OptionError`. Le champ qui suit la position accepte un **nombre seul** en plus du couple `x;y` : une distance en unités (mesurées sur l'axe x) qui pousse le label plus loin dans la direction où il se trouve (`label=A/ml/1`, `label=A/>O/0.3`) ; une position sans côté (`mc`) avec une distance est une `OptionError`. Le couple `x;y` s'ajoute à la poussée.
+- **Changement visible** : le label d'un **cercle** est au centre (`mc`), et non plus à l'intérieur, en haut à droite. Le label d'un **arc** sans position écrite est du côté de sa direction médiane à n'importe quel angle (avant : l'une des neuf positions). Le label d'un **point qui a une poignée de `drag`** est écarté de 15 px (le rayon de la poignée) dans la direction où il se trouve ; une distance écrite le remplace.
+- **Changement de type** : `ILabelConfig` gagne `away: XY | null`, `push: number | null`, `clearance: number` ; `Label.position(alignement?, offset?, rotate?, push?)` ; `Label.setAway`, `Label.setClearance` ; `AbstractFigure` gagne `referenceable`, `referenceAnchorPoint()`, `labelReference`, `setLabelReference`, `setLabelClearance` ; `tikzLabelNode` écrit `anchor=<angle>` et les décalages d'une poussée. `Label.position` avec une position écrite remet `away` à `null`.
+- **Interne** : `Graph.update` replace les labels des figures dont la référence a bougé (ce n'est pas une dépendance de redessin : aucun cycle) ; `Graph._detach` retire les références vers la figure et la marge de la poignée ; `HANDLE_SIZE` (30 px) est partagé.
+
+## 2026-11-05 : couleurs nommées de l'export TikZ (table CSS, `\definecolor`)
+
+Fichiers : `src/calculus/colors.ts` (`CSS_COLORS`), `src/figures/AbstractFigure/AbstractFigure.tikz.ts` (`tikzColor`, `tikzPicture`), `docs/guide/tikz.md`.
+
+- **Changement de sémantique (export TikZ)** : un nom de couleur n'est plus écrit tel quel (LaTeX le lisait avec la teinte de `xcolor`) mais défini par `\definecolor{pidraw-<nom>}{HTML}{RRGGBB}` avec la teinte de CSS, celle du dessin. `green` devient 008000 (avant : 00FF00), `orange` FFA500, `purple` 800080, `lightgray` D3D3D3, `darkgray` A9A9A9, etc. `black` et `white` restent natifs. Un PDF déjà produit change de teinte pour ces couleurs (c'est la correction voulue).
+- **Élargissement** : tous les noms CSS s'exportent (`gold`, `grey`, `darkgrey`, `lightgrey`, `lightblue`…). Avant, ils étaient une `InvalidArgumentError`. Un nom hors CSS (`periwinkle`) lève toujours `InvalidArgumentError`, dont le message ne liste plus les noms de `xcolor`.
+- **Changement de forme** : `tikzPicture` regroupe les `\definecolor` des fragments au début du `tikzpicture`, une fois chacun, avant `\path`. `figure.tikz()` garde les siens (fragment autonome). `tikzColor` renvoie `{name, definition}` pour un nom CSS (`definition` reste `null` pour `black` et `white`).

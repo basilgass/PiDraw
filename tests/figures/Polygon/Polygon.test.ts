@@ -4,7 +4,7 @@ import {Point} from '../../../src/figures/Point/Point'
 import type {IPolygonConfig} from '../../../src/figures/Polygon/Polygon.types'
 import {InvalidArgumentError} from '../../../src/errors'
 import type {XY} from '../../../src/pidraw.common'
-import {createContext} from '../../helpers/figure'
+import {createContext, graphConfig} from '../../helpers/figure'
 
 // A position given in units of the coordinate system (800 x 600 pixels, 50 pixels per unit, the origin in the middle), in pixels.
 const at = (x: number, y: number): XY => ({x: 400 + 50 * x, y: 300 - 50 * y})
@@ -296,8 +296,8 @@ describe('Polygon TikZ', () => {
         const {polygon} = create()
         const tikz = polygon('p', {vertices: [at(0, 0), at(2, 0), at(0, 2)]}).stroke('red').fill({color: 'blue', opacity: 0.3}).tikz()
 
-        expect(tikz).toContain('draw=red')
-        expect(tikz).toContain('fill=blue, fill opacity=0.3')
+        expect(tikz).toContain('draw=pidraw-red')
+        expect(tikz).toContain('fill=pidraw-blue, fill opacity=0.3')
     })
 
     test('a regular polygon is written with its vertices', () => {
@@ -330,5 +330,94 @@ describe('Polygon TikZ', () => {
 
         expect(hidden.tikz()).toBe('')
         expect(polygon('q', {onSide: {A: at(1, 1), B: at(1, 1), sides: 5}}).tikz()).toBe('')
+    })
+})
+
+describe('Polygon label fields', () => {
+    const labelOf = (p: Polygon, field: 'perimeter' | 'area', digits?: number) => {
+        p.addLabel([{field, ...(digits === undefined ? {} : {digits})}])
+
+        return p.computeLabel()
+    }
+
+    test('it shows its perimeter and its area, in units of the coordinate system', () => {
+        const {polygon} = create()
+        const p = polygon('p', {vertices: [at(0, 0), at(3, 0), at(0, 4)]})
+
+        expect(labelOf(p, 'perimeter')).toBe('12')
+        expect(labelOf(p, 'area')).toBe('6')
+    })
+
+    test('it has no default field', () => {
+        const {polygon} = create()
+
+        expect(polygon('p', {vertices: [at(0, 0), at(3, 0), at(0, 4)]}).defaultLabelField()).toBeNull()
+    })
+
+    test('its fields follow the points it goes through', () => {
+        const {point, polygon} = create()
+        const C = point('C', 0, 4)
+        const p = polygon('p', {vertices: [point('A', 0, 0), point('B', 3, 0), C]})
+
+        labelOf(p, 'area')
+        C.config = {coordinates: {x: 0, y: 2}}
+        p.computed().updateLabel()
+
+        expect(p.computeLabel()).toBe('3')
+    })
+
+    test('a regular hexagon of radius 2 has the area of six equilateral triangles', () => {
+        const {polygon} = create()
+        const p = polygon('h', {regular: {center: at(0, 0), radius: 2, sides: 6}})
+
+        expect(labelOf(p, 'area', 4)).toBe('10.3923')
+        expect(labelOf(p, 'perimeter')).toBe('12')
+    })
+
+    test('a star made of two triangles adds the area of each one', () => {
+        const {polygon} = create()
+        const p = polygon('s', {regular: {center: at(0, 0), radius: 2, sides: 6, star: 2}})
+
+        // Two equilateral triangles of side 2 * sqrt(3).
+        expect(labelOf(p, 'area', 4)).toBe('10.3923')
+        expect(labelOf(p, 'perimeter', 4)).toBe('20.7846')
+    })
+})
+
+describe('Polygon label with a unit and a scale', () => {
+    const measured = (unit: 'm' | null, scale: number) => {
+        const context = createContext({...graphConfig(), measure: {unit, scale}})
+
+        return new Polygon(context, 'p', {vertices: [at(0, 0), at(3, 0), at(0, 4)]})
+    }
+    const labelOf = (p: Polygon, field: 'perimeter' | 'area') => {
+        p.addLabel([{field}])
+
+        return p.computeLabel()
+    }
+
+    test('the perimeter is multiplied by the scale and the area by its square', () => {
+        const p = measured('m', 2)
+
+        expect(labelOf(p, 'perimeter')).toBe('24 m')
+        expect(labelOf(p, 'area')).toBe('24 m²')
+    })
+
+    test('nothing is added without a unit and a scale', () => {
+        const p = measured(null, 1)
+
+        expect(labelOf(p, 'perimeter')).toBe('12')
+        expect(labelOf(p, 'area')).toBe('6')
+    })
+})
+
+describe('Polygon as the reference of a label', () => {
+    test('is the center of its vertices', () => {
+        const {polygon} = create()
+        const p = polygon('p', {vertices: [at(0, 0), at(4, 0), at(0, 4)]})
+
+        expect(p.referenceable).toBe(true)
+        expect(p.referenceAnchorPoint()?.x).toBeCloseTo(400 + 200 / 3, 6)
+        expect(p.referenceAnchorPoint()?.y).toBeCloseTo(300 - 200 / 3, 6)
     })
 })

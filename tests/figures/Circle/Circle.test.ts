@@ -314,7 +314,7 @@ describe('Circle new configuration', () => {
 
         c.config = {diameter: {A: point('A', 0, 0), B: point('B', 4, 0)}}
 
-        expect(label.x).toBeCloseTo(500 + 50, 6)
+        expect(label.x).toBeCloseTo(500, 6)
     })
 })
 
@@ -404,13 +404,25 @@ describe('Circle follow', () => {
 })
 
 describe('Circle label', () => {
-    test('is inside the circle, at the top right', () => {
+    test('is exactly at the center of the circle, centered on it', () => {
         const {point, circle} = create()
-        const c = circle('c', {center: point('O', 0, 0), radius: 2})
+        const c = circle('c', {center: point('O', 1, 1), radius: 2})
         const label = c.addLabel('c')
 
         expect(label.x).toBeCloseTo(450, 6)
         expect(label.y).toBeCloseTo(250, 6)
+        expect(label.alignement).toBe('mc')
+    })
+
+    test('keeps the position that was asked for', () => {
+        const {point, circle} = create()
+        const c = circle('c', {center: point('O', 0, 0), radius: 2})
+        const label = c.addLabel('c')
+
+        label.position('tl')
+        c.moveLabel()
+
+        expect(label.alignement).toBe('tl')
     })
 
     test('stays where it was for a circle that is not drawn, without NaN', () => {
@@ -446,18 +458,18 @@ describe('Circle tikz', () => {
     test('writes the appearance of the circle as options', () => {
         const tikz = make().fill({color: 'red', opacity: 0.5}).stroke('blue', 2).dash('4 2').tikz()
 
-        expect(tikz).toContain('draw=blue, line width=1.5pt, fill=red, fill opacity=0.5, dash pattern=on 3pt off 1.5pt')
+        expect(tikz).toContain('draw=pidraw-blue, line width=1.5pt, fill=pidraw-red, fill opacity=0.5, dash pattern=on 3pt off 1.5pt')
     })
 
-    test('writes the label as a node inside the circle', () => {
+    test('writes the label as a node at the center of the circle', () => {
         const c = make()
         c.addLabel('c')
 
-        expect(c.tikz()).toBe(`\\draw[${style}] (1,2) circle[radius=2];\n\\node[below right] at (2,3) {c};`)
+        expect(c.tikz()).toBe(`\\draw[${style}] (1,2) circle[radius=2];\n\\node at (1,2) {c};`)
     })
 
     test('a color that has no equivalent in LaTeX is an InvalidArgumentError', () => {
-        const c = make().stroke('steelblue')
+        const c = make().stroke('periwinkle')
 
         expect(() => c.tikz()).toThrow(InvalidArgumentError)
     })
@@ -478,7 +490,154 @@ describe('Circle tikz', () => {
         const noLabel = make()
         noLabel.addLabel('c').hide()
 
-        expect(noShape.tikz()).toBe('\\node[below right] at (2,3) {c};')
+        expect(noShape.tikz()).toBe('\\node at (1,2) {c};')
         expect(noLabel.tikz()).toBe(`\\draw[${style}] (1,2) circle[radius=2];`)
+    })
+})
+
+describe('Circle label fields', () => {
+    const labelOf = (c: Circle, field: 'radius' | 'perimeter' | 'area', digits?: number) => {
+        c.addLabel([{field, ...(digits === undefined ? {} : {digits})}])
+
+        return c.computeLabel()
+    }
+
+    test('it shows its radius, its perimeter and its area, in units of the coordinate system', () => {
+        const {point, circle} = create()
+        const c = circle('c', {center: point('O', 0, 0), radius: 2})
+
+        expect(labelOf(c, 'radius')).toBe('2')
+        expect(labelOf(c, 'perimeter')).toBe('12.57')
+        expect(labelOf(c, 'area', 4)).toBe('12.5664')
+    })
+
+    test('it has no default field', () => {
+        const {point, circle} = create()
+
+        expect(circle('c', {center: point('O', 0, 0), radius: 2}).defaultLabelField()).toBeNull()
+    })
+
+    test('the area is written at the center, centered', () => {
+        const {point, circle} = create()
+        const c = circle('c', {center: point('O', 1, 1), radius: 2})
+
+        labelOf(c, 'area')
+
+        expect(c.label?.alignement).toBe('mc')
+        expect(c.label?.x).toBeCloseTo(450, 6)
+        expect(c.label?.y).toBeCloseTo(250, 6)
+    })
+
+    test('the other fields are written at the center too', () => {
+        const {point, circle} = create()
+        const c = circle('c', {center: point('O', 0, 0), radius: 2})
+
+        labelOf(c, 'radius')
+
+        expect(c.label?.x).toBeCloseTo(400, 6)
+        expect(c.label?.y).toBeCloseTo(300, 6)
+        expect(c.label?.alignement).toBe('mc')
+    })
+})
+
+describe('Circle label with a unit and a scale', () => {
+    const measured = (unit: 'cm' | 'u' | null, scale: number) => {
+        const {point, circle} = create({...graphConfig(), measure: {unit, scale}})
+
+        return circle('c', {center: point('O', 0, 0), radius: 2})
+    }
+    const labelOf = (c: Circle, field: 'radius' | 'perimeter' | 'area') => {
+        c.addLabel([{field, digits: 1}])
+
+        return c.computeLabel()
+    }
+
+    test('the radius and the perimeter are multiplied by the scale', () => {
+        const c = measured('cm', 0.5)
+
+        expect(labelOf(c, 'radius')).toBe('1 cm')
+        expect(labelOf(c, 'perimeter')).toBe('6.3 cm')
+    })
+
+    test('the area is multiplied by the square of the scale', () => {
+        expect(labelOf(measured('cm', 0.5), 'area')).toBe('3.1 cm²')
+    })
+
+    test('the generic unit u is written like the others', () => {
+        expect(labelOf(measured('u', 1), 'radius')).toBe('2 u')
+    })
+
+    test('the unit follows the graph when its layout changes', () => {
+        const c = measured(null, 1)
+
+        expect(labelOf(c, 'radius')).toBe('2')
+
+        c.graphConfig.measure = {unit: 'cm', scale: 3}
+        c.updateLabel()
+
+        expect(c.computeLabel()).toBe('6 cm')
+    })
+})
+
+describe('Figures as the reference of a label', () => {
+    test('a point is its position', () => {
+        const {point} = create()
+        const A = point('A', 1, 2)
+
+        expect(A.referenceable).toBe(true)
+        expect(A.referenceAnchorPoint()).toEqual({x: 450, y: 200})
+    })
+
+    test('a circle is its center', () => {
+        const {point, circle} = create()
+        const c = circle('c', {center: point('O', 1, 1), radius: 2})
+
+        expect(c.referenceable).toBe(true)
+        expect(c.referenceAnchorPoint()).toEqual({x: 450, y: 250})
+    })
+
+    test('a line is none: it is not a point', () => {
+        const {point, line} = create()
+        const d = line('d', point('A', 0, 0), point('B', 1, 1))
+
+        expect(d.referenceable).toBe(false)
+        expect(d.referenceAnchorPoint()).toBeNull()
+        expect(() => point('P', 2, 2).setLabelReference(d)).toThrow(InvalidArgumentError)
+    })
+
+    test('the label of a figure is pushed from its reference, and back to its own side without one', () => {
+        const {point} = create()
+        const O = point('O', 0, 0)
+        const A = point('A', 2, 0)
+
+        A.addLabel('A')
+        expect(A.label?.config.away).toBeNull()
+
+        A.setLabelReference(O)
+        expect(A.label?.config.away).toEqual({x: 1, y: 0})
+
+        A.setLabelReference(null)
+        expect(A.label?.config.away).toBeNull()
+    })
+
+    test('a label at the place of its reference lies in no direction and is left alone', () => {
+        const {point, circle} = create()
+        const c = circle('c', {center: point('O', 1, 1), radius: 2})
+
+        c.setLabelReference(c)
+        c.addLabel('c')
+
+        expect(c.label?.config.away).toBeNull()
+        expect(c.label?.alignement).toBe('mc')
+    })
+
+    test('resetStyle forgets the reference', () => {
+        const {point} = create()
+        const A = point('A', 2, 0)
+
+        A.setLabelReference(point('O', 0, 0))
+        A.resetStyle()
+
+        expect(A.labelReference).toBeNull()
     })
 })

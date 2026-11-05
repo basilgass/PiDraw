@@ -118,14 +118,22 @@ The keys that have an alternative form say so on their own page.
 
 ## Comments and empty lines
 
-A line that starts with `$` is a comment, and empty lines are ignored. A line that starts with `@` is a command: `@pause` and `@slides` (see [slides](./slides)); any other one is an error.
+Empty lines are ignored, and so are two kinds of lines. They still count in the numbers of the lines of the [report](./errors).
+
+- A line that starts with `%` is a comment. Putting `%` before a line of code switches that line off.
+- A line that starts with `$` is ignored by PiDraw too, but it is not a comment: it is meant for something else that reads the same code (an application that keeps its own parameters in it, for example), which can tell it from a comment.
+
+A line that starts with `@` is a command: `@pause` and `@slides` (see [slides](./slides)); any other one is an error. Only a whole line can be a comment: after the code of a figure, a `%` is part of the line (`A(1,1) % here` is an error).
 
 ```pidraw params="x=-1:5,y=-1:4"
-$ the vertices
+% the vertices
 A(1,1)
 B(4,1)
 
-$ the segment between them
+$ not for PiDraw
+%C(2,3)
+
+% the segment between them
 s=seg A,B
 ```
 

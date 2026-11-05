@@ -1,8 +1,9 @@
 import type {Path} from "@svgdotjs/svg.js"
 import {AbstractFigure} from "../AbstractFigure/AbstractFigure"
 import type {IFigureContext, XY} from "../../pidraw.common"
-import type {LabelFields} from "../Label/Label.types"
-import {numberCorrection, pathNumber, type RiemannRectangle, riemannRectangles, riemannSum, toPixels} from "../../calculus"
+import {fieldNumber} from "../Label/Label.constraints"
+import type {LabelFieldName, LabelFields} from "../Label/Label.types"
+import {pathNumber, type RiemannRectangle, riemannRectangles, riemannSum, toPixels} from "../../calculus"
 import {checkRiemann, DEFAULT_POSITION, DEFAULT_RECTANGLES, domainOf} from "./Riemann.constraints"
 import type {IRiemannConfig} from "./Riemann.types"
 
@@ -135,9 +136,13 @@ export class Riemann extends AbstractFigure {
     /** The sum and the number of rectangles can be shown in the label. */
     override labelFields(): LabelFields {
         return {
-            sum: (digits) => numberCorrection(this.sum, digits).toString(),
+            sum: (digits) => fieldNumber(this.sum, digits),
             rectangles: () => String(this.rectangles)
         }
+    }
+
+    override defaultLabelField(): LabelFieldName {
+        return 'sum'
     }
 
     /** Put the label above the highest rectangle. The alignment that was asked for (`label=r/bl`) is kept. */

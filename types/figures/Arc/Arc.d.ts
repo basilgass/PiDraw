@@ -1,6 +1,6 @@
 import { AbstractFigure } from "../AbstractFigure/AbstractFigure";
 import type { IFigureContext, XY } from "../../pidraw.common";
-import type { LABEL_POSITION } from "../Label/Label.types";
+import type { LABEL_POSITION, LabelFieldName, LabelFields } from "../Label/Label.types";
 import type { ArcDefinition } from "./Arc.constraints";
 import type { IArcConfig } from "./Arc.types";
 export declare class Arc extends AbstractFigure {
@@ -20,6 +20,8 @@ export declare class Arc extends AbstractFigure {
     protected _sweep: number;
     get angle(): number;
     get isSquare(): boolean;
+    labelFields(): LabelFields;
+    defaultLabelField(): LabelFieldName;
     asSector(): this;
     asSquare(): this;
     computed(): this;
@@ -35,7 +37,10 @@ export declare class Arc extends AbstractFigure {
     protected _labelPlace(): {
         point: XY;
         alignement: LABEL_POSITION;
+        away: XY | null;
     };
+    readonly referenceable = true;
+    referenceAnchorPoint(): XY | null;
     moveLabel(): this;
     tikz(): string;
     protected _tikzPath(): string;
