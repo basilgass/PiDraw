@@ -20,6 +20,7 @@ export declare function isDomain(obj: unknown): obj is Domain;
 export interface IFigureContext {
     readonly rootSVG: Svg;
     readonly config: IGraphConfig;
+    figureChanged?(name: string): void;
 }
 export interface IGraphConfig {
     axis: AxisVectors;

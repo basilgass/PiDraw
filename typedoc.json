@@ -1,0 +1,12 @@
+{
+  "$schema": "https://typedoc.org/schema.json",
+  "name": "PiDraw API",
+  "entryPoints": ["src/index.ts"],
+  "tsconfig": "tsconfig-build.json",
+  "out": "docs/public/api",
+  "readme": "none",
+  "excludePrivate": true,
+  "excludeProtected": true,
+  "excludeInternal": true,
+  "treatWarningsAsErrors": true
+}

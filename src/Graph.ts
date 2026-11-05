@@ -33,6 +33,7 @@ import {Polygon} from "./figures/Polygon/Polygon"
 import {Grid} from "./figures/Grid/Grid"
 import {Arc} from "./figures/Arc/Arc"
 import {InvalidArgumentError} from "./errors"
+import type {IControlsGraph} from "./controls/controls.types"
 import {Axis} from "./figures/Axis/Axis"
 import {axesDisplay, axisConfigOf} from "./figures/Axis/Axis.constraints"
 import {stepOf} from "./figures/Grid/Grid.constraints"
@@ -64,7 +65,7 @@ export interface IDraggableConfig {
     callback?: (point: Point) => void
     /** Limits that are applied in turn, after the rules above: a function, or a figure the point stays on. */
     follow?: IDraggableFollow[],
-    /** Put the point on the lines of the grid of the graph: its step if it shows one, a unit otherwise, from the origin. */
+    /** Put the point on the lines of the grid of the graph, subdivisions included: its step if it shows one, a unit otherwise, from the origin. */
     grid?: boolean
     /** A point that moves with the one that is dragged, and is the one other figures are built on (the dragged one is a handle). */
     target?: Point,
@@ -110,6 +111,34 @@ interface ILayoutFigures {
 export class Graph extends EventTarget {
     /** The controllers attached to the graph (see {@link attach}), in the order they were attached. */
     protected _controllers: IGraphController[] = []
+
+    protected _controls: Partial<IControlsGraph> = {}
+
+    /**
+     * What the themes keep on the graph (the titles of the slides...), by the name of the entry. The graph does not know what the entries mean: a theme
+     * writes its own with {@link setControl} and the controllers read them here.
+     */
+    get controls(): Readonly<Partial<IControlsGraph>> {
+        return this._controls
+    }
+
+    /**
+     * Keep a value for a theme, or take it away with `null`. The attached controllers are told (`onControlsChanged`). The value is not checked: the
+     * theme does it.
+     */
+    setControl<K extends keyof IControlsGraph>(key: K, value: IControlsGraph[K] | null): this {
+        if (value === null) {
+            Reflect.deleteProperty(this._controls, key)
+        } else {
+            this._controls[key] = value
+        }
+
+        this._controllers.forEach((controller) => {
+            controller.onControlsChanged?.(key)
+        })
+
+        return this
+    }
 
     protected _layout: ILayoutFigures
 
@@ -367,6 +396,16 @@ export class Graph extends EventTarget {
         this._notifyRemoved(names)
     }
 
+    /**
+     * A figure of the graph tells that something changed in it that the controllers may care about (see `IGraphController.onFigureChanged`). It is
+     * what the figures call on their context, and it is not for a program to call.
+     */
+    figureChanged(name: string): void {
+        this._controllers.forEach((controller) => {
+            controller.onFigureChanged?.(name)
+        })
+    }
+
     /** Tell the attached controllers that these figures are gone from the graph. Nothing is said for no figure. */
     protected _notifyRemoved(names: string[]): void {
         if (names.length === 0) {
@@ -390,6 +429,7 @@ export class Graph extends EventTarget {
             controller.dispose()
         })
         this._controllers = []
+        this._controls = {}
 
         this._clearLayout()
 
@@ -768,11 +808,16 @@ export class Graph extends EventTarget {
         return true
     }
 
-    /** The step of the grid of the layout, in units: the one of the grid that is shown, a unit if it has none. */
+    /**
+     * The step of the grid of the layout, in units: the one of the grid that is shown, a unit if it has none, cut in the subdivisions of the
+     * grid if it has some (they count even when they are too close to be drawn, so that the step does not depend on the zoom).
+     */
     protected _gridStep(): { x: number, y: number } {
-        const grid = this._display.grid
+        const grid = typeof this._display.grid === 'object' ? this._display.grid : {}
+        const {x, y} = stepOf(grid)
+        const parts = grid.subdivisions ?? 1
 
-        return stepOf(typeof grid === 'object' ? grid : {})
+        return {x: x / parts, y: y / parts}
     }
 
     /**

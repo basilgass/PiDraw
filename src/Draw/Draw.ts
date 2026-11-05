@@ -3,13 +3,15 @@ import type {IParserConfig, IParserSettings} from "../parser/parser.types"
 import {Axes, CoordinateSystem, type XY} from "../pidraw.common"
 import {layoutGeometry} from "../calculus"
 import {PARSER_CONFIG} from "../parser/parser.config"
-import {buildLayout, type ILayout, LAYOUT_KEYS} from "../parser/buildLayout"
+import {buildLayout, type ILayout} from "../parser/buildLayout"
 import {AbstractFigure} from "../figures/AbstractFigure/AbstractFigure"
 import type {Point} from "../figures/Point/Point"
 import {type PARSER, PiParse} from "piparser"
 import {InvalidArgumentError, ParseError, PiDrawError} from "../errors"
 import {type IDrawLine, readCode, standardForm} from "./Draw.lines"
-import {applyOptions, withDefaults} from "./Draw.options"
+import {applyOptions, lineParseOptions, withDefaults} from "./Draw.options"
+import {themeSyntaxes} from "../controls/controls"
+import type {IControlsFigure, IControlsGraph} from "../controls/controls.types"
 import {editedRecord, type ILineRecord, reusableCount} from "./Draw.diff"
 import {
     asPiDrawError,
@@ -23,10 +25,18 @@ import {
 /** The names of the axes of the graph, which no figure can have. */
 const AXIS_NAMES: string[] = Object.values(Axes)
 
-/** The names of the parameters of the graph (see `buildLayout`). */
-export const PARSER_PARAMETERS_KEYS = [...LAYOUT_KEYS]
+/** The entries of the controls of a point that its drag handle takes too, as the themes ask. */
+const HANDLE_CONTROLS: readonly (keyof IControlsFigure)[] = themeSyntaxes().flatMap(theme => theme.handleControls ?? [])
 
-// TODO: intersection of a line and a circle
+/** Give the figure the entry `key` of the controls `from`, if there is one. */
+function copyControl(from: Readonly<Partial<IControlsFigure>>, to: AbstractFigure, key: keyof IControlsFigure): void {
+    const value = from[key]
+
+    if (value !== undefined) {
+        to.setControl(key, value)
+    }
+}
+
 /**
  * Reads the code of a drawing and builds it in a {@link Graph}, which is the one that draws, updates and exports it.
  *
@@ -62,7 +72,6 @@ export class Draw {
         // Set the parser
         this._parser = new PiParse({
             formatter: standardForm,
-            keys: PARSER_PARAMETERS_KEYS,
             splitter: {
                 main: '->',
                 entry: ',',
@@ -196,7 +205,7 @@ export class Draw {
      * @param drag what to do with the points the user dragged (see {@link IRefreshOptions}).
      */
     protected _build(input: string, editing?: number, drag: 'keep' | 'reset' = 'keep'): IDrawReport {
-        const lines = readCode(input, text => this._parser.parse(text))
+        const {lines, graphControls} = readCode(input, text => this._parser.parse(text, lineParseOptions()), this._parser)
         const before = this._lines
 
         // The version before of the line that is being written, if it is the only line that changed.
@@ -229,6 +238,11 @@ export class Draw {
         this._code = lines.flatMap(line => line.item === undefined ? [] : [line.item])
         this._lines = records
         this._report = this._reportOf(records, editing)
+
+        // What the commands say that belongs to the graph (the titles of the slides), after the figures: a controller reads both.
+        for (const key of Object.keys(graphControls) as (keyof IControlsGraph)[]) {
+            this.graph.setControl(key, graphControls[key] ?? null)
+        }
 
         // A point that is no more is no more dragged.
         this._moved.forEach((_, name) => {
@@ -329,9 +343,14 @@ export class Draw {
                 throw line.error
             }
 
+            // A command makes no figure: it only gave the steps to the lines after it.
+            if (line.command !== undefined) {
+                return {...record, valid: null, validText: line.text, error: null, fallback: false, created: []}
+            }
+
             const read = structuredClone(line.item)
 
-            this._buildItem(line.item)
+            this._buildItem(line.item, line.controls)
 
             return {...record, valid: read, validText: line.text, error: null, fallback: false, created: made()}
         } catch (e) {
@@ -344,7 +363,7 @@ export class Draw {
             this._removeMade(made())
 
             try {
-                this._buildItem(structuredClone(previous.valid))
+                this._buildItem(structuredClone(previous.valid), line.controls ?? {})
 
                 return {...record, valid: previous.valid, validText: previous.validText, error, fallback: true, created: made()}
             } catch {
@@ -367,9 +386,10 @@ export class Draw {
 
     /**
      * Build the figures of one line of code and apply its options.
+     * @param controls what the commands before the line give to the controls of its figures, unless the line has its own option for them.
      * @throws ParseError if the line cannot be built, OptionError if one of its options is not valid.
      */
-    protected _buildItem(item: PARSER): void {
+    protected _buildItem(item: PARSER, controls: Partial<IControlsFigure>): void {
         // The names of the axes are theirs.
         if (AXIS_NAMES.includes(item.name)) {
             throw new ParseError(`Cannot build "${item.name}" (${item.key}): ${item.name} is the name of an axis of the graph, choose another name`)
@@ -403,6 +423,20 @@ export class Draw {
             const obj = make.call(makers, config, item.name + (builds.length > 1 ? `${index + 1}` : ''))
 
             applyOptions(withDefaults(item.parameters, this._settings, obj), obj, this.graph)
+
+            // What the commands before the line give, unless the line says its own (the name of the entry is the one of its option).
+            for (const key of Object.keys(controls) as (keyof IControlsFigure)[]) {
+                if (!Object.hasOwn(item.parameters, key)) {
+                    copyControl(controls, obj, key)
+                }
+            }
+
+            // The handle of a point that is dragged takes some of what the point has: it must not stay where the point is not shown.
+            const handle = this.graph.figures[`${obj.name}_drag`] as AbstractFigure | undefined
+
+            if (handle !== undefined) {
+                HANDLE_CONTROLS.forEach(key => { copyControl(obj.controls, handle, key) })
+            }
         })
     }
 

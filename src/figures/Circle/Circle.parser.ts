@@ -1,7 +1,7 @@
 import type {PARSER} from "piparser"
 import type {AbstractFigure} from "../AbstractFigure/AbstractFigure"
 import type {ICircleConfig} from "./Circle.types"
-import type {BuildResult, IParserValues} from "../../parser/parser.types"
+import type {BuildResult, IParserValues, ParserItems} from "../../parser/parser.types"
 import {ParseError} from "../../errors"
 import {
     ALTERNATIVE,
@@ -89,4 +89,15 @@ function circleOf(values: IParserValues[], item: PARSER, figures: Figures): ICir
     }
 
     return failure()
+}
+
+/** The kind of circle of the syntax, by key. */
+export const CIRCLE_ITEMS: ParserItems = {
+    [PARSER_TYPE.CIRCLE]: {
+        name: 'circle',
+        description: `Create a circle: from its center and its radius (a number, a point or A:B), from three points (a last ${ALTERNATIVE} for the inscribed circle), from a center and a tangent line, or from a diameter A:B`,
+        forms: ['c=circ <point>,<radius>', 'c=circ <point>,<line>', `c=circ <point>,<point>,<point>[,${ALTERNATIVE}]`, 'c=circ <point>:<point>'],
+        summary: 'c=circ O,r — circle',
+        build: buildCircle
+    }
 }

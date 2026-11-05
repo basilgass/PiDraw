@@ -1,7 +1,7 @@
 import type {PARSER} from "piparser"
 import type {AbstractFigure} from "../AbstractFigure/AbstractFigure"
 import type {IPlotConfig} from "./Plot.types"
-import type {BuildResult} from "../../parser/parser.types"
+import type {BuildResult, ParserItems} from "../../parser/parser.types"
 import {ParseError} from "../../errors"
 import {buildError, convertIdToFigure, describeValue, isPoint, PARSER_TYPE} from "../../parser/parser.common"
 import {curveValues, splitFunction} from "../../parser/parser.curve"
@@ -74,4 +74,19 @@ export function parsePlotShorthand(text: string): string | null {
     }
 
     return `${match[1]}=${PARSER_TYPE.PLOT} ${rest.slice(1)}`
+}
+
+/** The kind of plot of the syntax, by key. */
+export const PLOT_ITEMS: ParserItems = {
+    [PARSER_TYPE.PLOT]: {
+        name: 'plot',
+        description: 'Plot a function, or the parabola through three points (a line if they are aligned)',
+        forms: [
+            'f(x)=<function>[@<number>,<domain>,<image>]',
+            'f=plot <function>[@<number>,<domain>,<image>]',
+            'f=plot <point>,<point>,<point>[@<number>,<domain>,<image>]'
+        ],
+        summary: 'f=plot expr — function (or f(x)=expr)',
+        build: buildPlot
+    }
 }

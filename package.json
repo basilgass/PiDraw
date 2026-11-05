@@ -57,7 +57,7 @@
   "dependencies": {
     "@svgdotjs/svg.draggable.js": "^3.0.7",
     "@svgdotjs/svg.js": "^3.2.8",
-    "piparser": "^0.1.1"
+    "piparser": "^0.2.1"
   },
   "devDependencies": {
     "@codemirror/autocomplete": "^6.20.4",

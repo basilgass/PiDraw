@@ -12,6 +12,7 @@ import { Circle } from "./figures/Circle/Circle";
 import { Polygon } from "./figures/Polygon/Polygon";
 import { Grid } from "./figures/Grid/Grid";
 import { Arc } from "./figures/Arc/Arc";
+import type { IControlsGraph } from "./controls/controls.types";
 import { Axis } from "./figures/Axis/Axis";
 import { Parametric } from "./figures/Parametric/Parametric";
 import { Follow } from "./figures/Follow/Follow";
@@ -43,6 +44,9 @@ interface ILayoutFigures {
 }
 export declare class Graph extends EventTarget {
     protected _controllers: IGraphController[];
+    protected _controls: Partial<IControlsGraph>;
+    get controls(): Readonly<Partial<IControlsGraph>>;
+    setControl<K extends keyof IControlsGraph>(key: K, value: IControlsGraph[K] | null): this;
     protected _layout: ILayoutFigures;
     protected _decor: AbstractFigure[];
     protected _lines: Map<string, Axis>;
@@ -104,6 +108,7 @@ export declare class Graph extends EventTarget {
     }): string[];
     attach<T extends IGraphController>(controller: T): T;
     clear(): void;
+    figureChanged(name: string): void;
     protected _notifyRemoved(names: string[]): void;
     dispose(): void;
     handle(target: Point, options?: IDraggableConfig): Point;

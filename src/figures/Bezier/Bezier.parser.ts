@@ -3,7 +3,7 @@ import type {AbstractFigure} from "../AbstractFigure/AbstractFigure"
 import {Bezier} from "./Bezier"
 import type {BezierDirection, BezierPoint, IBezierConfig} from "./Bezier.types"
 import {Point} from "../Point/Point"
-import type {BuildResult, FigureOptionHandler} from "../../parser/parser.types"
+import type {BuildResult, FigureOptionHandler, ParserItems} from "../../parser/parser.types"
 import {InvalidArgumentError, OptionError, ParseError} from "../../errors"
 import {ALTERNATIVE, buildError, describeValue, isAlternative, PARSER_TYPE} from "../../parser/parser.common"
 
@@ -146,4 +146,15 @@ export function applyBezierOption(figure: AbstractFigure, option: BezierOption, 
 /** The options of the parser that shape a Bézier curve, ready for the registry of options. */
 export const BEZIER_OPTION_HANDLERS: Record<BezierOption, FigureOptionHandler> = {
     close: (figure, {value}) => { applyBezierOption(figure, 'close', value) }
+}
+
+/** The kind of Bézier curve of the syntax, by key. */
+export const BEZIER_ITEMS: ParserItems = {
+    [PARSER_TYPE.BEZIER]: {
+        name: 'bezier',
+        description: `Create a Bézier curve: the smooth curve through points (a direction and a ratio at each one), or, with a last ${ALTERNATIVE}, the curve pulled by 3 or 4 control points`,
+        forms: ['b=bezier <point>[/<H|V|S|angle>[/<ratio>]],...', `b=bezier <point>,<point>,<point>[,<point>],${ALTERNATIVE}`],
+        summary: 'b=bezier A,B,C — curve through points',
+        build: buildBezier
+    }
 }

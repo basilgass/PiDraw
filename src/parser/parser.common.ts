@@ -3,7 +3,7 @@ import type {AbstractFigure} from "../figures/AbstractFigure/AbstractFigure"
 import type {CircleRadius} from "../figures/Circle/Circle.types"
 import {Line} from "../figures/Line/Line"
 import {Point} from "../figures/Point/Point"
-import {ParseError} from "../errors"
+import {OptionError, ParseError} from "../errors"
 import type {IParserValues} from "./parser.types"
 
 /** The key of a line of code (`A=mid B,C`: `mid`), with the form of its values. */
@@ -128,6 +128,11 @@ export function describeValue(value: unknown): string {
     }
 
     return value === undefined ? 'nothing' : JSON.stringify(value)
+}
+
+/** The error of an option (after the `->`) that has a value which is not valid. `expected` says what would be. */
+export function invalidOption(key: string, figure: AbstractFigure, value: unknown, expected: string): OptionError {
+    return new OptionError(key, `Invalid value ${describeValue(value)} for the option "${key}" of "${figure.name}": expected ${expected}`)
 }
 
 /** @throws ParseError always: the line of code `item` does not match what its key expects. */

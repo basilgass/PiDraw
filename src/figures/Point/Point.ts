@@ -1,6 +1,5 @@
 import type {G, Shape} from "@svgdotjs/svg.js"
 import type {XY, IFigureContext} from "../../pidraw.common"
-import type {IFigureAnimation} from "../../animate/Animate.types"
 import {InvalidArgumentError} from "../../errors"
 import {AbstractFigure} from "../AbstractFigure/AbstractFigure"
 import {isDefinedPosition, numberCorrection, toCoordinates} from "../../calculus"
@@ -123,16 +122,6 @@ export class Point extends AbstractFigure {
 
         this._makeShape()
         this.updateLabel()
-    }
-
-    /** A point can be animated: it moves from a point to another one. */
-    override readonly animatable = true
-
-    /** @throws InvalidArgumentError if the animation has no start point or no end point (`from` and `to`). */
-    protected override _checkAnimation(animation: IFigureAnimation): void {
-        if (!(animation.from instanceof Point) || !(animation.to instanceof Point)) {
-            throw new InvalidArgumentError(`The animation of the point "${this.name}" needs a start and an end point (from, to)`)
-        }
     }
 
     protected _pixels: Readonly<XY>

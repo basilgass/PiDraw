@@ -5,7 +5,7 @@ import {Line} from "../Line/Line"
 import {Plot} from "../Plot/Plot"
 import {Point} from "./Point"
 import type {IPointConfig, PointCoordinateType} from "./Point.types"
-import type {BuildResult, FigureOptionHandler, IParserValues, PointShapeOption} from "../../parser/parser.types"
+import type {BuildResult, FigureOptionHandler, IParserValues, PointShapeOption, ParserItems} from "../../parser/parser.types"
 import {InvalidArgumentError, OptionError, ParseError} from "../../errors"
 import {
     ALTERNATIVE,
@@ -253,4 +253,64 @@ export const POINT_OPTIONS: Record<PointShapeOption, FigureOptionHandler> = {
     'o': shapeHandler('o'),
     's': shapeHandler('s'),
     '*': shapeHandler('*')
+}
+
+/** The kinds of points of the syntax, by key. */
+export const POINT_ITEMS: ParserItems = {
+    [PARSER_TYPE.POINT]: {
+        name: 'point',
+        description: 'Create a point',
+        forms: ['A(3,4)'],
+        summary: 'A=pt x,y — point',
+        build: buildPoint
+    },
+    [PARSER_TYPE.VECTOR_POINT]: {
+        name: 'point from two points',
+        description: 'Create a point from a vector defined by two points and a starting point',
+        forms: ['A=vpt <point>,<point>,<scale?>,<starting point?>'],
+        summary: 'P=vpt A,B,scale — point from a vector',
+        build: buildPoint
+    },
+    [PARSER_TYPE.DIRECTION_POINT]: {
+        name: 'point from direction line',
+        description: 'Create a point from a line and a starting point',
+        forms: ['A=dpt <point>,<line>,<distance>,<perpendicular?>'],
+        summary: 'P=dpt A,d,3 — point along a line',
+        build: buildPoint
+    },
+    [PARSER_TYPE.MIDDLE]: {
+        name: 'mid',
+        description: 'Create the middle of two points',
+        forms: ['A=mid <point>,<point>'],
+        summary: 'M=mid A,B — middle',
+        build: buildPoint
+    },
+    [PARSER_TYPE.PROJECTION]: {
+        name: 'projection',
+        description: 'Create the projection of a point on a line',
+        forms: ['A=proj <point>,<line>'],
+        summary: 'H=proj A,d — projection',
+        build: buildPoint
+    },
+    [PARSER_TYPE.INTERSECTION]: {
+        name: 'intersection',
+        description: 'Create the intersection of two lines',
+        forms: ['A=inter <line|circle>,<line|circle>'],
+        summary: 'P=inter d1,d2 — intersection',
+        build: buildIntersection
+    },
+    [PARSER_TYPE.SYMMETRY]: {
+        name: 'symmetry',
+        description: 'Create the symmetry of a point',
+        forms: ['A=sym <point>,<point|line>'],
+        summary: 'S=sym A,B — symmetry',
+        build: buildPoint
+    },
+    [PARSER_TYPE.EVAL_FX]: {
+        name: 'point on a function',
+        description: 'Create the point of a function at a value',
+        forms: ['A=eval f,3'],
+        summary: 'P=eval f,x — point of a function',
+        build: buildPoint
+    }
 }

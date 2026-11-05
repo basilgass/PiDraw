@@ -3,6 +3,7 @@ import type { AbstractFigure } from "../figures/AbstractFigure/AbstractFigure";
 import type { CircleRadius } from "../figures/Circle/Circle.types";
 import { Line } from "../figures/Line/Line";
 import { Point } from "../figures/Point/Point";
+import { OptionError } from "../errors";
 import type { IParserValues } from "./parser.types";
 export declare enum PARSER_TYPE {
     POINT = "pt",
@@ -44,6 +45,7 @@ export declare function convertIdToFigure(options: PARSER_VALUES[], figures: Rec
 export declare function parsePointPair(value: IParserValues | undefined, figures: Record<string, AbstractFigure>): [Point, Point] | null;
 export declare function parseRadius(value: IParserValues | undefined, figures: Record<string, AbstractFigure>): CircleRadius | null;
 export declare function describeValue(value: unknown): string;
+export declare function invalidOption(key: string, figure: AbstractFigure, value: unknown, expected: string): OptionError;
 export declare function buildError(item: PARSER, expected: string, got: string): never;
 export declare function expectCount(item: PARSER, values: IParserValues[], min: number, max: number, expected: string): void;
 //# sourceMappingURL=parser.common.d.ts.map

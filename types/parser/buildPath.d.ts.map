@@ -1,0 +1,1 @@
+{"version":3,"file":"buildPath.d.ts","sourceRoot":"","sources":["../../src/parser/buildPath.ts"],"names":[],"mappings":"AAAA,OAAO,KAAK,EAAC,MAAM,EAAC,MAAM,UAAU,CAAA;AAGpC,OAAO,KAAK,EAAC,WAAW,EAAC,MAAM,uBAAuB,CAAA;AACtD,OAAO,KAAK,EAAC,cAAc,EAAC,MAAM,kBAAkB,CAAA;AAkBpD,wBAAgB,SAAS,CAAC,IAAI,EAAE,MAAM,GAAG,cAAc,CAAC,WAAW,CAAC,CAsBnE"}

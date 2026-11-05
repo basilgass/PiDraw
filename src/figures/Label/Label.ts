@@ -1,7 +1,7 @@
 import {ForeignObject as svgHTML, SVG} from "@svgdotjs/svg.js"
 import type {G, Text as svgLabel} from "@svgdotjs/svg.js"
 import type {XY} from "../../pidraw.common"
-import {labelCenter} from "./Label.constraints"
+import {DEFAULT_LABEL_POSITION, labelCenter} from "./Label.constraints"
 import type {ILabelConfig, LABEL_POSITION, LabelOptions} from "./Label.types"
 
 type LabelType = svgLabel | svgHTML
@@ -32,7 +32,7 @@ export class Label {
 
         this._config = {
             asHtml: options.asHtml ?? false,
-            alignement: options.alignement ?? 'br',
+            alignement: options.alignement ?? DEFAULT_LABEL_POSITION,
             offset: options.offset ?? {x: 0, y: 0},
             rotate: options.rotate ?? 0,
             size: options.size ?? 'inherit',

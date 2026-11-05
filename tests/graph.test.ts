@@ -705,6 +705,19 @@ describe('Graph draggable', () => {
         expect(point.pixels.y).toBeCloseTo(300 - 2 * graph.config.axis.x.x, 6)
     })
 
+    test('puts the point on the lines of the subdivisions of the grid that the graph shows', () => {
+        const {graph} = createGraph({display: {grid: {step: {x: 2, y: 2}, subdivisions: 4}}})
+        const point = graph.create.point({x: 0, y: 0}, 'T')
+        graph.draggable(point, {grid: true})
+        const unit = graph.config.axis.x.x
+
+        // A step of 2 in 4 parts is 0.5: 450 is 1.32 units right of the origin, 250 is 1.32 units up.
+        dragTo(point, {x: 450, y: 250})
+
+        expect(point.pixels.x).toBeCloseTo(400 + 1.5 * unit, 6)
+        expect(point.pixels.y).toBeCloseTo(300 - 1.5 * unit, 6)
+    })
+
     test('puts the point on the lines of a unit when the graph shows no grid', () => {
         const {graph} = createGraph({display: {grid: false}})
         const point = graph.create.point({x: 0, y: 0}, 'T')

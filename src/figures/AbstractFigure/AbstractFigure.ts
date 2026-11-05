@@ -1,8 +1,6 @@
 import type {G, Path, Shape, Svg} from "@svgdotjs/svg.js"
 import type {IFigureAppearanceConfig, IFigureContext, XY} from "../../pidraw.common"
-import {LoopStyle} from "../../animate/Animate.types"
-import type {IFigureAnimation} from "../../animate/Animate.types"
-import {EASINGS} from "../../calculus/easing"
+import type {IControlsFigure} from "../../controls/controls.types"
 import {Label} from "../Label/Label"
 import {checkLabelContent, renderLabelContent} from "../Label/Label.constraints"
 import type {ILabelConfig, LabelContent, LabelFields} from "../Label/Label.types"
@@ -108,7 +106,6 @@ export abstract class AbstractFigure {
         this._name = name
         this._static = false
         this._isDraggable = false
-        this._animate = null
 
         this._label = null
         this._labelContent = name
@@ -193,68 +190,43 @@ export abstract class AbstractFigure {
         return this._label
     }
 
-    protected _animate: IFigureAnimation | null
+    protected _controls: Partial<IControlsFigure> = {}
 
-    get animate() {
-        return this._animate
+    /**
+     * What the themes keep on the figure (the animation of a point, the steps of a presentation...), by the name of the theme. The figure does not
+     * know what the entries mean: a theme writes its own with {@link setControl}, after it checked the value, and reads it back here.
+     */
+    get controls(): Readonly<Partial<IControlsFigure>> {
+        return this._controls
     }
 
     /**
-     * The animation of the figure, `null` for none. Setting `null` is always possible.
-     *
-     * @throws InvalidArgumentError if the figure cannot be animated (see {@link animatable}), if the duration is not a
-     * finite number greater than 0, if the delay is not a finite number of 0 or more, or if the figure refuses the
-     * animation (`_checkAnimation`). The animation of the figure is then left unchanged.
+     * Keep a value for a theme, or take it away with `null`. The figure tells its context, which tells the controllers of the graph.
+     * The value is not checked: the theme does it (see `setSlide`, `setAnimation`).
      */
-    set animate(value: IFigureAnimation | null) {
-        if (value !== null) {
-            if (!this.animatable) {
-                throw new InvalidArgumentError(`The figure "${this._name}" cannot be animated`)
-            }
-
-            if (!Number.isFinite(value.duration) || value.duration <= 0) {
-                throw new InvalidArgumentError(`Invalid duration ${value.duration} for the animation of "${this._name}": expected a number greater than 0`)
-            }
-
-            if (!Number.isFinite(value.delay) || value.delay < 0) {
-                throw new InvalidArgumentError(`Invalid delay ${value.delay} for the animation of "${this._name}": expected a number of 0 or more`)
-            }
-
-            if (!Object.hasOwn(EASINGS, value.easing)) {
-                throw new InvalidArgumentError(`Invalid easing ${value.easing} for the animation of "${this._name}": expected ${Object.keys(EASINGS).join(', ')}`)
-            }
-
-            if (!Object.values<string>(LoopStyle).includes(value.loop)) {
-                throw new InvalidArgumentError(`Invalid loop ${value.loop} for the animation of "${this._name}": expected ${Object.values(LoopStyle).join(', ')}`)
-            }
-
-            this._checkAnimation(value)
+    setControl<K extends keyof IControlsFigure>(key: K, value: IControlsFigure[K] | null): this {
+        if (value === null) {
+            Reflect.deleteProperty(this._controls, key)
+        } else {
+            this._controls[key] = value
         }
 
-        this._animate = value
+        this._context.figureChanged?.(this._name)
+
+        return this
     }
 
-    /**
-     * Whether the figure can have an animation. A figure that can be animated overrides this (and
-     * `_checkAnimation`), and the code that plays the animations has to know how to play it.
-     */
-    readonly animatable: boolean = false
+    /** The reasons for which the figure is hidden besides `hide()` and the lack of a position (see {@link setHiddenBy}). */
+    protected _hiders = new Set<string>()
+
+    /** Whether the figure has a position (see {@link _setDefined}). */
+    protected _defined = true
 
     /**
      * Whether a point can follow the figure: whether {@link follow} puts a position on it. A figure that overrides `follow` overrides
      * this too, and `Follow` accepts only such figures.
      */
     readonly followable: boolean = false
-
-    /**
-     * Check what is specific to the animation of this figure, for instance that it has what it needs to be played.
-     * Called by the `animate` setter, after the checks common to every animation.
-     * @throws InvalidArgumentError if the figure cannot play this animation.
-     */
-    protected _checkAnimation(animation: IFigureAnimation): void
-    protected _checkAnimation(): void {
-        // Nothing to check by default.
-    }
 
     get graphConfig() {
         return this._context.config
@@ -271,6 +243,27 @@ export abstract class AbstractFigure {
      * figures this one depends on (a line through two points...) to draw it again when they move.
      */
     abstract get config(): object
+
+    /**
+     * Hide the figure, or show it again, for a reason that has a name (`slide` for a presentation). The figure is hidden as long as one
+     * reason holds; `hide()` and the lack of a position are other causes, which this does not touch. The label goes with the figure.
+     */
+    setHiddenBy(reason: string, hidden: boolean): this {
+        if (hidden) {
+            this._hiders.add(reason)
+        } else {
+            this._hiders.delete(reason)
+        }
+
+        this._applyVisibility()
+
+        return this
+    }
+
+    /** Whether the figure is hidden for this reason (see {@link setHiddenBy}). */
+    isHiddenBy(reason: string): boolean {
+        return this._hiders.has(reason)
+    }
 
     /** Hide the figure, and its label. */
     hide(): this {
@@ -296,7 +289,7 @@ export abstract class AbstractFigure {
 
     /**
      * Take away what was asked of the figure since it was made, so that a figure that is given another configuration looks like a new one:
-     * the appearance, the dashes and the markers, the moves and the scales of the shape, the label, the animation, whether the user holds it,
+     * the appearance, the dashes and the markers, the moves and the scales of the shape, the label, what the themes kept (`controls`), whether the user holds it,
      * and whether it is hidden. The shape and the configuration stay as they are (the shape is made again, in the default style, by the
      * next `config`), and so does `static`, which the figure or its owner sets.
      */
@@ -311,8 +304,13 @@ export abstract class AbstractFigure {
         this._label = null
         this._labelContent = this._name
 
-        this._animate = null
         this._isDraggable = false
+
+        // What the themes kept on the figure goes too, and they are told.
+        if (Object.keys(this._controls).length > 0) {
+            this._controls = {}
+            this._context.figureChanged?.(this._name)
+        }
 
         // A figure that was never hidden has no `style`: show it again only if it was, and leave no empty `style` behind.
         if (this._element.css('display') === 'none') {
@@ -526,7 +524,13 @@ export abstract class AbstractFigure {
      * `hide()` (`display`) does not touch, so a figure hidden on purpose stays hidden when its position comes back.
      */
     protected _setDefined(defined: boolean): void {
-        this._element.attr("visibility", defined ? null : "hidden")
+        this._defined = defined
+        this._applyVisibility()
+    }
+
+    /** The group is hidden (`visibility`) when the figure has no position or a reason hides it; `hide()` (`display`) is apart. */
+    protected _applyVisibility(): void {
+        this._element.attr("visibility", this._defined && this._hiders.size === 0 ? null : "hidden")
     }
 
     /** A position in pixels as a TikZ coordinate, in units of the coordinate system and with 5 decimals at most: `1.5,-2`. */

@@ -2,6 +2,7 @@ import {EASINGS} from "../calculus/easing"
 import type {Graph} from "../Graph"
 import type {IGraphController} from "../Graph.types"
 import {Point} from "../figures/Point/Point"
+import {animationOf} from "./animation"
 import type {IAnimateEventMap} from "./Animate.types"
 import {LoopStyle} from "./Animate.types"
 
@@ -141,7 +142,7 @@ export class Animate extends EventTarget implements IGraphController {
         const gone = (figure: unknown): boolean => figure instanceof Point && names.includes(figure.name)
 
         for (const [name, anim] of this._animations) {
-            const animate = anim.point.animate
+            const animate = animationOf(anim.point)
 
             if (gone(anim.point) || gone(animate?.from) || gone(animate?.to)) {
                 this._animations.delete(name)
@@ -222,7 +223,7 @@ export class Animate extends EventTarget implements IGraphController {
 
     /**
      * Read the animations of the points of the graph, from the beginning. Only a point whose animation goes from a point to a point is played:
-     * `Point.animate` checks it, and the type of `IFigureAnimation` leaves the door open for another kind of start.
+     * `setAnimation` checks it, and the type of `IFigureAnimation` leaves the door open for another kind of start.
      * @returns the points that are animated.
      */
     protected _updatePoints(): Point[] {
@@ -231,11 +232,17 @@ export class Animate extends EventTarget implements IGraphController {
 
         Object.values(this._graph.figures).forEach(figure => {
             // Only the points are played. Another kind of figure that can be animated needs its own case here.
-            if (!(figure instanceof Point) || figure.animate === null) {
+            if (!(figure instanceof Point)) {
                 return
             }
 
-            const {from, to, duration, delay, easing, loop} = figure.animate
+            const animation = animationOf(figure)
+
+            if (animation === null) {
+                return
+            }
+
+            const {from, to, duration, delay, easing, loop} = animation
 
             if (!(from instanceof Point) || !(to instanceof Point)) {
                 return

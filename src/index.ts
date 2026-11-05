@@ -50,6 +50,7 @@ export type {RiemannRectangle} from "./calculus/computeRiemann"
 // Animation (a controller: made with the graph, `new Animate(graph)`)
 export * from "./animate/Animate.types"
 export {Animate} from "./animate/Animate"
+export {setAnimation} from "./animate/animation"
 export {EASINGS} from "./calculus/easing"
 
 // Zoom (a controller: made with the graph, `new Zoom(graph)`)
@@ -57,14 +58,21 @@ export * from "./zoom/Zoom.types"
 export {Zoom, ZOOM_STEP} from "./zoom/Zoom"
 export {ZOOM_LIMITS} from "./calculus/computeZoom"
 
+// Slides (a controller: made with the graph, `new Slides(graph)`)
+export type * from "./slides/Slides.types"
+export {Slides} from "./slides/Slides"
+export {setSlide} from "./slides/slideSet"
+
+// What the themes keep on a figure (`figure.controls`)
+export type * from "./controls/controls.types"
+
 // The graph and the code
 export * from "./pidraw.common"
 export type * from "./Graph.types"
 export {Graph as PiGraph} from "./Graph"
 export type {IDraggableConfig, IDraggableFollow} from "./Graph"
 export {Draw as PiDraw} from "./Draw/Draw"
-export type {BuildResult, FigureKind, IParserConfig} from "./parser/parser.types"
-export type {ParserItem} from "./parser/parser.config"
+export type {BuildResult, FigureKind, IParserConfig, ParserItem} from "./parser/parser.types"
 export type * from "./Draw/Draw.report"
 
 // Errors

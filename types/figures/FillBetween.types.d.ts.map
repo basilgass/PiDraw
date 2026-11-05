@@ -1,0 +1,1 @@
+{"version":3,"file":"FillBetween.types.d.ts","sourceRoot":"","sources":["../../src/figures/FillBetween.types.ts"],"names":[],"mappings":"AAAA,OAAO,KAAK,EAAC,MAAM,EAAC,MAAM,kBAAkB,CAAA;AAC5C,OAAO,KAAK,EAAC,IAAI,EAAC,MAAM,QAAQ,CAAA;AAKhC,MAAM,WAAW,kBAAkB;IAE/B,IAAI,EAAE,IAAI,CAAC;IAEX,KAAK,CAAC,EAAE,IAAI,CAAC;IAKb,MAAM,CAAC,EAAE,MAAM,CAAA;CAClB"}

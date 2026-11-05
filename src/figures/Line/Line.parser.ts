@@ -2,7 +2,7 @@ import type {PARSER} from "piparser"
 import type {AbstractFigure} from "../AbstractFigure/AbstractFigure"
 import {Plot} from "../Plot/Plot"
 import type {ILineConfig, ILineType} from "./Line.types"
-import type {BuildResult, IParserValues} from "../../parser/parser.types"
+import type {BuildResult, IParserValues, ParserItems} from "../../parser/parser.types"
 import {ParseError} from "../../errors"
 import {toNumber} from "../../calculus"
 import {
@@ -213,4 +213,71 @@ export function parseLineShorthand(keyCode: string): string | null {
     throw new ParseError(
         `Cannot read "${keyCode}" as a line: expected two points, like AB, AB., [AB], AB[, [AB[, [AB or vAB, after the "="`
     )
+}
+
+/** The kinds of lines of the syntax, by key. */
+export const LINE_ITEMS: ParserItems = {
+    [PARSER_TYPE.LINE]: {
+        name: 'line',
+        description: 'Create a line through two points, through a point with a slope, or from its equation',
+        forms: ['d=AB', 'd=line <point>,<point>', 'd=line <point>,<slope>', 'd=line <equation>'],
+        summary: 'd=line A,B — line (or d=AB)',
+        build: buildLine
+    },
+    [PARSER_TYPE.VECTOR]: {
+        name: 'vector',
+        description: 'Create a vector: a segment with an arrow at its end',
+        forms: ['v=vAB', 'v=vec <point>,<point>'],
+        summary: 'v=vec A,B — vector (or v=vAB)',
+        build: buildLine
+    },
+    [PARSER_TYPE.SEGMENT]: {
+        name: 'segment',
+        description: 'Create a segment through two points',
+        forms: ['s=AB.', 's=[AB]', 's=seg <point>,<point>'],
+        summary: 's=seg A,B — segment (or s=AB.)',
+        build: buildLine
+    },
+    [PARSER_TYPE.RAY]: {
+        name: 'ray (half line)',
+        description: 'Create a ray: it starts at the first point and goes through the second',
+        forms: ['r=AB[', 'r=[AB[', 'r=[AB', 'r=ray <point>,<point>'],
+        summary: 'r=ray A,B — ray (or r=AB[)',
+        build: buildLine
+    },
+    [PARSER_TYPE.PERPENDICULAR]: {
+        name: 'perpendicular',
+        description: 'Create the perpendicular of a line from a point',
+        forms: ['d=perp <line>,<point>'],
+        summary: 'p=perp d,A — perpendicular',
+        build: buildLine
+    },
+    [PARSER_TYPE.PARALLEL]: {
+        name: 'parallel',
+        description: 'Create a parallel line from a point',
+        forms: ['d=para <line>,<point>'],
+        summary: 'p=para d,A — parallel',
+        build: buildLine
+    },
+    [PARSER_TYPE.MEDIATOR]: {
+        name: 'mediator',
+        description: 'Create the mediator of two points',
+        forms: ['d=med <point>,<point>'],
+        summary: 'm=med A,B — perpendicular bisector',
+        build: buildLine
+    },
+    [PARSER_TYPE.TANGENT]: {
+        name: 'tangent',
+        description: 'Create a tangent line from a <circle|plot> by a Point',
+        forms: ['d=tan <circle|plot>,<point>'],
+        summary: 't=tan f,A — tangent',
+        build: buildLine
+    },
+    [PARSER_TYPE.BISECTOR]: {
+        name: 'bisector',
+        description: `Create the bisector of an angle (three points), or of two lines or axes (a last ${ALTERNATIVE} for the other bisector)`,
+        forms: ['d=bis <point>,<point>,<point>', `d=bis <line>,<line>[,${ALTERNATIVE}]`],
+        summary: 'b=bis d1,d2 — angle bisector',
+        build: buildLine
+    }
 }

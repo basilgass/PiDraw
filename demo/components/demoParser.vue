@@ -201,7 +201,7 @@ function logTikz(){
 						<p class="px-3">
 							{{ doc.description }}
 						</p>
-						<pre class="px-3 pb-3">{{ doc.code }}</pre>
+						<pre class="px-3 pb-3">{{ doc.forms.join('\n') }}</pre>
 					</div>
 				</div>
 			</details>

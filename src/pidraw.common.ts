@@ -54,6 +54,11 @@ function hasDefined(obj: unknown, keys: readonly string[]): boolean {
 export interface IFigureContext {
     readonly rootSVG: Svg
     readonly config: IGraphConfig
+    /**
+     * Called by a figure when something that the controllers of the graph care about changed in it (its steps of a presentation): the name of
+     * the figure. Facultative: a figure made without a graph (in a test) tells nobody.
+     */
+    figureChanged?(name: string): void
 }
 
 /** The coordinate system of a graph, in pixels. */

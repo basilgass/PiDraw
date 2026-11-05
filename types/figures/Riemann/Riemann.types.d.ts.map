@@ -1,0 +1,1 @@
+{"version":3,"file":"Riemann.types.d.ts","sourceRoot":"","sources":["../../../src/figures/Riemann/Riemann.types.ts"],"names":[],"mappings":"AAAA,OAAO,KAAK,EAAC,MAAM,EAAC,MAAM,qBAAqB,CAAA;AAC/C,OAAO,KAAK,EAAC,IAAI,EAAC,MAAM,cAAc,CAAA;AAKtC,MAAM,WAAW,cAAc;IAE3B,IAAI,EAAE,IAAI,CAAC;IAEX,MAAM,CAAC,EAAE,MAAM,CAAC;IAEhB,UAAU,CAAC,EAAE,MAAM,CAAC;IAIpB,QAAQ,CAAC,EAAE,MAAM,CAAA;CACpB"}

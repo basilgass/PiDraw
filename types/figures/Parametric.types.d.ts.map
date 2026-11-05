@@ -1,0 +1,1 @@
+{"version":3,"file":"Parametric.types.d.ts","sourceRoot":"","sources":["../../src/figures/Parametric.types.ts"],"names":[],"mappings":"AAAA,OAAO,KAAK,EAAC,YAAY,EAAC,MAAM,eAAe,CAAA;AAS/C,MAAM,WAAW,iBAAkB,SAAQ,YAAY;IACnD,WAAW,EAAE;QACT,CAAC,EAAE,MAAM,CAAC;QACV,CAAC,EAAE,MAAM,CAAA;KACZ,CAAA;CACJ"}

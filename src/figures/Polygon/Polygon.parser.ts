@@ -1,7 +1,7 @@
 import type {PARSER} from "piparser"
 import type {AbstractFigure} from "../AbstractFigure/AbstractFigure"
 import type {IPolygonConfig, PolygonRadius} from "./Polygon.types"
-import type {BuildResult, IParserValues} from "../../parser/parser.types"
+import type {BuildResult, IParserValues, ParserItems} from "../../parser/parser.types"
 import {ParseError} from "../../errors"
 import {
     buildError,
@@ -80,4 +80,15 @@ export function buildPolygon(item: PARSER, figures: Figures): BuildResult<IPolyg
     return radius === null
         ? failure()
         : {create, config: {regular: {center: first, radius, sides: integer(sides, item, 'number of sides'), ...steps}}}
+}
+
+/** The kind of polygon of the syntax, by key. */
+export const POLYGON_ITEMS: ParserItems = {
+    [PARSER_TYPE.POLYGON]: {
+        name: 'polygon',
+        description: 'Create a polygon: through points, or a regular polygon (and a regular star polygon with a last step) from a center and a radius, or from a side',
+        forms: ['p=poly <point>,<point>,<point>,...', 'p=poly <point>,<radius>,<sides>[,<step>]', 'p=poly <point>,<point>,<sides>[,<step>]'],
+        summary: 'p=poly A,B,C — polygon',
+        build: buildPolygon
+    }
 }

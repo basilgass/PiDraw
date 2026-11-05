@@ -1,0 +1,1 @@
+{"version":3,"file":"Follow.types.d.ts","sourceRoot":"","sources":["../../src/figures/Follow.types.ts"],"names":[],"mappings":"AAAA,OAAO,KAAK,EAAC,EAAE,EAAC,MAAM,kBAAkB,CAAA;AACxC,OAAO,KAAK,EAAC,cAAc,EAAC,MAAM,kBAAkB,CAAA;AAOpD,MAAM,WAAW,aAAa;IAE1B,MAAM,EAAE,cAAc,CAAC;IAEvB,OAAO,CAAC,EAAE,OAAO,CAAC;IAElB,IAAI,CAAC,EAAE,MAAM,CAAC;IAKd,EAAE,CAAC,EAAE,EAAE,CAAA;CACV"}
