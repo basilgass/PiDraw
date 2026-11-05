@@ -752,7 +752,7 @@ export class Graph extends EventTarget {
      * to (see `tikzPicture`). The handles of the points
      * the user drags are not part of the drawing, and a figure that is hidden writes nothing. The packages it needs are in {@link tikzPreamble}.
      *
-     * @throws InvalidArgumentError if the appearance of a figure has no TikZ equivalent (a color that is neither hexadecimal nor a name of `xcolor`).
+     * @throws InvalidArgumentError if the appearance of a figure has no TikZ equivalent (a color that is neither hexadecimal nor a name of CSS).
      * @throws NotImplementedError if a figure cannot be written in TikZ, or the x axis does not go to the right or the y axis does not go up.
      */
     tikz(): string {

@@ -658,7 +658,7 @@ export abstract class AbstractFigure {
      * (`tikz`, and `arrows.meta` for the cross marker; `pgfplots` for the figures that draw a function).
      *
      * @throws InvalidArgumentError if the appearance of the figure has no TikZ equivalent (a color that is neither
-     * hexadecimal nor a name of `xcolor`).
+     * hexadecimal nor a name of CSS).
      * @throws NotImplementedError if the figure cannot be written in TikZ yet.
      */
     abstract tikz(): string
