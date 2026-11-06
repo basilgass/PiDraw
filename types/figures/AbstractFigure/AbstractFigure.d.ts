@@ -58,6 +58,7 @@ export declare abstract class AbstractFigure {
     hide(): this;
     show(): this;
     hideShape(): this;
+    showShape(): this;
     resetStyle(): this;
     strokeable(): Shape[];
     fillable(): Shape[];

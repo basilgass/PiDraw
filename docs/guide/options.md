@@ -12,6 +12,7 @@ An option that does not exist (`->colr=red`), that is not made for the figure (`
 | [Move and scale](#move-and-scale) | `move`, `scale` |
 | [Interaction](./interaction) | `drag`, `animate`, `from`, `to`, `duration`, `delay`, `easing`, `loop` |
 | [Slides](./slides) | `slide` |
+| [Buttons](./buttons) | `toggle` |
 
 ## Stroke and fill
 

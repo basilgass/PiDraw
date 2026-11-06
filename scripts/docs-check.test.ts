@@ -357,8 +357,8 @@ describe('demos of the controls page', () => {
         expect(draw.errors.map(error => `${error.line}: ${error.message}`)).toEqual([])
         const animated = new Animate(draw.graph).canBeAnimated()
 
-        if (demo.zoom === undefined && demo.slides === undefined) {
-            expect(animated, 'a demo with neither a zoom nor slides has an animation').toBe(true)
+        if (demo.zoom === undefined && demo.slides === undefined && demo.buttons !== true) {
+            expect(animated, 'a demo with neither a zoom, slides nor buttons has an animation').toBe(true)
         }
 
         if (demo.zoom !== undefined) {

@@ -45,6 +45,7 @@ export type Options = Record<string, IParserParameters>;
 export interface IOptionContext {
     graph: Graph;
     options: Options;
+    states: ReadonlyMap<string, unknown>;
 }
 export type OptionHandler = (figure: AbstractFigure, option: IParserParameters, context: IOptionContext) => void;
 export type OptionValueType = 'text' | 'set';

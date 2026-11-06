@@ -64,6 +64,11 @@ export type * from "./slides/Slides.types"
 export {Slides} from "./slides/Slides"
 export {setSlide} from "./slides/slideSet"
 
+// Buttons (a controller: made with the graph, `new Buttons(graph)`)
+export type * from "./buttons/Buttons.types"
+export {Buttons} from "./buttons/Buttons"
+export {setToggle} from "./buttons/toggle"
+
 // What the themes keep on a figure (`figure.controls`)
 export type * from "./controls/controls.types"
 

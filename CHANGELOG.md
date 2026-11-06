@@ -6,7 +6,9 @@ All the changes of PiDraw that a user or a program can see. The details of what 
 
 ### Added
 
+- **Usage**: `draw.hasDraggable()`, `draw.uses('animate' | 'slide' | 'toggle')` and `draw.usedControls()` tell what the figures ask of the program, and the event `usage` (`draw.on('usage', …)`) says when a drawing changes it. `Draw` is now an `EventTarget`.
 - **Slides**: `Slides` controller, the option `slide=<2-5,7,9->`, the commands `@pause`, `@pause=Title`, `@slides`, `@slides=<…>` and `@title,N=Title`. The TikZ export writes the step that is shown.
+- **Buttons**: `Buttons` controller (`buttons`, `toggle(id)`, `reset()`, the event `change`), the command `@button=id->title=Text` and the option `toggle=id/seconds`: the figures that name a button appear and go together, with a fade of the given seconds. The TikZ export writes what is shown.
 - **Zoom**: `Zoom` controller (`zoomIn`, `zoomOut`, `zoomTo`, `moveOrigin`, `reset`), with mouse, touch and pinch gestures.
 - **Animation**: `Animate` is a controller made with the graph (`new Animate(graph)`) with the events `start`, `pause`, `end` and `stop`. `easing=inOut` and `loop` are applied and checked.
 - **TikZ export**: `graph.tikz()` writes a complete `tikzpicture` for every figure, and `graph.tikzPreamble()` gives the lines to put before `\begin{document}`. The curves use `pgfplots`.

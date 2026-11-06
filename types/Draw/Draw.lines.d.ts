@@ -10,16 +10,19 @@ export type IDrawLine = {
 } & ({
     item: PARSER;
     controls: Partial<IControlsFigure>;
+    states: ReadonlyMap<string, unknown>;
     command?: never;
     error?: never;
 } | {
     command: IDrawCommand;
     item?: never;
     controls?: never;
+    states?: never;
     error?: never;
 } | {
     error: ParseError;
     controls: Partial<IControlsFigure>;
+    states: ReadonlyMap<string, unknown>;
     item?: never;
     command?: never;
 });

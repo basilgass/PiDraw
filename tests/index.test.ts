@@ -7,6 +7,7 @@ describe('the package pidraw', () => {
     const EXPORTED = [
         'Animate',
         'Axes',
+        'Buttons',
         'CoordinateSystem',
         'EASINGS',
         'InvalidArgumentError',
@@ -22,6 +23,7 @@ describe('the package pidraw', () => {
         'Slides',
         'setAnimation',
         'setSlide',
+        'setToggle',
         'UnsupportedOperationError',
         'ZOOM_ALLOWS',
         'ZOOM_LIMITS',

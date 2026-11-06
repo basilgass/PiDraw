@@ -28,14 +28,17 @@ export type IDrawLine = {
         item: PARSER
         /** What the commands before the line give to the controls of its figures, unless the line has its own option for them. */
         controls: Partial<IControlsFigure>
+        /** What the commands before the line say, by theme (the buttons that are declared above a `toggle`). */
+        states: ReadonlyMap<string, unknown>
         command?: never
         error?: never
     }
-    | { command: IDrawCommand, item?: never, controls?: never, error?: never }
+    | { command: IDrawCommand, item?: never, controls?: never, states?: never, error?: never }
     | {
         error: ParseError
         /** What the commands before the line give, so that the version before of the line, if it falls back to it, gets them. */
         controls: Partial<IControlsFigure>
+        states: ReadonlyMap<string, unknown>
         item?: never
         command?: never
     }
@@ -123,9 +126,10 @@ export function readCode(input: string, parse: (text: string) => PARSER, parser:
                 return
             }
 
-            lines.push({number, text, indent, item: parse(text), controls})
+            // The states are replaced, never changed (`fold` returns new ones): a copy of the map is what the line saw.
+            lines.push({number, text, indent, item: parse(text), controls, states: new Map(states)})
         } catch (e) {
-            lines.push({number, text, indent, error: asParseError(e, text), controls})
+            lines.push({number, text, indent, error: asParseError(e, text), controls, states: new Map(states)})
         }
     })
 

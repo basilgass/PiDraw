@@ -222,6 +222,55 @@ slides.current // 3
 slides.goto(4) // throws InvalidArgumentError
 ```
 
+## Buttons
+
+A `Buttons` shows and hides the figures that the code ties to a button. It is made with the graph, `new Buttons(graph)`, like `Slides`, and a graph has one. It draws no button: a program shows them from `buttons`, calls `toggle` when the user presses one, and listens to the event `change`. The code declares them (the command `@button` and the option `toggle`, see [buttons](./buttons)); a program can also tie a figure to a button with `setToggle(figure, {id, duration, hidden})`, and the figure keeps it in `figure.controls.toggle`.
+
+| Member | Description |
+|---|---|
+| `new Buttons(graph)` | the buttons of `graph`, none of them pressed. A graph that already has a `Buttons` is an `InvalidArgumentError` |
+| `buttons` | the buttons that the code declares, in the order of the code: `{id, title, active}`. `active` is true after an odd number of presses |
+| `isActive(id)` | whether the button was pressed an odd number of times |
+| `toggle(id)` | presses the button: every figure of the button is reversed (shown if it was hidden, hidden if it was shown) |
+| `reset()` | releases every button: the figures are as their lines say |
+| `on(event, handler)`, `off(event, handler)` | the event `change`, which gives `{buttons, toggled}`: it is sent when a button is pressed (`toggled` is its id), and when the code declares other buttons (`toggled` is `null`) |
+
+An `id` that the code does not declare is an `InvalidArgumentError`. A figure fades in and out in the seconds of its `toggle`. A figure that a button hides is still drawn and updated, and it stays hidden when another controller (the steps of a `Slides`) hides it. Without a `Buttons` the buttons mean nothing and every figure is shown.
+
+```js
+const draw = new PiDraw(container, {code: '@button=p\nA(1,1)->!,toggle=p'})
+const buttons = new Buttons(draw.graph)
+
+buttons.isActive('p') // false
+buttons.toggle('p')
+buttons.isActive('p') // true
+buttons.toggle('q') // throws InvalidArgumentError
+```
+
+## Which extensions to turn on
+
+`Animate`, `Slides`, `Buttons` and the drag are worth turning on only if a figure uses them. A `PiDraw` tells it: `hasDraggable()` is true if a point can be dragged, `uses('animate' | 'slide' | 'toggle')` if at least one figure has that entry in its `controls`, and `usedControls()` lists the themes that are used. A `@button` that no figure cites is not a use of `toggle`.
+
+The event `usage` says when drawing the code changed the answer (a point began to be draggable, the last `slide` of the code is gone...), and says nothing when it is the same: a page that is typed in turns the extensions on and off with it.
+
+```ts
+const draw = new PiDraw(container, {code})
+let animate: Animate | null = null
+
+function follow({draggable, controls}: IDrawUsage) {
+    pointerHint.hidden = !draggable
+    if (controls.includes('animate') && animate === null) {
+        animate = new Animate(draw.graph)
+    } else if (!controls.includes('animate')) {
+        animate?.dispose()
+        animate = null
+    }
+}
+
+follow({draggable: draw.hasDraggable(), controls: draw.usedControls()})
+draw.on('usage', e => { follow(e.detail) })
+```
+
 ## Changing the code while it is typed
 
 `refresh` gives a report and does not throw for a line of code. A program that shows a text field calls it at each keystroke, with the number of the line being written: [the errors page](./errors) shows how.

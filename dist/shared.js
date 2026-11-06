@@ -6143,6 +6143,11 @@ var Ac = class {
 			e.attr("id") !== `${this._name}-label` && e.hide();
 		}), this;
 	}
+	showShape() {
+		return this._element.children().forEach((e) => {
+			e.attr("id") !== `${this._name}-label` && e.show();
+		}), this;
+	}
 	resetStyle() {
 		return this._appearance = kc(), this._dasharray = null, this._markerStart = null, this._markerEnd = null, this._shape.attr("transform", null), this._label?.shape.remove(), this._label = null, this._labelContent = this._name, this._labelReference = null, this._isDraggable = !1, Object.keys(this._controls).length > 0 && (this._controls = {}, this._context.figureChanged?.(this._name)), this._element.css("display") === "none" && (this._element.show(), this._element.attr("style") === "" && this._element.attr("style", null)), this;
 	}
@@ -7133,22 +7138,33 @@ function Fl(e) {
 function Il(e, t) {
 	t !== null && jl(t, e.name), e.setControl("slide", t === null ? null : Pl(t));
 }
-// src/figures/Curve/Curve.constraints.ts
+// src/buttons/toggle.ts
 function Ll(e, t) {
+	if (e.id === "" || e.id.includes("/")) throw new a(`Invalid toggle for "${t}": the id of a button is not empty and has no "/", got "${e.id}"`);
+	if (!Number.isFinite(e.duration) || e.duration < 0) throw new a(`Invalid toggle for "${t}": the duration is a number of seconds from 0, got ${e.duration}`);
+}
+function Rl(e) {
+	return e.controls.toggle ?? null;
+}
+function zl(e, t) {
+	t !== null && Ll(t, e.name), e.setControl("toggle", t === null ? null : Object.freeze({ ...t }));
+}
+// src/figures/Curve/Curve.constraints.ts
+function Bl(e, t) {
 	let n = e;
 	return typeof n == "object" && !!n && typeof n.min == "number" && typeof n.max == "number" && !Number.isNaN(n.min) && !Number.isNaN(n.max) && n.min <= n.max && (t || Number.isFinite(n.min) && Number.isFinite(n.max));
 }
-var Rl = (e) => typeof e == "number" && Number.isFinite(e) && e > 0, zl = {
+var Vl = (e) => typeof e == "number" && Number.isFinite(e) && e > 0, Hl = {
 	domain: {
-		valid: (e) => Ll(e, !1),
+		valid: (e) => Bl(e, !1),
 		expected: "{min, max} with finite numbers and min <= max"
 	},
 	samples: {
-		valid: Rl,
+		valid: Vl,
 		expected: "a finite number greater than 0"
 	},
 	tolerance: {
-		valid: Rl,
+		valid: Vl,
 		expected: "a finite number greater than 0"
 	},
 	maxDepth: {
@@ -7156,16 +7172,16 @@ var Rl = (e) => typeof e == "number" && Number.isFinite(e) && e > 0, zl = {
 		expected: "an integer of 0 or more"
 	},
 	asymptoteThreshold: {
-		valid: Rl,
+		valid: Vl,
 		expected: "a finite number greater than 0"
 	}
-}, Bl = {
-	valid: (e) => Ll(e, !0),
+}, Ul = {
+	valid: (e) => Bl(e, !0),
 	expected: "{min, max} with min <= max"
 };
-function Vl(e, t, n = {}) {
+function Wl(e, t, n = {}) {
 	let r = {
-		...zl,
+		...Hl,
 		...n
 	}, i = e;
 	for (let [e, n] of Object.entries(r)) {
@@ -7173,7 +7189,7 @@ function Vl(e, t, n = {}) {
 		if (r !== void 0 && !n.valid(r)) throw new a(`Invalid ${e} ${JSON.stringify(r)} for the curve "${t}": expected ${n.expected}`);
 	}
 }
-function Hl(e, t) {
+function Gl(e, t) {
 	if (e !== void 0) return {
 		min: e.min,
 		max: e.max
@@ -7184,7 +7200,7 @@ function Hl(e, t) {
 		max: Math.min(...n.map((e) => e.max))
 	};
 }
-function Ul(e, t, n) {
+function Kl(e, t, n) {
 	let r = new _o(e);
 	try {
 		r.evaluate({ [t]: 0 });
@@ -7194,7 +7210,7 @@ function Ul(e, t, n) {
 	return r;
 }
 // src/figures/Plot/Plot.constraints.ts
-var Wl = {
+var ql = {
 	expression: (e) => e,
 	quadratic: (e, t) => {
 		let { A: n, B: r, C: i } = W(e, "points of the parabola");
@@ -7206,27 +7222,27 @@ var Wl = {
 		}
 	}
 };
-function Gl(e, t) {
-	return Mc(Wl, e, t, "plot");
+function Jl(e, t) {
+	return Mc(ql, e, t, "plot");
 }
-function Kl(e, t, n) {
-	return Nc(Wl, e, t, n);
+function Yl(e, t, n) {
+	return Nc(ql, e, t, n);
 }
-function ql(e, t, n) {
-	let r = Gl(e, t);
-	Vl(e, t, { image: Bl });
-	let i = Kl(r, e, n);
+function Xl(e, t, n) {
+	let r = Jl(e, t);
+	Wl(e, t, { image: Ul });
+	let i = Yl(r, e, n);
 	return i === null ? null : {
 		expression: i,
-		numExp: Ul(i, "x", `of the plot "${t}"`)
+		numExp: Kl(i, "x", `of the plot "${t}"`)
 	};
 }
 // src/figures/Plot/Plot.ts
-var Jl = "0/0", Yl = class extends Ac {
+var Zl = "0/0", Ql = class extends Ac {
 	_labelGap = 6;
 	constructor(e, t, n) {
-		let r = ql(n, t, e.config);
-		super(e, t), this._config = { ...n }, this._fx = r?.expression ?? "", this._numExp = r?.numExp ?? new _o(Jl), this._labelAnchor = null, this._range = null, this._makeShape(), this._draw(r !== null);
+		let r = Xl(n, t, e.config);
+		super(e, t), this._config = { ...n }, this._fx = r?.expression ?? "", this._numExp = r?.numExp ?? new _o(Zl), this._labelAnchor = null, this._range = null, this._makeShape(), this._draw(r !== null);
 	}
 	_fx;
 	_numExp;
@@ -7238,12 +7254,12 @@ var Jl = "0/0", Yl = class extends Ac {
 		return this._config;
 	}
 	set config(e) {
-		let t = ql(e, this.name, this.graphConfig);
-		this._config = { ...e }, this._fx = t?.expression ?? "", this._numExp = t?.numExp ?? new _o(Jl), this._draw(t !== null), this.updateLabel();
+		let t = Xl(e, this.name, this.graphConfig);
+		this._config = { ...e }, this._fx = t?.expression ?? "", this._numExp = t?.numExp ?? new _o(Zl), this._draw(t !== null), this.updateLabel();
 	}
 	computed() {
-		let e = Kl(Gl(this._config, this.name), this._config, this.graphConfig);
-		return e !== this._fx && (this._fx = e ?? "", this._numExp = e === null ? new _o(Jl) : new _o(e)), this._draw(e !== null);
+		let e = Yl(Jl(this._config, this.name), this._config, this.graphConfig);
+		return e !== this._fx && (this._fx = e ?? "", this._numExp = e === null ? new _o(Zl) : new _o(e)), this._draw(e !== null);
 	}
 	valueAt(e) {
 		return this._numExp.evaluate({ x: e });
@@ -7335,7 +7351,7 @@ var Jl = "0/0", Yl = class extends Ac {
 	_makeShape() {
 		return this.clear(), this.shape = this.element.path("M0 0"), this.fill().stroke(), this.element.add(this.shape), this.shape;
 	}
-}, Xl = {
+}, $l = {
 	radius: ({ center: e, radius: t }, n) => {
 		let r = W({ center: e }, "circle").center;
 		return {
@@ -7361,28 +7377,28 @@ var Jl = "0/0", Yl = class extends Ac {
 		return no(t, n, r);
 	}
 };
-function Zl(e, t) {
-	let n = Mc(Xl, e, t, "circle");
+function eu(e, t) {
+	let n = Mc($l, e, t, "circle");
 	if (n !== "radius" && e.center !== void 0) throw new a(`The circle "${t}" has a center, which goes with a radius, and a ${n}`);
 	if (n === "radius" && e.center === void 0) throw new a(`The circle "${t}" has a radius and needs a center`);
 	return n;
 }
-function Ql(e, t, n) {
-	let r = Xl[e];
+function tu(e, t, n) {
+	let r = $l[e];
 	return r(t, n);
 }
 // src/figures/Circle/Circle.ts
-var $l = class extends Ac {
+var nu = class extends Ac {
 	followable = !0;
 	constructor(e, t, n) {
-		Ql(Zl(n, t), n, e.config), super(e, t), this._config = { ...n }, this._center = z(), this._radius = NaN, this._makeShape(), this.computed();
+		tu(eu(n, t), n, e.config), super(e, t), this._config = { ...n }, this._center = z(), this._radius = NaN, this._makeShape(), this.computed();
 	}
 	_config;
 	get config() {
 		return this._config;
 	}
 	set config(e) {
-		let t = Ql(Zl(e, this.name), e, this.graphConfig);
+		let t = tu(eu(e, this.name), e, this.graphConfig);
 		this._config = { ...e }, this._makeShape(), this._place(t), this.updateLabel();
 	}
 	_center;
@@ -7394,7 +7410,7 @@ var $l = class extends Ac {
 		return this._radius;
 	}
 	computed() {
-		return this._place(Ql(Zl(this._config, this.name), this._config, this.graphConfig));
+		return this._place(tu(eu(this._config, this.name), this._config, this.graphConfig));
 	}
 	tikz() {
 		let e = this._tikzShown();
@@ -7461,17 +7477,17 @@ var $l = class extends Ac {
 	_makeShape() {
 		return this.clear(), this.shape = this.element.circle(0), this.fill().stroke(), this.shape;
 	}
-}, eu = {
+}, ru = {
 	x: 1,
 	y: 1
 };
-function tu(e) {
-	return e.step === void 0 ? { ...eu } : {
+function iu(e) {
+	return e.step === void 0 ? { ...ru } : {
 		x: e.step.x,
 		y: e.step.y
 	};
 }
-function nu(e, t) {
+function au(e, t) {
 	let n = e.step, r = (e) => typeof e == "number" && Number.isFinite(e) && e > 0;
 	if (n !== void 0 && (typeof n != "object" || !r(n.x) || !r(n.y))) throw new a(`Invalid step ${JSON.stringify(e.step)} for the grid "${t}": expected {x, y}, two finite numbers greater than 0`);
 	let i = (e) => typeof e == "object" && !!e && Number.isFinite(e.min) && Number.isFinite(e.max) && e.min < e.max;
@@ -7481,21 +7497,21 @@ function nu(e, t) {
 	if (o !== void 0 && !(typeof o == "number" && Number.isInteger(o) && o >= 2 && o <= 20)) throw new a(`Invalid subdivisions ${JSON.stringify(o)} for the grid "${t}": expected an integer from 2 to 20`);
 }
 // src/figures/Grid/Grid.ts
-var ru = 3, iu = .5;
-function au(e) {
+var ou = 3, su = .5;
+function cu(e) {
 	let t = (e) => `${U(e.x)},${U(e.y)}`;
 	return e.length === 0 ? "M 0 0" : e.map(([e, n]) => `M${t(e)} L${t(n)}`).join(" ");
 }
-var ou = class extends Ac {
+var lu = class extends Ac {
 	constructor(e, t, n = {}) {
-		nu(n, t), super(e, t), this.static = !0, this.appearance.stroke.color = "lightgray", this._config = { ...n }, this._lines = [], this._subLines = [], this._makeShape(), this.computed();
+		au(n, t), super(e, t), this.static = !0, this.appearance.stroke.color = "lightgray", this._config = { ...n }, this._lines = [], this._subLines = [], this._makeShape(), this.computed();
 	}
 	_config;
 	get config() {
 		return this._config;
 	}
 	set config(e) {
-		nu(e, this.name), this._config = { ...e }, this.computed();
+		au(e, this.name), this._config = { ...e }, this.computed();
 	}
 	_lines;
 	_subLines;
@@ -7537,21 +7553,21 @@ var ou = class extends Ac {
 		};
 	}
 	_family(e, t) {
-		let { origin: n, width: r, height: i, axis: a } = this.graphConfig, o = tu(this._config), { x: s, y: c } = this._config;
+		let { origin: n, width: r, height: i, axis: a } = this.graphConfig, o = iu(this._config), { x: s, y: c } = this._config;
 		return s !== void 0 && c !== void 0 ? bs({
 			x: s,
 			y: c
-		}, this._view(), o, (e) => Za(e, this.graphConfig), ru, e) : [..._s(n, a.x, {
+		}, this._view(), o, (e) => Za(e, this.graphConfig), ou, e) : [..._s(n, a.x, {
 			x: a.y.x * o.y / e,
 			y: a.y.y * o.y / e
-		}, r, i, ru, t), ..._s(n, a.y, {
+		}, r, i, ou, t), ..._s(n, a.y, {
 			x: a.x.x * o.x / e,
 			y: a.x.y * o.x / e
-		}, r, i, ru, t)];
+		}, r, i, ou, t)];
 	}
 	computed() {
 		let e = this._config.subdivisions ?? 0;
-		return this._lines = this._family(1, 0), this._subLines = e === 0 ? [] : this._family(e, e), this._setDefined(this._lines.length > 0 || this._subLines.length > 0), this.shape.plot(au(this._lines)), this._sub?.plot(au(this._subLines)), this;
+		return this._lines = this._family(1, 0), this._subLines = e === 0 ? [] : this._family(e, e), this._setDefined(this._lines.length > 0 || this._subLines.length > 0), this.shape.plot(cu(this._lines)), this._sub?.plot(cu(this._subLines)), this;
 	}
 	moveLabel() {
 		return this;
@@ -7562,10 +7578,10 @@ var ou = class extends Ac {
 	tikz() {
 		if (this._lines.length === 0 && this._subLines.length === 0 || !this._tikzShown().shape) return "";
 		let e = (e, t) => e.length === 0 ? "" : this._tikzDraw(this._tikzGridPath(t) ?? e.map(([e, t]) => `(${this._tikzCoordinates(e)}) -- (${this._tikzCoordinates(t)})`).join(" ")), t = e(this._subLines, this._config.subdivisions ?? 1);
-		return [t === "" ? "" : `\\begin{scope}[opacity=${iu}]\n${t}\n\\end{scope}`, e(this._lines, 1)].filter((e) => e !== "").join("\n");
+		return [t === "" ? "" : `\\begin{scope}[opacity=${su}]\n${t}\n\\end{scope}`, e(this._lines, 1)].filter((e) => e !== "").join("\n");
 	}
 	_tikzGridPath(e) {
-		let { axis: t } = this.graphConfig, n = tu(this._config), r = Math.abs(t.x.y) <= 1e-9 && Math.abs(t.y.x) <= 1e-9, i = Math.hypot(t.x.x, t.x.y) * n.x / e >= ru && Math.hypot(t.y.x, t.y.y) * n.y / e >= ru;
+		let { axis: t } = this.graphConfig, n = iu(this._config), r = Math.abs(t.x.y) <= 1e-9 && Math.abs(t.y.x) <= 1e-9, i = Math.hypot(t.x.x, t.x.y) * n.x / e >= ou && Math.hypot(t.y.x, t.y.y) * n.y / e >= ou;
 		if (!r || !i) return null;
 		let { x: a, y: o } = this._config, s = a !== void 0 && o !== void 0, c = s ? {
 			x: [a.min, a.max],
@@ -7574,18 +7590,18 @@ var ou = class extends Ac {
 		return `${u} grid[xstep=${l(n.x / e)}, ystep=${l(n.y / e)}] ${d}${s && e === 1 ? ` ${u} rectangle ${d}` : ""}`;
 	}
 	_makeShape() {
-		return this.clear(), this._sub = this.element.group().opacity(iu).path("M 0 0"), this.shape = this.element.path("M 0 0"), this.stroke(), this.element.add(this.shape), this.shape;
+		return this.clear(), this._sub = this.element.group().opacity(su).path("M 0 0"), this.shape = this.element.path("M 0 0"), this.stroke(), this.element.add(this.shape), this.shape;
 	}
 };
 // src/figures/Arc/Arc.constraints.ts
-function su(e, t) {
+function uu(e, t) {
 	if (!Number.isFinite(e)) throw new a(`Invalid ${t} ${e}: expected a finite number`);
 	return e;
 }
-function cu(e, t, n, r) {
+function du(e, t, n, r) {
 	return e === void 0 ? V(t, n) : Ic(e, t, r);
 }
-var lu = {
+var fu = {
 	points: ({ start: e, center: t, end: n, radius: r }, i) => {
 		let a = W({
 			start: e,
@@ -7594,11 +7610,11 @@ var lu = {
 		}, "arc");
 		return {
 			...a,
-			radius: cu(r, a.center, a.start, i)
+			radius: du(r, a.center, a.start, i)
 		};
 	},
 	angles: ({ center: e, radius: t, from: n, to: r }, i) => {
-		let a = W({ center: e }, "arc").center, o = Ic(t, a, i), s = (e) => Ya(a.x, a.y, o, su(e, "angle"));
+		let a = W({ center: e }, "arc").center, o = Ic(t, a, i), s = (e) => Ya(a.x, a.y, o, uu(e, "angle"));
 		return {
 			center: a,
 			start: s(n),
@@ -7610,7 +7626,7 @@ var lu = {
 		let a = W({
 			start: e,
 			center: t
-		}, "arc"), o = su(n, "angle"), s = V(a.center, a.start), c = Ya(a.center.x, a.center.y, s, Xa(a.center, a.start) + o), l = cu(r, a.center, a.start, i);
+		}, "arc"), o = uu(n, "angle"), s = V(a.center, a.start), c = Ya(a.center.x, a.center.y, s, Xa(a.center, a.start) + o), l = du(r, a.center, a.start, i);
 		return o >= 0 ? {
 			center: a.center,
 			start: a.start,
@@ -7624,23 +7640,23 @@ var lu = {
 		};
 	}
 };
-function uu(e, t) {
-	return Mc(lu, e, t, "arc");
+function pu(e, t) {
+	return Mc(fu, e, t, "arc");
 }
-function du(e, t, n) {
-	return Nc(lu, e, t, n);
+function mu(e, t, n) {
+	return Nc(fu, e, t, n);
 }
 // src/figures/Arc/Arc.ts
-var fu = 1e-6, pu = class extends Ac {
+var hu = 1e-6, gu = class extends Ac {
 	constructor(e, t, n) {
-		du(uu(n, t), n, e.config), super(e, t), this._config = { ...n }, this._center = z(), this._start = z(), this._end = z(), this._radius = NaN, this._from = NaN, this._sweep = NaN, this._makeShape(), this.computed();
+		mu(pu(n, t), n, e.config), super(e, t), this._config = { ...n }, this._center = z(), this._start = z(), this._end = z(), this._radius = NaN, this._from = NaN, this._sweep = NaN, this._makeShape(), this.computed();
 	}
 	_config;
 	get config() {
 		return this._config;
 	}
 	set config(e) {
-		let t = du(uu(e, this.name), e, this.graphConfig);
+		let t = mu(pu(e, this.name), e, this.graphConfig);
 		this._config = { ...e }, this._makeShape(), this._place(t), this.updateLabel();
 	}
 	_center;
@@ -7665,7 +7681,7 @@ var fu = 1e-6, pu = class extends Ac {
 		return this._sweep;
 	}
 	get isSquare() {
-		return Math.abs(this._sweep - 90) < fu;
+		return Math.abs(this._sweep - 90) < hu;
 	}
 	labelFields() {
 		let e = () => Math.abs(H(this._radius, this.graphConfig)), t = () => this.graphConfig.measure;
@@ -7692,7 +7708,7 @@ var fu = 1e-6, pu = class extends Ac {
 		}, this;
 	}
 	computed() {
-		return this._place(du(uu(this._config, this.name), this._config, this.graphConfig));
+		return this._place(mu(pu(this._config, this.name), this._config, this.graphConfig));
 	}
 	_place({ center: e, start: t, end: n, radius: r }) {
 		let i = B(e) && B(t) && B(n) && Number.isFinite(r) && r > 0 && V(e, t) > 0 && V(e, n) > 0 ? Xa(e, t) : NaN, a = Number.isNaN(i) ? 0 : is(i, Xa(e, n));
@@ -7802,19 +7818,19 @@ var fu = 1e-6, pu = class extends Ac {
 	}
 };
 // src/figures/Bezier/Bezier.constraints.ts
-function mu(e) {
+function _u(e) {
 	if (e !== void 0 && e !== "horizontal" && e !== "vertical" && !(typeof e == "number" && Number.isFinite(e))) throw new a(`Invalid direction ${JSON.stringify(e)}: expected 'horizontal', 'vertical' or an angle in degrees`);
 }
-function hu(e) {
+function vu(e) {
 	if (e !== void 0 && !(typeof e == "number" && Number.isFinite(e) && e > 0)) throw new a(`Invalid ratio ${JSON.stringify(e)}: expected a finite number greater than 0`);
 }
-var gu = {
+var yu = {
 	through: (e, t) => {
 		let n = t ? 3 : 2;
 		if (!Array.isArray(e) || e.length < n) throw new a(`A ${t ? "closed " : ""}curve needs at least ${n} points, got ${Array.isArray(e) ? e.length : typeof e}`);
 		let r = e.map((e, t) => {
 			let { point: n } = W({ point: e?.point }, `point ${t} of the curve`);
-			return mu(e.direction), hu(e.ratio), {
+			return _u(e.direction), vu(e.ratio), {
 				point: {
 					x: n.x,
 					y: n.y
@@ -7834,17 +7850,17 @@ var gu = {
 		}))) : null;
 	}
 };
-function _u(e, t) {
-	return Mc(gu, e, t, "curve");
+function bu(e, t) {
+	return Mc(yu, e, t, "curve");
 }
-function vu(e, t, n) {
+function xu(e, t, n) {
 	if (t.closed === !0 && e !== "through") throw new a(`The curve "${n}" has control points and cannot be closed: only a curve through points can`);
-	return Nc(gu, e, t, t.closed === !0);
+	return Nc(yu, e, t, t.closed === !0);
 }
 // src/figures/Bezier/Bezier.ts
-var yu = class e extends Ac {
+var Su = class e extends Ac {
 	constructor(t, n, r) {
-		vu(_u(r, n), r, n), super(t, n), this._config = e._copy(r), this._segments = null, this._makeShape(), this.computed();
+		xu(bu(r, n), r, n), super(t, n), this._config = e._copy(r), this._segments = null, this._makeShape(), this.computed();
 	}
 	static _copy(e) {
 		return {
@@ -7858,7 +7874,7 @@ var yu = class e extends Ac {
 		return this._config;
 	}
 	set config(t) {
-		let n = vu(_u(t, this.name), t, this.name);
+		let n = xu(bu(t, this.name), t, this.name);
 		this._config = e._copy(t), this._place(n), this.updateLabel();
 	}
 	_segments;
@@ -7877,7 +7893,7 @@ var yu = class e extends Ac {
 		}, this;
 	}
 	computed() {
-		return this._place(vu(_u(this._config, this.name), this._config, this.name));
+		return this._place(xu(bu(this._config, this.name), this._config, this.name));
 	}
 	_place(e) {
 		return this._segments = e, this._setDefined(e !== null), this.shape.plot(e === null ? "M 0 0" : Xo(e, this._config.closed === !0)), this;
@@ -7908,7 +7924,7 @@ var yu = class e extends Ac {
 	}
 }, K = /* @__PURE__ */ function(e) {
 	return e.POINT = "pt", e.MIDDLE = "mid", e.PROJECTION = "proj", e.INTERSECTION = "inter", e.SYMMETRY = "sym", e.DIRECTION_POINT = "dpt", e.VECTOR_POINT = "vpt", e.EVAL_FX = "eval", e.LINE = "line", e.VECTOR = "vec", e.SEGMENT = "seg", e.RAY = "ray", e.PERPENDICULAR = "perp", e.PARALLEL = "para", e.MEDIATOR = "med", e.TANGENT = "tan", e.BISECTOR = "bis", e.CIRCLE = "circ", e.ARC = "arc", e.PLOT = "plot", e.PARAMETRIC = "parametric", e.BEZIER = "bezier", e.POLYGON = "poly", e.GRID = "grid", e.AXIS = "axis", e.FOLLOW = "follow", e.FILL_BETWEEN = "fill", e.RIEMANN = "riemann", e.PATH = "path", e;
-}({}), bu = [
+}({}), Cu = [
 	"black",
 	"white",
 	"red",
@@ -7931,20 +7947,20 @@ var yu = class e extends Ac {
 	"purple",
 	"teal",
 	"gold"
-], q = (e) => e instanceof G, xu = (e) => e instanceof ol, Su = (e) => e === "*";
-function Cu(e, t) {
+], q = (e) => e instanceof G, wu = (e) => e instanceof ol, Tu = (e) => e === "*";
+function Eu(e, t) {
 	return e.map((e) => typeof e == "string" && Object.hasOwn(t, e) ? t[e] : e);
 }
-function wu(e, t) {
+function Du(e, t) {
 	if (typeof e != "string") return null;
 	let n = e.split(":");
 	if (n.length !== 2) return null;
 	let [r, i] = n.map((e) => Object.hasOwn(t, e) ? t[e] : void 0);
 	return r instanceof G && i instanceof G ? [r, i] : null;
 }
-function Tu(e, t) {
+function Ou(e, t) {
 	if (typeof e == "number" || q(e)) return e;
-	let n = wu(e, t);
+	let n = Du(e, t);
 	return n === null ? null : {
 		point1: n[0],
 		point2: n[1]
@@ -7963,23 +7979,23 @@ function Z(e, t, n, r, i) {
 	(t.length < n || t.length > r) && X(e, i, `${t.length} value${t.length === 1 ? "" : "s"}`);
 }
 // src/figures/Arc/Arc.parser.ts
-var Eu = "arc", Du = "three points (start, center, end) and a radius, a center with a radius and two angles, or a center, a point and an angle and a radius (the radius is always optional but with the two angles), all with a last * for the other arc";
-function Ou(e, t) {
+var ku = "arc", Au = "three points (start, center, end) and a radius, a center with a radius and two angles, or a center, a point and an angle and a radius (the radius is always optional but with the two angles), all with a last * for the other arc";
+function ju(e, t) {
 	if (e.key !== K.ARC.toString()) throw new r(`Cannot build "${e.name}" (${e.key}): the key does not define an arc`);
-	let n = Cu(e.values, t), i = Su(n.at(-1)), a = ku(i ? n.slice(0, -1) : n, t) ?? X(e, Du, n.length === 0 ? "no value" : n.map(J).join(", "));
+	let n = Eu(e.values, t), i = Tu(n.at(-1)), a = Mu(i ? n.slice(0, -1) : n, t) ?? X(e, Au, n.length === 0 ? "no value" : n.map(J).join(", "));
 	return {
-		create: Eu,
+		create: ku,
 		config: i ? {
 			...a,
 			alternative: i
 		} : a
 	};
 }
-function ku(e, t) {
+function Mu(e, t) {
 	let [n, r, i, a] = e;
 	if (!q(n) || e.length < 3 || e.length > 4) return null;
 	if (q(r) && q(i)) {
-		let e = a === void 0 ? void 0 : Tu(a, t);
+		let e = a === void 0 ? void 0 : Ou(a, t);
 		return e === null ? null : { points: {
 			start: n,
 			center: r,
@@ -7994,7 +8010,7 @@ function ku(e, t) {
 		to: a
 	} };
 	if (q(r) && typeof i == "number") {
-		let e = a === void 0 ? void 0 : Tu(a, t);
+		let e = a === void 0 ? void 0 : Ou(a, t);
 		return e === null ? null : { rotation: {
 			center: n,
 			start: r,
@@ -8004,24 +8020,24 @@ function ku(e, t) {
 	}
 	return null;
 }
-var Au = {
+var Nu = {
 	sector: (e) => e.asSector(),
 	square: (e) => e.asSquare()
 };
-Object.keys(Au);
-function ju(e, t, n) {
-	if (!(e instanceof pu)) throw new i(t, `The option "${t}" shapes an arc, and "${e.name}" is not an arc`);
+Object.keys(Nu);
+function Pu(e, t, n) {
+	if (!(e instanceof gu)) throw new i(t, `The option "${t}" shapes an arc, and "${e.name}" is not an arc`);
 	if (n !== !0) throw new i(t, `Invalid value ${J(n)} for the option "${t}" of "${e.name}": it takes no value`);
-	Au[t](e);
+	Nu[t](e);
 }
-var Mu = {
+var Fu = {
 	sector: (e, { value: t }) => {
-		ju(e, "sector", t);
+		Pu(e, "sector", t);
 	},
 	square: (e, { value: t }) => {
-		ju(e, "square", t);
+		Pu(e, "square", t);
 	}
-}, Nu = { [K.ARC]: {
+}, Iu = { [K.ARC]: {
 	name: "arc",
 	description: "Create an arc: the angle BAC from three points, a center with a radius and two angles, or a point turned around a center by an angle (a last * for the other arc)",
 	forms: [
@@ -8036,34 +8052,34 @@ var Mu = {
 		"radius",
 		"area"
 	],
-	build: Ou
-} }, Pu = /^(\d*\.?\d*)pi$/, Fu = /^(\d*\.?\d*)pi(?:\/(\d+))?$/, Iu = 2;
-function Lu(e, t) {
+	build: ju
+} }, Lu = /^(\d*\.?\d*)pi$/, Ru = /^(\d*\.?\d*)pi(?:\/(\d+))?$/, zu = 2;
+function Bu(e, t) {
 	throw new r(`Cannot read the parameter ${e}: expected ${t}`);
 }
-function Ru({ value: e, options: t }, n) {
+function Vu({ value: e, options: t }, n) {
 	let r = `"${n}=${[e, ...t].map((e) => J(e)).join("/")}"`;
-	if (e === !0) return t.length === 0 ? null : Lu(r, `no option after ${n}`);
-	if (typeof e == "number") return (t.length > 0 || !(Number.isFinite(e) && e > 0)) && Lu(r, `a step greater than 0 (${n}=0.5)`), {
+	if (e === !0) return t.length === 0 ? null : Bu(r, `no option after ${n}`);
+	if (typeof e == "number") return (t.length > 0 || !(Number.isFinite(e) && e > 0)) && Bu(r, `a step greater than 0 (${n}=0.5)`), {
 		step: e,
 		pi: !1
 	};
-	let i = typeof e == "string" ? Pu.exec(e) : null;
-	if (i === null) return Lu(r, `a step (${n}=0.5, ${n}=pi, ${n}=2pi/3), got ${J(e)}`);
-	let a = i[1] === "" ? 1 : +i[1], o = t.length === 0 ? Iu : t[0];
-	return (t.length > 1 || typeof o != "number" || !Number.isInteger(o) || o <= 0 || !(a > 0)) && Lu(r, `a multiple of pi over an integer greater than 0 (${n}=pi/3)`), {
+	let i = typeof e == "string" ? Lu.exec(e) : null;
+	if (i === null) return Bu(r, `a step (${n}=0.5, ${n}=pi, ${n}=2pi/3), got ${J(e)}`);
+	let a = i[1] === "" ? 1 : +i[1], o = t.length === 0 ? zu : t[0];
+	return (t.length > 1 || typeof o != "number" || !Number.isInteger(o) || o <= 0 || !(a > 0)) && Bu(r, `a multiple of pi over an integer greater than 0 (${n}=pi/3)`), {
 		step: a * Math.PI / o,
 		pi: !0
 	};
 }
-function zu(e) {
+function Hu(e) {
 	if (typeof e == "number") return Number.isFinite(e) && e > 0 ? {
 		step: e,
 		pi: !1
 	} : null;
-	let t = typeof e == "string" ? Fu.exec(e) : null;
+	let t = typeof e == "string" ? Ru.exec(e) : null;
 	if (t === null) return null;
-	let n = t[1] === "" ? 1 : +t[1], r = t.at(2) === void 0 ? Iu : +t[2];
+	let n = t[1] === "" ? 1 : +t[1], r = t.at(2) === void 0 ? zu : +t[2];
 	return n > 0 && r > 0 ? {
 		step: n * Math.PI / r,
 		pi: !0
@@ -8071,7 +8087,7 @@ function zu(e) {
 }
 var Q = (e) => e !== void 0 && e.value !== !1;
 // src/parser/parser.interval.ts
-function Bu(e, t) {
+function Uu(e, t) {
 	try {
 		let t = new _o(e).evaluate();
 		if (Number.isFinite(t)) return t;
@@ -8080,17 +8096,17 @@ function Bu(e, t) {
 	}
 	throw new r(`Cannot read the parameter "${t}": ${JSON.stringify(e)} is not a number, or an expression of numbers like 2pi`);
 }
-function Vu(e) {
+function Wu(e) {
 	return Ha(e) && !("step" in e) || typeof e == "string" && e.includes(":");
 }
-function Hu(e, t) {
+function Gu(e, t) {
 	let n, i;
 	if (Ha(e) && !("step" in e)) ({min: n, max: i} = e);
-	else if (typeof e == "number" || typeof e == "string" && !e.includes(":")) i = typeof e == "number" ? e : Bu(e, t), n = -i;
+	else if (typeof e == "number" || typeof e == "string" && !e.includes(":")) i = typeof e == "number" ? e : Uu(e, t), n = -i;
 	else if (typeof e == "string") {
 		let [a, o, ...s] = e.split(":");
 		if (s.length > 0 || a.trim() === "" || o.trim() === "") throw new r(`Cannot read the parameter "${t}=${e}": expected min:max, or one number for -n:n`);
-		n = Bu(a, t), i = Bu(o, t);
+		n = Uu(a, t), i = Uu(o, t);
 	} else throw new r(`Cannot read the parameter "${t}=${J(e)}": expected min:max, or one number for -n:n`);
 	if (!(Number.isFinite(n) && Number.isFinite(i) && n < i)) throw new r(`Invalid interval ${J(e)} for the parameter "${t}": expected a minimum lower than the maximum`);
 	return {
@@ -8099,12 +8115,12 @@ function Hu(e, t) {
 	};
 }
 // src/figures/Axis/Axis.parser.ts
-function Uu(e, t) {
+function Ku(e, t) {
 	let { value: n, options: i } = e;
 	if (typeof n != "string" && typeof n != "number" || i.length > 0 || String(n).trim() === "") throw new r(`Cannot read the parameter "${t}=${J(n)}": expected a name (${t}=x)`);
 	return String(n);
 }
-function Wu({ value: e, options: t }, n, i) {
+function qu({ value: e, options: t }, n, i) {
 	if (e === "none" && i && t.length === 0) return "none";
 	if (e === "first" && t.length === 0) return { first: !0 };
 	if (typeof e == "number" && Number.isInteger(e) && e >= 1 && e <= 1e3) {
@@ -8116,12 +8132,12 @@ function Wu({ value: e, options: t }, n, i) {
 	}
 	throw new r(`Cannot read the option "${n}=${[e, ...t].map((e) => J(e)).join("/")}": expected an integer from 1 to ${Jc} (${n}=5), first, 5/first${i ? " or none" : ""}`);
 }
-function Gu(e) {
+function Ju(e) {
 	let t = {}, n = {};
-	for (let [i, a] of Object.entries(e)) if (i === "ticks") t.marks = Wu(a, i, !1);
-	else if (i === "numbers") t.numbers = Wu(a, i, !0);
-	else if (i === "padding") t.padding = Ku(a);
-	else if (i === "range") t.range = qu(a);
+	for (let [i, a] of Object.entries(e)) if (i === "ticks") t.marks = qu(a, i, !1);
+	else if (i === "numbers") t.numbers = qu(a, i, !0);
+	else if (i === "padding") t.padding = Yu(a);
+	else if (i === "range") t.range = Xu(a);
 	else if (i === "name" || i === "side") throw new r(`The option "${i}" is for an axis drawn from the code, not for the axes of the graph: ${i === "name" ? "use axisXname or axisYname" : "the graph puts the numbers inside of the drawing"}`);
 	else n[i] = a;
 	return {
@@ -8129,18 +8145,18 @@ function Gu(e) {
 		style: n
 	};
 }
-function Ku({ value: e, options: t }) {
+function Yu({ value: e, options: t }) {
 	if (typeof e != "number" || t.length > 0 || !(Number.isFinite(e) && e >= 0)) throw new r(`Cannot read the option "padding=${J(e)}": expected a number of 0 or more (pixels)`);
 	return e;
 }
-function qu({ value: e, options: t }) {
+function Xu({ value: e, options: t }) {
 	if (t.length > 0) throw new r(`Cannot read the option "range=${[e, ...t].map((e) => J(e)).join("/")}": expected min:max, or one number for -n:n`);
-	return Hu(e, "range");
+	return Gu(e, "range");
 }
-function Ju(e, t = {}) {
-	let n = Q(e.axis) ? Ru(e.axis, "axis") : null, r = (t, n, r, i, a, o) => {
+function Zu(e, t = {}) {
+	let n = Q(e.axis) ? Vu(e.axis, "axis") : null, r = (t, n, r, i, a, o) => {
 		if (!(Q(e.axis) || Q(t) || Q(r))) return !1;
-		let s = Q(t) ? Ru(t, n) : null, c = s === null ? { ...a } : {
+		let s = Q(t) ? Vu(t, n) : null, c = s === null ? { ...a } : {
 			step: s.step,
 			labels: s.pi ? "pi" : "numbers"
 		}, l = {
@@ -8153,7 +8169,7 @@ function Ju(e, t = {}) {
 		};
 		return Q(r) ? {
 			...l,
-			name: Uu(r, i)
+			name: Ku(r, i)
 		} : l;
 	};
 	return {
@@ -8167,11 +8183,11 @@ function Ju(e, t = {}) {
 		}, t.y)
 	};
 }
-var Yu = "two points (the zero, then the unit), then a step: a number (0.5) or a number of pi (pi/2)";
-function Xu(e, t) {
+var Qu = "two points (the zero, then the unit), then a step: a number (0.5) or a number of pi (pi/2)";
+function $u(e, t) {
 	if (e.key !== K.AXIS.toString()) throw new r(`Cannot build "${e.name}" (${e.key}): the key does not define an axis`);
-	let [n, i, ...a] = Cu(e.values, t);
-	if (!q(n) || !q(i) || a.length > 1) return X(e, Yu, e.values.length === 0 ? "no value" : e.values.map(J).join(", "));
+	let [n, i, ...a] = Eu(e.values, t);
+	if (!q(n) || !q(i) || a.length > 1) return X(e, Qu, e.values.length === 0 ? "no value" : e.values.map(J).join(", "));
 	if (a.length === 0) return {
 		create: "axis",
 		config: {
@@ -8182,8 +8198,8 @@ function Xu(e, t) {
 			ticks: {}
 		}
 	};
-	let o = zu(a[0]);
-	return o === null ? X(e, Yu, J(a[0])) : {
+	let o = Hu(a[0]);
+	return o === null ? X(e, Qu, J(a[0])) : {
 		create: "axis",
 		config: {
 			through: {
@@ -8197,7 +8213,7 @@ function Xu(e, t) {
 		}
 	};
 }
-function Zu(e, t, n) {
+function ed(e, t, n) {
 	if (!(e instanceof gl)) throw new i(t, `The option "${t}" is for an axis, and "${e.name}" is not one`);
 	let { value: o, options: s } = n, c = e.config, l = (n) => new i(t, `Invalid value ${J(o)} for the option "${t}" of "${e.name}": expected ${n}`), u;
 	try {
@@ -8207,7 +8223,7 @@ function Zu(e, t, n) {
 					...c,
 					ticks: {
 						...c.ticks,
-						marks: Wu(n, t, !1)
+						marks: qu(n, t, !1)
 					}
 				};
 				break;
@@ -8216,20 +8232,20 @@ function Zu(e, t, n) {
 					...c,
 					ticks: {
 						...c.ticks,
-						numbers: Wu(n, t, !0)
+						numbers: qu(n, t, !0)
 					}
 				};
 				break;
 			case "padding":
 				u = {
 					...c,
-					padding: Ku(n)
+					padding: Yu(n)
 				};
 				break;
 			case "range":
 				u = {
 					...c,
-					range: qu(n)
+					range: Xu(n)
 				};
 				break;
 			case "name":
@@ -8251,94 +8267,94 @@ function Zu(e, t, n) {
 		throw n instanceof i ? n : n instanceof a || n instanceof r ? new i(t, `Invalid option "${t}" of "${e.name}": ${n.message}`, { cause: n }) : n;
 	}
 }
-var Qu = (e) => (t, n) => {
-	Zu(t, e, n);
-}, $u = {
-	ticks: Qu("ticks"),
-	numbers: Qu("numbers"),
-	name: Qu("name"),
-	side: Qu("side"),
-	padding: Qu("padding"),
-	range: Qu("range")
-}, ed = { [K.AXIS]: {
+var td = (e) => (t, n) => {
+	ed(t, e, n);
+}, nd = {
+	ticks: td("ticks"),
+	numbers: td("numbers"),
+	name: td("name"),
+	side: td("side"),
+	padding: td("padding"),
+	range: td("range")
+}, rd = { [K.AXIS]: {
 	name: "axis",
 	description: "Draw a graduated line through two points: the first is its zero, the second its unit. It does not change the axes of the graph",
 	forms: ["a=axis <point>,<point>[,<step>]"],
 	summary: "a=axis A,B — graduated line",
-	build: Xu
-} }, td = "bezier", nd = "two points or more, each one a name that can be followed by a direction (H, V, S, or an angle in degrees) and a ratio (A/H/0.4, B/45/0.3), or, with a last *, 3 or 4 control points";
-function rd(e, t) {
+	build: $u
+} }, id = "bezier", ad = "two points or more, each one a name that can be followed by a direction (H, V, S, or an angle in degrees) and a ratio (A/H/0.4, B/45/0.3), or, with a last *, 3 or 4 control points";
+function od(e, t) {
 	let n = Object.hasOwn(t, e) ? t[e] : void 0;
 	return n instanceof G ? n : null;
 }
-function id(e) {
+function sd(e) {
 	let t = +e;
 	return e.trim() === "" || !Number.isFinite(t) ? null : t;
 }
-function ad(e) {
+function cd(e) {
 	switch (e) {
 		case "H": return "horizontal";
 		case "V": return "vertical";
 		case "S": return;
-		default: return id(e);
+		default: return sd(e);
 	}
 }
-function od(e, t, n) {
-	let r = typeof e == "string" ? e.split("/") : [], i = r.at(0), a = r.at(1), o = r.at(2), s = i === void 0 ? null : rd(i, n);
-	if (s === null) return X(t, nd, `${J(e)} as a point`);
-	let c = a === void 0 ? void 0 : ad(a), l = o === void 0 ? void 0 : id(o);
-	return c === null || r.length > 3 ? X(t, nd, `${J(e)} (the direction must be H, V, S or an angle in degrees)`) : l === null || l !== void 0 && l <= 0 ? X(t, nd, `${J(e)} (the ratio must be a number greater than 0)`) : {
+function ld(e, t, n) {
+	let r = typeof e == "string" ? e.split("/") : [], i = r.at(0), a = r.at(1), o = r.at(2), s = i === void 0 ? null : od(i, n);
+	if (s === null) return X(t, ad, `${J(e)} as a point`);
+	let c = a === void 0 ? void 0 : cd(a), l = o === void 0 ? void 0 : sd(o);
+	return c === null || r.length > 3 ? X(t, ad, `${J(e)} (the direction must be H, V, S or an angle in degrees)`) : l === null || l !== void 0 && l <= 0 ? X(t, ad, `${J(e)} (the ratio must be a number greater than 0)`) : {
 		point: s,
 		...c === void 0 ? {} : { direction: c },
 		...l === void 0 ? {} : { ratio: l }
 	};
 }
-function sd(e, t) {
+function ud(e, t) {
 	if (e.key !== K.BEZIER.toString()) throw new r(`Cannot build "${e.name}" (${e.key}): the key does not define a Bézier curve`);
-	let n = Su(e.values.at(-1)), i = n ? e.values.slice(0, -1) : e.values;
+	let n = Tu(e.values.at(-1)), i = n ? e.values.slice(0, -1) : e.values;
 	if (n) {
-		let n = i.map((e) => typeof e == "string" ? rd(e, t) : null);
-		return n.length !== 3 && n.length !== 4 || n.some((e) => e === null) ? X(e, nd, i.length === 0 ? "no value" : i.map(J).join(", ")) : {
-			create: td,
+		let n = i.map((e) => typeof e == "string" ? od(e, t) : null);
+		return n.length !== 3 && n.length !== 4 || n.some((e) => e === null) ? X(e, ad, i.length === 0 ? "no value" : i.map(J).join(", ")) : {
+			create: id,
 			config: { controls: n }
 		};
 	}
-	return i.length < 2 ? X(e, nd, i.length === 0 ? "no value" : J(i[0])) : {
-		create: td,
-		config: { through: i.map((n) => od(n, e, t)) }
+	return i.length < 2 ? X(e, ad, i.length === 0 ? "no value" : J(i[0])) : {
+		create: id,
+		config: { through: i.map((n) => ld(n, e, t)) }
 	};
 }
-var cd = { close: (e) => e.asClosed() };
-Object.keys(cd);
-function ld(e, t, n) {
-	if (!(e instanceof yu)) throw new i(t, `The option "${t}" shapes a Bézier curve, and "${e.name}" is not one`);
+var dd = { close: (e) => e.asClosed() };
+Object.keys(dd);
+function fd(e, t, n) {
+	if (!(e instanceof Su)) throw new i(t, `The option "${t}" shapes a Bézier curve, and "${e.name}" is not one`);
 	if (n !== !0) throw new i(t, `Invalid value ${J(n)} for the option "${t}" of "${e.name}": it takes no value`);
 	try {
-		cd[t](e);
+		dd[t](e);
 	} catch (n) {
 		throw n instanceof a ? new i(t, `Invalid option "${t}" of "${e.name}": ${n.message}`, { cause: n }) : n;
 	}
 }
-var ud = { close: (e, { value: t }) => {
-	ld(e, "close", t);
-} }, dd = { [K.BEZIER]: {
+var pd = { close: (e, { value: t }) => {
+	fd(e, "close", t);
+} }, md = { [K.BEZIER]: {
 	name: "bezier",
 	description: "Create a Bézier curve: the smooth curve through points (a direction and a ratio at each one), or, with a last *, the curve pulled by 3 or 4 control points",
 	forms: ["b=bezier <point>[/<H|V|S|angle>[/<ratio>]],...", "b=bezier <point>,<point>,<point>[,<point>],*"],
 	summary: "b=bezier A,B,C — curve through points",
-	build: sd
-} }, fd = "circle", pd = "a center and a radius (a number, a point or A:B), a center and a line or an axis, three points (with a last * for the inscribed circle), or A:B for a diameter";
-function md(e, t) {
+	build: ud
+} }, hd = "circle", gd = "a center and a radius (a number, a point or A:B), a center and a line or an axis, three points (with a last * for the inscribed circle), or A:B for a diameter";
+function _d(e, t) {
 	if (e.key !== K.CIRCLE.toString()) throw new r(`Cannot build "${e.name}" (${e.key}): the key does not define a circle`);
 	return {
-		create: fd,
-		config: hd(Cu(e.values, t), e, t)
+		create: hd,
+		config: vd(Eu(e.values, t), e, t)
 	};
 }
-function hd(e, t, n) {
-	let r = () => X(t, pd, e.length === 0 ? "no value" : e.map(J).join(", "));
+function vd(e, t, n) {
+	let r = () => X(t, gd, e.length === 0 ? "no value" : e.map(J).join(", "));
 	if (e.length === 1) {
-		let t = wu(e[0], n);
+		let t = Du(e[0], n);
 		return t === null ? r() : { diameter: {
 			A: t[0],
 			B: t[1]
@@ -8347,11 +8363,11 @@ function hd(e, t, n) {
 	if (e.length === 2) {
 		let [t, i] = e;
 		if (!q(t)) return r();
-		if (xu(i)) return { tangent: {
+		if (wu(i)) return { tangent: {
 			center: t,
 			to: i
 		} };
-		let a = Tu(i, n);
+		let a = Ou(i, n);
 		return a === null ? r() : {
 			center: t,
 			radius: a
@@ -8365,7 +8381,7 @@ function hd(e, t, n) {
 				B: n,
 				C: r
 			} };
-			if (Su(i)) return { inscribed: {
+			if (Tu(i)) return { inscribed: {
 				A: t,
 				B: n,
 				C: r
@@ -8374,7 +8390,7 @@ function hd(e, t, n) {
 	}
 	return r();
 }
-var gd = { [K.CIRCLE]: {
+var yd = { [K.CIRCLE]: {
 	name: "circle",
 	description: "Create a circle: from its center and its radius (a number, a point or A:B), from three points (a last * for the inscribed circle), from a center and a tangent line, or from a diameter A:B",
 	forms: [
@@ -8389,10 +8405,10 @@ var gd = { [K.CIRCLE]: {
 		"perimeter",
 		"area"
 	],
-	build: md
+	build: _d
 } };
 // src/parser/parser.curve.ts
-function _d(e, t, n) {
+function bd(e, t, n) {
 	try {
 		let t = new _o(e).evaluate();
 		if (Number.isFinite(t)) return t;
@@ -8401,16 +8417,16 @@ function _d(e, t, n) {
 	}
 	return X(t, n, `${JSON.stringify(e)} as a bound (a number, or an expression of numbers like 2pi)`);
 }
-function vd(e, t, n) {
+function xd(e, t, n) {
 	let r = e.split(":");
 	if (r.length !== 2 || r.some((e) => e.trim() === "")) return X(t, n, `${JSON.stringify(e)} (expected min:max)`);
-	let i = _d(r[0], t, n), a = _d(r[1], t, n);
+	let i = bd(r[0], t, n), a = bd(r[1], t, n);
 	return i > a ? X(t, n, `${JSON.stringify(e)}, whose minimum is greater than its maximum`) : {
 		min: i,
 		max: a
 	};
 }
-function yd(e) {
+function Sd(e) {
 	if (typeof e == "number") return {
 		text: String(e),
 		samples: []
@@ -8425,7 +8441,7 @@ function yd(e) {
 		samples: [e.slice(t)]
 	};
 }
-function bd(e, t, n, r) {
+function Cd(e, t, n, r) {
 	let i = {}, a = [];
 	for (let o of e) {
 		let e = o;
@@ -8433,7 +8449,7 @@ function bd(e, t, n, r) {
 			let n = o.lastIndexOf("@"), a = +o.slice(n + 1);
 			(i.samples !== void 0 || o.slice(n + 1).trim() === "" || !Number.isFinite(a) || a <= 0) && X(t, r, `${J(o)} as the samples (a single @ and a number greater than 0)`), i.samples = a, e = o.slice(0, n);
 		}
-		e !== "" && (a.length >= n && X(t, r, `${J(o)} after the ${n === 1 ? "domain" : "domain and the image"}`), typeof e == "string" ? a.push(vd(e, t, r)) : Ha(e) ? a.push({
+		e !== "" && (a.length >= n && X(t, r, `${J(o)} after the ${n === 1 ? "domain" : "domain and the image"}`), typeof e == "string" ? a.push(xd(e, t, r)) : Ha(e) ? a.push({
 			min: e.min,
 			max: e.max
 		}) : X(t, r, J(o)));
@@ -8441,76 +8457,76 @@ function bd(e, t, n, r) {
 	return a.length > 0 && (i.domain = a[0]), a.length > 1 && (i.image = a[1]), i;
 }
 // src/figures/FillBetween/FillBetween.parser.ts
-var xd = "fillbetween", Sd = "a plot, then another plot (or nothing for the x axis), then a domain (min:max, like 0:2pi)";
-function Cd(e, t) {
+var wd = "fillbetween", Td = "a plot, then another plot (or nothing for the x axis), then a domain (min:max, like 0:2pi)";
+function Ed(e, t) {
 	if (e.key !== K.FILL_BETWEEN.toString()) throw new r(`Cannot build "${e.name}" (${e.key}): the key does not define an area between plots`);
-	let [n, ...i] = Cu(e.values, t);
-	if (!(n instanceof Yl)) return X(e, Sd, e.values.length === 0 ? "no value" : `${J(e.values[0])}, which is not a plot`);
+	let [n, ...i] = Eu(e.values, t);
+	if (!(n instanceof Ql)) return X(e, Td, e.values.length === 0 ? "no value" : `${J(e.values[0])}, which is not a plot`);
 	let a = i.at(0), o = a !== void 0 && !(typeof a == "string" || Ha(a));
-	if (o && !(a instanceof Yl)) return X(e, Sd, `${J(a)}, which is not a plot`);
+	if (o && !(a instanceof Ql)) return X(e, Td, `${J(a)}, which is not a plot`);
 	let s = e.values.slice(o ? 2 : 1);
-	if (s.length > 1) return X(e, Sd, e.values.map(J).join(", "));
-	let c = bd(s, e, 1, Sd);
+	if (s.length > 1) return X(e, Td, e.values.map(J).join(", "));
+	let c = Cd(s, e, 1, Td);
 	return c.samples === void 0 ? {
-		create: xd,
+		create: wd,
 		config: {
 			plot: n,
 			...o ? { other: a } : {},
 			...c.domain === void 0 ? {} : { domain: c.domain }
 		}
-	} : X(e, Sd, J(s[0]));
+	} : X(e, Td, J(s[0]));
 }
-var wd = { [K.FILL_BETWEEN]: {
+var Dd = { [K.FILL_BETWEEN]: {
 	name: "fillbetween",
 	description: "Fill the area between two plots, or between a plot and the x axis",
 	forms: ["z=fill <plot>[,<plot>][,<domain>]"],
 	summary: "z=fill f,g — area between curves",
 	labelFields: ["area"],
-	build: Cd
-} }, Td = "follow", Ed = "a line, a circle or a curve to follow, then a point where to start, and a last * to draw the tangent";
-function Dd(e, t) {
+	build: Ed
+} }, Od = "follow", kd = "a line, a circle or a curve to follow, then a point where to start, and a last * to draw the tangent";
+function Ad(e, t) {
 	if (e.key !== K.FOLLOW.toString()) throw new r(`Cannot build "${e.name}" (${e.key}): the key does not define a point that follows a figure`);
-	let n = Cu(e.values, t), i = Su(n.at(-1)), a = i ? n.slice(0, -1) : n, o = a.at(0), s = a.at(1);
-	return o instanceof Ac ? o.followable ? s !== void 0 && !(s instanceof G) || a.length > 2 ? X(e, Ed, n.map(J).join(", ")) : {
-		create: Td,
+	let n = Eu(e.values, t), i = Tu(n.at(-1)), a = i ? n.slice(0, -1) : n, o = a.at(0), s = a.at(1);
+	return o instanceof Ac ? o.followable ? s !== void 0 && !(s instanceof G) || a.length > 2 ? X(e, kd, n.map(J).join(", ")) : {
+		create: Od,
 		config: {
 			follow: o,
 			...s === void 0 ? {} : { at: s },
 			...i ? { tangent: i } : {}
 		}
-	} : X(e, Ed, `${J(o)}, which cannot be followed`) : X(e, Ed, n.length === 0 ? "no value" : J(n[0]));
+	} : X(e, kd, `${J(o)}, which cannot be followed`) : X(e, kd, n.length === 0 ? "no value" : J(n[0]));
 }
-var Od = { [K.FOLLOW]: {
+var jd = { [K.FOLLOW]: {
 	name: "follow",
 	description: "Create a point that follows the mouse along a line, a circle or a curve (a last * draws the tangent too)",
 	forms: ["t=follow <figure>[,<point>][,*]"],
 	summary: "F=follow f — point on a curve",
-	build: Dd
+	build: Ad
 } };
 // src/figures/Grid/Grid.parser.ts
-function kd(e, t, n) {
+function Md(e, t, n) {
 	if (!Q(e) && !Q(t) && !Q(n)) return null;
-	let r = Q(e) ? Ru(e, "grid") : null, i = Q(t) ? Ru(t, "gridX") : null, a = Q(n) ? Ru(n, "gridY") : null, o = {
+	let r = Q(e) ? Vu(e, "grid") : null, i = Q(t) ? Vu(t, "gridX") : null, a = Q(n) ? Vu(n, "gridY") : null, o = {
 		x: i?.step ?? r?.step ?? 1,
 		y: a?.step ?? (r === null || r.pi ? 1 : r.step)
 	};
 	return o.x === 1 && o.y === 1 ? {} : { step: o };
 }
-var Ad = "an x interval and a y interval (0:5,0:3, a bound can be 2pi) for a part of the drawing, then a step: a number (0.5), a number of pi (pi/3) or a step for each axis (0.5;1)";
-function jd(e) {
+var Nd = "an x interval and a y interval (0:5,0:3, a bound can be 2pi) for a part of the drawing, then a step: a number (0.5), a number of pi (pi/3) or a step for each axis (0.5;1)";
+function Pd(e) {
 	if (e.key !== K.GRID.toString()) throw new r(`Cannot build "${e.name}" (${e.key}): the key does not define a grid`);
-	let t = e.values.length === 1 && e.values[0] === !0 ? [] : e.values, [n, i, ...a] = t, o = Vu(n);
-	if (o && !Vu(i)) return X(e, Ad, `${J(n)} alone`);
+	let t = e.values.length === 1 && e.values[0] === !0 ? [] : e.values, [n, i, ...a] = t, o = Wu(n);
+	if (o && !Wu(i)) return X(e, Nd, `${J(n)} alone`);
 	let s = o ? a : t, c = {};
-	if (s.length > 1) return X(e, Ad, t.map(J).join(", "));
+	if (s.length > 1) return X(e, Nd, t.map(J).join(", "));
 	if (o) try {
-		c.x = Hu(n, "x"), c.y = Hu(i, "y");
+		c.x = Gu(n, "x"), c.y = Gu(i, "y");
 	} catch (t) {
 		throw t instanceof r ? new r(`Cannot build "${e.name}" (${e.key}): ${t.message}`, { cause: t }) : t;
 	}
 	if (s.length === 1) {
-		let [t] = s, n = Va(t) && !Vu(t) ? Md(t) : zu(t);
-		if (n === null) return X(e, Ad, J(t));
+		let [t] = s, n = Va(t) && !Wu(t) ? Fd(t) : Hu(t);
+		if (n === null) return X(e, Nd, J(t));
 		c.step = "x" in n ? n : {
 			x: n.step,
 			y: n.pi ? 1 : n.step
@@ -8521,14 +8537,14 @@ function jd(e) {
 		config: c
 	};
 }
-function Md(e) {
+function Fd(e) {
 	return Number.isFinite(e.x) && Number.isFinite(e.y) && e.x > 0 && e.y > 0 ? {
 		x: e.x,
 		y: e.y
 	} : null;
 }
-function Nd(e, t, n) {
-	if (!(e instanceof ou)) throw new i(t, `The option "${t}" cuts the steps of a grid, and "${e.name}" is not one`);
+function Id(e, t, n) {
+	if (!(e instanceof lu)) throw new i(t, `The option "${t}" cuts the steps of a grid, and "${e.name}" is not one`);
 	let r = n === !0 ? 2 : n;
 	try {
 		e.config = {
@@ -8539,15 +8555,15 @@ function Nd(e, t, n) {
 		throw r instanceof a ? new i(t, `Invalid value ${J(n)} for the option "${t}" of "${e.name}": expected an integer from 2 to 20`, { cause: r }) : r;
 	}
 }
-var Pd = { subgrid: (e, { value: t }) => {
-	Nd(e, "subgrid", t);
-} }, Fd = { [K.GRID]: {
+var Ld = { subgrid: (e, { value: t }) => {
+	Id(e, "subgrid", t);
+} }, Rd = { [K.GRID]: {
 	name: "grid",
 	description: "Draw a grid: on the whole drawing, or on a part of it. It does not change the grid of the graph",
 	forms: ["g=grid [<x interval>,<y interval>][,<step>]"],
 	summary: "g=grid — grid",
-	build: jd
-} }, Id = "line", Ld = (e) => (t, n) => {
+	build: Pd
+} }, zd = "line", Bd = (e) => (t, n) => {
 	Z(n, t, 2, 2, "two points");
 	let [r, i] = t;
 	return q(r) && q(i) ? {
@@ -8558,7 +8574,7 @@ var Pd = { subgrid: (e, { value: t }) => {
 		shape: e
 	} : X(n, "two points", `${J(r)} and ${J(i)}`);
 };
-function Rd(e, t) {
+function Vd(e, t) {
 	try {
 		return Ba(e);
 	} catch (n) {
@@ -8566,18 +8582,18 @@ function Rd(e, t) {
 		throw n;
 	}
 }
-var zd = (e) => (t, n) => {
+var Hd = (e) => (t, n) => {
 	let r = "a line or an axis, and a point";
 	Z(n, t, 2, 2, r);
 	let [i, a] = t;
-	return xu(i) && q(a) ? e === "perpendicular" ? { perpendicular: {
+	return wu(i) && q(a) ? e === "perpendicular" ? { perpendicular: {
 		to: i,
 		through: a
 	} } : { parallel: {
 		to: i,
 		through: a
 	} } : X(n, r, `${J(i)} and ${J(a)}`);
-}, Bd = {
+}, Ud = {
 	[K.LINE]: (e, t) => {
 		let n = "an equation, two points, or a point and a slope";
 		if (Z(t, e, 1, 2, n), e.length === 1) {
@@ -8594,16 +8610,16 @@ var zd = (e) => (t, n) => {
 		} : q(r) && (typeof i == "number" || typeof i == "string") ? {
 			slope: {
 				A: r,
-				slope: Rd(i, t)
+				slope: Vd(i, t)
 			},
 			shape: "line"
 		} : X(t, n, `${J(r)} and ${J(i)}`);
 	},
-	[K.SEGMENT]: Ld("segment"),
-	[K.VECTOR]: Ld("vector"),
-	[K.RAY]: Ld("ray"),
-	[K.PERPENDICULAR]: zd("perpendicular"),
-	[K.PARALLEL]: zd("parallel"),
+	[K.SEGMENT]: Bd("segment"),
+	[K.VECTOR]: Bd("vector"),
+	[K.RAY]: Bd("ray"),
+	[K.PERPENDICULAR]: Hd("perpendicular"),
+	[K.PARALLEL]: Hd("parallel"),
 	[K.MEDIATOR]: (e, t) => {
 		Z(t, e, 2, 2, "two points");
 		let [n, r] = e;
@@ -8616,7 +8632,7 @@ var zd = (e) => (t, n) => {
 		let n = "a curve and a point";
 		Z(t, e, 2, 2, n);
 		let [r, i] = e;
-		return r instanceof Yl && q(i) ? { tangent: {
+		return r instanceof Ql && q(i) ? { tangent: {
 			f: r,
 			A: i
 		} } : X(t, n, `${J(r)} and ${J(i)}`);
@@ -8625,7 +8641,7 @@ var zd = (e) => (t, n) => {
 		let n = "two lines or axes (with a last * for the other bisector), or three points (the vertex of the angle is the second)";
 		Z(t, e, 2, 3, n);
 		let [r, i] = e, a = e.at(2);
-		return xu(r) && xu(i) && (a === void 0 || Su(a)) ? a === void 0 ? { bisector: {
+		return wu(r) && wu(i) && (a === void 0 || Tu(a)) ? a === void 0 ? { bisector: {
 			d1: r,
 			d2: i
 		} } : { bisector: {
@@ -8639,15 +8655,15 @@ var zd = (e) => (t, n) => {
 		} } : X(t, n, e.map(J).join(", "));
 	}
 };
-function Vd(e, t) {
-	let n = Object.hasOwn(Bd, e.key) ? Bd[e.key] : void 0;
+function Wd(e, t) {
+	let n = Object.hasOwn(Ud, e.key) ? Ud[e.key] : void 0;
 	if (n === void 0) throw new r(`Cannot build "${e.name}" (${e.key}): the key does not define a line`);
 	return {
-		create: Id,
-		config: n(Cu(e.values, t), e)
+		create: zd,
+		config: n(Eu(e.values, t), e)
 	};
 }
-var Hd = Object.values(K), $ = "[A-Z][0-9]*", Ud = [
+var Gd = Object.values(K), $ = "[A-Z][0-9]*", Kd = [
 	[RegExp(`^v(${$})(${$})$`), K.VECTOR],
 	[RegExp(`^\\[(${$})(${$})\\]$`), K.SEGMENT],
 	[RegExp(`^(${$})(${$})\\.$`), K.SEGMENT],
@@ -8656,18 +8672,18 @@ var Hd = Object.values(K), $ = "[A-Z][0-9]*", Ud = [
 	[RegExp(`^\\[(${$})(${$})$`), K.RAY],
 	[RegExp(`^(${$})(${$})$`), K.LINE]
 ];
-function Wd(e) {
+function qd(e) {
 	let t = e.indexOf("=");
 	if (t <= 0 || e.includes(" ")) return null;
 	let n = e.slice(0, t), i = e.slice(t + 1);
-	if (Hd.includes(i)) return null;
-	for (let [e, t] of Ud) {
+	if (Gd.includes(i)) return null;
+	for (let [e, t] of Kd) {
 		let r = e.exec(i);
 		if (r !== null) return `${n}=${t} ${r[1]},${r[2]}`;
 	}
 	throw new r(`Cannot read "${e}" as a line: expected two points, like AB, AB., [AB], AB[, [AB[, [AB or vAB, after the "="`);
 }
-var Gd = {
+var Jd = {
 	[K.LINE]: {
 		name: "line",
 		description: "Create a line through two points, through a point with a slope, or from its equation",
@@ -8679,7 +8695,7 @@ var Gd = {
 		],
 		summary: "d=line A,B — line (or d=AB)",
 		labelFields: ["slope"],
-		build: Vd
+		build: Wd
 	},
 	[K.VECTOR]: {
 		name: "vector",
@@ -8687,7 +8703,7 @@ var Gd = {
 		forms: ["v=vAB", "v=vec <point>,<point>"],
 		summary: "v=vec A,B — vector (or v=vAB)",
 		labelFields: ["slope"],
-		build: Vd
+		build: Wd
 	},
 	[K.SEGMENT]: {
 		name: "segment",
@@ -8699,7 +8715,7 @@ var Gd = {
 		],
 		summary: "s=seg A,B — segment (or s=AB.)",
 		labelFields: ["length", "slope"],
-		build: Vd
+		build: Wd
 	},
 	[K.RAY]: {
 		name: "ray (half line)",
@@ -8712,7 +8728,7 @@ var Gd = {
 		],
 		summary: "r=ray A,B — ray (or r=AB[)",
 		labelFields: ["slope"],
-		build: Vd
+		build: Wd
 	},
 	[K.PERPENDICULAR]: {
 		name: "perpendicular",
@@ -8720,7 +8736,7 @@ var Gd = {
 		forms: ["d=perp <line>,<point>"],
 		summary: "p=perp d,A — perpendicular",
 		labelFields: ["slope"],
-		build: Vd
+		build: Wd
 	},
 	[K.PARALLEL]: {
 		name: "parallel",
@@ -8728,7 +8744,7 @@ var Gd = {
 		forms: ["d=para <line>,<point>"],
 		summary: "p=para d,A — parallel",
 		labelFields: ["slope"],
-		build: Vd
+		build: Wd
 	},
 	[K.MEDIATOR]: {
 		name: "mediator",
@@ -8736,7 +8752,7 @@ var Gd = {
 		forms: ["d=med <point>,<point>"],
 		summary: "m=med A,B — perpendicular bisector",
 		labelFields: ["slope"],
-		build: Vd
+		build: Wd
 	},
 	[K.TANGENT]: {
 		name: "tangent",
@@ -8744,7 +8760,7 @@ var Gd = {
 		forms: ["d=tan <circle|plot>,<point>"],
 		summary: "t=tan f,A — tangent",
 		labelFields: ["slope"],
-		build: Vd
+		build: Wd
 	},
 	[K.BISECTOR]: {
 		name: "bisector",
@@ -8752,20 +8768,20 @@ var Gd = {
 		forms: ["d=bis <point>,<point>,<point>", "d=bis <line>,<line>[,*]"],
 		summary: "b=bis d1,d2 — angle bisector",
 		labelFields: ["slope"],
-		build: Vd
+		build: Wd
 	}
-}, Kd = "parametric", qd = "two functions of t (x then y), then a domain (min:max, like 0:2pi) and a number of samples per unit (@50)";
-function Jd(e, t) {
+}, Yd = "parametric", Xd = "two functions of t (x then y), then a domain (min:max, like 0:2pi) and a number of samples per unit (@50)";
+function Zd(e, t) {
 	if (e.key !== K.PARAMETRIC.toString()) throw new r(`Cannot build "${e.name}" (${e.key}): the key does not define a parametric curve`);
-	let n = yd(e.values.at(0)), i = yd(e.values.at(1));
-	if (n === null || i === null || n.text.trim() === "" || i.text.trim() === "") return X(e, qd, e.values.length === 0 ? "no value" : e.values.map(J).join(", "));
-	let { domain: a, samples: o } = bd([
+	let n = Sd(e.values.at(0)), i = Sd(e.values.at(1));
+	if (n === null || i === null || n.text.trim() === "" || i.text.trim() === "") return X(e, Xd, e.values.length === 0 ? "no value" : e.values.map(J).join(", "));
+	let { domain: a, samples: o } = Cd([
 		...n.samples,
 		...i.samples,
 		...e.values.slice(2)
-	], e, 1, qd);
+	], e, 1, Xd);
 	return {
-		create: Kd,
+		create: Yd,
 		config: {
 			expressions: {
 				x: n.text,
@@ -8776,24 +8792,24 @@ function Jd(e, t) {
 		}
 	};
 }
-var Yd = /^([a-z][0-9]*)\(t\)/;
-function Xd(e) {
-	let t = Yd.exec(e);
+var Qd = /^([a-z][0-9]*)\(t\)/;
+function $d(e) {
+	let t = Qd.exec(e);
 	if (t === null) return null;
 	let n = e.slice(t[0].length);
 	if (!n.startsWith("=") || n.slice(1).trim() === "") throw new r(`Cannot read the curve "${e}": expected ${t[1]}(t)=<function of x>,<function of y>`);
 	return `${t[1]}=${K.PARAMETRIC} ${n.slice(1)}`;
 }
-var Zd = { [K.PARAMETRIC]: {
+var ef = { [K.PARAMETRIC]: {
 	name: "parametric",
 	description: "Plot a parametric function",
 	forms: ["f(t)=<function_x>,<function_y>[,<domain>][@<number>]", "f=parametric <function_x>,<function_y>[,<domain>][,@<number>]"],
 	summary: "f=parametric x(t),y(t) — parametric curve",
-	build: Jd
-} }, Qd = "the data of an SVG path in units of the coordinate system, like M 0,0 L 2,1 Q 3,3 4,0 Z";
-function $d(e) {
+	build: Zd
+} }, tf = "the data of an SVG path in units of the coordinate system, like M 0,0 L 2,1 Q 3,3 4,0 Z";
+function nf(e) {
 	if (e.key !== K.PATH.toString()) throw new r(`Cannot build "${e.name}" (${e.key}): the key does not define a path`);
-	if (e.values.length === 0 || e.values.some((e) => typeof e != "string" && typeof e != "number")) return X(e, Qd, e.values.length === 0 ? "no value" : e.values.map(J).join(", "));
+	if (e.values.length === 0 || e.values.some((e) => typeof e != "string" && typeof e != "number")) return X(e, tf, e.values.length === 0 ? "no value" : e.values.map(J).join(", "));
 	let t = e.values.map(String).join(",");
 	try {
 		Ps(t);
@@ -8808,45 +8824,45 @@ function $d(e) {
 		}
 	};
 }
-var ef = { [K.PATH]: {
+var rf = { [K.PATH]: {
 	name: "path",
 	description: "Draw an SVG path, written in units of the coordinate system",
 	forms: ["p=path M 0,0 L 2,1 Q 3,3 4,0 Z"],
 	summary: "p=path d — SVG path",
-	build: $d
-} }, tf = "plot", nf = "an expression or three points (the parabola through them), then a number of samples per unit (@50), a domain (min:max, like -2pi:2pi) and an image (min:max)";
-function rf(e, t) {
+	build: nf
+} }, af = "plot", of = "an expression or three points (the parabola through them), then a number of samples per unit (@50), a domain (min:max, like -2pi:2pi) and an image (min:max)";
+function sf(e, t) {
 	if (e.key !== K.PLOT.toString()) throw new r(`Cannot build "${e.name}" (${e.key}): the key does not define a plot`);
-	let [n, i, a] = Cu(e.values.slice(0, 3), t);
+	let [n, i, a] = Eu(e.values.slice(0, 3), t);
 	if (q(n) && q(i) && q(a)) return {
-		create: tf,
+		create: af,
 		config: {
 			quadratic: {
 				A: n,
 				B: i,
 				C: a
 			},
-			...bd(e.values.slice(3), e, 2, nf)
+			...Cd(e.values.slice(3), e, 2, of)
 		}
 	};
-	let o = yd(e.values.at(0));
-	return o === null || o.text.trim() === "" ? X(e, nf, e.values.length === 0 ? "no value" : J(e.values[0])) : {
-		create: tf,
+	let o = Sd(e.values.at(0));
+	return o === null || o.text.trim() === "" ? X(e, of, e.values.length === 0 ? "no value" : J(e.values[0])) : {
+		create: af,
 		config: {
 			expression: o.text,
-			...bd([...o.samples, ...e.values.slice(1)], e, 2, nf)
+			...Cd([...o.samples, ...e.values.slice(1)], e, 2, of)
 		}
 	};
 }
-var af = /^([a-z][0-9]*)\(x\)/;
-function of(e) {
-	let t = af.exec(e);
+var cf = /^([a-z][0-9]*)\(x\)/;
+function lf(e) {
+	let t = cf.exec(e);
 	if (t === null) return null;
 	let n = e.slice(t[0].length);
 	if (!n.startsWith("=") || n.slice(1).trim() === "") throw new r(`Cannot read the plot "${e}": expected ${t[1]}(x)=<function>`);
 	return `${t[1]}=${K.PLOT} ${n.slice(1)}`;
 }
-var sf = { [K.PLOT]: {
+var uf = { [K.PLOT]: {
 	name: "plot",
 	description: "Plot a function, or the parabola through three points (a line if they are aligned)",
 	forms: [
@@ -8855,9 +8871,9 @@ var sf = { [K.PLOT]: {
 		"f=plot <point>,<point>,<point>[@<number>,<domain>,<image>]"
 	],
 	summary: "f=plot expr — function (or f(x)=expr)",
-	build: rf
-} }, cf = "point";
-function lf(e, t, n) {
+	build: sf
+} }, df = "point";
+function ff(e, t, n) {
 	let r = (e) => Object.hasOwn(n, e) ? n[e] : void 0;
 	if (typeof e == "number") return e;
 	if (typeof e == "string" && e.includes(".")) {
@@ -8867,16 +8883,16 @@ function lf(e, t, n) {
 			axis: n
 		};
 	}
-	let i = wu(e, n);
+	let i = Du(e, n);
 	return i === null ? X(t, "a number, <point>.x, <point>.y or <point>:<point>", J(e)) : {
 		point1: i[0],
 		point2: i[1]
 	};
 }
-var uf = {
+var pf = {
 	[K.POINT]: (e, t, n) => (Z(t, e, 2, 2, "two coordinates (x,y)"), { coordinates: {
-		x: lf(e[0], t, n),
-		y: lf(e[1], t, n)
+		x: ff(e[0], t, n),
+		y: ff(e[1], t, n)
 	} }),
 	[K.MIDDLE]: (e, t) => {
 		Z(t, e, 2, 2, "two points");
@@ -8889,7 +8905,7 @@ var uf = {
 	[K.PROJECTION]: (e, t) => {
 		Z(t, e, 2, 2, "a point and a line or an axis");
 		let [n, r] = e;
-		return q(n) && xu(r) ? { projection: {
+		return q(n) && wu(r) ? { projection: {
 			point: n,
 			axis: r
 		} } : X(t, "a point and a line or an axis", `${J(n)} and ${J(r)}`);
@@ -8897,7 +8913,7 @@ var uf = {
 	[K.SYMMETRY]: (e, t) => {
 		Z(t, e, 2, 2, "a point and a point, a line or an axis");
 		let [n, r] = e;
-		return q(n) && (q(r) || xu(r)) ? { symmetry: {
+		return q(n) && (q(r) || wu(r)) ? { symmetry: {
 			A: n,
 			B: r
 		} } : X(t, "a point and a point, a line or an axis", `${J(n)} and ${J(r)}`);
@@ -8906,7 +8922,7 @@ var uf = {
 		let n = "a point, a line or an axis, a distance and, to be perpendicular, a last *";
 		Z(t, e, 3, 4, n);
 		let [r, i, a, o] = e;
-		return q(r) && xu(i) && typeof a == "number" && (o === void 0 || Su(o)) ? { direction: {
+		return q(r) && wu(i) && typeof a == "number" && (o === void 0 || Tu(o)) ? { direction: {
 			point: r,
 			direction: i,
 			distance: a,
@@ -8929,44 +8945,44 @@ var uf = {
 	[K.EVAL_FX]: (e, t, n) => {
 		Z(t, e, 2, 2, "a curve and an abscissa");
 		let [r] = e;
-		return r instanceof Yl ? { evaluation: {
+		return r instanceof Ql ? { evaluation: {
 			fx: r,
-			x: lf(e[1], t, n)
+			x: ff(e[1], t, n)
 		} } : X(t, "a curve and an abscissa", `${J(r)} as a curve`);
 	}
 };
-function df(e, t) {
-	let n = Object.hasOwn(uf, e.key) ? uf[e.key] : void 0;
+function mf(e, t) {
+	let n = Object.hasOwn(pf, e.key) ? pf[e.key] : void 0;
 	if (n === void 0) throw new r(`Cannot build "${e.name}" (${e.key}): the key does not define a point`);
 	return {
-		create: cf,
-		config: n(Cu(e.values, t), e, t)
+		create: df,
+		config: n(Eu(e.values, t), e, t)
 	};
 }
-function ff(e, t) {
+function hf(e, t) {
 	let n = "two figures: two lines or axes, a circle and a line, or two circles";
 	if (e.key !== K.INTERSECTION.toString()) throw new r(`Cannot build "${e.name}" (${e.key}): the key is not an intersection`);
-	let i = Cu(e.values, t);
+	let i = Eu(e.values, t);
 	Z(e, i, 2, 2, n);
 	let [a, o] = i;
-	if (xu(a) && xu(o)) return [{
-		create: cf,
+	if (wu(a) && wu(o)) return [{
+		create: df,
 		config: { intersection: {
 			A: a,
 			B: o
 		} }
 	}];
-	if (a instanceof $l && o instanceof $l) return [0, 1].map((e) => ({
-		create: cf,
+	if (a instanceof nu && o instanceof nu) return [0, 1].map((e) => ({
+		create: df,
 		config: { intersectionBetweenCircles: {
 			A: a,
 			B: o,
 			index: e
 		} }
 	}));
-	let s = a instanceof $l ? a : o, c = a instanceof $l ? o : a;
-	return s instanceof $l && c instanceof ol ? [0, 1].map((e) => ({
-		create: cf,
+	let s = a instanceof nu ? a : o, c = a instanceof nu ? o : a;
+	return s instanceof nu && c instanceof ol ? [0, 1].map((e) => ({
+		create: df,
 		config: { intersectionWithCircle: {
 			A: s,
 			B: c,
@@ -8974,38 +8990,38 @@ function ff(e, t) {
 		} }
 	})) : X(e, n, `${J(a)} and ${J(o)}`);
 }
-var pf = {
+var gf = {
 	o: (e, t) => e.asCircle(t),
 	s: (e, t) => e.asSquare(t),
 	"*": (e, t) => e.asCrosshair(t)
 };
-function mf(e, t, n) {
+function _f(e, t, n) {
 	if (!(e instanceof G)) throw new i(t, `The option "${t}" sets the shape of a point, and "${e.name}" is not a point`);
 	if (n !== !0 && typeof n != "number") throw new i(t, `Invalid value ${J(n)} for the option "${t}" of "${e.name}": expected a size, a number greater than 0`);
 	try {
-		pf[t](e, n === !0 ? void 0 : n);
+		gf[t](e, n === !0 ? void 0 : n);
 	} catch (n) {
 		throw n instanceof a ? new i(t, `Invalid option "${t}" of "${e.name}": ${n.message}`, { cause: n }) : n;
 	}
 }
-function hf(e) {
+function vf(e) {
 	let t = /^([A-Z][0-9]*)\((.*)\)$/.exec(e);
 	return t === null ? null : `${t[1]}=pt ${t[2].split(",").map((e) => e.trim()).join(",")}`;
 }
-var gf = (e) => (t, { value: n }) => {
-	mf(t, e, n);
-}, _f = {
-	o: gf("o"),
-	s: gf("s"),
-	"*": gf("*")
-}, vf = {
+var yf = (e) => (t, { value: n }) => {
+	_f(t, e, n);
+}, bf = {
+	o: yf("o"),
+	s: yf("s"),
+	"*": yf("*")
+}, xf = {
 	[K.POINT]: {
 		name: "point",
 		description: "Create a point",
 		forms: ["A(3,4)"],
 		summary: "A=pt x,y — point",
 		labelFields: ["coordinates"],
-		build: df
+		build: mf
 	},
 	[K.VECTOR_POINT]: {
 		name: "point from two points",
@@ -9013,7 +9029,7 @@ var gf = (e) => (t, { value: n }) => {
 		forms: ["A=vpt <point>,<point>,<scale?>,<starting point?>"],
 		summary: "P=vpt A,B,scale — point from a vector",
 		labelFields: ["coordinates"],
-		build: df
+		build: mf
 	},
 	[K.DIRECTION_POINT]: {
 		name: "point from direction line",
@@ -9021,7 +9037,7 @@ var gf = (e) => (t, { value: n }) => {
 		forms: ["A=dpt <point>,<line>,<distance>,<perpendicular?>"],
 		summary: "P=dpt A,d,3 — point along a line",
 		labelFields: ["coordinates"],
-		build: df
+		build: mf
 	},
 	[K.MIDDLE]: {
 		name: "mid",
@@ -9029,7 +9045,7 @@ var gf = (e) => (t, { value: n }) => {
 		forms: ["A=mid <point>,<point>"],
 		summary: "M=mid A,B — middle",
 		labelFields: ["coordinates"],
-		build: df
+		build: mf
 	},
 	[K.PROJECTION]: {
 		name: "projection",
@@ -9037,7 +9053,7 @@ var gf = (e) => (t, { value: n }) => {
 		forms: ["A=proj <point>,<line>"],
 		summary: "H=proj A,d — projection",
 		labelFields: ["coordinates"],
-		build: df
+		build: mf
 	},
 	[K.INTERSECTION]: {
 		name: "intersection",
@@ -9045,7 +9061,7 @@ var gf = (e) => (t, { value: n }) => {
 		forms: ["A=inter <line|circle>,<line|circle>"],
 		summary: "P=inter d1,d2 — intersection",
 		labelFields: ["coordinates"],
-		build: ff
+		build: hf
 	},
 	[K.SYMMETRY]: {
 		name: "symmetry",
@@ -9053,7 +9069,7 @@ var gf = (e) => (t, { value: n }) => {
 		forms: ["A=sym <point>,<point|line>"],
 		summary: "S=sym A,B — symmetry",
 		labelFields: ["coordinates"],
-		build: df
+		build: mf
 	},
 	[K.EVAL_FX]: {
 		name: "point on a function",
@@ -9061,47 +9077,47 @@ var gf = (e) => (t, { value: n }) => {
 		forms: ["A=eval f,3"],
 		summary: "P=eval f,x — point of a function",
 		labelFields: ["coordinates"],
-		build: df
+		build: mf
 	}
-}, yf = "polygon", bf = "three points or more, a center with a radius (a number or A:B) and a number of sides, or two points and a number of sides; the number of sides can be followed by the step of a star (5,2)";
-function xf(e, t, n) {
-	return typeof e == "number" && Number.isInteger(e) ? e : X(t, bf, `${J(e)} as the ${n} (an integer)`);
+}, Sf = "polygon", Cf = "three points or more, a center with a radius (a number or A:B) and a number of sides, or two points and a number of sides; the number of sides can be followed by the step of a star (5,2)";
+function wf(e, t, n) {
+	return typeof e == "number" && Number.isInteger(e) ? e : X(t, Cf, `${J(e)} as the ${n} (an integer)`);
 }
-function Sf(e, t) {
-	let n = Tu(e, t);
+function Tf(e, t) {
+	let n = Ou(e, t);
 	return typeof n == "number" || n !== null && "point1" in n ? n : null;
 }
-function Cf(e, t) {
+function Ef(e, t) {
 	if (e.key !== K.POLYGON.toString()) throw new r(`Cannot build "${e.name}" (${e.key}): the key does not define a polygon`);
-	let n = Cu(e.values, t), i = () => X(e, bf, n.length === 0 ? "no value" : n.map(J).join(", "));
+	let n = Eu(e.values, t), i = () => X(e, Cf, n.length === 0 ? "no value" : n.map(J).join(", "));
 	if (n.every(q)) return n.length >= 3 ? {
-		create: yf,
+		create: Sf,
 		config: { vertices: n }
 	} : i();
 	let [a, o, s, c, ...l] = n;
 	if (!q(a) || s === void 0 || l.length > 0) return i();
-	let u = c === void 0 ? {} : { star: xf(c, e, "step of the star") };
+	let u = c === void 0 ? {} : { star: wf(c, e, "step of the star") };
 	if (q(o)) return {
-		create: yf,
+		create: Sf,
 		config: { onSide: {
 			A: a,
 			B: o,
-			sides: xf(s, e, "number of sides"),
+			sides: wf(s, e, "number of sides"),
 			...u
 		} }
 	};
-	let d = Sf(o, t);
+	let d = Tf(o, t);
 	return d === null ? i() : {
-		create: yf,
+		create: Sf,
 		config: { regular: {
 			center: a,
 			radius: d,
-			sides: xf(s, e, "number of sides"),
+			sides: wf(s, e, "number of sides"),
 			...u
 		} }
 	};
 }
-var wf = { [K.POLYGON]: {
+var Df = { [K.POLYGON]: {
 	name: "polygon",
 	description: "Create a polygon: through points, or a regular polygon (and a regular star polygon with a last step) from a center and a radius, or from a side",
 	forms: [
@@ -9111,34 +9127,34 @@ var wf = { [K.POLYGON]: {
 	],
 	summary: "p=poly A,B,C — polygon",
 	labelFields: ["perimeter", "area"],
-	build: Cf
-} }, Tf = "riemann", Ef = "a plot, then a domain (min:max, like 0:2pi), a number of rectangles and a position from 0 (left) to 1 (right)";
-function Df(e, t) {
+	build: Ef
+} }, Of = "riemann", kf = "a plot, then a domain (min:max, like 0:2pi), a number of rectangles and a position from 0 (left) to 1 (right)";
+function Af(e, t) {
 	if (e.key !== K.RIEMANN.toString()) throw new r(`Cannot build "${e.name}" (${e.key}): the key does not define a Riemann sum`);
-	let [n, ...i] = Cu(e.values, t);
-	if (!(n instanceof Yl)) return X(e, Ef, e.values.length === 0 ? "no value" : `${J(e.values[0])}, which is not a plot`);
+	let [n, ...i] = Eu(e.values, t);
+	if (!(n instanceof Ql)) return X(e, kf, e.values.length === 0 ? "no value" : `${J(e.values[0])}, which is not a plot`);
 	let a = i.length > 0 && (typeof i[0] == "string" || Ha(i[0])), o = a ? i.slice(1) : i, s = { plot: n };
 	if (a) {
-		let t = bd([e.values[1]], e, 1, Ef);
-		if (t.samples !== void 0 || t.domain === void 0) return X(e, Ef, J(e.values[1]));
+		let t = Cd([e.values[1]], e, 1, kf);
+		if (t.samples !== void 0 || t.domain === void 0) return X(e, kf, J(e.values[1]));
 		s.domain = t.domain;
 	}
 	let c = o.at(0), l = o.at(1);
-	return o.length > 2 || o.some((e) => typeof e != "number") ? X(e, Ef, e.values.map(J).join(", ")) : (c !== void 0 && (s.rectangles = c), l !== void 0 && (s.position = l), {
-		create: Tf,
+	return o.length > 2 || o.some((e) => typeof e != "number") ? X(e, kf, e.values.map(J).join(", ")) : (c !== void 0 && (s.rectangles = c), l !== void 0 && (s.position = l), {
+		create: Of,
 		config: s
 	});
 }
-var Of = { [K.RIEMANN]: {
+var jf = { [K.RIEMANN]: {
 	name: "riemann",
 	description: "Create the Riemann sum of a plot: rectangles from the x axis to its graph",
 	forms: ["r=riemann <plot>[,<domain>][,<rectangles>][,<position>]"],
 	summary: "r=riemann f — Riemann sum",
 	labelFields: ["sum", "rectangles"],
-	build: Df
+	build: Af
 } };
 // src/parser/parser.config.ts
-function kf(...e) {
+function Mf(...e) {
 	let t = Object.create(null);
 	for (let n of e) for (let [e, r] of Object.entries(n)) {
 		if (e in t) throw Error(`The key "${e}" is defined twice`);
@@ -9146,7 +9162,7 @@ function kf(...e) {
 	}
 	return t;
 }
-var Af = kf(vf, Gd, gd, Nu, sf, Zd, dd, wf, Od, wd, ef, Fd, ed, Of), jf = [
+var Nf = Mf(xf, Jd, yd, Iu, uf, ef, md, Df, jd, Dd, rf, Rd, rd, jf), Pf = [
 	"x",
 	"y",
 	"box",
@@ -9165,14 +9181,14 @@ var Af = kf(vf, Gd, gd, Nu, sf, Zd, dd, wf, Od, wd, ef, Fd, ed, Of), jf = [
 	"default.label",
 	"default.tex",
 	"default.points"
-], Mf = {
+], Ff = {
 	ppu: "unitX and unitY, the length of a unit in cm (unitX=1.5)",
 	subgrid: "the option subgrid of grid (grid->subgrid=4)",
 	label: "default.label",
 	tex: "default.tex",
 	points: "default.points",
 	"no-points": "default.points=no"
-}, Nf = [
+}, If = [
 	"axis",
 	"axisX",
 	"axisY",
@@ -9181,65 +9197,65 @@ var Af = kf(vf, Gd, gd, Nu, sf, Zd, dd, wf, Od, wd, ef, Fd, ed, Of), jf = [
 	"grid",
 	"gridX",
 	"gridY"
-], Pf = 8;
-function Ff(e) {
+], Lf = 8;
+function Rf(e) {
 	let t = [], n = null;
 	for (let r of e.split(",").map((e) => e.trim())) n === null ? r !== "" && (r.includes("->") ? n = r : t.push(r)) : r === "" ? (t.push(n), n = null) : n += `,${r}`;
 	return n !== null && t.push(n), t;
 }
-function If({ value: e, options: t }, n) {
+function zf({ value: e, options: t }, n) {
 	if (t.length > 0) throw new r(`Cannot read the parameter "${n}=${J(e)}/${t.map(J).join("/")}": expected min:max, or one number for -n:n`);
-	return Hu(e, n);
+	return Gu(e, n);
 }
-function Lf(e) {
+function Bf(e) {
 	let { value: t } = e;
 	if (typeof t == "object" && !Ha(t) && "x" in t && "y" in t) return {
-		x: Hu(t.x, "box"),
-		y: Hu(t.y, "box")
+		x: Gu(t.x, "box"),
+		y: Gu(t.y, "box")
 	};
-	let n = If(e, "box");
+	let n = zf(e, "box");
 	return {
 		x: n,
 		y: { ...n }
 	};
 }
-function Rf(e, t) {
+function Vf(e, t) {
 	if (!Q(e)) return null;
 	let { value: n, options: i } = e;
 	if (typeof n != "number" || i.length > 0 || !(Number.isFinite(n) && n > 0)) throw new r(`Cannot read the parameter "${t}=${J(n)}": expected a length in cm greater than 0 (${t}=1.5)`);
 	return n;
 }
-function zf(e) {
+function Hf(e) {
 	if (!Q(e)) return null;
 	let { value: t, options: n } = e, i = typeof t == "string" && n.length === 0 ? ws(t) : null;
 	if (i === null) throw new r(`Cannot read the parameter "unit=${J(t)}": expected ${xs.join(", ")} (unit=mm)`);
 	return i;
 }
-function Bf(e) {
+function Uf(e) {
 	if (!Q(e)) return null;
 	let { value: t, options: n } = e;
 	if (typeof t != "number" || n.length > 0 || !(Number.isFinite(t) && t > 0)) throw new r(`Cannot read the parameter "scale=${J(t)}": expected a number greater than 0, or a fraction (scale=10, scale=1/10)`);
 	return t;
 }
-function Vf(e, t) {
+function Wf(e, t) {
 	if (!Q(e)) return !1;
 	if (e.value !== !0 || e.options.length > 0) throw new r(`Cannot read the parameter "${t}=${J(e.value)}": expected the word ${t} alone`);
 	return !0;
 }
-function Hf(e) {
+function Gf(e) {
 	if (!Q(e)) return { shape: "o" };
 	if (e.value === "no" && e.options.length === 0) return !1;
 	try {
-		return Gf(e);
+		return Jf(e);
 	} catch (e) {
 		throw e instanceof i ? new r(`Cannot read the parameter "default.points": ${e.message} (or "no" to hide the points)`, { cause: e }) : e;
 	}
 }
-function Uf(e, t) {
+function Kf(e, t) {
 	let n = e.indexOf("->"), i = (n < 0 ? e : e.slice(0, n)).trim(), a = i.split("=")[0].trim();
-	if (Object.hasOwn(Mf, a)) throw new r(`The parameter "${a}" does not exist any more: use ${Mf[a]}`);
-	if (!jf.includes(a)) throw new r(`Unknown parameter "${a}": expected ${jf.join(", ")}`);
-	let o = t.parameters(i, jf)[a];
+	if (Object.hasOwn(Ff, a)) throw new r(`The parameter "${a}" does not exist any more: use ${Ff[a]}`);
+	if (!Pf.includes(a)) throw new r(`Unknown parameter "${a}": expected ${Pf.join(", ")}`);
+	let o = t.parameters(i, Pf)[a];
 	if (o === void 0) throw new r(`Cannot read the parameter "${i}"`);
 	let s = n < 0 ? "" : e.slice(n + 2).trim();
 	return {
@@ -9248,7 +9264,7 @@ function Uf(e, t) {
 		options: s === "" ? {} : t.parse(`layout=grid ->${s}`).parameters
 	};
 }
-function Wf(e, t) {
+function qf(e, t) {
 	let n = {}, i = {
 		x: {},
 		y: {},
@@ -9257,27 +9273,27 @@ function Wf(e, t) {
 		x: {},
 		y: {}
 	};
-	for (let o of Ff(e)) {
-		let { key: e, parameter: s, options: c } = Uf(o, t);
+	for (let o of Rf(e)) {
+		let { key: e, parameter: s, options: c } = Kf(o, t);
 		if (Object.hasOwn(n, e)) throw new r(`The parameter "${e}" is written twice`);
-		if (n[e] = s, Object.keys(c).length > 0 && !Nf.includes(e)) throw new r(`The parameter "${e}" has no options, got ${Object.keys(c).join(", ")} after "->"`);
+		if (n[e] = s, Object.keys(c).length > 0 && !If.includes(e)) throw new r(`The parameter "${e}" has no options, got ${Object.keys(c).join(", ")} after "->"`);
 		let l = e === "axis" || e === "axisX" || e === "axisXname", u = e === "axis" || e === "axisY" || e === "axisYname";
 		if (l || u) {
-			let { extra: e, style: t } = Gu(c);
+			let { extra: e, style: t } = Ju(c);
 			l && (Object.assign(i.x, t), Object.assign(a.x, e)), u && (Object.assign(i.y, t), Object.assign(a.y, e));
 		}
 		(e === "grid" || e === "gridX" || e === "gridY") && Object.assign(i.grid, c);
 	}
-	let o = Q(n.box) ? Lf(n.box) : null, s = {
-		x: Q(n.x) ? If(n.x, "x") : o?.x ?? {
+	let o = Q(n.box) ? Bf(n.box) : null, s = {
+		x: Q(n.x) ? zf(n.x, "x") : o?.x ?? {
 			min: -8,
-			max: Pf
+			max: Lf
 		},
-		y: Q(n.y) ? If(n.y, "y") : o?.y ?? {
+		y: Q(n.y) ? zf(n.y, "y") : o?.y ?? {
 			min: -8,
-			max: Pf
+			max: Lf
 		}
-	}, c = Rf(n.unitX, "unitX"), l = Rf(n.unitY, "unitY"), u = kd(n.grid, n.gridX, n.gridY);
+	}, c = Vf(n.unitX, "unitX"), l = Vf(n.unitY, "unitY"), u = Md(n.grid, n.gridX, n.gridY);
 	return {
 		window: s,
 		unit: {
@@ -9285,22 +9301,22 @@ function Wf(e, t) {
 			y: l ?? c ?? 1
 		},
 		measure: {
-			unit: zf(n.unit),
-			scale: Bf(n.scale) ?? Ss.scale
+			unit: Hf(n.unit),
+			scale: Uf(n.scale) ?? Ss.scale
 		},
 		display: {
-			axis: Ju(n, a),
+			axis: Zu(n, a),
 			grid: u ?? !1
 		},
 		defaults: {
-			label: Vf(n["default.label"], "default.label"),
-			tex: Vf(n["default.tex"], "default.tex"),
-			points: Hf(n["default.points"])
+			label: Wf(n["default.label"], "default.label"),
+			tex: Wf(n["default.tex"], "default.tex"),
+			points: Gf(n["default.points"])
 		},
 		options: i
 	};
 }
-function Gf({ value: e, options: t }) {
+function Jf({ value: e, options: t }) {
 	let n = e === !0 ? "o" : e;
 	if (n !== "o" && n !== "s" && n !== "*") throw new i("points", `Invalid shape ${J(e)} for the option "points": expected 'o', 's' or '*'`);
 	let r = t.at(0);
@@ -9312,7 +9328,7 @@ function Gf({ value: e, options: t }) {
 	};
 }
 // src/animate/Animate.syntax.ts
-var Kf = [
+var Yf = [
 	"from",
 	"to",
 	"duration",
@@ -9320,22 +9336,22 @@ var Kf = [
 	"easing",
 	"loop"
 ];
-function qf(e, t, n) {
+function Xf(e, t, n) {
 	let r = typeof e == "string" && Object.hasOwn(n, e) ? n[e] : void 0;
 	if (!(r instanceof G)) throw new a(`The option ${t}=${String(e)} of an animation must be the name of a point of the drawing`);
 	return r;
 }
-var Jf = Object.fromEntries(Object.values(e).map((e) => [e, e]));
-function Yf(t, n) {
+var Zf = Object.fromEntries(Object.values(e).map((e) => [e, e]));
+function Qf(t, n) {
 	if (t === !0 || t === "1" || t === 1) return e.RESET;
-	if (typeof t == "string" && Object.hasOwn(Jf, t)) return Jf[t];
-	throw Y("loop", n, t, `loop alone, or one of ${Object.keys(Jf).join(", ")}`);
+	if (typeof t == "string" && Object.hasOwn(Zf, t)) return Zf[t];
+	throw Y("loop", n, t, `loop alone, or one of ${Object.keys(Zf).join(", ")}`);
 }
-function Xf(e, n) {
+function $f(e, n) {
 	if (typeof e == "string" && Object.hasOwn(t, e)) return e;
 	throw Y("easing", n, e, Object.keys(t).join(", "));
 }
-var Zf = {
+var ep = {
 	options: {
 		animate: (t, n, { graph: r, options: i }) => {
 			let a = {
@@ -9346,9 +9362,9 @@ var Zf = {
 				easing: "linear",
 				loop: e.NONE
 			};
-			Object.hasOwn(i, "from") && (a.from = qf(i.from.value, "from", r.figures)), Object.hasOwn(i, "to") && (a.to = qf(i.to.value, "to", r.figures)), Object.hasOwn(i, "duration") && (a.duration = i.duration.value), Object.hasOwn(i, "delay") && (a.delay = i.delay.value), Object.hasOwn(i, "easing") && (a.easing = Xf(i.easing.value, t)), Object.hasOwn(i, "loop") && (a.loop = Yf(i.loop.value, t)), kl(t, a);
+			Object.hasOwn(i, "from") && (a.from = Xf(i.from.value, "from", r.figures)), Object.hasOwn(i, "to") && (a.to = Xf(i.to.value, "to", r.figures)), Object.hasOwn(i, "duration") && (a.duration = i.duration.value), Object.hasOwn(i, "delay") && (a.delay = i.delay.value), Object.hasOwn(i, "easing") && (a.easing = $f(i.easing.value, t)), Object.hasOwn(i, "loop") && (a.loop = Qf(i.loop.value, t)), kl(t, a);
 		},
-		...Object.fromEntries(Kf.map((e) => [e, (t, n, { options: r }) => {
+		...Object.fromEntries(Yf.map((e) => [e, (t, n, { options: r }) => {
 			if (!Object.hasOwn(r, "animate")) throw new i(e, `The option "${e}" is part of an animation: "${t.name}" needs "animate"`);
 		}]))
 	},
@@ -9369,30 +9385,70 @@ var Zf = {
 			"none"
 		]
 	}
+}, tp = "toggle", np = (e, { value: t, options: n }, { states: r, options: a }) => {
+	let o = n.at(0);
+	if (typeof t != "string" || n.length > 1 || o !== void 0 && (typeof o != "number" || o < 0)) throw Y("toggle", e, [t, ...n].map(String).join("/"), "the id of a button, and a duration in seconds from 0 after a /, like toggle=id or toggle=id/0.5");
+	if (!(r.get(tp) ?? []).some(({ id: e }) => e === t)) throw new i("toggle", `Invalid option "toggle" of "${e.name}": the button "${t}" is not declared above this line, write @button=${t} first`);
+	let s = Object.hasOwn(a, "!");
+	s && e.showShape(), zl(e, {
+		id: t,
+		duration: o ?? 0,
+		hidden: s
+	});
+}, rp = /^=\s*(\w+)\s*(?:->(.*))?$/s;
+function ip(e, t, n) {
+	let i = /^\s*title\s*=(.*)$/s.exec(e);
+	if (i === null) throw new r(`Cannot read the command "${n}": after the -> expected title=Text, like @button=${t}->title=Show the area`);
+	let a = i[1].trim();
+	if (a === "") throw new r(`Cannot read the command "${n}": the title is empty`);
+	return a;
+}
+var ap = {
+	options: { toggle: np },
+	optionTypes: { toggle: "text" },
+	optionDetails: { toggle: "toggle=id/0.5 — button that shows or hides it, and seconds of the fade" },
+	commands: {
+		names: ["button"],
+		pattern: /^@button\s*=\s*\w+\s*(?:->\s*title\s*=\s*\S.*)?$/,
+		initial: [],
+		fold(e, { value: t, text: n }) {
+			let i = rp.exec(t);
+			if (i === null) throw new r(`Cannot read the command "${n}": expected the id of the button after a =, like @button=area or @button=area->title=Show the area`);
+			let [, a, o] = i;
+			if (e.some((e) => e.id === a)) throw new r(`Cannot read the command "${n}": the button "${a}" is declared already`);
+			let s = {
+				id: a,
+				title: o === void 0 ? a : ip(o, a, n)
+			};
+			return [...e, Object.freeze(s)];
+		},
+		defaults: () => ({}),
+		graphControls: (e) => ({ buttons: e.length === 0 ? null : Object.freeze([...e]) })
+	}
 };
 // src/slides/Slides.syntax.ts
-function Qf(e) {
+function op(e) {
 	return typeof e != "object" || !e || !("items" in e) || !Array.isArray(e.items) ? null : e.items.map(({ from: e, to: t }) => t === void 0 ? { from: e } : {
 		from: e,
 		to: t
 	});
 }
-function $f(e, t) {
-	let n = e.parameters(`slides=${t}`, { types: { slides: "set" } }), i = Qf(Object.hasOwn(n, "slides") ? n.slides.value : void 0);
+function sp(e, t) {
+	let n = e.parameters(`slides=${t}`, { types: { slides: "set" } }), i = op(Object.hasOwn(n, "slides") ? n.slides.value : void 0);
 	if (Object.keys(n).length !== 1 || n.slides.options.length > 0 || i === null) throw new r(`Expected steps between chevrons and nothing else, like <2-4,6>, got "${t}"`);
 	return i;
 }
-var ep = (e, { value: t, options: n }) => {
-	let r = Qf(t);
+var cp = (e, { value: t, options: n }) => {
+	let r = op(t);
 	if (r === null || n.length > 0) throw Y("slide", e, r === null ? t : [t.raw, ...n.map(String)].join("/"), "steps between chevrons and nothing after them, like <2-4,6>");
 	Il(e, r);
 };
-function tp(e, t) {
+function lp(e, t) {
 	let n = e.trim();
 	if (n === "") throw new r(`Cannot read the command "${t}": the title is empty`);
 	return n;
 }
-function np(e, t, n, i) {
+function up(e, t, n, i) {
 	if (Object.hasOwn(e, t)) throw new r(`Cannot read the command "${i}": the step ${t} has the title "${e[t]}" already`);
 	return {
 		...e,
@@ -9400,10 +9456,10 @@ function np(e, t, n, i) {
 	};
 }
 // src/controls/controls.ts
-var rp = {
-	animate: Zf,
+var dp = {
+	animate: ep,
 	slide: {
-		options: { slide: ep },
+		options: { slide: cp },
 		optionTypes: { slide: "set" },
 		optionDetails: { slide: "slide=<2-4,6> — steps at which it is shown" },
 		commands: {
@@ -9429,7 +9485,7 @@ var rp = {
 					if (!n.startsWith("=")) throw new r(`Cannot read the command "${i}": @pause takes a title only after a =, like @pause=Introduction`);
 					return {
 						...a,
-						titles: np(e.titles, t + 1, tp(n.slice(1), i), i)
+						titles: up(e.titles, t + 1, lp(n.slice(1), i), i)
 					};
 				}
 				if (t === "title") {
@@ -9439,7 +9495,7 @@ var rp = {
 					if (a < 1) throw new r(`Cannot read the command "${i}": the step ${a} is not an integer from 1`);
 					return {
 						...e,
-						titles: np(e.titles, a, tp(t[2], i), i)
+						titles: up(e.titles, a, lp(t[2], i), i)
 					};
 				}
 				if (n === "") return {
@@ -9448,7 +9504,7 @@ var rp = {
 					slide: null
 				};
 				if (!n.startsWith("=")) throw new r(`Cannot read the command "${i}": the steps of @slides come after a =, like @slides=<2->`);
-				let o = $f(a, n.slice(1).trim());
+				let o = sp(a, n.slice(1).trim());
 				return jl(o, i), {
 					...e,
 					slide: Pl(o)
@@ -9458,37 +9514,38 @@ var rp = {
 			graphControls: (e) => ({ titles: Object.keys(e.titles).length === 0 ? null : Object.freeze({ ...e.titles }) })
 		},
 		handleControls: ["slide"]
-	}
+	},
+	toggle: ap
 };
-function ip() {
-	return Object.values(rp);
+function fp() {
+	return Object.values(dp);
 }
-function ap() {
-	return Object.fromEntries(ip().flatMap((e) => Object.entries(e.optionTypes ?? {})));
+function pp() {
+	return Object.fromEntries(fp().flatMap((e) => Object.entries(e.optionTypes ?? {})));
 }
-function op() {
-	return Object.fromEntries(ip().flatMap((e) => Object.entries(e.optionDetails ?? {})));
+function mp() {
+	return Object.fromEntries(fp().flatMap((e) => Object.entries(e.optionDetails ?? {})));
 }
-function sp() {
-	return Object.fromEntries(ip().flatMap((e) => Object.entries(e.optionValues ?? {})));
+function hp() {
+	return Object.fromEntries(fp().flatMap((e) => Object.entries(e.optionValues ?? {})));
 }
 // src/figures/Label/Label.parser.ts
-var cp = "tmb", lp = "lcr", up = /@@|@([a-z]+)?(?:\.(\d+))?/g;
-function dp(e) {
-	let [t, n] = "br", r = cp.includes(e) && e.length === 1 ? e + n : lp.includes(e) && e.length === 1 ? t + e : e, i = r.length === 2 ? r[1] + r[0] : r;
+var gp = "tmb", _p = "lcr", vp = /@@|@([a-z]+)?(?:\.(\d+))?/g;
+function yp(e) {
+	let [t, n] = "br", r = gp.includes(e) && e.length === 1 ? e + n : _p.includes(e) && e.length === 1 ? t + e : e, i = r.length === 2 ? r[1] + r[0] : r;
 	return Qs.find((e) => e === r || e === i) ?? null;
 }
-function fp(e, t) {
+function bp(e, t) {
 	let n = Object.keys(t.labelFields());
 	if (n.length === 0 || !e.includes("@")) return e;
 	let r = [], i = "", a = 0;
-	for (let o of e.matchAll(up)) {
+	for (let o of e.matchAll(vp)) {
 		if (i += e.slice(a, o.index), a = o.index + o[0].length, o[0] === "@@") {
 			i += "@";
 			continue;
 		}
 		i !== "" && (r.push(i), i = "");
-		let s = o[1], c = o[2], l = pp(s, n, t);
+		let s = o[1], c = o[2], l = xp(s, n, t);
 		r.push(c === void 0 ? { field: l } : {
 			field: l,
 			digits: +c
@@ -9496,26 +9553,26 @@ function fp(e, t) {
 	}
 	return i += e.slice(a), i !== "" && r.push(i), r;
 }
-function pp(e, t, n) {
+function xp(e, t, n) {
 	let r = e ?? n.defaultLabelField();
 	if (r === null) throw new a(`The figure "${n.name}" has no default field for "@": write the field you want (${t.map((e) => `@${e}`).join(", ")})`);
 	if (!t.includes(r)) throw new a(`The figure "${n.name}" cannot show "@${r}" in its label: expected ${t.map((e) => `@${e}`).join(", ")}, or @@ for a @`);
 	return r;
 }
 // src/Draw/Draw.options.ts
-var mp = {
+var Sp = {
 	ultrathin: .5,
 	thin: .75,
 	thick: 2.5,
 	ultrathick: 4
-}, hp = {
+}, Cp = {
 	xs: "2 2",
 	sm: "4 3",
 	md: "6 4",
 	lg: "10 6",
 	xl: "16 8"
-}, gp = Object.keys(_f);
-function _p(e, t, { value: n, options: r }) {
+}, wp = Object.keys(bf);
+function Tp(e, t, { value: n, options: r }) {
 	if (typeof n != "string" || r.length > 1) throw Y(e, t, n, `a color (${e}=red) with an opacity or not (${e}=red/0.5)`);
 	let [i] = r;
 	if (i === void 0) return { color: n };
@@ -9525,7 +9582,7 @@ function _p(e, t, { value: n, options: r }) {
 		opacity: i
 	};
 }
-function vp(e, { value: t, options: n }) {
+function Ep(e, { value: t, options: n }) {
 	if (typeof t != "string" && typeof t != "boolean") throw Y("mark", e, t, "a side ('start', 'end', 'both' or 'none')");
 	let r = t === !0 ? "both" : t === !1 ? "none" : t, i = n.find((e) => typeof e == "number"), a = n.find((e) => typeof e == "string");
 	return {
@@ -9534,23 +9591,23 @@ function vp(e, { value: t, options: n }) {
 		...a === void 0 ? {} : { shape: a }
 	};
 }
-var yp = ">";
-function bp(e, t, n, r) {
+var Dp = ">";
+function Op(e, t, n, r) {
 	let i = Object.hasOwn(r, n) ? r[n] : void 0;
-	if (i === void 0) throw Y(e, t, `${yp}${n}`, `${yp} followed by the name of a figure that is defined before`);
-	if (!i.referenceable) throw Y(e, t, `${yp}${n}`, `${yp} followed by a point, a circle, an arc or a polygon (${n} is none of them)`);
+	if (i === void 0) throw Y(e, t, `${Dp}${n}`, `${Dp} followed by the name of a figure that is defined before`);
+	if (!i.referenceable) throw Y(e, t, `${Dp}${n}`, `${Dp} followed by a point, a circle, an arc or a polygon (${n} is none of them)`);
 	return i;
 }
-function xp(e) {
+function kp(e) {
 	return (t, { value: n, options: r }, { graph: i }) => {
 		let a = t.name;
 		typeof n == "string" && (a = n), e === "tex" && a.length === 2 && !isNaN(+a[1]) && (a = a[0] + "_" + a[1]);
-		let o = r[0], s = typeof o == "string" && o.startsWith(yp) ? bp(e, t, o.slice(1), i.figures) : null, c = typeof o == "boolean" || o === void 0 || s !== null ? void 0 : typeof o == "string" ? dp(o) : null, l = r[1], u = r[2];
-		if (c === null) throw Y(e, t, o, `a position (${Qs.join(", ")}), one letter (t, m, b, l, c, r) that replaces the same part of br, or ${yp}<figure> to push the label away from a figure`);
+		let o = r[0], s = typeof o == "string" && o.startsWith(Dp) ? Op(e, t, o.slice(1), i.figures) : null, c = typeof o == "boolean" || o === void 0 || s !== null ? void 0 : typeof o == "string" ? yp(o) : null, l = r[1], u = r[2];
+		if (c === null) throw Y(e, t, o, `a position (${Qs.join(", ")}), one letter (t, m, b, l, c, r) that replaces the same part of br, or ${Dp}<figure> to push the label away from a figure`);
 		if (l !== void 0 && typeof l != "boolean" && typeof l != "number" && !(typeof l == "object" && "x" in l && "y" in l)) throw Y(e, t, l, "a shift in units (0.5;0), or a distance in units (0.5)");
 		if (typeof l == "number" && c !== void 0 && qs(c) === null) throw Y(e, t, o, `a position that lies on a side (${c} has none) for the distance ${l}`);
 		if (u !== void 0 && u !== !0 && typeof u != "number") throw Y(e, t, u, "an angle in degrees, or nothing to turn the label with a line");
-		if (t.setLabelReference(s), t.addLabel(fp(a, t), {
+		if (t.setLabelReference(s), t.addLabel(bp(a, t), {
 			asHtml: e === "tex",
 			...i.toTex === void 0 ? {} : { texConverter: i.toTex }
 		}), t.label) {
@@ -9565,7 +9622,7 @@ function xp(e) {
 		}
 	};
 }
-function Sp(e, t) {
+function Ap(e, t) {
 	let n = {}, r = [];
 	for (let i of e) if (i !== !0) {
 		if (i === "grid") n.grid = !0;
@@ -9585,11 +9642,11 @@ function Sp(e, t) {
 	}
 	return r.length > 0 && (n.follow = r), n;
 }
-var Cp = (e, { value: t, options: n }, { graph: r }) => {
+var jp = (e, { value: t, options: n }, { graph: r }) => {
 	if (!(e instanceof G)) throw new i("drag", `The option "drag" is for a point, and "${e.name}" is not one`);
-	r.handle(e, Sp([t, ...n], r.figures));
+	r.handle(e, Ap([t, ...n], r.figures));
 };
-function wp(...e) {
+function Mp(...e) {
 	let t = Object.create(null);
 	for (let n of e) for (let [e, r] of Object.entries(n)) {
 		if (e in t) throw Error(`The option "${e}" is defined twice`);
@@ -9597,20 +9654,20 @@ function wp(...e) {
 	}
 	return t;
 }
-var Tp = wp({
+var Np = Mp({
 	w: (e, { value: t }) => {
 		if (typeof t != "number") throw Y("w", e, t, "a width, a number");
 		e.stroke(t);
 	},
 	color: (e, t) => {
-		e.stroke(_p("color", e, t));
+		e.stroke(Tp("color", e, t));
 	},
 	fill: (e, t) => {
-		e.fill(_p("fill", e, t));
+		e.fill(Tp("fill", e, t));
 	},
 	dash: (e, { value: t }) => {
 		if (t === !0) e.dash();
-		else if (typeof t == "string" && Object.hasOwn(hp, t)) e.dash(hp[t]);
+		else if (typeof t == "string" && Object.hasOwn(Cp, t)) e.dash(Cp[t]);
 		else if (typeof t == "string" || typeof t == "number") e.dash(t);
 		else throw Y("dash", e, t, "a pattern or a size (xs, sm, md, lg, xl), like dash=5, dash=5 2 or dash=lg");
 	},
@@ -9618,9 +9675,9 @@ var Tp = wp({
 		e.dot();
 	},
 	mark: (e, t) => {
-		e.mark(vp(e, t));
+		e.mark(Ep(e, t));
 	}
-}, Object.fromEntries(Object.entries(mp).map(([e, t]) => [e, (e) => {
+}, Object.fromEntries(Object.entries(Sp).map(([e, t]) => [e, (e) => {
 	e.stroke(t);
 }])), {
 	hide: (e) => {
@@ -9646,46 +9703,47 @@ var Tp = wp({
 		e.scale(t);
 	}
 }, {
-	label: xp("label"),
-	tex: xp("tex"),
-	drag: Cp
-}, ...ip().map((e) => e.options), _f, Mu, ud, $u, Pd);
-function Ep() {
-	return Object.keys(Tp);
+	label: kp("label"),
+	tex: kp("tex"),
+	drag: jp
+}, ...fp().map((e) => e.options), bf, Fu, pd, nd, Ld);
+function Pp() {
+	return Object.keys(Np);
 }
-var Dp;
-function Op() {
-	return Dp ??= {
-		keys: [...Ep(), ...bu],
+var Fp;
+function Ip() {
+	return Fp ??= {
+		keys: [...Pp(), ...Cu],
 		types: {
 			label: "text",
 			tex: "text",
-			...ap()
+			...pp()
 		}
-	}, Dp;
+	}, Fp;
 }
-function kp(e, t, n) {
-	let r = {
+function Lp(e, t, n, r = /* @__PURE__ */ new Map()) {
+	let i = {
 		graph: n,
-		options: e
+		options: e,
+		states: r
 	};
-	for (let [n, i] of Object.entries(e)) Ap(n, i, t, r);
+	for (let [n, r] of Object.entries(e)) Rp(n, r, t, i);
 }
-function Ap(e, t, n, r) {
-	if (!(e in Tp) && bu.includes(e)) n.stroke(e);
+function Rp(e, t, n, r) {
+	if (!(e in Np) && Cu.includes(e)) n.stroke(e);
 	else {
-		if (!(e in Tp)) throw new i(e, `Unknown option "${e}" for "${n.name}"`);
+		if (!(e in Np)) throw new i(e, `Unknown option "${e}" for "${n.name}"`);
 		try {
-			Tp[e](n, t, r);
+			Np[e](n, t, r);
 		} catch (t) {
 			throw t instanceof a && !(t instanceof i) ? new i(e, `Invalid option "${e}" of "${n.name}": ${t.message}`, { cause: t }) : t;
 		}
 	}
 }
-function jp(e, t, n) {
+function zp(e, t, n) {
 	if (!(n instanceof G)) return e;
 	let r = {}, i = t.points;
-	i && !gp.some((t) => Object.hasOwn(e, t)) && (i.shape !== "o" || i.size !== void 0) && (r[i.shape] = {
+	i && !wp.some((t) => Object.hasOwn(e, t)) && (i.shape !== "o" || i.size !== void 0) && (r[i.shape] = {
 		value: i.size ?? !0,
 		options: []
 	}), Object.assign(r, e);
@@ -9701,6 +9759,6 @@ function jp(e, t, n) {
 		options: []
 	}), r;
 }
-export { Ss as $, Fl as A, or as At, W as B, Yl as C, R as Ct, Il as D, Fa as Dt, Hl as E, Da as Et, ol as F, r as Ft, wc as G, Nc as H, $c as I, n as It, Vs as J, Us as K, el as L, c as Lt, kl as M, s as Mt, G as N, o as Nt, Ml as O, k as Ot, gl as P, i as Pt, Fs as Q, Mc as R, t as Rt, $l as S, Va as St, Ul as T, yr as Tt, Ac as U, Ic as V, Cc as W, Ls as X, Ps as Y, Is as Z, K as _, Ya as _t, rp as a, Uo as at, ou as b, Wa as bt, ip as c, Ho as ct, Af as d, H as dt, Ts as et, hf as f, Za as ft, bu as g, z as gt, Wd as h, B as ht, jp as i, Go as it, Ol as j, a as jt, Nl as k, sr as kt, jf as l, co as lt, Xd as m, V as mt, Op as n, es as nt, op as o, Wo as ot, of as p, Xa as pt, Hs as q, Ep as r, Ko as rt, sp as s, U as st, kp as t, ns as tt, Wf as u, so as ut, yu as v, Ga as vt, Vl as w, N as wt, tu as x, Ha as xt, pu as y, Ka as yt, Fc as z, e as zt };
+export { Is as $, Ml as A, k as At, Mc as B, t as Bt, Ql as C, Ha as Ct, zl as D, yr as Dt, Gl as E, N as Et, G as F, o as Ft, Ac as G, W as H, gl as I, i as It, Us as J, Cc as K, ol as L, r as Lt, Fl as M, or as Mt, Ol as N, a as Nt, Rl as O, Da as Ot, kl as P, s as Pt, Ls as Q, $c as R, n as Rt, nu as S, Wa as St, Kl as T, R as Tt, Ic as U, Fc as V, e as Vt, Nc as W, Vs as X, Hs as Y, Ps as Z, K as _, B as _t, dp as a, Ko as at, lu as b, Ga as bt, fp as c, Wo as ct, Nf as d, co as dt, Fs as et, vf as f, so as ft, Cu as g, V as gt, qd as h, Xa as ht, zp as i, es as it, Nl as j, sr as jt, Il as k, Fa as kt, Pf as l, U as lt, $d as m, Za as mt, Ip as n, Ts as nt, mp as o, Go as ot, lf as p, H as pt, wc as q, Pp as r, ns as rt, hp as s, Uo as st, Lp as t, Ss as tt, qf as u, Ho as ut, Su as v, z as vt, Wl as w, Va as wt, iu as x, Ka as xt, gu as y, Ya as yt, el as z, c as zt };
 
 //# sourceMappingURL=shared.js.map

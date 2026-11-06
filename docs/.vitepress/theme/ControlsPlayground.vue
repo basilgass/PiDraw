@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import {computed, onBeforeUnmount, onMounted, ref, shallowRef} from 'vue'
 import AnimationControls from './AnimationControls.vue'
+import ButtonsControls from './ButtonsControls.vue'
 import ZoomControls from './ZoomControls.vue'
 import SlidesControls from './SlidesControls.vue'
 import {controlsDemos} from './controlsDemos'
@@ -14,6 +15,7 @@ const log = ref<{ id: number, at: string, event: string }[]>([])
 const animation = shallowRef<import('pidraw').Animate | null>(null)
 const zoom = shallowRef<import('pidraw').Zoom | null>(null)
 const slides = shallowRef<import('pidraw').Slides | null>(null)
+const buttons = shallowRef<import('pidraw').Buttons | null>(null)
 const animated = ref(false)
 
 const current = computed(() => controlsDemos[selected.value])
@@ -27,7 +29,7 @@ let origin = 0
 const ANIMATION_EVENTS = ['start', 'pause', 'end', 'stop'] as const
 
 /** Write an event of a controller in the log: what the program would receive from `on`. */
-function record(source: 'animation' | 'zoom' | 'slides', event: string): void {
+function record(source: 'animation' | 'zoom' | 'slides' | 'buttons', event: string): void {
     if (counter === 0) {
         origin = performance.now()
     }
@@ -53,22 +55,28 @@ const zoomHandlers = {
     navigation: (event: CustomEvent<boolean>) => { record('zoom', `navigation ${event.detail ? 'on' : 'off'}`) }
 }
 
-function listen(target: import('pidraw').Animate | null, other: import('pidraw').Zoom | null, steps: import('pidraw').Slides | null): void {
+function buttonsHandler(event: CustomEvent<{ toggled: string | null }>): void {
+    record('buttons', event.detail.toggled === null ? 'change (the buttons of the code)' : `change ${event.detail.toggled}`)
+}
+
+function listen(target: import('pidraw').Animate | null, other: import('pidraw').Zoom | null, steps: import('pidraw').Slides | null, pushed: import('pidraw').Buttons | null): void {
     for (const event of ANIMATION_EVENTS) {
         target?.on(event, animationHandlers[event])
     }
 
     other?.on('change', zoomHandlers.change).on('navigation', zoomHandlers.navigation)
     steps?.on('change', slidesHandler)
+    pushed?.on('change', buttonsHandler)
 }
 
-function unlisten(target: import('pidraw').Animate | null, other: import('pidraw').Zoom | null, steps: import('pidraw').Slides | null): void {
+function unlisten(target: import('pidraw').Animate | null, other: import('pidraw').Zoom | null, steps: import('pidraw').Slides | null, pushed: import('pidraw').Buttons | null): void {
     for (const event of ANIMATION_EVENTS) {
         target?.off(event, animationHandlers[event])
     }
 
     other?.off('change', zoomHandlers.change).off('navigation', zoomHandlers.navigation)
     steps?.off('change', slidesHandler)
+    pushed?.off('change', buttonsHandler)
 }
 
 function clearLog(): void {
@@ -85,7 +93,7 @@ async function show(): Promise<void> {
     const library = await import('pidraw')
     katex ??= await import('katex')
 
-    unlisten(animation.value, zoom.value, slides.value)
+    unlisten(animation.value, zoom.value, slides.value, buttons.value)
     draw?.graph.dispose()
     host.value.replaceChildren()
     clearLog()
@@ -102,11 +110,13 @@ async function show(): Promise<void> {
     const nextAnimation = new library.Animate(draw.graph)
     const nextZoom = demo.zoom === undefined ? null : new library.Zoom(draw.graph, demo.zoom)
     const nextSlides = demo.slides === undefined ? null : new library.Slides(draw.graph, demo.slides)
-    listen(nextAnimation, nextZoom, nextSlides)
+    const nextButtons = demo.buttons === true ? new library.Buttons(draw.graph) : null
+    listen(nextAnimation, nextZoom, nextSlides, nextButtons)
     animated.value = nextAnimation.canBeAnimated()
     animation.value = nextAnimation
     zoom.value = nextZoom
     slides.value = nextSlides
+    buttons.value = nextButtons
 }
 
 onMounted(() => {
@@ -114,12 +124,13 @@ onMounted(() => {
 })
 
 onBeforeUnmount(() => {
-    unlisten(animation.value, zoom.value, slides.value)
+    unlisten(animation.value, zoom.value, slides.value, buttons.value)
     draw?.graph.dispose()
     draw = null
     animation.value = null
     zoom.value = null
     slides.value = null
+    buttons.value = null
 })
 </script>
 
@@ -146,6 +157,10 @@ onBeforeUnmount(() => {
 
         <div v-if="slides !== null" class="pd-panel">
             <SlidesControls :slides="slides" />
+        </div>
+
+        <div v-if="buttons !== null" class="pd-panel">
+            <ButtonsControls :buttons="buttons" />
         </div>
 
         <div v-if="animated" class="pd-panel">

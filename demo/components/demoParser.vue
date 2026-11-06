@@ -2,7 +2,7 @@
 
 import {onMounted, ref} from "vue"
 import katex from "katex"
-import {Animate, type IGraphDragEvent, type IGraphDragMoveEvent, PiDraw} from "../../src"
+import {Animate, Buttons, type IButton, type IGraphDragEvent, type IGraphDragMoveEvent, PiDraw} from "../../src"
 import {basic_examples} from "../parsing_examples/basic_examples"
 
 const id = basic_examples.length - 1
@@ -15,11 +15,14 @@ const parameterError = ref<string>('')
 const code = ref<string>(basic_examples[id].code ?? '')
 
 const showAnimation = ref<boolean>(false)
+// The buttons that the code declares (@button=id->title=Text) and the ones that are pressed.
+const buttons = ref<IButton[]>([])
 // What is wrong with the lines of the code: the report of the last drawing.
 const lineErrors = ref<string[]>([])
 
 let draw: PiDraw
 let player: Animate
+let pushers: Buttons
 
 function update(newCode: unknown) {
   if (typeof newCode === "string") {
@@ -70,6 +73,11 @@ onMounted(() => {
   )
 
   player = new Animate(draw.graph)
+  pushers = new Buttons(draw.graph)
+  buttons.value = pushers.buttons
+  pushers.on('change', event => {
+    buttons.value = [...event.detail.buttons]
+  })
   parameterError.value = draw.layoutError?.message ?? ''
   lineErrors.value = draw.errors.map(error => `Line ${error.line}: ${error.message}`)
   showAnimation.value = player.canBeAnimated()
@@ -144,6 +152,21 @@ function logTikz(){
 				>
 					{{ touched }}
 				</p>
+
+				<div
+					v-if="buttons.length > 0"
+					class="flex flex-wrap gap-3 mt-3"
+				>
+					<button
+						v-for="button in buttons"
+						:key="button.id"
+						class="hover:bg-gray-200 transition-colors border rounded px-4 py-2"
+						:class="button.active ? 'bg-gray-300' : 'bg-white'"
+						@click="pushers.toggle(button.id)"
+					>
+						{{ button.title }}
+					</button>
+				</div>
 
 				<div
 					v-show="showAnimation"

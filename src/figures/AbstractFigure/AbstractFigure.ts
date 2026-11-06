@@ -317,6 +317,17 @@ export abstract class AbstractFigure {
         return this
     }
 
+    /** Show what {@link hideShape} hid (the label is not touched: `?` hides it for good). */
+    showShape(): this {
+        this._element.children().forEach((child) => {
+            if (child.attr('id') !== `${this._name}-label`) {
+                child.show()
+            }
+        })
+
+        return this
+    }
+
     /**
      * Take away what was asked of the figure since it was made, so that a figure that is given another configuration looks like a new one:
      * the appearance, the dashes and the markers, the moves and the scales of the shape, the label, what the themes kept (`controls`), whether the user holds it,

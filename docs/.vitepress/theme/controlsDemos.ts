@@ -10,6 +10,8 @@ export interface IControlsDemo {
     zoom?: { allow?: 'both' | 'zoom' | 'move', gestures?: boolean }
     /** The presentation of the demo, as `new Slides(graph, slides)` makes it: none for a demo without. */
     slides?: { count?: number }
+    /** Whether the demo has the buttons of the code, as `new Buttons(graph)` makes them. */
+    buttons?: boolean
 }
 
 export const controlsDemos: IControlsDemo[] = [
@@ -184,5 +186,36 @@ export const controlsDemos: IControlsDemo[] = [
         ].join('\n'),
         zoom: {gestures: true},
         slides: {}
+    },
+    {
+        name: 'Buttons that show the areas',
+        about: 'Each button shows or hides its area, and the area fades in the seconds of its toggle. The areas start hidden, because of the !.',
+        parameters: 'x=-1:10,y=-1:10,axis,grid',
+        code: [
+            'f(x)=x/3+6',
+            'g(x)=1/8(2x-8)^2+2',
+            '@button=between->title=Between f and g',
+            '@button=f->title=Under f',
+            '@button=g->title=Under g',
+            'a=fill f,g,1.05:7.6->fill=yellow/0.3,!,toggle=between/0.5',
+            'b=fill f,1.05:7.6->fill=green/0.3,!,toggle=f/1',
+            'c=fill g,1.05:7.6->fill=red/0.3,!,toggle=g/2'
+        ].join('\n'),
+        buttons: true
+    },
+    {
+        name: 'Buttons, steps and a figure that starts shown',
+        about: 'A figure without ! starts shown and its button hides it. The middle M is shown from the second step: it appears only when the step and the button agree.',
+        parameters: 'x=-1:7,y=-1:5,axis',
+        code: [
+            '@button=label->title=The middle',
+            'A(1,1)->label',
+            '@pause',
+            'B(5,3)->label',
+            's=seg A,B->red',
+            'M=mid A,B->blue,label,toggle=label/0.5'
+        ].join('\n'),
+        slides: {},
+        buttons: true
     }
 ]

@@ -1,3 +1,4 @@
+import type {IControlsFigure} from "../controls/controls.types"
 import {OptionError, ParseError, PiDrawError} from "../errors"
 
 /**
@@ -37,6 +38,20 @@ export interface IDrawLineStatus {
 export interface IDrawReport {
     errors: IDrawError[]
     lines: IDrawLineStatus[]
+}
+
+/** What the figures of a drawing ask of the program: which extensions it must turn on. */
+export interface IDrawUsage {
+    /** Whether a point can be dragged. */
+    draggable: boolean
+    /** The themes (`animate`, `slide`, `toggle`...) that at least one figure uses, in alphabetical order. */
+    controls: readonly (keyof IControlsFigure)[]
+}
+
+/** The events of a `Draw`. */
+export interface IDrawEventMap {
+    /** The code was drawn again and the {@link IDrawUsage} is not the one it was: an extension may have to be turned on or off. */
+    'usage': IDrawUsage
 }
 
 /** How to draw the code again. */

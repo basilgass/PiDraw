@@ -384,5 +384,18 @@ s=seg A,C->label=@
 t=poly A,B,C->fill=orange/0.3,label=@area
 c=circ A,1->label=@radius
 a=arc B,A,C,1.5->label=@`
+    },
+    {
+        name: 'buttons: show and hide the figures',
+        parameters: 'x=-1:10,y=-1:10,axis,grid',
+        code: `f(x)=x/3+6
+g(x)=1/8(2x-8)^2+2
+@button=between->title=Between f and g
+@button=under_f->title=Under f
+@button=under_g->title=Under g
+a=fill f,g,1.05:7.6->fill=yellow/0.3,!,toggle=between/0.5
+b=fill f,1.05:7.6->fill=green/0.3,!,toggle=under_f/1
+c=fill g,1.05:7.6->fill=red/0.3,!,toggle=under_g/2
+A(2,3)->drag=grid,label,toggle=under_g`
     }
 ]

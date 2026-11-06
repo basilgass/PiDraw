@@ -224,7 +224,7 @@ describe('readCode titles', () => {
     const titles = (code: string) => readAll(code).graphControls.titles
 
     test('there are none by default, and the graph is told to take them away', () => {
-        expect(readAll('A(1,2)').graphControls).toEqual({titles: null})
+        expect(readAll('A(1,2)').graphControls).toEqual({titles: null, buttons: null})
     })
 
     test('@pause=Title titles the step that the pause opens', () => {

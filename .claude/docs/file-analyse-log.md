@@ -39,6 +39,10 @@ Règles de tenue :
 | src/animate/Animate.syntax.ts | Jamais |  |  |
 | src/controls/controls.ts | Jamais |  |  |
 | src/controls/controls.types.ts | Jamais |  |  |
+| src/buttons/Buttons.ts | Jamais |  |  |
+| src/buttons/Buttons.syntax.ts | Jamais |  |  |
+| src/buttons/Buttons.types.ts | Jamais |  |  |
+| src/buttons/toggle.ts | Jamais |  |  |
 | src/slides/Slides.types.ts | 2026-11-05 | 2026-11-05 : c2352409-1f0d-483b-b9dd-7ae70aa615e8 | |
 | src/calculus/computeAxis.ts | 2026-10-30 | 2026-10-30 : 2c074a69-e519-4c8f-82a5-8e23320a64cc | src/figures/Axis/Axis.ts |
 | src/calculus/computeBezier.ts | 2026-10-29 | 2026-10-29 : 2c074a69-e519-4c8f-82a5-8e23320a64cc | src/figures/Bezier/Bezier.ts |

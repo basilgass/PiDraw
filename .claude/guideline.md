@@ -247,6 +247,17 @@ Une figure qui reçoit une entrée de `controls` (`setControl`) prévient son co
   d'un point à un point (`InvalidArgumentError`), puis appelle `figure.setControl('animate', …)`. Une figure animable un jour (un `Plot` qui se dessine) aura son cas dans `animation.ts` et dans `Animate` : le cœur n'a ni `animatable` ni `_checkAnimation`.
   Le code qui joue l'animation (`Animate`) choisit les figures par leur classe, pas par la forme de leurs propriétés.
 
+## Ce que le dessin demande au programme (`Draw.usage`)
+
+- `Draw.hasDraggable()`, `Draw.uses(clé)` et `Draw.usedControls()` se lisent sur les figures du graphe (`isDraggable`, `figure.controls`), sans état : un balayage de `graph.figures`. Un thème nouveau est couvert dès que sa clé est dans `IControlsFigure`. Une déclaration du graphe sans figure (`@button` non cité, `@slides` seul) n'est pas un usage.
+- `Draw` est un `EventTarget` : l'événement `usage` (`IDrawUsage` : `{draggable, controls}`, `IDrawEventMap` dans `Draw.report.ts`) est émis à la fin de `_build` seulement si le résultat diffère du précédent ; le constructeur n'émet pas (aucun écouteur n'existe encore).
+
+## Boutons (`src/buttons/`)
+
+- `@button=id->title=Texte` (titre = `id` s'il manque) déclare un bouton, **au-dessus** des figures qui le citent ; `toggle=id` ou `toggle=id/secondes` lie une figure (`controls.toggle` : `{id, duration, hidden}`). Un `toggle` sur un bouton non déclaré avant sa ligne est une `OptionError` : le `fold` de `@button` est la source, l'option lit l'état des commandes par `IOptionContext.states` (clé du thème dans `THEMES` : `toggle`).
+- **Toute durée du code est en secondes** (`animate` : `duration`, `delay` ; `toggle=id/0.5`), jamais en millisecondes ; seul le code interne (`performance.now`, `requestAnimationFrame`) compte en ms.
+- `!` sur une ligne qui a un `toggle` veut dire « caché jusqu'au clic », label compris (`hidden: true`, `AbstractFigure.showShape()` annule le `hideShape`) ; sans `!`, la figure est montrée et le clic la cache. Un clic inverse toutes les figures du bouton, chacune depuis son état de départ. `Buttons` (`toggle`, `reset`, `buttons`, `isActive`, événement `change`) cache par la raison `toggle` (`setHiddenBy`) et fond par l'opacité du groupe ; aucune interface dans `src/` (`ButtonsControls.vue` dans la documentation).
+
 ## Thèmes : ce que le cœur ne sait pas
 
 Un **thème** (`animate`, `slides`, `zoom`, demain un autre) est un dossier `src/<thème>/` avec son contrôleur, son `.types.ts` et, s'il ajoute à la syntaxe, son `<Thème>.syntax.ts`. **Casser ou retirer un thème ne touche jamais la logique du cœur** : retirer son dossier, sa ligne dans `controls/controls.ts`

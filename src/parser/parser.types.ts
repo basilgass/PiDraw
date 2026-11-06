@@ -86,6 +86,11 @@ export type Options = Record<string, IParserParameters>
 export interface IOptionContext {
     graph: Graph
     options: Options
+    /**
+     * What the commands before the line say, for each theme that has commands, by the name of its entry in the controls (`toggle` reads the buttons
+     * declared above the line). Empty when the options do not come from a line of code.
+     */
+    states: ReadonlyMap<string, unknown>
 }
 
 /**

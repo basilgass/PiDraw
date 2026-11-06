@@ -1,4 +1,5 @@
 import type {IFigureAnimation} from "../animate/Animate.types"
+import type {IButtonDefinitions, IFigureToggle} from "../buttons/Buttons.types"
 import type {ISlideSet, ISlideTitles} from "../slides/Slides.types"
 
 /**
@@ -11,6 +12,8 @@ export interface IControlsFigure {
     animate: IFigureAnimation
     /** The steps at which the figure is shown (see `Slides`). */
     slide: ISlideSet
+    /** The button that shows or hides the figure (see `Buttons`). */
+    toggle: IFigureToggle
 }
 
 /**
@@ -20,4 +23,6 @@ export interface IControlsFigure {
 export interface IControlsGraph {
     /** The titles of the steps of a presentation (see `Slides`). */
     titles: ISlideTitles
+    /** The buttons that the code declares (see `Buttons`). */
+    buttons: IButtonDefinitions
 }

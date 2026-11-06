@@ -38,7 +38,7 @@ export declare class Draw {
     protected _restore(record: ILineRecord): void;
     protected _buildLine(line: IDrawLine, previous: ILineRecord | undefined): ILineRecord;
     protected _removeMade(names: readonly string[]): void;
-    protected _buildItem(item: PARSER, controls: Partial<IControlsFigure>): void;
+    protected _buildItem(item: PARSER, controls: Partial<IControlsFigure>, states: ReadonlyMap<string, unknown>): void;
     protected _namedFigures(): Record<string, AbstractFigure>;
     protected _uniqueName(name: string): string;
 }

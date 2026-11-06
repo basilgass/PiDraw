@@ -1,4 +1,5 @@
 import {ANIMATE_SYNTAX} from "../animate/Animate.syntax"
+import {BUTTONS_SYNTAX} from "../buttons/Buttons.syntax"
 import type {IThemeSyntax, OptionValueType} from "../parser/parser.types"
 import {SLIDES_SYNTAX} from "../slides/Slides.syntax"
 import type {IControlsFigure} from "./controls.types"
@@ -12,7 +13,8 @@ import type {IControlsFigure} from "./controls.types"
  */
 export const THEMES: Readonly<Record<keyof IControlsFigure, IThemeSyntax>> = {
     animate: ANIMATE_SYNTAX,
-    slide: SLIDES_SYNTAX
+    slide: SLIDES_SYNTAX,
+    toggle: BUTTONS_SYNTAX
 }
 
 /** The syntax of every theme. */

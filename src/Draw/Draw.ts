@@ -17,8 +17,10 @@ import {
     asPiDrawError,
     drawError,
     type IDrawError,
+    type IDrawEventMap,
     type IDrawLineStatus,
     type IDrawReport,
+    type IDrawUsage,
     type IRefreshOptions
 } from "./Draw.report"
 
@@ -43,7 +45,7 @@ function copyControl(from: Readonly<Partial<IControlsFigure>>, to: AbstractFigur
  * A line of code that is not valid does not stop the others: the problems are in the report that {@link refresh} gives (and in `report`), line
  * by line, for an editor to show.
  */
-export class Draw {
+export class Draw extends EventTarget {
     /** The graph that the code is drawn in. */
     readonly graph: Graph
 
@@ -65,7 +67,12 @@ export class Draw {
     /** The points the user dragged, by name: the line they were made by, and where they were left (in units, so that a new scale keeps them). */
     protected _moved = new Map<string, { text: string, coordinates: XY }>()
 
+    /** What the figures used when `usage` was last told, to tell it again only when it differs. */
+    protected _usage: IDrawUsage = {draggable: false, controls: []}
+
     constructor(id: string | HTMLElement, config?: IParserConfig) {
+        super()
+
         // Without a converter the text of an HTML label is written as text, never read as HTML.
         this.graph = new Graph(id, config?.tex === undefined ? {} : {tex: config.tex})
 
@@ -100,6 +107,65 @@ export class Draw {
         }
 
         return this
+    }
+
+    /** Whether a point of the drawing can be dragged (`drag`): the program turns the pointer interactions on only then. */
+    hasDraggable(): boolean {
+        return Object.values(this.graph.figures).some(figure => figure.isDraggable)
+    }
+
+    /**
+     * Whether at least one figure uses the theme `key` (`animate`, `slide`, `toggle`...): the program creates `Animate`, `Slides`, `Buttons` only then.
+     * A declaration that no figure uses (a `@button` that no figure cites) does not count.
+     */
+    uses(key: keyof IControlsFigure): boolean {
+        return Object.values(this.graph.figures).some(figure => figure.controls[key] !== undefined)
+    }
+
+    /** The themes that at least one figure uses (see {@link uses}), in alphabetical order. */
+    usedControls(): (keyof IControlsFigure)[] {
+        const keys = new Set<keyof IControlsFigure>()
+
+        for (const figure of Object.values(this.graph.figures)) {
+            (Object.keys(figure.controls) as (keyof IControlsFigure)[]).forEach(key => keys.add(key))
+        }
+
+        return [...keys].sort()
+    }
+
+    /**
+     * Call `handler` each time drawing the code changes what the figures ask of the program (`usage`): a point became draggable or stopped
+     * being so, or a theme gained or lost its last figure. Nothing is told when the usage is the same.
+     * The same handler given twice is called once.
+     * @returns the drawing, to chain.
+     */
+    on<K extends keyof IDrawEventMap>(event: K, handler: (e: CustomEvent<IDrawEventMap[K]>) => void): this {
+        this.addEventListener(event, handler as EventListener)
+
+        return this
+    }
+
+    /**
+     * Stop calling a handler given to {@link on}.
+     * @returns the drawing, to chain.
+     */
+    off<K extends keyof IDrawEventMap>(event: K, handler: (e: CustomEvent<IDrawEventMap[K]>) => void): this {
+        this.removeEventListener(event, handler as EventListener)
+
+        return this
+    }
+
+    /** Tell `usage` if what the figures use is not what it was. */
+    protected _tellUsage(): void {
+        const usage: IDrawUsage = {draggable: this.hasDraggable(), controls: this.usedControls()}
+        const before = this._usage
+
+        if (usage.draggable === before.draggable && usage.controls.join() === before.controls.join()) {
+            return
+        }
+
+        this._usage = usage
+        this.dispatchEvent(new CustomEvent('usage', {detail: usage}))
     }
 
     protected _code: PARSER[]
@@ -258,6 +324,8 @@ export class Draw {
             this.graph.update(made.map(name => this.graph.figures[name]))
         }
 
+        this._tellUsage()
+
         return this._report
     }
 
@@ -351,7 +419,7 @@ export class Draw {
 
             const read = structuredClone(line.item)
 
-            this._buildItem(line.item, line.controls)
+            this._buildItem(line.item, line.controls, line.states)
 
             return {...record, valid: read, validText: line.text, error: null, fallback: false, created: made()}
         } catch (e) {
@@ -364,7 +432,7 @@ export class Draw {
             this._removeMade(made())
 
             try {
-                this._buildItem(structuredClone(previous.valid), line.controls ?? {})
+                this._buildItem(structuredClone(previous.valid), line.controls ?? {}, line.states ?? new Map())
 
                 return {...record, valid: previous.valid, validText: previous.validText, error, fallback: true, created: made()}
             } catch {
@@ -388,9 +456,10 @@ export class Draw {
     /**
      * Build the figures of one line of code and apply its options.
      * @param controls what the commands before the line give to the controls of its figures, unless the line has its own option for them.
+     * @param states what the commands before the line say, by theme (the buttons that a `toggle` names).
      * @throws ParseError if the line cannot be built, OptionError if one of its options is not valid.
      */
-    protected _buildItem(item: PARSER, controls: Partial<IControlsFigure>): void {
+    protected _buildItem(item: PARSER, controls: Partial<IControlsFigure>, states: ReadonlyMap<string, unknown>): void {
         // The names of the axes are theirs.
         if (AXIS_NAMES.includes(item.name)) {
             throw new ParseError(`Cannot build "${item.name}" (${item.key}): ${item.name} is the name of an axis of the graph, choose another name`)
@@ -423,7 +492,7 @@ export class Draw {
 
             const obj = make.call(makers, config, item.name + (builds.length > 1 ? `${index + 1}` : ''))
 
-            applyOptions(withDefaults(item.parameters, this._settings, obj), obj, this.graph)
+            applyOptions(withDefaults(item.parameters, this._settings, obj), obj, this.graph, states)
 
             // What the commands before the line give, unless the line says its own (the name of the entry is the one of its option).
             for (const key of Object.keys(controls) as (keyof IControlsFigure)[]) {

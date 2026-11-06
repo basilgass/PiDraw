@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import {computed, onBeforeUnmount, onMounted, ref, shallowRef} from 'vue'
 import AnimationControls from './AnimationControls.vue'
+import ButtonsControls from './ButtonsControls.vue'
 import SlidesControls from './SlidesControls.vue'
 
 // The code of the example is encoded by the Markdown fence (see config.mts): a newline or a quote cannot travel in an attribute.
@@ -11,6 +12,7 @@ const errors = ref<{ line: number, message: string }[]>([])
 const animated = ref(false)
 const interactive = ref(false)
 const stepped = ref(false)
+const pushable = ref(false)
 
 const source = computed(() => decodeURIComponent(props.code))
 
@@ -18,6 +20,7 @@ const source = computed(() => decodeURIComponent(props.code))
 let draw: import('pidraw').PiDraw | null = null
 const animation = shallowRef<import('pidraw').Animate | null>(null)
 const slides = shallowRef<import('pidraw').Slides | null>(null)
+const buttons = shallowRef<import('pidraw').Buttons | null>(null)
 
 function show(): void {
     if (draw === null) {
@@ -28,17 +31,19 @@ function show(): void {
     animated.value = animation.value?.canBeAnimated() ?? false
     interactive.value = Object.keys(draw.graph.figures).some(name => name.endsWith('_drag'))
     stepped.value = (slides.value?.count ?? 1) > 1
+    pushable.value = (buttons.value?.buttons.length ?? 0) > 0
 }
 
 function reset(): void {
     animation.value?.stop()
     slides.value?.first()
+    buttons.value?.reset()
     draw?.refresh(source.value, {drag: 'reset'})
     show()
 }
 
 onMounted(async () => {
-    const [{PiDraw, Animate, Slides}, katex] = await Promise.all([import('pidraw'), import('katex')])
+    const [{PiDraw, Animate, Slides, Buttons}, katex] = await Promise.all([import('pidraw'), import('katex')])
 
     draw = new PiDraw(host.value as HTMLElement, {
         code: source.value,
@@ -47,6 +52,7 @@ onMounted(async () => {
     })
     animation.value = new Animate(draw.graph)
     slides.value = new Slides(draw.graph)
+    buttons.value = new Buttons(draw.graph)
     show()
 })
 
@@ -55,6 +61,7 @@ onBeforeUnmount(() => {
     draw = null
     animation.value = null
     slides.value = null
+    buttons.value = null
 })
 </script>
 
@@ -62,8 +69,9 @@ onBeforeUnmount(() => {
     <div class="pd-example">
         <div ref="host" class="pd-figure"></div>
 
-        <div v-if="animated || interactive || stepped" class="pd-bar">
+        <div v-if="animated || interactive || stepped || pushable" class="pd-bar">
             <SlidesControls v-if="stepped" :slides="slides" />
+            <ButtonsControls :buttons="buttons" />
             <AnimationControls v-if="animated" :animation="animation" />
             <button type="button" @click="reset">Reset</button>
             <span v-if="interactive" class="pd-hint">Drag the points</span>

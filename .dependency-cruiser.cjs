@@ -13,7 +13,7 @@ module.exports = {
     // },
     // log an error for all circular dependencies which consist of only 
     // dependencies that are _not_ declared as explicitly type-only
-    // The themes (animation, zoom, slides) are independent controllers: the core knows only their types (`*.types.ts`), and a theme never reads another.
+    // The themes (animation, zoom, slides, buttons) are independent controllers: the core knows only their types (`*.types.ts`), and a theme never reads another.
     // Only the registry of the themes (src/controls/controls.ts) names their syntax, and only the syntax layer (Draw), the editors (codemirror) and the entry
     // of the package (index.ts) read it. Taking a theme out is taking its folder, its line in the registry and its exports out: the core does not change.
     {
@@ -21,10 +21,10 @@ module.exports = {
       severity: 'error',
       from: {
         path: '^src',
-        pathNot: '^src/(animate|zoom|slides)/|^src/index[.]ts$|^src/codemirror|^src/controls/controls[.]ts$'
+        pathNot: '^src/(animate|zoom|slides|buttons)/|^src/index[.]ts$|^src/codemirror|^src/controls/controls[.]ts$'
       },
       to: {
-        path: '^src/(animate|zoom|slides)/',
+        path: '^src/(animate|zoom|slides|buttons)/',
         pathNot: '[.]types[.]ts$'
       }
     },
@@ -43,7 +43,7 @@ module.exports = {
       name: 'theme-not-to-syntax-layer',
       severity: 'error',
       from: {
-        path: '^src/(animate|zoom|slides)/'
+        path: '^src/(animate|zoom|slides|buttons)/'
       },
       to: {
         path: '^src/(Draw|codemirror|controls/controls[.]ts)'
@@ -53,10 +53,10 @@ module.exports = {
       name: 'theme-not-to-theme',
       severity: 'error',
       from: {
-        path: '^src/(animate|zoom|slides)/'
+        path: '^src/(animate|zoom|slides|buttons)/'
       },
       to: {
-        path: '^src/(animate|zoom|slides)/',
+        path: '^src/(animate|zoom|slides|buttons)/',
         pathNot: '^src/$1/'
       }
     },

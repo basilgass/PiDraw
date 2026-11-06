@@ -6,6 +6,6 @@ export type { IOptionContext, OptionHandler, Options };
 export declare function dragConfig(values: unknown[], figures: Record<string, AbstractFigure>): IDraggableConfig;
 export declare function optionNames(): string[];
 export declare function lineParseOptions(): PiParseOptions;
-export declare function applyOptions(options: Options, figure: AbstractFigure, graph: Graph): void;
+export declare function applyOptions(options: Options, figure: AbstractFigure, graph: Graph, states?: ReadonlyMap<string, unknown>): void;
 export declare function withDefaults(options: Options, settings: IParserSettings, figure: AbstractFigure): Options;
 //# sourceMappingURL=Draw.options.d.ts.map

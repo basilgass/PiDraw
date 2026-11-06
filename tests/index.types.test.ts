@@ -4,6 +4,9 @@ import type {
     BezierSegment,
     BuildResult,
     CircleOnly,
+    IButton,
+    IButtonsEventMap,
+    IFigureToggle,
     FigureKind,
     IAnimateEventMap,
     IDraggableConfig,
@@ -44,8 +47,12 @@ describe('the types of the package pidraw', () => {
         const state: ISlidesState = {current: 1, count: 3, title: null}
         const slidesEvent: keyof ISlidesEventMap = 'change'
         const slidesOptions: ISlidesOptions = {count: 3}
+        const button: IButton = {id: 'area', title: 'Area', active: false}
+        const buttonsEvent: keyof IButtonsEventMap = 'change'
+        const toggle: IFigureToggle = {id: 'area', duration: 0.5, hidden: true}
 
-        expect([easing, kind, events, selection.every, options.allow, zoomEvent, shown.x.max, set[0].from, state.count, slidesEvent, slidesOptions.count]).toEqual(['inOut', 'point', 'end', 5, 'zoom', 'navigation', 1, 2, 3, 'change', 3])
+        expect([easing, kind, events, selection.every, options.allow, zoomEvent, shown.x.max, set[0].from, state.count, slidesEvent, slidesOptions.count, button.id, buttonsEvent, toggle.duration])
+            .toEqual(['inOut', 'point', 'end', 5, 'zoom', 'navigation', 1, 2, 3, 'change', 3, 'area', 'change', 0.5])
     })
 
     test('name the shapes that the figures give back', () => {

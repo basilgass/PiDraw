@@ -5,7 +5,7 @@ import {PiParse} from 'piparser'
 
 describe('the registry of the themes', () => {
     test('has a syntax for each entry that the themes keep on a figure', () => {
-        expect(Object.keys(THEMES).sort()).toEqual(['animate', 'slide'])
+        expect(Object.keys(THEMES).sort()).toEqual(['animate', 'slide', 'toggle'])
     })
 
     test('the options of the themes are options of the language, each once', () => {

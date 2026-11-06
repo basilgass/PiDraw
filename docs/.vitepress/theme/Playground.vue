@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import {computed, onBeforeUnmount, onMounted, ref, shallowRef} from 'vue'
 import AnimationControls from './AnimationControls.vue'
+import ButtonsControls from './ButtonsControls.vue'
 import SlidesControls from './SlidesControls.vue'
 import {basic_examples} from '../../../demo/parsing_examples/basic_examples'
 
@@ -33,6 +34,7 @@ type Diagnostic = import('@codemirror/lint').Diagnostic
 let draw: InstanceType<Library['PiDraw']> | null = null
 const animation = shallowRef<InstanceType<Library['Animate']> | null>(null)
 const slides = shallowRef<InstanceType<Library['Slides']> | null>(null)
+const buttons = shallowRef<InstanceType<Library['Buttons']> | null>(null)
 let view: import('@codemirror/view').EditorView | null = null
 let lint: typeof import('@codemirror/lint') | null = null
 let scheduled = false
@@ -102,6 +104,7 @@ function changeParameters(): void {
 function reset(): void {
     animation.value?.stop()
     slides.value?.first()
+    buttons.value?.reset()
     draw?.refresh(view?.state.doc.toString() ?? '', {drag: 'reset'})
     schedule()
 }
@@ -154,6 +157,7 @@ onMounted(async () => {
 
     animation.value = new library.Animate(draw.graph)
     slides.value = new library.Slides(draw.graph)
+    buttons.value = new library.Buttons(draw.graph)
 
     parametersError.value = draw.layoutError?.message ?? ''
     ready.value = true
@@ -167,6 +171,7 @@ onBeforeUnmount(() => {
     draw = null
     animation.value = null
     slides.value = null
+    buttons.value = null
 })
 </script>
 
@@ -202,6 +207,10 @@ onBeforeUnmount(() => {
         </ul>
 
         <div ref="figureHost" class="pd-figure"></div>
+
+        <div class="pd-buttons-bar">
+            <ButtonsControls :buttons="buttons" />
+        </div>
 
         <pre v-if="showTikz" class="pd-tikz">{{ tikz }}</pre>
     </div>
@@ -323,6 +332,10 @@ onBeforeUnmount(() => {
 }
 
 /* The figures are drawn for a white page, whatever the theme of the site. */
+.pd-buttons-bar {
+    margin-top: 8px;
+}
+
 .pd-figure {
     margin-top: 12px;
     width: fit-content;

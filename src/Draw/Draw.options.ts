@@ -297,9 +297,10 @@ export function lineParseOptions(): PiParseOptions {
  * Apply the options of a line of code to its figure, in the order they are written.
  * @throws OptionError if an option does not exist, cannot be applied to the figure, or has a value that is not valid. The options
  * before it are applied.
+ * @param states what the commands before the line say, by theme (see {@link IOptionContext.states}).
  */
-export function applyOptions(options: Options, figure: AbstractFigure, graph: Graph): void {
-    const context: IOptionContext = {graph, options}
+export function applyOptions(options: Options, figure: AbstractFigure, graph: Graph, states: ReadonlyMap<string, unknown> = new Map()): void {
+    const context: IOptionContext = {graph, options, states}
 
     for (const [key, option] of Object.entries(options)) {
         applyOption(key, option, figure, context)

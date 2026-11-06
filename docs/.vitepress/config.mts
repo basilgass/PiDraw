@@ -108,6 +108,7 @@ export default defineConfig({
                 items: [
                     {text: 'Dragging and animation', link: '/guide/interaction'},
                     {text: 'Slides', link: '/guide/slides'},
+                    {text: 'Buttons', link: '/guide/buttons'},
                     {text: 'Using it from code', link: '/guide/code'},
                     {text: 'Errors and editing', link: '/guide/errors'},
                     {text: 'TikZ export', link: '/guide/tikz'},

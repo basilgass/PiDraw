@@ -123,7 +123,7 @@ Empty lines are ignored, and so are two kinds of lines. They still count in the 
 - A line that starts with `%` is a comment. Putting `%` before a line of code switches that line off.
 - A line that starts with `$` is ignored by PiDraw too, but it is not a comment: it is meant for something else that reads the same code (an application that keeps its own parameters in it, for example), which can tell it from a comment.
 
-A line that starts with `@` is a command: `@pause` and `@slides` (see [slides](./slides)); any other one is an error. Only a whole line can be a comment: after the code of a figure, a `%` is part of the line (`A(1,1) % here` is an error).
+A line that starts with `@` is a command: `@pause` and `@slides` (see [slides](./slides)), and `@button` (see [buttons](./buttons)); any other one is an error. Only a whole line can be a comment: after the code of a figure, a `%` is part of the line (`A(1,1) % here` is an error).
 
 ```pidraw params="x=-1:5,y=-1:4"
 % the vertices

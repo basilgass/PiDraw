@@ -20,7 +20,7 @@ describe('what the parser is given to read a line of a figure', () => {
     })
 
     test('the text of a label and of a formula is kept as it is written, and the steps of a figure are a set', () => {
-        expect(lineParseOptions().types).toEqual({label: 'text', tex: 'text', slide: 'set'})
+        expect(lineParseOptions().types).toEqual({label: 'text', tex: 'text', slide: 'set', toggle: 'text'})
     })
 
     test('is the same object each time', () => {
