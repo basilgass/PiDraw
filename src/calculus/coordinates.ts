@@ -1,5 +1,6 @@
 import {type Domain, type IGraphConfig, isDomain, isXY, type XY} from "../pidraw.common"
 import {InvalidArgumentError, MathError} from "../errors"
+import {numberCorrection} from "./numbers"
 
 /**
  * Convert a length (number), a domain or a point from the coordinate system to the pixels.
@@ -78,7 +79,8 @@ export function toCoordinates(pixels: number | Domain | XY, config: IGraphConfig
         const dx = pixels.x - config.origin.x
         const dy = pixels.y - config.origin.y
 
-        return {x: (dx * by - dy * bx) / det, y: (dy * ax - dx * ay) / det}
+        // The round trip units -> pixels -> units leaves noise (`3` comes back as `3.0000000000000004`): far below a pixel, so hidden.
+        return {x: numberCorrection((dx * by - dy * bx) / det, 12), y: numberCorrection((dy * ax - dx * ay) / det, 12)}
     }
 
     throw new InvalidArgumentError(`Cannot convert ${JSON.stringify(pixels)} to coordinates`)

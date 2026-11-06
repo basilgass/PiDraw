@@ -58,6 +58,7 @@ All the changes of PiDraw that a user or a program can see. The details of what 
 
 - Opacity was applied twice, and the last `fill` or `stroke` imposed its opacity on the other.
 - A dragged point was off by half the size of its shape and drifted at each move.
+- The coordinates of a point read from its position (`point.coordinates`, `graph.toCoordinates`) carried floating point noise: a point dragged on the grid to `3` gave `3.0000000000000004`, and `y` could be `-0`. They are rounded to 12 decimals.
 - `Parametric`, `Plot` and `fill` could write `NaN` in the svg or loop for ever with an invalid number of samples or domain.
 - The color of the markers depended on the order of the options.
 - A label hidden with `?` came back after an update.

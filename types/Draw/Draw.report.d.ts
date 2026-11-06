@@ -1,3 +1,4 @@
+import type { IControlsFigure } from "../controls/controls.types";
 import { PiDrawError } from "../errors";
 export type DrawSeverity = 'error' | 'pending';
 export interface IDrawError {
@@ -17,6 +18,13 @@ export interface IDrawLineStatus {
 export interface IDrawReport {
     errors: IDrawError[];
     lines: IDrawLineStatus[];
+}
+export interface IDrawUsage {
+    draggable: boolean;
+    controls: readonly (keyof IControlsFigure)[];
+}
+export interface IDrawEventMap {
+    'usage': IDrawUsage;
 }
 export interface IRefreshOptions {
     editing?: number;

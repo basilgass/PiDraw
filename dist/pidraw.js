@@ -2475,7 +2475,7 @@ function $n(e, t, n) {
 	let r = e[n];
 	r !== void 0 && t.setControl(n, r);
 }
-var er = class {
+var er = class extends EventTarget {
 	graph;
 	_parser;
 	_settings;
@@ -2487,8 +2487,12 @@ var er = class {
 	_lines = [];
 	_parameters;
 	_moved = /* @__PURE__ */ new Map();
+	_usage = {
+		draggable: !1,
+		controls: []
+	};
 	constructor(e, t) {
-		this.graph = new vn(e, t?.tex === void 0 ? {} : { tex: t.tex }), this._parser = new Ln({
+		super(), this.graph = new vn(e, t?.tex === void 0 ? {} : { tex: t.tex }), this._parser = new Ln({
 			formatter: Vn,
 			splitter: {
 				main: "->",
@@ -2500,6 +2504,30 @@ var er = class {
 		});
 		let n = this.refreshLayout(t?.parameters);
 		return n !== null && (this.refreshLayout(), this._layoutError = n), this._code = [], t?.code && this._build(t.code), this;
+	}
+	hasDraggable() {
+		return Object.values(this.graph.figures).some((e) => e.isDraggable);
+	}
+	uses(e) {
+		return Object.values(this.graph.figures).some((t) => t.controls[e] !== void 0);
+	}
+	usedControls() {
+		let e = /* @__PURE__ */ new Set();
+		for (let t of Object.values(this.graph.figures)) Object.keys(t.controls).forEach((t) => e.add(t));
+		return [...e].sort();
+	}
+	on(e, t) {
+		return this.addEventListener(e, t), this;
+	}
+	off(e, t) {
+		return this.removeEventListener(e, t), this;
+	}
+	_tellUsage() {
+		let e = {
+			draggable: this.hasDraggable(),
+			controls: this.usedControls()
+		}, t = this._usage;
+		(e.draggable !== t.draggable || e.controls.join() !== t.controls.join()) && (this._usage = e, this.dispatchEvent(new CustomEvent("usage", { detail: e })));
 	}
 	_code;
 	get code() {
@@ -2573,7 +2601,7 @@ var er = class {
 		for (let e of Object.keys(i)) this.graph.setControl(e, i[e] ?? null);
 		return this._moved.forEach((e, t) => {
 			Object.hasOwn(this.graph.figures, t) || this._moved.delete(t);
-		}), l.length > 0 && this.graph.update(l.map((e) => this.graph.figures[e])), this._report;
+		}), l.length > 0 && this.graph.update(l.map((e) => this.graph.figures[e])), this._tellUsage(), this._report;
 	}
 	_removeAfter(e) {
 		Object.keys(this.graph.figures).reverse().filter((t) => !e.has(t)).forEach((e) => {

@@ -55,6 +55,14 @@ describe('toCoordinates', () => {
         expect(toCoordinates({x: 130, y: 160}, orthogonal)).toEqual({x: 3, y: 2})
     })
 
+    test('a point hides the floating point noise of the round trip, and a negative zero', () => {
+        const scaled = config({x: {x: 800 / 22, y: 0}, y: {x: 0, y: -600 / 21}})
+        const back = toCoordinates(toPixels({x: 3, y: 0}, scaled), scaled)
+
+        expect(back.x).toBe(3)
+        expect(Object.is(back.y, 0)).toBe(true)
+    })
+
     test('a domain subtracts the origin', () => {
         expect(toCoordinates({min: 110, max: 130}, orthogonal)).toEqual({min: 1, max: 3})
         expect(toCoordinates({min: 140, max: 180}, orthogonal, 'y')).toEqual({min: 1, max: 3})

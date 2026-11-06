@@ -4206,8 +4206,8 @@ function H(e, t, n) {
 		if (o === 0) throw new s("The axes of the coordinate system are collinear: a point cannot be converted to coordinates");
 		let c = e.x - t.origin.x, l = e.y - t.origin.y;
 		return {
-			x: (c * a - l * i) / o,
-			y: (l * n - c * r) / o
+			x: R((c * a - l * i) / o, 12),
+			y: R((l * n - c * r) / o, 12)
 		};
 	}
 	throw new a(`Cannot convert ${JSON.stringify(e)} to coordinates`);

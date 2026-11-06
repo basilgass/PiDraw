@@ -34,6 +34,12 @@ function mouseTo(handle: Point, center: { x: number, y: number }): void {
     })
 }
 
+/** A position put back from coordinates, which are rounded to 12 decimals: the same to far below a pixel. */
+function expectPixels(actual: { x: number, y: number }, expected: { x: number, y: number }): void {
+    expect(actual.x).toBeCloseTo(expected.x, 6)
+    expect(actual.y).toBeCloseTo(expected.y, 6)
+}
+
 const record = (text: string, fallback = false): ILineRecord => ({
     number: 1, text, indent: 0, valid: null, validText: null, error: null, fallback, created: []
 })
@@ -235,8 +241,8 @@ describe('Draw points that were dragged', () => {
         d.refresh(`P(0,0)\n${code}`)
 
         expect(point(d, 'A')).not.toBe(A)
-        expect(point(d, 'A').pixels).toEqual({x: 300, y: 200})
-        expect(point(d, 'A_drag').pixels).toEqual({x: 300, y: 200})
+        expectPixels(point(d, 'A').pixels, {x: 300, y: 200})
+        expectPixels(point(d, 'A_drag').pixels, {x: 300, y: 200})
         expect(d.errors).toEqual([])
     })
 
@@ -288,13 +294,13 @@ describe('Draw points that were dragged', () => {
         const d = dragged('A(1,2)->drag=Ox\nB(3,4)')
         const height = point(draw('A(1,2)->drag=Ox'), 'A').pixels.y
 
-        expect(point(d, 'A').pixels.x).toBe(300)
-        expect(point(d, 'A').pixels.y).toBeCloseTo(height, 9)
+        expect(point(d, 'A').pixels.x).toBeCloseTo(300, 6)
+        expect(point(d, 'A').pixels.y).toBeCloseTo(height, 6)
 
         d.refresh('P(0,0)\nA(1,2)->drag=Ox\nB(3,4)')
 
-        expect(point(d, 'A').pixels.x).toBe(300)
-        expect(point(d, 'A').pixels.y).toBeCloseTo(height, 9)
+        expect(point(d, 'A').pixels.x).toBeCloseTo(300, 6)
+        expect(point(d, 'A').pixels.y).toBeCloseTo(height, 6)
     })
 
     test('that were not dragged are where the line says, even if what they depend on changed', () => {
@@ -329,10 +335,10 @@ describe('Draw points that were dragged', () => {
         const d = dragged('P(0,0)\nA(1,2)->drag\nB(3,4)')
 
         d.refresh('P(0,0)\nA(1,2)->dra\nB(3,4)', {editing: 2})
-        expect(point(d, 'A').pixels).toEqual({x: 300, y: 200})
+        expectPixels(point(d, 'A').pixels, {x: 300, y: 200})
 
         d.refresh('P(0,0)\nA(1,2)->drag\nB(3,4)', {editing: 2})
-        expect(point(d, 'A').pixels).toEqual({x: 300, y: 200})
+        expectPixels(point(d, 'A').pixels, {x: 300, y: 200})
     })
 })
 
@@ -439,5 +445,20 @@ describe('Draw with labels pushed away from a figure', () => {
 
         // O is now level with A, to the right: the label lies to the left of A.
         expect(point(d, 'A').label?.config.away?.x).toBeCloseTo(-1, 6)
+    })
+})
+
+describe('Draw dragged point on the grid', () => {
+    test('has the exact coordinates of the line of the grid, without floating point noise', () => {
+        const d = draw('O(0,0)\nA(5,0)->drag=grid/Ox', 'x=-2:20,y=-3:18,axis')
+        const A = point(d, 'A')
+
+        for (const x of [3, 7, 13, 1, 4]) {
+            const pixels = d.graph.toPixels({x: x + 0.13, y: 0})
+
+            mouseTo(point(d, 'A_drag'), pixels)
+
+            expect(A.coordinates).toEqual({x, y: 0})
+        }
     })
 })

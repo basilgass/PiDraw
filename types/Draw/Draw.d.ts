@@ -8,8 +8,8 @@ import { type PARSER, PiParse } from "piparser";
 import { type IDrawLine } from "./Draw.lines";
 import type { IControlsFigure } from "../controls/controls.types";
 import { type ILineRecord } from "./Draw.diff";
-import { type IDrawError, type IDrawReport, type IRefreshOptions } from "./Draw.report";
-export declare class Draw {
+import { type IDrawError, type IDrawEventMap, type IDrawReport, type IDrawUsage, type IRefreshOptions } from "./Draw.report";
+export declare class Draw extends EventTarget {
     readonly graph: Graph;
     protected _parser: PiParse;
     protected _settings: IParserSettings;
@@ -21,7 +21,14 @@ export declare class Draw {
         text: string;
         coordinates: XY;
     }>;
+    protected _usage: IDrawUsage;
     constructor(id: string | HTMLElement, config?: IParserConfig);
+    hasDraggable(): boolean;
+    uses(key: keyof IControlsFigure): boolean;
+    usedControls(): (keyof IControlsFigure)[];
+    on<K extends keyof IDrawEventMap>(event: K, handler: (e: CustomEvent<IDrawEventMap[K]>) => void): this;
+    off<K extends keyof IDrawEventMap>(event: K, handler: (e: CustomEvent<IDrawEventMap[K]>) => void): this;
+    protected _tellUsage(): void;
     protected _code: PARSER[];
     get code(): PARSER[];
     get report(): IDrawReport;
