@@ -50,6 +50,10 @@ export interface ILabelConfig {
     rotate: number,
     /** The font size, as in CSS. */
     size: string,
+    /** The color of the text, a CSS color; `null` keeps the one the page gives it. */
+    color: string | null,
+    /** The background of the label, a box a little bigger than the text; `null` has none. The opacity is from 0 to 1. */
+    fill: { color: string, opacity: number } | null,
     /**
      * Turns the text of an HTML label into HTML (the LaTeX of a label, rendered). Without it the text of an HTML label is written as
      * it is, never read as HTML.

@@ -25,6 +25,10 @@ import type {IPolygonConfig} from "./Polygon.types"
  * same place) is not drawn: its `vertices` are empty, and it is drawn again when it exists again.
  */
 export class Polygon extends AbstractFigure {
+    protected override get _className(): string {
+        return 'pidraw-polygon'
+    }
+
     /**
      * @throws InvalidArgumentError if `values` does not hold exactly one construction, or has a value that is not valid: fewer than
      * 3 vertices, a position that is not `{x, y}`, a number of sides that is not an integer from 3 to 1000, a star that is not an
@@ -105,6 +109,27 @@ export class Polygon extends AbstractFigure {
     /** The center of the vertices. `null` when the polygon does not exist. */
     override referenceAnchorPoint(): XY | null {
         return this._polygon === null ? null : this.centroid
+    }
+
+    override get snappable(): boolean {
+        return true
+    }
+
+    /** The vertices of the polygon, then the middle of each side as it is drawn (the sides of a star, not the neighbours by number). Empty when it does not exist. */
+    override snapPoints(): XY[] {
+        if (this._polygon === null) {
+            return []
+        }
+
+        const {vertices, cycles} = this._polygon
+        const middles = cycles.flatMap(cycle => cycle.map((index, i) => {
+            const from = vertices[index]
+            const to = vertices[cycle[(i + 1) % cycle.length]]
+
+            return {x: (from.x + to.x) / 2, y: (from.y + to.y) / 2}
+        }))
+
+        return [...this.vertices, ...middles]
     }
 
     /** Find the polygon from its construction and draw it. A polygon that does not exist is not drawn (see the class). */

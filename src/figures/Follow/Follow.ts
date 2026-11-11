@@ -22,6 +22,10 @@ interface FollowState {
  * the figure does not exist where the mouse is, the point and the tangent are hidden.
  */
 export class Follow extends AbstractFigure {
+    protected override get _className(): string {
+        return 'pidraw-follow'
+    }
+
     /** The label is this far, in pixels, from the point. */
     protected override readonly _labelGap: number = 12
 

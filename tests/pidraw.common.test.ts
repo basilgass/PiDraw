@@ -61,11 +61,12 @@ describe('enumerations of the public API', () => {
         expect(Object.values(Axes)).toEqual(['Ox', 'Oy'])
     })
 
-    test('the layers are listed from the back to the front, the interactive one last', () => {
+    test('the layers are listed from the back to the front, the temporary one last, in front of the interactive one', () => {
         const layers = Object.values(LayerName)
 
         expect(layers[0]).toBe('background')
-        expect(layers[layers.length - 1]).toBe('interactive')
+        expect(layers[layers.length - 1]).toBe('temporary')
+        expect(layers.indexOf(LayerName.INTERACTIVE)).toBe(layers.length - 2)
         expect(layers.indexOf(LayerName.GRIDS)).toBeLessThan(layers.indexOf(LayerName.AXIS))
         expect(layers.indexOf(LayerName.MAIN)).toBeLessThan(layers.indexOf(LayerName.POINTS))
     })

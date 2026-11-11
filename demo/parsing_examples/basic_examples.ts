@@ -1,6 +1,23 @@
-export const basic_examples = [
+/** An example of the demo: the code, and the parameters of the graph it is drawn with (the default ones of the demo when absent). */
+export interface IDemoExample {
+    name: string
+    code: string
+    parameters?: string
+}
+
+/** The parameters of the graph for an example that gives none. */
+export const DEFAULT_PARAMETERS = 'x=-11:11,y=-11:11,axis,grid,unitX=1.3'
+
+export const basic_examples: IDemoExample[] = [
     {
-        name: 'basic_example_1',
+        name: 'Drag on the grid',
+        parameters: 'axis,grid,x=-5:5,y=-5:5',
+        code: `A(0,0)->drag=grid
+B(2,1)->drag=grid
+d=AB`
+    },
+    {
+        name: 'Overview of the constructions',
         code: `A(8,3)->red,w=5,drag=grid,tex=@
 B(-4,-1)->blue,w=10
 M=mid A,B
@@ -23,7 +40,7 @@ X(0,0)->drag=f
 `,
     },
     {
-        name: 'basic_example_2',
+        name: 'Bisector and symmetries',
         code: `A(1,2)->drag=grid,tex=A=@/tr/1;3
 B(2,0)->drag=grid
 C(6,5)->drag=grid
@@ -32,7 +49,7 @@ T=sym B,A
 K=sym B,b
 
 A1=sym A,Ox
-    A2=sym A,Oy
+A2=sym A,Oy
 l1=AK
 l2=AT->ultrathick,blue
 l3=TC
@@ -42,7 +59,7 @@ X=dpt A2,l3,-2
 Y=vpt A2,K,1,B`
     },
     {
-        name: 'bezier curve',
+        name: 'Bezier curve and its control points',
         code: `A(3,2)->drag
 B(-4,4)->drag
 C(-8,2)->drag
@@ -53,11 +70,7 @@ l2=BC.
 l3=CD.`,
     },
     {
-        name: 'segment labeling',
-        code: `A(3,2)->tex=A,!\nB(6,8)->tex\nd=AB.->tex=h`,
-    },
-    {
-        name: 'circle intersections',
+        name: 'Circle intersections',
         code: `A(3,2)->tex=A,!,drag
 c1=circ A,4
 B(1,1)->drag
@@ -72,66 +85,25 @@ Z=inter c2,l
 j=Y1Y2->red,w=3`,
     },
     {
-        name: 'trigonometric circle (circle radius=10)',
-        parameters: 'scale=1/10,x=12,y=18,axis->range=-11:11',
-        code: `
-O(0,0)
-c=circ O,10
-P0(10,0)
-P1(8.67,5)->tex=\\frac{\\pi}{6}/mr/0.5;0
-P2(7.07,7.07)->tex=\\frac{\\pi}{4}/mr/0.5;0.4
-P3(5,8.67)->tex=\\frac{\\pi}{3}/tr/0.5;0
-P4(0,10)->tex=\\frac{\\pi}{2}/tl/-0.5;0.2
-P7(-8.67,5)->tex=\\frac{5\\pi}{6}/ml/-0.5;0
-P6(-7.07,7.07)->tex=\\frac{3\\pi}{4}/ml/-0.5;0.4
-P5(-5,8.67)->tex=\\frac{2\\pi}{3}/tl/-0.5;0
-P8(-10,0)->tex=\\frac{3\\pi}{2}/tl/-0.5;0.3
-P9(8.67,-5)->tex=\\frac{11\\pi}{6}/mr/0.5;0
-P10(7.07,-7.07)->tex=\\frac{7\\pi}{4}/br/0.5;0
-P311(5,-8.67)->tex=\\frac{5\\pi}{3}/br/0.5;0
-P12(0,-10)->tex=\\frac{3\\pi}{2}/bl/-0.5;-0.3
-P13(-8.67,-5)->tex=\\frac{7\\pi}{6}/ml/-0.5;0
-P14(-7.07,-7.07)->tex=\\frac{5\\pi}{4}/bl/-0.5;0
-P15(-5,-8.67)->tex=\\frac{4\\pi}{3}/bl/-0.5;0
-T1(5,0)->tex=\\scriptsize\\frac{1}{2}/bc/0;-0.5
-T2(7.07,0)->tex=\\scriptsize\\frac{\\sqrt{2}}{2}/bc/0;-0.5
-T3(8.6,0)->tex=\\scriptsize\\frac{\\sqrt{3}}{2}/bc/0;-0.5
-T4(10,0)->tex=\\scriptsize 1/br/0.4;0
-T5(0,5)->tex=\\scriptsize\\frac{1}{2}/mr/0.5;0
-T6(0,7.07)->tex=\\scriptsize\\frac{\\sqrt{2}}{2}/mr/0.5;0
-T7(0,8.6)->tex=\\scriptsize\\frac{\\sqrt{3}}{2}/mr/0.5;0
-T9(0,10)->tex=\\scriptsize 1/tr/0.5;0
-T11(-5,0)->tex=\\scriptsize-\\frac{1}{2}/bc/0;-0.5
-T12(-7.07,0)->tex=\\scriptsize-\\frac{\\sqrt{2}}{2}/bc/0;-0.5
-T13(-8.6,0)->tex=\\scriptsize-\\frac{\\sqrt{3}}{2}/bc/0;-0.5
-T14(-10,0)->tex=\\scriptsize -1/bl/-0.4;0
-T15(0,-5)->tex=\\scriptsize-\\frac{1}{2}/mr/0.5;0
-T16(0,-7.07)->tex=\\scriptsize-\\frac{\\sqrt{2}}{2}/mr/0.5;0
-T17(0,-8.6)->tex=\\scriptsize-\\frac{\\sqrt{3}}{2}/mr/0.5;0
-T19(0,-10)->tex=\\scriptsize -1/br/0.5;0
-T20(10,10)->hide
-X1(10,5.77)->tex=\\scriptsize \\frac{\\sqrt{3}}{3}/mr/0.5;0
-X2(10,10)->tex=\\scriptsize 1/mr/0.5;0
-X3(10,17.3)->tex=\\scriptsize \\sqrt{3}/mr/0.5;0
-X4(10,-5.77)->tex=\\scriptsize -\\frac{\\sqrt{3}}{3}/mr/0.5;0
-X5(10,-10)->tex=\\scriptsize -1/mr/0.5;0
-X6(10,-17.3)->tex=\\scriptsize -\\sqrt{3}/mr/0.5;0
-t=T20P0
-P(7.07,7.07)->drag=c
-C=proj P,Ox->hide
-S=proj P,Oy->hide
-c=PC.->dash,tex=@
-s=PS.->dash,tex=@
-p0=PO->dot
-p=PO.->w=3
-c1=OC.->green,w=5
-s1=OS.->red,w=5
-a=arc P0,O,P,1->tex=\\theta/mc
-T=inter p,t
-t1=P0T.->gold,w=5,tex=@`,
+        name: 'Snap to points, centers, ends and middles',
+        parameters: 'x=-10:12,y=-9:9,axis,grid',
+        code: `A(-7,-4)->label
+B(1,-4)->label
+C(-3,2)->label
+t=poly A,B,C->fill=teal/0.3
+O(6,3)->label
+c=circ O,2->blue
+E(-8,5)->label
+F(-2,7)->label
+s=seg E,F->red
+M(4,-4)->label
+N(8,-4)
+L(4,0)
+a=arc N,M,L->green,w=3
+P(0,0)->drag,snap=t/c/s/a,snapRadius=20,red,label`,
     },
     {
-        name: 'trigonometric circle (circle radius=1)',
+        name: 'Trigonometric circle',
         parameters: 'unitX=10,unitY=10,x=1.2,y=1.8,axis->range=-1.1:1.1',
         code: `
 O(0,0)
@@ -190,15 +162,16 @@ T=inter p,t
 t1=P0T.->gold,w=5,tex=@`,
     },
     {
-        name: 'ara fill',
+        name: 'Area between curves',
         code: `f(x)=(x-3)(x+2)(x-1)/6
 a=fill f,-2:1->fill=green/0.3
 b=fill f,1:3->fill=red/0.3
 A(-2,0)->tex=a
 B(1,0)->tex=b
 C(3,0)->tex=c`
-    },{
-    name: 'animation',
+    },
+    {
+        name: 'Animation of points',
         code: `A(1,2)
 B(7,6)
 d=AB.
@@ -207,7 +180,7 @@ Y(1,2)->green,w=10,animate,from=A,to=B,duration=5,loop=reverse
 p=perp d,X`
     },
     {
-        name: 'vectors and markers',
+        name: 'Vectors and markers',
         code: `A(-2,2)
 B(3,4)
 C(6,-4)
@@ -215,21 +188,20 @@ v=vAB
 b=bezier A,B,C->mark=both/20,red`
     },
     {
-        name: 'tan function plot (vertical asymptotes test)',
+        name: 'Function plots: tan (asymptotes) and ln',
+        parameters: 'axis,grid,x=-5:5,y=-5:5',
         code: `f(x)=tan(x)
-A(2,3)
-B(8,6)
-d=AB.->tex=abc`
+g(x)=ln(x)->red`
     },
     {
-        name: 'quadratic plot',
+        name: 'Parabola through three points',
         code: `A(0,1)->drag=grid,tex
 B(1,3)->drag=grid,tex
 C(2,9)->drag=grid,tex
 q=plot A,B,C`
     },
     {
-        name: 'animation with dynamic values',
+        name: 'Animation with dynamic values',
         code: `f(x)=1/4(x+2)^2-5
 g(x)=1/4(x+2)^2-5,-6:4->w=10,red
 X0(-6,0)
@@ -245,26 +217,14 @@ R(0,-1)->animate,from=R0,to=R1,duration=2
 S(0,-5)->animate,from=R1,to=R2,duration=4,delay=2`
     },
     {
-        name: "simple drag",
-        parameters: `axis,grid,x=-5:5,y=-5:5`,
-        code: `A(0,0)->drag=grid
-B(2,1)->drag=grid
-d=AB`
-    },
-    {
-        name: 'tangent to f(x) through a point',
+        name: 'Tangent to a curve at a dragged point',
         parameters: 'axis,grid',
         code: `f(x)=1/2x^2-3x+5
 P(4,1)->drag=f
 t=tan f,P`
     },
     {
-        name: 'log and ln',
-        parameters: 'axis,grid,x=-3:5,y=-10:10',
-        code: `f(x)=ln(x)`
-    },
-    {
-        name: 'box with ribbons (cavalier projection)',
+        name: 'Static drawing: box with ribbons (cavalier projection)',
         parameters: 'x=-0.5:13,y=-0.5:7.5',
         code: `A(0,0)->hide
 B(10,0)->hide
@@ -324,8 +284,8 @@ hg=HG.
 gf=GF.`
     },
     {
-        name: 'label values: arcs',
-        parameters: 'x=-1:9,y=-1:7',
+        name: 'Label values: angles, areas and perimeters',
+        parameters: 'x=-1:21,y=-5:7',
         code: `A(1,1)->drag=grid
 B(7,1)->drag=grid
 C(3,6)->drag=grid
@@ -334,10 +294,18 @@ t=seg A,C
 a=arc B,A,C,1.5->label=@
 b=arc B,A,C,*->dash,label=@.0
 c=arc B,A,C,3.5->sector,fill=orange/0.3,label=@area
-l=arc B,A,C,2.5->blue,label=@length`
+l=arc B,A,C,2.5->blue,label=@length
+O(12,0)->drag=grid
+c1=circ O,2->label=@area
+d1=circ O,3->dash,label=@perimeter/tr
+P(16,-2)->drag=grid
+Q(20,-2)->drag=grid
+R(18,2)->drag=grid
+p=poly P,Q,R->fill=teal/0.3,label=@area
+q=poly P,Q,R->!,label=@perimeter/br`
     },
     {
-        name: 'label values: slopes and lengths',
+        name: 'Label values: slopes and lengths',
         parameters: 'axis,x=-1:9,y=-1:7',
         code: `A(0,0)->drag=grid
 B(4,3)->drag=grid
@@ -348,19 +316,7 @@ s=seg A,C->color=green,label=@
 t=seg B,C->color=red,label=@.1/tr`
     },
     {
-        name: 'label values: circles and polygons',
-        parameters: 'x=-5:9,y=-4:6',
-        code: `O(0,0)->drag=grid
-c=circ O,2->label=@area
-d=circ O,3->dash,label=@perimeter/tr
-A(4,-2)->drag=grid
-B(8,-2)->drag=grid
-C(6,2)->drag=grid
-p=poly A,B,C->fill=teal/0.3,label=@area
-q=poly A,B,C->!,label=@perimeter/br`
-    },
-    {
-        name: 'labels pushed away from a figure',
+        name: 'Label placement: pushed away from a figure',
         parameters: 'x=-6:8,y=-5:6',
         code: `O(0,0)->drag=grid
 c=circ O,3
@@ -372,10 +328,13 @@ Q(7,3)->drag=grid
 R(6,5)->drag=grid
 t=poly P,Q,R->fill=teal/0.3
 S(6,3.5)->drag=t,label=@/>t
-a=arc P,O,A,1.5->label=@`
+a=arc P,O,A,1.5->label=@
+E(-5,-4)->tex=E,!
+F(-2,-2)->tex
+e=EF.->tex=h`
     },
     {
-        name: 'label values: unit and scale',
+        name: 'Units and scale of the lengths',
         parameters: 'x=-1:7,y=-1:5,unit=mm,scale=10',
         code: `A(0,0)->drag=grid
 B(4,0)->drag=grid
@@ -386,7 +345,7 @@ c=circ A,1->label=@radius
 a=arc B,A,C,1.5->label=@`
     },
     {
-        name: 'buttons: show and hide the figures',
+        name: 'Buttons: show and hide the figures',
         parameters: 'x=-1:10,y=-1:10,axis,grid',
         code: `f(x)=x/3+6
 g(x)=1/8(2x-8)^2+2
@@ -397,5 +356,61 @@ a=fill f,g,1.05:7.6->fill=yellow/0.3,!,toggle=between/0.5
 b=fill f,1.05:7.6->fill=green/0.3,!,toggle=under_f/1
 c=fill g,1.05:7.6->fill=red/0.3,!,toggle=under_g/2
 A(2,3)->drag=grid,label,toggle=under_g`
+    },
+    {
+        name: 'Slides: a construction step by step',
+        parameters: 'x=-1:7,y=-1:5,axis',
+        code: `@title,1=A point
+A(1,1)->label
+@pause=A second point and a segment
+B(5,3)->label
+s=seg A,B->red
+@pause=The middle
+M=mid A,B->blue,label`
+    },
+    {
+        name: 'Flowchart: nodes, edges and a loop',
+        parameters: 'x=-1:11,y=-1:8',
+        code: `S(1,6)->label=Start,node=round,fill=lightgreen
+Q(5,6)->label=Done?,node=diamond,fill=lightyellow
+W(5,2)->label=Work,node
+E(9,6)->label=End,node=round,fill=lightgreen
+a=edge S,Q->mark=end
+b=edge Q,E->mark=end,tex=\\text{yes}/mc
+c=edge Q,W->mark=end,label=no
+d=edge W,W->mark=end,loopSide=r
+t=seg W.ml,S.bc->mark=end,dash
+M=mid W.ml,S.bc->red,label=M`
+    },
+    {
+        name: 'Probability tree',
+        parameters: 'x=-1:12,y=-1:9',
+        code: `R(0.5,4)->label=Start,node=circle
+A(5,6.5)->label=Red,node=round
+B(5,1.5)->label=Blue,node=round
+A1(10,7.5)->label=Red,node
+A2(10,5.5)->label=Blue,node
+B1(10,2.5)->label=Red,node
+B2(10,0.5)->label=Blue,node
+r=edge R,A->tex=\\frac{3}{5}/mc,labelSize=sm
+s=edge R,B->tex=\\frac{2}{5}/mc,labelSize=sm
+a1=edge A,A1->tex=\\frac{1}{2}/mc,labelSize=sm
+a2=edge A,A2->tex=\\frac{1}{2}/mc,labelSize=sm
+b1=edge B,B1->tex=\\frac{3}{4}/mc,labelSize=sm
+b2=edge B,B2->tex=\\frac{1}{4}/mc,labelSize=sm`
+    },
+    {
+        name: 'Markov graph: curves and loops',
+        parameters: 'x=-1:9,y=-1:7',
+        code: `A(1,3)->label=A,node=circle
+B(6,5)->label=B,node=circle
+C(6,1)->label=C,node=circle
+ab=edge A,B->mark=end,curve=0.2,label=0.5
+ba=edge B,A->mark=end,curve=0.2,label=0.3
+bc=edge B,C->mark=end,curve=0.2,label=0.2
+cb=edge C,B->mark=end,curve=0.2,label=0.4
+ca=edge C,A->mark=end,label=0.6
+aa=edge A,A->mark=end,loopSide=l,label=0.5
+bb=edge B,B->mark=end,loopSide=t,label=0.5`
     }
 ]

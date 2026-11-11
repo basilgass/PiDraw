@@ -39,6 +39,7 @@ The same name used twice does not replace the figure: the second one is named `A
 | [Lines](./lines) | `line`, `seg`, `ray`, `vec`, `perp`, `para`, `med`, `tan`, `bis` |
 | [Circles and arcs](./circles) | `circ`, `arc` |
 | [Functions and curves](./curves) | `plot`, `parametric`, `bezier`, `follow`, `fill`, `riemann` |
+| [Nodes and edges](./diagrams) | `edge`, and the option `node` of a point |
 | [Polygons and paths](./polygons) | `poly`, `path` |
 | [Grids and graduated lines](./grids-axes) | `grid`, `axis` |
 

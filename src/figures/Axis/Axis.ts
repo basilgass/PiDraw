@@ -64,6 +64,10 @@ const TIKZ_HORIZONTAL: Record<string, string> = {l: 'left', c: '', r: 'right'}
  * and thinned out when the ticks are too close (one number in as many ticks as it takes). Its `name` is written beyond the arrow.
  */
 export class Axis extends Line {
+    protected override get _className(): string {
+        return 'pidraw-axis'
+    }
+
     declare protected _config: IAxisResolvedConfig
 
     // These are made while the line is, before the fields of this class are set: they are only declared.

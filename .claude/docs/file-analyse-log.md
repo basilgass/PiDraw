@@ -150,3 +150,9 @@ Règles de tenue :
 | src/parser/parser.step.ts | 2026-10-31 | 2026-10-31 : 2c074a69-e519-4c8f-82a5-8e23320a64cc | src/parser/buildLayout.ts, src/figures/Grid/Grid.parser.ts, src/figures/Axis/Axis.parser.ts |
 | src/pidraw.common.ts | 2026-11-03 | 2026-11-03 : c2352409-1f0d-483b-b9dd-7ae70aa615e8 | src/parser/parser.common.ts, src/parser/parser.config.ts, src/index.ts |
 | src/svg/marker.ts | 2026-10-28 | 2026-10-28 : bde2415e-7be7-44ba-a29c-d7450ab94493 | src/figures/AbstractFigure/AbstractFigure.ts, src/figures/Line/Line.ts, src/figures/Axis/Axis.ts |
+| src/calculus/computeNode.ts | Jamais |  |  |
+| src/calculus/computeEdge.ts | Jamais |  |  |
+| src/figures/Edge/Edge.ts | Jamais |  |  |
+| src/figures/Edge/Edge.types.ts | Jamais |  |  |
+| src/figures/Edge/Edge.constraints.ts | Jamais |  |  |
+| src/figures/Edge/Edge.parser.ts | Jamais |  |  |

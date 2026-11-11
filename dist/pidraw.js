@@ -1,31 +1,37 @@
-import { $ as e, A as t, At as n, B as r, Bt as i, C as a, Ct as o, D as s, Dt as c, E as l, Et as u, F as d, Ft as f, G as p, H as m, I as h, It as ee, J as te, K as ne, L as re, Lt as g, M as ie, Mt as ae, N as oe, Nt as _, O as se, Ot as ce, P as le, Pt as ue, Q as de, R as fe, Rt as v, S as pe, St as y, T as me, Tt as he, U as ge, V as _e, Vt as ve, W as ye, X as b, Y as be, Z as xe, _t as x, a as Se, at as Ce, b as we, bt as S, c as Te, ct as C, d as w, dt as Ee, et as De, f as Oe, ft as ke, gt as Ae, h as je, ht as Me, i as Ne, it as Pe, j as Fe, jt as T, k as Ie, kt as Le, lt as E, m as Re, mt as D, n as ze, nt as Be, ot as Ve, p as He, pt as O, q as Ue, rt as We, st as Ge, t as Ke, tt as qe, u as Je, ut as Ye, v as Xe, vt as k, w as Ze, wt as Qe, x as $e, xt as A, y as et, yt as j, z as tt, zt as M } from "./shared.js";
+import { $ as e, A as t, At as n, B as r, Bt as i, C as a, Ct as o, D as s, Dt as c, E as l, Et as u, F as d, Ft as f, G as p, H as m, Ht as ee, I as h, It as te, J as ne, K as g, L as _, Lt as re, M as ie, Mt as ae, N as oe, Nt as v, O as se, Ot as ce, P as le, Pt as ue, Q as de, R as fe, Rt as pe, S as me, St as y, T as he, Tt as ge, U as _e, Ut as ve, V as ye, Vt as b, W as be, X as xe, Y as Se, Z as x, _t as Ce, a as we, at as Te, b as Ee, bt as S, c as De, ct as Oe, d as C, dt as ke, et as Ae, f as je, ft as Me, gt as w, h as Ne, ht as T, i as Pe, it as Fe, j as Ie, jt as Le, k as Re, kt as ze, lt as E, m as Be, mt as Ve, n as He, nt as Ue, ot as We, p as Ge, pt as Ke, q as qe, rt as Je, st as Ye, t as Xe, tt as Ze, u as Qe, ut as D, v as $e, vt as et, w as O, wt as k, x as tt, xt as A, y as nt, yt as j, z as rt, zt as M } from "./shared.js";
 // src/calculus/computeDrag.ts
-function nt(e, t, n) {
+function it(e, t, n) {
 	return Math.max(t, Math.min(e, n));
 }
-function rt(e, t, n) {
+function at(e, t, n) {
+	return t.filter(j).map((t) => ({
+		candidate: t,
+		distance: Math.hypot(t.x - e.x, t.y - e.y)
+	})).filter(({ distance: e }) => e <= n).sort((e, t) => e.distance - t.distance).map(({ candidate: e }) => e);
+}
+function ot(e, t, n) {
 	let { x: r, y: i } = e;
 	if (t.along) {
 		let { axis: e, keep: n } = t.along;
 		e === "x" ? i = n.y : r = n.x;
 	}
 	if (t.step) {
-		let e = O({
+		let e = T({
 			x: r,
 			y: i
 		}, n);
-		({x: r, y: i} = D({
+		({x: r, y: i} = w({
 			x: Math.round(e.x / t.step.x) * t.step.x,
 			y: Math.round(e.y / t.step.y) * t.step.y
 		}, n));
 	}
 	if (t.bounds?.x) {
-		let { min: e, max: i } = D(t.bounds.x, n, "x");
-		r = nt(r, e, i);
+		let { min: e, max: i } = w(t.bounds.x, n, "x");
+		r = it(r, e, i);
 	}
 	if (t.bounds?.y) {
-		let { min: e, max: r } = D(t.bounds.y, n, "y");
-		i = nt(i, e, r);
+		let { min: e, max: r } = w(t.bounds.y, n, "y");
+		i = it(i, e, r);
 	}
 	return {
 		x: r,
@@ -33,12 +39,12 @@ function rt(e, t, n) {
 	};
 }
 // src/calculus/computeFillBetween.ts
-var it = 1e-9;
-function at(e, t, n, r, i, a) {
-	let { bound: o } = a, s = (e) => x(e) && Math.abs(e.x) <= o && Math.abs(e.y) <= o, c = [r.min, r.max];
-	for (let n of t === null ? [e] : [e, t]) for (let e of Ye(n, r.min, r.max, a)) x(e) && c.push(Math.min(r.max, Math.max(r.min, i(e.x))));
+var st = 1e-9;
+function ct(e, t, n, r, i, a) {
+	let { bound: o } = a, s = (e) => j(e) && Math.abs(e.x) <= o && Math.abs(e.y) <= o, c = [r.min, r.max];
+	for (let n of t === null ? [e] : [e, t]) for (let e of ke(n, r.min, r.max, a)) j(e) && c.push(Math.min(r.max, Math.max(r.min, i(e.x))));
 	c.sort((e, t) => e - t);
-	let l = c.filter((e, t) => t === 0 || e - c[t - 1] > it), u = [], d = {
+	let l = c.filter((e, t) => t === 0 || e - c[t - 1] > st), u = [], d = {
 		first: [],
 		second: []
 	}, f = () => {
@@ -61,12 +67,12 @@ function at(e, t, n, r, i, a) {
 	}
 	return f(), u;
 }
-function ot(e) {
+function lt(e) {
 	if (e.length === 0) return "M 0 0";
-	let t = (e) => `${E(e.x)} ${E(e.y)}`;
+	let t = (e) => `${D(e.x)} ${D(e.y)}`;
 	return e.map(({ first: e, second: n }) => `M ${e.map(t).join(" L ")} L ${[...n].reverse().map(t).join(" L ")} Z`).join(" ");
 }
-function st(e) {
+function ut(e) {
 	let t = 0;
 	for (let { first: n, second: r } of e) for (let e = 1; e < n.length; e++) {
 		let i = n[e].x - n[e - 1].x, a = r[e - 1].y - n[e - 1].y, o = r[e].y - n[e].y;
@@ -75,22 +81,22 @@ function st(e) {
 	return t;
 }
 // src/calculus/computeLayout.ts
-var ct = 28.45274 / .75, lt = 800, ut = 600;
-function dt(e) {
+var dt = 28.45274 / .75, ft = 800, pt = 600;
+function mt(e) {
 	return Object.fromEntries(Object.entries(e ?? {}).filter(([, e]) => e !== void 0));
 }
-function ft(e) {
-	let t = e?.width ?? lt, n = e?.height ?? ut, r = {
+function ht(e) {
+	let t = e?.width ?? ft, n = e?.height ?? pt, r = {
 		width: t,
 		height: n,
 		origin: { ...e?.origin ?? {
 			x: t / 2,
 			y: n / 2
 		} },
-		system: e?.system ?? A.CARTESIAN_2D,
+		system: e?.system ?? o.CARTESIAN_2D,
 		measure: {
-			...qe,
-			...dt(e?.measure)
+			...Ue,
+			...mt(e?.measure)
 		},
 		axis: {
 			x: { ...e?.axis?.x ?? {
@@ -103,27 +109,27 @@ function ft(e) {
 			} }
 		}
 	};
-	return pt(r), {
+	return gt(r), {
 		config: r,
 		display: {
 			grid: !0,
 			axis: !0,
-			...dt(e?.display)
+			...mt(e?.display)
 		}
 	};
 }
-function pt(e) {
-	let t = (e, t, n) => new _(`Invalid ${e} ${typeof t == "number" ? String(t) : JSON.stringify(t)} for the graph: expected ${n}`), n = ({ x: e, y: t }) => Number.isFinite(e) && Number.isFinite(t);
+function gt(e) {
+	let t = (e, t, n) => new f(`Invalid ${e} ${typeof t == "number" ? String(t) : JSON.stringify(t)} for the graph: expected ${n}`), n = ({ x: e, y: t }) => Number.isFinite(e) && Number.isFinite(t);
 	for (let n of ["width", "height"]) if (!(Number.isFinite(e[n]) && e[n] > 0)) throw t(n, e[n], "a finite number greater than 0");
 	if (!n(e.origin)) throw t("origin", e.origin, "a position with finite coordinates");
 	for (let r of ["x", "y"]) {
 		let i = e.axis[r];
 		if (!n(i) || Math.hypot(i.x, i.y) === 0) throw t(`vector of the axis ${r}`, i, "a finite vector that is not null");
 	}
-	if (e.measure !== void 0 && Be(e.measure), e.system !== A.CARTESIAN_2D) throw new f(`The coordinate system "${e.system}" cannot be drawn yet`);
+	if (e.measure !== void 0 && Je(e.measure), e.system !== o.CARTESIAN_2D) throw new re(`The coordinate system "${e.system}" cannot be drawn yet`);
 }
-function mt({ x: e, y: t, unit: n }) {
-	let r = n.x * ct, i = n.y * ct;
+function _t({ x: e, y: t, unit: n }) {
+	let r = n.x * dt, i = n.y * dt;
 	return {
 		width: (e.max - e.min) * r,
 		height: (t.max - t.min) * i,
@@ -143,9 +149,9 @@ function mt({ x: e, y: t, unit: n }) {
 		}
 	};
 }
-var ht = 1e-9;
-function gt(e, t, n, r) {
-	let i = Math.abs(r.x.y) <= ht && Math.abs(r.y.x) <= ht, a = (t) => ({
+var vt = 1e-9;
+function yt(e, t, n, r) {
+	let i = Math.abs(r.x.y) <= vt && Math.abs(r.y.x) <= vt, a = (t) => ({
 		A: { ...e },
 		displaced: !1,
 		side: t
@@ -181,29 +187,29 @@ function gt(e, t, n, r) {
 	};
 }
 // src/calculus/computePolygon.ts
-function _t(e, t) {
-	return t === 0 ? e : _t(t, e % t);
+function bt(e, t) {
+	return t === 0 ? e : bt(t, e % t);
 }
-function vt(e, t = 1) {
-	let n = _t(e, t), r = e / n;
+function xt(e, t = 1) {
+	let n = bt(e, t), r = e / n;
 	return Array.from({ length: n }, (n, i) => Array.from({ length: r }, (n, r) => (i + r * t) % e));
 }
-function yt(e, t, n, r = 1) {
-	return !x(e) || !Number.isFinite(t) || t <= 0 ? null : {
-		vertices: Array.from({ length: n }, (r, i) => j(e.x, e.y, t, 90 + i * 360 / n)),
-		cycles: vt(n, r)
+function St(e, t, n, r = 1) {
+	return !j(e) || !Number.isFinite(t) || t <= 0 ? null : {
+		vertices: Array.from({ length: n }, (r, i) => A(e.x, e.y, t, 90 + i * 360 / n)),
+		cycles: xt(n, r)
 	};
 }
-function bt(e, t, n, r = 1) {
-	let i = x(e) && x(t) ? Ae(e, t) : NaN;
+function Ct(e, t, n, r = 1) {
+	let i = j(e) && j(t) ? et(e, t) : NaN;
 	if (!Number.isFinite(i) || i === 0) return null;
-	let a = Math.PI * r / n, o = Me(e, t), s = j((e.x + t.x) / 2, (e.y + t.y) / 2, i / (2 * Math.tan(a)), o + 90), c = i / (2 * Math.sin(a)), l = Me(s, e);
+	let a = Math.PI * r / n, o = Ce(e, t), s = A((e.x + t.x) / 2, (e.y + t.y) / 2, i / (2 * Math.tan(a)), o + 90), c = i / (2 * Math.sin(a)), l = Ce(s, e);
 	return {
-		vertices: Array.from({ length: n }, (e, t) => j(s.x, s.y, c, l + t * 360 / n)),
-		cycles: vt(n, r)
+		vertices: Array.from({ length: n }, (e, t) => A(s.x, s.y, c, l + t * 360 / n)),
+		cycles: xt(n, r)
 	};
 }
-function xt(e) {
+function wt(e) {
 	let t = e.reduce((e, t) => ({
 		x: e.x + t.x,
 		y: e.y + t.y
@@ -216,24 +222,24 @@ function xt(e) {
 		y: t.y / e.length
 	};
 }
-function St(e, t) {
-	let n = k(), r = Infinity;
+function Tt(e, t) {
+	let n = S(), r = Infinity;
 	for (let i of e.cycles) {
-		let a = [...i, i[0]].map((t) => e.vertices[t]), o = C(a, t), s = Math.hypot(o.x - t.x, o.y - t.y);
+		let a = [...i, i[0]].map((t) => e.vertices[t]), o = E(a, t), s = Math.hypot(o.x - t.x, o.y - t.y);
 		s < r && (r = s, n = o);
 	}
 	return n;
 }
-function Ct(e) {
-	return e.cycles.map((t) => t.map((t, n) => `${n === 0 ? "M" : "L"} ${E(e.vertices[t].x)} ${E(e.vertices[t].y)}`).join(" ") + " Z").join(" ");
+function Et(e) {
+	return e.cycles.map((t) => t.map((t, n) => `${n === 0 ? "M" : "L"} ${D(e.vertices[t].x)} ${D(e.vertices[t].y)}`).join(" ") + " Z").join(" ");
 }
-function wt(e) {
+function Dt(e) {
 	return e.cycles.reduce((t, n) => t + n.reduce((t, r, i) => {
 		let a = e.vertices[n[(i + 1) % n.length]];
-		return t + Ae(e.vertices[r], a);
+		return t + et(e.vertices[r], a);
 	}, 0), 0);
 }
-function Tt(e) {
+function Ot(e) {
 	return e.cycles.reduce((t, n) => {
 		let r = n.reduce((t, r, i) => {
 			let a = e.vertices[r], o = e.vertices[n[(i + 1) % n.length]];
@@ -243,7 +249,7 @@ function Tt(e) {
 	}, 0);
 }
 // src/calculus/computeRiemann.ts
-function Et(e, t, n, r) {
+function kt(e, t, n, r) {
 	let i = (t.max - t.min) / n;
 	return Array.from({ length: n }, (n, a) => {
 		let o = t.min + a * i;
@@ -254,22 +260,22 @@ function Et(e, t, n, r) {
 		};
 	}).filter(({ y: e }) => Number.isFinite(e));
 }
-function Dt(e) {
+function At(e) {
 	return e.reduce((e, { x0: t, x1: n, y: r }) => e + r * (n - t), 0);
 }
 // src/calculus/computeZoom.ts
 var N = {
 	min: 1 / 100,
 	max: 100
-}, Ot = 1e-9, kt = (e) => Number.isFinite(e.x) && Number.isFinite(e.y);
-function At(e, t) {
-	if (!kt(e)) throw new _(`Invalid ${t} (${e.x}, ${e.y}): expected a position with finite numbers`);
+}, jt = 1e-9, Mt = (e) => Number.isFinite(e.x) && Number.isFinite(e.y);
+function Nt(e, t) {
+	if (!Mt(e)) throw new f(`Invalid ${t} (${e.x}, ${e.y}): expected a position with finite numbers`);
 }
-function jt(e) {
-	if (!Number.isFinite(e) || e <= 0) throw new _(`Invalid zoom factor ${e}: expected a finite number greater than 0`);
+function Pt(e) {
+	if (!Number.isFinite(e) || e <= 0) throw new f(`Invalid zoom factor ${e}: expected a finite number greater than 0`);
 }
 function P(e, t, n) {
-	jt(t), At(n, "center");
+	Pt(t), Nt(n, "center");
 	let r = (e) => ({
 		x: e.x * t,
 		y: e.y * t
@@ -287,7 +293,7 @@ function P(e, t, n) {
 	};
 }
 function F(e, t) {
-	return At(t, "move"), {
+	return Nt(t, "move"), {
 		...e,
 		origin: {
 			x: e.origin.x + t.x,
@@ -295,16 +301,16 @@ function F(e, t) {
 		}
 	};
 }
-function Mt(e, t) {
+function Ft(e, t) {
 	let { x: n, y: r } = t;
 	if (![
 		n.min,
 		n.max,
 		r.min,
 		r.max
-	].every(Number.isFinite) || n.min >= n.max || r.min >= r.max) throw new _(`Invalid window x ${n.min}:${n.max}, y ${r.min}:${r.max}: expected finite numbers, each min below its max`);
+	].every(Number.isFinite) || n.min >= n.max || r.min >= r.max) throw new f(`Invalid window x ${n.min}:${n.max}, y ${r.min}:${r.max}: expected finite numbers, each min below its max`);
 	let { axis: i } = e;
-	if (!(Math.abs(i.x.y) <= Ot && Math.abs(i.y.x) <= Ot && i.x.x > 0 && i.y.y < 0)) throw new _("A window can be shown only with the usual axes: orthogonal, the x axis to the right and the y axis up");
+	if (!(Math.abs(i.x.y) <= jt && Math.abs(i.y.x) <= jt && i.x.x > 0 && i.y.y < 0)) throw new f("A window can be shown only with the usual axes: orthogonal, the x axis to the right and the y axis up");
 	let a = e.width / (n.max - n.min), o = e.height / (r.max - r.min);
 	return {
 		...e,
@@ -324,7 +330,7 @@ function Mt(e, t) {
 		}
 	};
 }
-function Nt(e) {
+function It(e) {
 	let t = [
 		{
 			x: 0,
@@ -342,7 +348,7 @@ function Nt(e) {
 			x: e.width,
 			y: e.height
 		}
-	].map((t) => O(t, e)), n = t.map((e) => e.x), r = t.map((e) => e.y);
+	].map((t) => T(t, e)), n = t.map((e) => e.x), r = t.map((e) => e.y);
 	return {
 		x: {
 			min: Math.min(...n),
@@ -362,12 +368,12 @@ function I(e, t) {
 	};
 }
 function L(e, t, n = N) {
-	jt(e);
+	Pt(e);
 	let r = Math.max(n.min / t.x, n.min / t.y), i = Math.min(n.max / t.x, n.max / t.y);
 	return r > i ? 1 : Math.min(Math.max(e, r), i);
 }
 // src/animate/Animate.ts
-var Pt = 100, Ft = class extends EventTarget {
+var Lt = 100, Rt = class extends EventTarget {
 	_graph;
 	_animatedPoints = [];
 	_last = null;
@@ -397,9 +403,9 @@ var Pt = 100, Ft = class extends EventTarget {
 		this._halt(), this._animations = /* @__PURE__ */ new Map(), this._animatedPoints = [];
 	}
 	onFiguresRemoved(e) {
-		let t = (t) => t instanceof d && e.includes(t.name);
+		let t = (t) => t instanceof h && e.includes(t.name);
 		for (let [e, n] of this._animations) {
-			let r = oe(n.point);
+			let r = le(n.point);
 			(t(n.point) || t(r?.from) || t(r?.to)) && this._animations.delete(e);
 		}
 		this._animatedPoints = [...this._animations.values()].map((e) => e.point), this._animations.size === 0 && (this.isRunning() || this._paused) && (this._halt(), this._emit("stop"));
@@ -430,26 +436,26 @@ var Pt = 100, Ft = class extends EventTarget {
 	}
 	_updatePoints() {
 		return this._animations = /* @__PURE__ */ new Map(), this._animatedPoints = [], Object.values(this._graph.figures).forEach((e) => {
-			if (!(e instanceof d)) return;
-			let t = oe(e);
+			if (!(e instanceof h)) return;
+			let t = le(e);
 			if (t === null) return;
-			let { from: n, to: r, duration: a, delay: o, easing: s, loop: c } = t;
-			n instanceof d && r instanceof d && (this._animations.set(e.name, {
+			let { from: n, to: r, duration: i, delay: a, easing: o, loop: s } = t;
+			n instanceof h && r instanceof h && (this._animations.set(e.name, {
 				point: e,
 				start: n,
 				end: r,
 				reversed: !1,
-				duration: a * 1e3,
-				delay: o * 1e3,
-				ease: i[s],
-				loop: c,
+				duration: i * 1e3,
+				delay: a * 1e3,
+				ease: ee[o],
+				loop: s,
 				elapsed: 0
 			}), this._animatedPoints.push(e));
 		}), this._animatedPoints;
 	}
 	_step = (e) => {
 		if (this._paused) return;
-		let t = this._last === null ? 0 : Math.min(Math.max(e - this._last, 0), Pt);
+		let t = this._last === null ? 0 : Math.min(Math.max(e - this._last, 0), Lt);
 		this._last = e;
 		let n = !1;
 		for (let e of this._animations.values()) {
@@ -471,7 +477,7 @@ var Pt = 100, Ft = class extends EventTarget {
 	"both",
 	"zoom",
 	"move"
-], z = 1.25, It = .0015, Lt = class extends EventTarget {
+], z = 1.25, zt = .0015, Bt = class extends EventTarget {
 	allow;
 	gestures;
 	_graph;
@@ -485,7 +491,7 @@ var Pt = 100, Ft = class extends EventTarget {
 	constructor(e, t = {}) {
 		super();
 		let n = t.allow ?? "both";
-		if (!R.includes(n)) throw new _(`Invalid zoom allow ${n}: expected ${R.join(", ")}`);
+		if (!R.includes(n)) throw new f(`Invalid zoom allow ${n}: expected ${R.join(", ")}`);
 		this.allow = n, this.gestures = t.gestures ?? !1, this._graph = e, e.attach(this), this._home = structuredClone(e.config), this.gestures && this.canZoom && e.rootSVG.node.addEventListener("wheel", this._ctrlWheel, { passive: !1 });
 	}
 	get canZoom() {
@@ -495,7 +501,7 @@ var Pt = 100, Ft = class extends EventTarget {
 		return this.allow !== "zoom";
 	}
 	get window() {
-		return Nt(this._graph.config);
+		return It(this._graph.config);
 	}
 	get scale() {
 		return I(this._graph.config, this._home);
@@ -504,13 +510,13 @@ var Pt = 100, Ft = class extends EventTarget {
 		this._zoom(e, t);
 	}
 	zoomOut(e = z, t) {
-		if (!Number.isFinite(e) || e <= 0) throw new _(`Invalid zoom factor ${e}: expected a finite number greater than 0`);
+		if (!Number.isFinite(e) || e <= 0) throw new f(`Invalid zoom factor ${e}: expected a finite number greater than 0`);
 		this._zoom(1 / e, t);
 	}
 	zoomTo(e) {
 		this._requireZoom(), this._requireMove();
-		let t = Mt(this._current(), e), n = I(t, this._home), r = (e) => e < N.min || e > N.max;
-		if (r(n.x) || r(n.y)) throw new _("This window needs units more than a hundred times shorter or longer than the ones at the start");
+		let t = Ft(this._current(), e), n = I(t, this._home), r = (e) => e < N.min || e > N.max;
+		if (r(n.x) || r(n.y)) throw new f("This window needs units more than a hundred times shorter or longer than the ones at the start");
 		this._apply(t);
 	}
 	moveOrigin(e, t) {
@@ -526,7 +532,7 @@ var Pt = 100, Ft = class extends EventTarget {
 		return this._navigating;
 	}
 	set navigating(e) {
-		if (!this.gestures) throw new M("This zoom was made without gestures: made it with {gestures: true} to navigate with the mouse and the fingers");
+		if (!this.gestures) throw new b("This zoom was made without gestures: made it with {gestures: true} to navigate with the mouse and the fingers");
 		e !== this._navigating && (e ? this._enter() : this._leave(), this._navigating = e, this._emit("navigation", e));
 	}
 	dispose() {
@@ -545,10 +551,10 @@ var Pt = 100, Ft = class extends EventTarget {
 		this.dispatchEvent(new CustomEvent(e, { detail: t }));
 	}
 	_requireZoom() {
-		if (!this.canZoom) throw new M("This zoom may only move (allow: \"move\"): it cannot change the length of a unit");
+		if (!this.canZoom) throw new b("This zoom may only move (allow: \"move\"): it cannot change the length of a unit");
 	}
 	_requireMove() {
-		if (!this.canMove) throw new M("This zoom may only zoom (allow: \"zoom\"): the origin stays where it is");
+		if (!this.canMove) throw new b("This zoom may only zoom (allow: \"zoom\"): the origin stays where it is");
 	}
 	_current() {
 		return this._pending ?? this._graph.config;
@@ -661,12 +667,12 @@ var Pt = 100, Ft = class extends EventTarget {
 		!this._navigating && e.ctrlKey && (e.preventDefault(), this._wheelBy(e));
 	};
 	_wheelBy(e) {
-		let t = e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? 400 : 1, n = Math.exp(-e.deltaY * t * It);
+		let t = e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? 400 : 1, n = Math.exp(-e.deltaY * t * zt);
 		if (!Number.isFinite(n) || n <= 0) return;
 		let r = this._current(), i = L(n, I(r, this._home));
 		i !== 1 && this._schedule(P(r, i, this._fixed(this._local(e))));
 	}
-}, Rt = "slide", zt = class extends EventTarget {
+}, Vt = "slide", Ht = class extends EventTarget {
 	_graph;
 	_least;
 	_current = 1;
@@ -676,7 +682,7 @@ var Pt = 100, Ft = class extends EventTarget {
 	constructor(e, t = {}) {
 		super();
 		let n = t.count ?? 1;
-		if (!Number.isInteger(n) || n < 1) throw new _(`Invalid count ${n} of slides: expected an integer from 1`);
+		if (!Number.isInteger(n) || n < 1) throw new f(`Invalid count ${n} of slides: expected an integer from 1`);
 		this._graph = e, e.attach(this), this._least = n, this._titles = e.controls.titles ?? {}, this._count = this._countOfFigures(), this._applyAll();
 	}
 	get current() {
@@ -714,7 +720,7 @@ var Pt = 100, Ft = class extends EventTarget {
 		this._show(this._count);
 	}
 	goto(e) {
-		if (!Number.isInteger(e) || e < 1 || e > this._count) throw new _(`Invalid step ${e}: expected an integer from 1 to ${this._count}`);
+		if (!Number.isInteger(e) || e < 1 || e > this._count) throw new f(`Invalid step ${e}: expected an integer from 1 to ${this._count}`);
 		this._show(e);
 	}
 	onFigureChanged(e) {
@@ -730,7 +736,7 @@ var Pt = 100, Ft = class extends EventTarget {
 	}
 	dispose() {
 		this._disposed = !0, Object.values(this._graph.figures).forEach((e) => {
-			e.setHiddenBy(Rt, !1);
+			e.setHiddenBy(Vt, !1);
 		});
 	}
 	on(e, t) {
@@ -743,11 +749,11 @@ var Pt = 100, Ft = class extends EventTarget {
 		this.dispatchEvent(new CustomEvent("change", { detail: this.state }));
 	}
 	_countOfFigures() {
-		return Object.values(this._graph.figures).reduce((e, t) => Math.max(e, Fe(ie(t) ?? [])), this._least);
+		return Object.values(this._graph.figures).reduce((e, t) => Math.max(e, ie(oe(t) ?? [])), this._least);
 	}
 	_apply(e) {
-		let n = ie(e);
-		e.setHiddenBy(Rt, n !== null && !t(n, this._current));
+		let t = oe(e);
+		e.setHiddenBy(Vt, t !== null && !Ie(t, this._current));
 	}
 	_applyAll() {
 		Object.values(this._graph.figures).forEach((e) => {
@@ -761,7 +767,7 @@ var Pt = 100, Ft = class extends EventTarget {
 		let e = this._countOfFigures(), t = Math.min(this._current, e);
 		(e !== this._count || t !== this._current) && (this._count = e, t !== this._current && (this._current = t, this._applyAll()), this._emit());
 	}
-}, B = "toggle", Bt = class extends EventTarget {
+}, B = "toggle", Ut = class extends EventTarget {
 	_graph;
 	_definitions;
 	_active = /* @__PURE__ */ new Set();
@@ -817,7 +823,7 @@ var Pt = 100, Ft = class extends EventTarget {
 		return this.removeEventListener(e, t), this;
 	}
 	_check(e) {
-		if (!this._definitions.some((t) => t.id === e)) throw new _(`Invalid button "${e}": the code declares ${this._definitions.length === 0 ? "none" : this._definitions.map((e) => e.id).join(", ")}`);
+		if (!this._definitions.some((t) => t.id === e)) throw new f(`Invalid button "${e}": the code declares ${this._definitions.length === 0 ? "none" : this._definitions.map((e) => e.id).join(", ")}`);
 	}
 	_emit(e) {
 		let t = {
@@ -827,7 +833,7 @@ var Pt = 100, Ft = class extends EventTarget {
 		this.dispatchEvent(new CustomEvent("change", { detail: t }));
 	}
 	_figuresOf(e) {
-		return Object.values(this._graph.figures).filter((t) => se(t)?.id === e);
+		return Object.values(this._graph.figures).filter((t) => Re(t)?.id === e);
 	}
 	_shown({ id: e, hidden: t }) {
 		return t === this._active.has(e);
@@ -838,7 +844,7 @@ var Pt = 100, Ft = class extends EventTarget {
 		});
 	}
 	_apply(e, t) {
-		let n = se(e);
+		let n = Re(e);
 		if (n === null) {
 			this._stopFade(e.name), e.setHiddenBy(B, !1), e.element.attr("opacity", null);
 			return;
@@ -860,10 +866,10 @@ var Pt = 100, Ft = class extends EventTarget {
 		let t = this._fades.get(e);
 		t !== void 0 && (cancelAnimationFrame(t), this._fades.delete(e));
 	}
-}, Vt = (e) => (e.changedTouches && (e = e.changedTouches[0]), {
+}, Wt = (e) => (e.changedTouches && (e = e.changedTouches[0]), {
 	x: e.clientX,
 	y: e.clientY
-}), Ht = class {
+}), Gt = class {
 	constructor(e) {
 		e.remember("_draggable", this), this.el = e, this.drag = this.drag.bind(this), this.startDrag = this.startDrag.bind(this), this.endDrag = this.endDrag.bind(this);
 	}
@@ -876,19 +882,19 @@ var Pt = 100, Ft = class extends EventTarget {
 			event: e,
 			handler: this
 		}).defaultPrevented) return;
-		e.preventDefault(), e.stopPropagation(), this.init(!1), this.box = this.el.bbox(), this.lastClick = this.el.point(Vt(e));
+		e.preventDefault(), e.stopPropagation(), this.init(!1), this.box = this.el.bbox(), this.lastClick = this.el.point(Wt(e));
 		let n = (t ? "mousemove" : "touchmove") + ".drag", r = (t ? "mouseup" : "touchend") + ".drag";
-		ae(window, n, this.drag, this, { passive: !1 }), ae(window, r, this.endDrag, this, { passive: !1 }), this.el.fire("dragstart", {
+		ue(window, n, this.drag, this, { passive: !1 }), ue(window, r, this.endDrag, this, { passive: !1 }), this.el.fire("dragstart", {
 			event: e,
 			handler: this,
 			box: this.box
 		});
 	}
 	drag(e) {
-		let { box: t, lastClick: n } = this, r = this.el.point(Vt(e)), i = r.x - n.x, a = r.y - n.y;
+		let { box: t, lastClick: n } = this, r = this.el.point(Wt(e)), i = r.x - n.x, a = r.y - n.y;
 		if (!i && !a) return t;
 		let o = t.x + i, s = t.y + a;
-		this.box = new u(o, s, t.w, t.h), this.lastClick = r, !this.el.dispatch("dragmove", {
+		this.box = new ce(o, s, t.w, t.h), this.lastClick = r, !this.el.dispatch("dragmove", {
 			event: e,
 			handler: this,
 			box: this.box,
@@ -897,30 +903,30 @@ var Pt = 100, Ft = class extends EventTarget {
 		}).defaultPrevented && this.move(o, s);
 	}
 	move(e, t) {
-		this.el.type === "svg" ? ce.prototype.move.call(this.el, e, t) : this.el.move(e, t);
+		this.el.type === "svg" ? n.prototype.move.call(this.el, e, t) : this.el.move(e, t);
 	}
 	endDrag(e) {
 		this.drag(e), this.el.fire("dragend", {
 			event: e,
 			handler: this,
 			box: this.box
-		}), T(window, "mousemove.drag"), T(window, "touchmove.drag"), T(window, "mouseup.drag"), T(window, "touchend.drag"), this.init(!0);
+		}), v(window, "mousemove.drag"), v(window, "touchmove.drag"), v(window, "mouseup.drag"), v(window, "touchend.drag"), this.init(!0);
 	}
 };
-n(c, { draggable(e = !0) {
-	return (this.remember("_draggable") || new Ht(this)).init(e), this;
+ae(ze, { draggable(e = !0) {
+	return (this.remember("_draggable") || new Gt(this)).init(e), this;
 } });
 // src/figures/Polygon/Polygon.constraints.ts
-var Ut = 1e3;
-function Wt(e, t) {
-	if (!Number.isInteger(e) || e < 3 || e > 1e3) throw new _(`Invalid number of sides ${e}: expected an integer from 3 to ${Ut}`);
-	if (t !== void 0 && (!Number.isInteger(t) || t < 1 || 2 * t >= e)) throw new _(`Invalid star ${t} for ${e} sides: expected an integer from 1 to less than ${e / 2}`);
+var Kt = 1e3;
+function qt(e, t) {
+	if (!Number.isInteger(e) || e < 3 || e > 1e3) throw new f(`Invalid number of sides ${e}: expected an integer from 3 to ${Kt}`);
+	if (t !== void 0 && (!Number.isInteger(t) || t < 1 || 2 * t >= e)) throw new f(`Invalid star ${t} for ${e} sides: expected an integer from 1 to less than ${e / 2}`);
 	return t ?? 1;
 }
-var Gt = {
+var Jt = {
 	vertices: (e) => {
-		if (!Array.isArray(e) || e.length < 3) throw new _(`A polygon needs at least 3 vertices, got ${Array.isArray(e) ? e.length : typeof e}`);
-		let t = _e(e, "vertex of the polygon");
+		if (!Array.isArray(e) || e.length < 3) throw new f(`A polygon needs at least 3 vertices, got ${Array.isArray(e) ? e.length : typeof e}`);
+		let t = m(e, "vertex of the polygon");
 		return t.some((e) => !Number.isFinite(e.x) || !Number.isFinite(e.y)) ? null : {
 			vertices: t.map((e) => ({
 				x: e.x,
@@ -930,25 +936,28 @@ var Gt = {
 		};
 	},
 	regular: ({ center: e, radius: t, sides: n, star: r }, i) => {
-		let a = Wt(n, r), o = m({ center: e }, "polygon").center;
-		return yt(o, ge(t, o, i), n, a);
+		let a = qt(n, r), o = _e({ center: e }, "polygon").center;
+		return St(o, be(t, o, i), n, a);
 	},
 	onSide: ({ A: e, B: t, sides: n, star: r }) => {
-		let i = Wt(n, r), a = m({
+		let i = qt(n, r), a = _e({
 			A: e,
 			B: t
 		}, "side of the polygon");
-		return bt(a.A, a.B, n, i);
+		return Ct(a.A, a.B, n, i);
 	}
 };
 function V(e, t) {
-	return r(Gt, e, t, "polygon");
+	return ye(Jt, e, t, "polygon");
 }
 function H(e, t, n) {
-	return ye(Gt, e, t, n);
+	return p(Jt, e, t, n);
 }
 // src/figures/Polygon/Polygon.ts
-var Kt = class e extends p {
+var Yt = class e extends g {
+	get _className() {
+		return "pidraw-polygon";
+	}
 	constructor(t, n, r) {
 		H(V(r, n), r, t.config), super(t, n), this._config = e._copy(r), this._polygon = null, this._makeShape(), this.computed();
 	}
@@ -974,7 +983,7 @@ var Kt = class e extends p {
 		}));
 	}
 	get centroid() {
-		return this._polygon === null ? k() : xt(this._polygon.vertices);
+		return this._polygon === null ? S() : wt(this._polygon.vertices);
 	}
 	labelFields() {
 		let e = () => {
@@ -984,27 +993,41 @@ var Kt = class e extends p {
 			};
 			return {
 				...e,
-				vertices: e.vertices.map((e) => O(e, this.graphConfig))
+				vertices: e.vertices.map((e) => T(e, this.graphConfig))
 			};
 		}, t = () => this.graphConfig.measure;
 		return {
-			perimeter: (n, r) => te(wt(e()), n, t(), r),
-			area: (n, r) => te(Tt(e()), n, t(), r, 2)
+			perimeter: (n, r) => Se(Dt(e()), n, t(), r),
+			area: (n, r) => Se(Ot(e()), n, t(), r, 2)
 		};
 	}
 	referenceable = !0;
 	referenceAnchorPoint() {
 		return this._polygon === null ? null : this.centroid;
 	}
+	get snappable() {
+		return !0;
+	}
+	snapPoints() {
+		if (this._polygon === null) return [];
+		let { vertices: e, cycles: t } = this._polygon, n = t.flatMap((t) => t.map((n, r) => {
+			let i = e[n], a = e[t[(r + 1) % t.length]];
+			return {
+				x: (i.x + a.x) / 2,
+				y: (i.y + a.y) / 2
+			};
+		}));
+		return [...this.vertices, ...n];
+	}
 	computed() {
 		return this._place(H(V(this._config, this.name), this._config, this.graphConfig));
 	}
 	_place(e) {
-		return this._polygon = e, this._setDefined(e !== null), this.shape.plot(e === null ? "M 0 0" : Ct(e)), this;
+		return this._polygon = e, this._setDefined(e !== null), this.shape.plot(e === null ? "M 0 0" : Et(e)), this;
 	}
 	followable = !0;
 	follow(e, t) {
-		return this._polygon === null ? k() : St(this._polygon, {
+		return this._polygon === null ? S() : Tt(this._polygon, {
 			x: e,
 			y: t
 		});
@@ -1026,26 +1049,29 @@ var Kt = class e extends p {
 	}
 };
 // src/figures/Parametric/Parametric.constraints.ts
-function qt(e, t, n) {
-	if (typeof e != "string") throw new _(`Invalid function ${JSON.stringify(e)} of ${t} for the curve "${n}": expected text`);
-	return me(e, "t", `of ${t} of the curve "${n}"`);
+function Xt(e, t, n) {
+	if (typeof e != "string") throw new f(`Invalid function ${JSON.stringify(e)} of ${t} for the curve "${n}": expected text`);
+	return l(e, "t", `of ${t} of the curve "${n}"`);
 }
-function Jt(e, t) {
-	Ze(e, t);
+function Zt(e, t) {
+	he(e, t);
 	let n = e.expressions;
-	if (typeof n != "object") throw new _(`The curve "${t}" needs its functions: {expressions: {x, y}}`);
+	if (typeof n != "object") throw new f(`The curve "${t}" needs its functions: {expressions: {x, y}}`);
 	return {
-		x: qt(n.x, "x", t),
-		y: qt(n.y, "y", t)
+		x: Xt(n.x, "x", t),
+		y: Xt(n.y, "y", t)
 	};
 }
 // src/figures/Parametric/Parametric.ts
-var Yt = {
+var Qt = {
 	min: 0,
 	max: 2 * Math.PI
-}, Xt = 64, Zt = class extends p {
+}, $t = 64, en = class extends g {
+	get _className() {
+		return "pidraw-parametric";
+	}
 	constructor(e, t, n) {
-		let r = Jt(n, t);
+		let r = Zt(n, t);
 		super(e, t), this._config = {
 			...n,
 			expressions: { ...n.expressions }
@@ -1057,7 +1083,7 @@ var Yt = {
 		return this._config;
 	}
 	set config(e) {
-		let t = Jt(e, this.name);
+		let t = Zt(e, this.name);
 		this._config = {
 			...e,
 			expressions: { ...e.expressions }
@@ -1073,17 +1099,17 @@ var Yt = {
 		};
 	}
 	evaluate(e) {
-		return D(this.valueAt(e), this.graphConfig);
+		return w(this.valueAt(e), this.graphConfig);
 	}
 	_draw() {
-		let e = this.graphConfig, { width: t, height: n } = e, r = this._config.domain ?? Yt, i = n * (this._config.asymptoteThreshold ?? 10), a = { t: 0 }, o = (t) => {
+		let e = this.graphConfig, { width: t, height: n } = e, r = this._config.domain ?? Qt, i = n * (this._config.asymptoteThreshold ?? 10), a = { t: 0 }, o = (t) => {
 			a.t = t;
 			let n = this._numExp.x.evaluate(a), r = this._numExp.y.evaluate(a);
-			return Number.isFinite(n) && Number.isFinite(r) ? D({
+			return Number.isFinite(n) && Number.isFinite(r) ? w({
 				x: n,
 				y: r
-			}, e) : k();
-		}, s = this._config.samples === void 0 ? Math.max(Xt, (r.max - r.min) * Math.abs(e.axis.x.x) / 8) : (r.max - r.min) * this._config.samples, c = Ye(o, r.min, r.max, {
+			}, e) : S();
+		}, s = this._config.samples === void 0 ? Math.max($t, (r.max - r.min) * Math.abs(e.axis.x.x) / 8) : (r.max - r.min) * this._config.samples, c = ke(o, r.min, r.max, {
 			intervals: s,
 			tolerance: this._config.tolerance ?? .5,
 			maxDepth: this._config.maxDepth ?? 6,
@@ -1095,16 +1121,16 @@ var Yt = {
 			},
 			bound: i
 		});
-		return this.shape.plot(Ce(c, i)), this._range = {
+		return this.shape.plot(We(c, i)), this._range = {
 			from: r.min,
 			to: r.max,
 			intervals: s
-		}, this._points = c, this._labelAnchor = Ge(c, t, n), this;
+		}, this._points = c, this._labelAnchor = Oe(c, t, n), this;
 	}
 	_points;
 	followable = !0;
 	follow(e, t) {
-		return C(this._points, {
+		return E(this._points, {
 			x: e,
 			y: t
 		});
@@ -1112,7 +1138,7 @@ var Yt = {
 	_range;
 	_labelAnchor;
 	_labelPlace({ point: e, direction: t }) {
-		return b(e, t, this._labelGap);
+		return x(e, t, this._labelGap);
 	}
 	moveLabel() {
 		if (!this.label || this._labelAnchor === null) return this;
@@ -1125,7 +1151,7 @@ var Yt = {
 	}
 	_tikzCurve() {
 		if (this._range === null) return "";
-		let { definitions: e, options: t } = this._tikzCurveStyle(), n = this._tikzView(), r = (e) => he(e, 5), i = ([e, t]) => [e - (t - e), t + (t - e)], a = { t: "x" }, o = [
+		let { definitions: e, options: t } = this._tikzCurveStyle(), n = this._tikzView(), r = (e) => c(e, 5), i = ([e, t]) => [e - (t - e), t + (t - e)], a = { t: "x" }, o = [
 			`domain=${r(this._range.from)}:${r(this._range.to)}`,
 			`samples=${this._tikzSamples(this._range.intervals)}`,
 			...t
@@ -1140,19 +1166,22 @@ var Yt = {
 	}
 };
 // src/figures/Follow/Follow.constraints.ts
-function Qt(e, t) {
+function tn(e, t) {
 	let n = e.follow;
-	if (!(n instanceof p)) throw new _(`The point "${t}" needs a figure to follow`);
-	if (!n.followable) throw new _(`The point "${t}" cannot follow the figure "${n.name}": a point follows a line, a circle, a plot or a parametric curve`);
-	if (e.size !== void 0 && !(typeof e.size == "number" && Number.isFinite(e.size) && e.size > 0)) throw new _(`Invalid size ${JSON.stringify(e.size)} for the point "${t}": expected a finite number greater than 0`);
+	if (!(n instanceof g)) throw new f(`The point "${t}" needs a figure to follow`);
+	if (!n.followable) throw new f(`The point "${t}" cannot follow the figure "${n.name}": a point follows a line, a circle, a plot or a parametric curve`);
+	if (e.size !== void 0 && !(typeof e.size == "number" && Number.isFinite(e.size) && e.size > 0)) throw new f(`Invalid size ${JSON.stringify(e.size)} for the point "${t}": expected a finite number greater than 0`);
 	let r = e.at;
-	if (r !== void 0 && (typeof r != "object" || typeof r.x != "number" || typeof r.y != "number")) throw new _(`Invalid starting position ${JSON.stringify(r)} for the point "${t}": expected a position {x, y}`);
+	if (r !== void 0 && (typeof r != "object" || typeof r.x != "number" || typeof r.y != "number")) throw new f(`Invalid starting position ${JSON.stringify(r)} for the point "${t}": expected a position {x, y}`);
 }
 // src/figures/Follow/Follow.ts
-var $t = class extends p {
+var nn = class extends g {
+	get _className() {
+		return "pidraw-follow";
+	}
 	_labelGap = 12;
 	constructor(e, t, n) {
-		Qt(n, t), super(e, t), this.appearance.fill.color = "black", this._config = { ...n }, this._mouse = null, this._state = null, this._listener = (e) => {
+		tn(n, t), super(e, t), this.appearance.fill.color = "black", this._config = { ...n }, this._mouse = null, this._state = null, this._listener = (e) => {
 			let t = this.rootSVG.node, n = t.getScreenCTM();
 			if (n === null) return;
 			let r = t.createSVGPoint();
@@ -1166,7 +1195,7 @@ var $t = class extends p {
 		return this._config;
 	}
 	set config(e) {
-		Qt(e, this.name), this._config = { ...e }, this._makeShape(), this.computed(), this.updateLabel();
+		tn(e, this.name), this._config = { ...e }, this._makeShape(), this.computed(), this.updateLabel();
 	}
 	_mouse;
 	_state;
@@ -1193,13 +1222,13 @@ var $t = class extends p {
 	}
 	computed() {
 		let e = this._config.follow, t = this._target(), n = e.follow(t.x, t.y);
-		if (!x(n)) return this._state = null, this._point?.hide(), this._tangent?.hide(), this;
+		if (!j(n)) return this._state = null, this._point?.hide(), this._tangent?.hide(), this;
 		this._state = {
 			point: {
 				x: n.x,
 				y: n.y
 			},
-			direction: Ve((t, n) => e.follow(t, n), n)
+			direction: Ye((t, n) => e.follow(t, n), n)
 		}, this._point?.show().center(n.x, n.y);
 		let r = this._tangentLine();
 		return r === null ? this._tangent?.hide() : this._tangent?.show().plot(r[0].x, r[0].y, r[1].x, r[1].y), this;
@@ -1207,8 +1236,8 @@ var $t = class extends p {
 	_tangentLine() {
 		let e = this._state?.direction;
 		if (this._config.tangent !== !0 || this._state === null || !e) return null;
-		let { width: t, height: n } = this.graphConfig, r = ke(this._state.point, e, t, n);
-		return r === null ? null : Ee(r[0], r[1], t, n);
+		let { width: t, height: n } = this.graphConfig, r = Ve(this._state.point, e, t, n);
+		return r === null ? null : Ke(r[0], r[1], t, n);
 	}
 	moveLabel() {
 		if (!this.label || this._state === null) return this;
@@ -1216,7 +1245,7 @@ var $t = class extends p {
 		return this.label.alignementGiven || (this.label.config.alignement = t), this.label.move(e.x, e.y), this;
 	}
 	_labelPlace({ point: e, direction: t }) {
-		return b(e, t ?? {
+		return x(e, t ?? {
 			x: 0,
 			y: 0
 		}, this._labelGap);
@@ -1244,21 +1273,24 @@ var $t = class extends p {
 	}
 };
 // src/figures/FillBetween/FillBetween.constraints.ts
-function en(e) {
-	return l(e.domain, [e.plot, e.other].flatMap((e) => e === void 0 ? [] : [e]));
+function rn(e) {
+	return s(e.domain, [e.plot, e.other].flatMap((e) => e === void 0 ? [] : [e]));
 }
-function tn(e, t) {
+function an(e, t) {
 	let n = e.plot, r = e.other;
-	if (!(n instanceof a)) throw new _(`The area "${t}" needs a plot`);
-	if (r !== void 0 && !(r instanceof a)) throw new _(`The area "${t}" can only be between plots, got ${JSON.stringify(r)} as the second one`);
-	if (e.domain !== void 0 && !(o(e.domain) && Number.isFinite(e.domain.min) && Number.isFinite(e.domain.max))) throw new _(`Invalid domain ${JSON.stringify(e.domain)} for the area "${t}": expected finite numbers`);
-	let i = en(e);
-	if (i !== null && i.min >= i.max) throw new _(e.domain === void 0 ? `The plots of the area "${t}" have no abscissa in common: give a domain` : `Invalid domain ${JSON.stringify(e.domain)} for the area "${t}": the minimum must be below the maximum`);
+	if (!(n instanceof O)) throw new f(`The area "${t}" needs a plot`);
+	if (r !== void 0 && !(r instanceof O)) throw new f(`The area "${t}" can only be between plots, got ${JSON.stringify(r)} as the second one`);
+	if (e.domain !== void 0 && !(ge(e.domain) && Number.isFinite(e.domain.min) && Number.isFinite(e.domain.max))) throw new f(`Invalid domain ${JSON.stringify(e.domain)} for the area "${t}": expected finite numbers`);
+	let i = rn(e);
+	if (i !== null && i.min >= i.max) throw new f(e.domain === void 0 ? `The plots of the area "${t}" have no abscissa in common: give a domain` : `Invalid domain ${JSON.stringify(e.domain)} for the area "${t}": the minimum must be below the maximum`);
 }
 // src/figures/FillBetween/FillBetween.ts
-var nn = .5, rn = 6, an = 10, on = class e extends p {
+var on = .5, sn = 6, cn = 10, ln = class e extends g {
+	get _className() {
+		return "pidraw-fillbetween";
+	}
 	constructor(t, n, r) {
-		tn(r, n), super(t, n), this._config = e._copy(r), this._runs = [], this._range = null, this._makeShape(), this.computed();
+		an(r, n), super(t, n), this._config = e._copy(r), this._runs = [], this._range = null, this._makeShape(), this.computed();
 	}
 	static _copy(e) {
 		return e.domain === void 0 ? { ...e } : {
@@ -1274,14 +1306,14 @@ var nn = .5, rn = 6, an = 10, on = class e extends p {
 		return this._config;
 	}
 	set config(t) {
-		tn(t, this.name), this._config = e._copy(t), this.computed(), this.updateLabel();
+		an(t, this.name), this._config = e._copy(t), this.computed(), this.updateLabel();
 	}
 	_runs;
 	_range;
 	get area() {
 		if (this._runs.length === 0) return NaN;
 		let { x: e, y: t } = this.graphConfig.axis;
-		return st(this._runs) / Math.abs(e.x * t.y);
+		return ut(this._runs) / Math.abs(e.x * t.y);
 	}
 	computed() {
 		let e = this.graphConfig, { origin: t, width: n, height: r } = e, i = e.axis.x.x;
@@ -1289,36 +1321,36 @@ var nn = .5, rn = 6, an = 10, on = class e extends p {
 		let a = {
 			min: -t.x / i - 1,
 			max: (n - t.x) / i + 1
-		}, o = en(this._config) ?? a, s = Math.max(o.min, a.min), c = Math.min(o.max, a.max);
+		}, o = rn(this._config) ?? a, s = Math.max(o.min, a.min), c = Math.min(o.max, a.max);
 		if (s < c) {
 			let { plot: a, other: o } = this._config, l = (c - s) * Math.abs(i) / 8;
-			this._runs = at((e) => a.evaluate(e), o === void 0 ? null : (e) => o.evaluate(e), t.y, {
+			this._runs = ct((e) => a.evaluate(e), o === void 0 ? null : (e) => o.evaluate(e), t.y, {
 				min: s,
 				max: c
-			}, (t) => O({
+			}, (t) => T({
 				x: t,
 				y: 0
 			}, e).x, {
 				intervals: l,
-				tolerance: nn,
-				maxDepth: rn,
+				tolerance: on,
+				maxDepth: sn,
 				view: {
 					left: 0,
 					right: n,
 					top: 0,
 					bottom: r
 				},
-				bound: r * an
+				bound: r * cn
 			}), this._range = this._runs.length === 0 ? null : {
 				from: s,
 				to: c,
 				intervals: l
 			};
 		}
-		return this._setDefined(this._runs.length > 0), this.shape.plot(ot(this._runs)), this;
+		return this._setDefined(this._runs.length > 0), this.shape.plot(lt(this._runs)), this;
 	}
 	labelFields() {
-		return { area: (e) => be(this.area, e) };
+		return { area: (e) => xe(this.area, e) };
 	}
 	defaultLabelField() {
 		return "area";
@@ -1341,34 +1373,37 @@ var nn = .5, rn = 6, an = 10, on = class e extends p {
 		return this._range === null || t === null || !e.shape && !e.label ? "" : [e.shape ? this._tikzArea(this._range) : "", e.label ? this._tikzLabel(this._tikzCoordinates(t)) : ""].filter((e) => e !== "").join("\n");
 	}
 	_tikzArea({ from: e, to: t, intervals: n }) {
-		let { definitions: r, options: i } = this._tikzStyle(), { plot: a, other: o } = this._config, [s, c] = this._tikzView().y, l = (e) => he(e, 5), u = `pidraw-${this.name}-1`, d = `pidraw-${this.name}-2`, f = (r, i) => `\\addplot[name path=${r}, draw=none, domain=${l(e)}:${l(t)}, samples=${this._tikzSamples(n)}] {${i.numExp.toPgf()}};`;
+		let { definitions: r, options: i } = this._tikzStyle(), { plot: a, other: o } = this._config, [s, l] = this._tikzView().y, u = (e) => c(e, 5), d = `pidraw-${this.name}-1`, f = `pidraw-${this.name}-2`, p = (r, i) => `\\addplot[name path=${r}, draw=none, domain=${u(e)}:${u(t)}, samples=${this._tikzSamples(n)}] {${i.numExp.toPgf()}};`;
 		return [...r, ...this._tikzAxis([
-			f(u, a),
-			o === void 0 ? `\\path[name path=${d}] (axis cs:${l(e)},0) -- (axis cs:${l(t)},0);` : f(d, o),
-			`\\addplot[${i.join(", ")}] fill between[of=${u} and ${d}];`
-		], { y: [s - (c - s), c + (c - s)] })].join("\n");
+			p(d, a),
+			o === void 0 ? `\\path[name path=${f}] (axis cs:${u(e)},0) -- (axis cs:${u(t)},0);` : p(f, o),
+			`\\addplot[${i.join(", ")}] fill between[of=${d} and ${f}];`
+		], { y: [s - (l - s), l + (l - s)] })].join("\n");
 	}
 	_makeShape() {
 		return this.clear(), this.shape = this.element.path("M 0 0"), this.fill().stroke(), this.element.add(this.shape), this.shape;
 	}
-}, sn = 1e3;
+}, un = 1e3;
 function U(e) {
-	return l(e.domain, [e.plot]);
+	return s(e.domain, [e.plot]);
 }
-function cn(e, t) {
-	if (!(e.plot instanceof a)) throw new _(`The Riemann sum "${t}" needs a plot`);
+function dn(e, t) {
+	if (!(e.plot instanceof O)) throw new f(`The Riemann sum "${t}" needs a plot`);
 	let n = U(e);
-	if (n === null) throw new _(`The Riemann sum "${t}" needs a domain: give one, or give a domain to the plot "${e.plot.name}"`);
-	if (!o(n) || !Number.isFinite(n.min) || !Number.isFinite(n.max) || n.min >= n.max) throw new _(`Invalid domain ${JSON.stringify(n)} for the Riemann sum "${t}": expected finite numbers with the minimum below the maximum`);
+	if (n === null) throw new f(`The Riemann sum "${t}" needs a domain: give one, or give a domain to the plot "${e.plot.name}"`);
+	if (!ge(n) || !Number.isFinite(n.min) || !Number.isFinite(n.max) || n.min >= n.max) throw new f(`Invalid domain ${JSON.stringify(n)} for the Riemann sum "${t}": expected finite numbers with the minimum below the maximum`);
 	let { rectangles: r, position: i } = e;
-	if (r !== void 0 && !(Number.isInteger(r) && r >= 1 && r <= 1e3)) throw new _(`Invalid number of rectangles ${JSON.stringify(r)} for the Riemann sum "${t}": expected an integer from 1 to ${sn}`);
-	if (i !== void 0 && !(typeof i == "number" && i >= 0 && i <= 1)) throw new _(`Invalid position ${JSON.stringify(i)} for the Riemann sum "${t}": expected a number from 0 (left) to 1 (right)`);
+	if (r !== void 0 && !(Number.isInteger(r) && r >= 1 && r <= 1e3)) throw new f(`Invalid number of rectangles ${JSON.stringify(r)} for the Riemann sum "${t}": expected an integer from 1 to ${un}`);
+	if (i !== void 0 && !(typeof i == "number" && i >= 0 && i <= 1)) throw new f(`Invalid position ${JSON.stringify(i)} for the Riemann sum "${t}": expected a number from 0 (left) to 1 (right)`);
 }
 // src/figures/Riemann/Riemann.ts
-var ln = class e extends p {
+var fn = class e extends g {
+	get _className() {
+		return "pidraw-riemann";
+	}
 	_labelGap = 6;
 	constructor(t, n, r) {
-		cn(r, n), super(t, n), this._config = e._copy(r), this._rectangles = [], this._makeShape(), this.computed();
+		dn(r, n), super(t, n), this._config = e._copy(r), this._rectangles = [], this._makeShape(), this.computed();
 	}
 	static _copy(e) {
 		return e.domain === void 0 ? { ...e } : {
@@ -1384,7 +1419,7 @@ var ln = class e extends p {
 		return this._config;
 	}
 	set config(t) {
-		cn(t, this.name), this._config = e._copy(t), this.computed(), this.updateLabel();
+		dn(t, this.name), this._config = e._copy(t), this.computed(), this.updateLabel();
 	}
 	get rectangles() {
 		return this._config.rectangles ?? 5;
@@ -1409,27 +1444,27 @@ var ln = class e extends p {
 	}
 	_rectangles;
 	get sum() {
-		return this._rectangles.length === 0 ? NaN : Dt(this._rectangles);
+		return this._rectangles.length === 0 ? NaN : At(this._rectangles);
 	}
 	computed() {
 		let e = U(this._config), t = this._config.plot;
-		return this._rectangles = e === null ? [] : Et((e) => t.valueAt(e), e, this.rectangles, this.position), this._setDefined(this._rectangles.length > 0), this.shape.plot(this._path()), this;
+		return this._rectangles = e === null ? [] : kt((e) => t.valueAt(e), e, this.rectangles, this.position), this._setDefined(this._rectangles.length > 0), this.shape.plot(this._path()), this;
 	}
 	_path() {
 		if (this._rectangles.length === 0) return "M 0 0";
 		let e = (e, t) => {
-			let n = D({
+			let n = w({
 				x: e,
 				y: t
 			}, this.graphConfig);
-			return `${E(n.x)} ${E(n.y)}`;
+			return `${D(n.x)} ${D(n.y)}`;
 		};
 		return this._rectangles.map(({ x0: t, x1: n, y: r }) => `M ${e(t, 0)} L ${e(n, 0)} L ${e(n, r)} L ${e(t, r)} Z`).join(" ");
 	}
 	_labelPlace() {
 		let e = U(this._config);
 		if (e === null || this._rectangles.length === 0) return null;
-		let t = Math.max(0, ...this._rectangles.map(({ y: e }) => e)), { x: n, y: r } = D({
+		let t = Math.max(0, ...this._rectangles.map(({ y: e }) => e)), { x: n, y: r } = w({
 			x: (e.min + e.max) / 2,
 			y: t
 		}, this.graphConfig);
@@ -1440,7 +1475,7 @@ var ln = class e extends p {
 	}
 	labelFields() {
 		return {
-			sum: (e) => be(this.sum, e),
+			sum: (e) => xe(this.sum, e),
 			rectangles: () => String(this.rectangles)
 		};
 	}
@@ -1454,7 +1489,7 @@ var ln = class e extends p {
 	tikz() {
 		let e = this._tikzShown(), t = this._labelPlace();
 		if (t === null || !e.shape && !e.label) return "";
-		let n = (e, t) => `(${this._tikzCoordinates(D({
+		let n = (e, t) => `(${this._tikzCoordinates(w({
 			x: e,
 			y: t
 		}, this.graphConfig))})`, r = this._rectangles.map(({ x0: e, x1: t, y: r }) => `${n(e, 0)} rectangle ${n(t, r)}`).join(" ");
@@ -1465,16 +1500,19 @@ var ln = class e extends p {
 	}
 };
 // src/figures/Path/Path.constraints.ts
-function un(e, t) {
+function pn(e, t) {
 	let n = e.d, r = e.units;
-	if (typeof n != "string") throw new _(`Invalid data ${JSON.stringify(n)} for the path "${t}": expected the text of an SVG path`);
-	if (r !== void 0 && typeof r != "boolean") throw new _(`Invalid units ${JSON.stringify(r)} for the path "${t}": expected true or false`);
-	return xe(n);
+	if (typeof n != "string") throw new f(`Invalid data ${JSON.stringify(n)} for the path "${t}": expected the text of an SVG path`);
+	if (r !== void 0 && typeof r != "boolean") throw new f(`Invalid units ${JSON.stringify(r)} for the path "${t}": expected true or false`);
+	return de(n);
 }
 // src/figures/Path/Path.ts
-var dn = (e) => e.reduce((t, n, r) => r === 0 ? 0 : t + Math.hypot(n.x - e[r - 1].x, n.y - e[r - 1].y), 0), fn = class extends p {
+var mn = (e) => e.reduce((t, n, r) => r === 0 ? 0 : t + Math.hypot(n.x - e[r - 1].x, n.y - e[r - 1].y), 0), hn = class extends g {
+	get _className() {
+		return "pidraw-path";
+	}
 	constructor(e, t, n) {
-		let r = un(n, t);
+		let r = pn(n, t);
 		super(e, t), this._config = { ...n }, this._commands = r, this._pixels = [], this._makeShape(), this.computed();
 	}
 	_config;
@@ -1482,7 +1520,7 @@ var dn = (e) => e.reduce((t, n, r) => r === 0 ? 0 : t + Math.hypot(n.x - e[r - 1
 		return this._config;
 	}
 	set config(e) {
-		let t = un(e, this.name);
+		let t = pn(e, this.name);
 		this._config = { ...e }, this._commands = t, this.computed(), this.updateLabel();
 	}
 	get d() {
@@ -1500,27 +1538,27 @@ var dn = (e) => e.reduce((t, n, r) => r === 0 ? 0 : t + Math.hypot(n.x - e[r - 1
 		return structuredClone(this._pixels);
 	}
 	computed() {
-		let t = this.graphConfig;
-		return this._pixels = this._config.units === !0 ? De(this._commands, (e) => D(e, t)) : this._commands, this._setDefined(this._pixels.length > 0), this.shape.plot(this._pixels.length === 0 ? "M 0 0" : e(this._pixels)), this;
+		let e = this.graphConfig;
+		return this._pixels = this._config.units === !0 ? Ze(this._commands, (t) => w(t, e)) : this._commands, this._setDefined(this._pixels.length > 0), this.shape.plot(this._pixels.length === 0 ? "M 0 0" : Ae(this._pixels)), this;
 	}
 	followable = !0;
-	follow(e, t) {
-		let n = k(), r = Infinity;
-		for (let i of de(this._pixels)) {
-			let a = C(Pe(i), {
-				x: e,
-				y: t
-			}), o = Math.hypot(a.x - e, a.y - t);
-			o < r && (r = o, n = a);
+	follow(t, n) {
+		let r = S(), i = Infinity;
+		for (let a of e(this._pixels)) {
+			let e = E(Te(a), {
+				x: t,
+				y: n
+			}), o = Math.hypot(e.x - t, e.y - n);
+			o < i && (i = o, r = e);
 		}
-		return n;
+		return r;
 	}
 	_labelPlace() {
-		let e = de(this._pixels).map((e) => ({
+		let t = e(this._pixels).map((e) => ({
 			piece: e,
-			length: dn(Pe(e))
-		})).reduce((e, t) => e === null || t.length > e.length ? t : e, null), t = e === null ? null : We(e.piece);
-		return t === null ? null : b(t.point, t.direction, this._labelGap);
+			length: mn(Te(e))
+		})).reduce((e, t) => e === null || t.length > e.length ? t : e, null), n = t === null ? null : Fe(t.piece);
+		return n === null ? null : x(n.point, n.direction, this._labelGap);
 	}
 	moveLabel() {
 		let e = this._labelPlace();
@@ -1541,20 +1579,20 @@ var dn = (e) => e.reduce((t, n, r) => r === 0 ? 0 : t + Math.hypot(n.x - e[r - 1
 	_makeShape() {
 		return this.clear(), this.shape = this.element.path("M 0 0"), this.fill().stroke(), this.element.add(this.shape), this.shape;
 	}
-}, pn = "MAINGRID", W = "-edge", mn = [
-	pn,
-	S.X,
-	S.Y,
-	`${S.X}${W}`,
-	`${S.Y}${W}`
-], hn = 30, gn = 5;
-function _n(e, t = gn) {
-	if (e instanceof p) return [e];
+}, gn = "MAINGRID", W = "-edge", _n = [
+	gn,
+	y.X,
+	y.Y,
+	`${y.X}${W}`,
+	`${y.Y}${W}`
+], vn = 30, yn = 5, bn = 8, xn = "#e8590c", Sn = 1e-6, Cn = 5;
+function wn(e, t = Cn) {
+	if (e instanceof g) return [e];
 	if (t === 0 || typeof e != "object" || !e) return [];
 	let n = Object.getPrototypeOf(e);
-	return !Array.isArray(e) && n !== Object.prototype && n !== null ? [] : [...new Set(Object.values(e).flatMap((e) => _n(e, t - 1)))];
+	return !Array.isArray(e) && n !== Object.prototype && n !== null ? [] : [...new Set(Object.values(e).flatMap((e) => wn(e, t - 1)))];
 }
-var vn = class extends EventTarget {
+var Tn = class extends EventTarget {
 	_controllers = [];
 	_controls = {};
 	get controls() {
@@ -1570,15 +1608,16 @@ var vn = class extends EventTarget {
 	_lines = /* @__PURE__ */ new Map();
 	_held = /* @__PURE__ */ new Set();
 	_drags = /* @__PURE__ */ new Map();
+	_snapDrags = /* @__PURE__ */ new Map();
 	_total = 0;
 	_links = /* @__PURE__ */ new Map();
 	_dependents = null;
 	constructor(e, t) {
 		super();
-		let { config: n, display: r } = ft(t), i = typeof e == "string" ? document.getElementById(e) : e;
-		if (i === null) throw new _(`Cannot find the element "${e}" to draw the graph in`);
+		let { config: n, display: r } = ht(t), i = typeof e == "string" ? document.getElementById(e) : e;
+		if (i === null) throw new f(`Cannot find the element "${e}" to draw the graph in`);
 		let a = document.createElement("DIV");
-		a.style.position = "relative", a.style.width = "100%", a.style.height = "auto", a.style.userSelect = "none", i.appendChild(a), this._wrapper = a, this._config = n, this._display = r, this._toTex = t?.tex, this._rootSVG = Le().addTo(a), this._fitSvg(), this._rootSVG.defs(), this._layers = {}, Object.values(y).forEach((e) => {
+		a.style.position = "relative", a.style.width = "100%", a.style.height = "auto", a.style.userSelect = "none", i.appendChild(a), this._wrapper = a, this._config = n, this._display = r, this._toTex = t?.tex, this._rootSVG = Le().addTo(a), this._fitSvg(), this._rootSVG.defs(), this._layers = {}, Object.values(k).forEach((e) => {
 			this._layers[e] = this._rootSVG.group().attr("id", `LAYER_${e}`);
 		}), this._figures = Object.create(null);
 		try {
@@ -1615,25 +1654,26 @@ var vn = class extends EventTarget {
 	get create() {
 		return {
 			point: (e, t, n) => {
-				let r = Qe(e) ? { coordinates: e } : e, i = this._make(t, y.POINTS, () => new d(this, t, r));
+				let r = u(e) ? { coordinates: e } : e, i = this._make(t, k.POINTS, () => new h(this, t, r));
 				return n && i.addLabel(t, {
 					asHtml: n.html,
 					...this._toTex === void 0 ? {} : { texConverter: this._toTex }
 				}), i;
 			},
-			line: this._maker(re, y.MAIN),
-			path: this._maker(fn, y.MAIN),
-			bezier: this._maker(Xe, y.MAIN),
-			plot: this._maker(a, y.PLOTS),
-			parametric: this._maker(Zt, y.PLOTS),
-			circle: this._maker(pe, y.MAIN),
-			polygon: this._maker(Kt, y.MAIN),
-			arc: this._maker(et, y.MAIN),
-			follow: this._maker($t, y.PLOTS_FOREGROUND),
-			fillbetween: this._maker(on, y.PLOTS_BACKGROUND),
-			grid: this._maker(we, y.GRIDS),
-			axis: this._maker(h, y.MAIN),
-			riemann: this._maker(ln, y.PLOTS_BACKGROUND)
+			line: this._maker(fe, k.MAIN),
+			path: this._maker(hn, k.MAIN),
+			bezier: this._maker(nt, k.MAIN),
+			edge: this._maker($e, k.MAIN),
+			plot: this._maker(O, k.PLOTS),
+			parametric: this._maker(en, k.PLOTS),
+			circle: this._maker(a, k.MAIN),
+			polygon: this._maker(Yt, k.MAIN),
+			arc: this._maker(Ee, k.MAIN),
+			follow: this._maker(nn, k.PLOTS_FOREGROUND),
+			fillbetween: this._maker(ln, k.PLOTS_BACKGROUND),
+			grid: this._maker(tt, k.GRIDS),
+			axis: this._maker(_, k.MAIN),
+			riemann: this._maker(fn, k.PLOTS_BACKGROUND)
 		};
 	}
 	_mainGrid = null;
@@ -1647,11 +1687,11 @@ var vn = class extends EventTarget {
 		return this._layout.drawn;
 	}
 	remove(e, t) {
-		if (!Object.hasOwn(this._figures, e)) throw new _(`There is no figure named "${e}" to remove`);
+		if (!Object.hasOwn(this._figures, e)) throw new f(`There is no figure named "${e}" to remove`);
 		let n = this._figures[e], r = this._affectedBy([n]);
 		if (r.length > 0 && t?.cascade !== !0) {
 			let t = r.map((e) => `"${e.name}"`).join(", ");
-			throw new _(`Cannot remove the figure "${e}": ${t} depend on it (remove them first, or use {cascade: true})`);
+			throw new f(`Cannot remove the figure "${e}": ${t} depend on it (remove them first, or use {cascade: true})`);
 		}
 		let i = [...r.reverse(), n];
 		i.forEach((e) => {
@@ -1661,7 +1701,7 @@ var vn = class extends EventTarget {
 		return this._notifyRemoved(a), a;
 	}
 	attach(e) {
-		if (this._controllers.some((t) => t.constructor === e.constructor)) throw new _(`A ${e.constructor.name} is already attached to this graph`);
+		if (this._controllers.some((t) => t.constructor === e.constructor)) throw new f(`A ${e.constructor.name} is already attached to this graph`);
 		return this._controllers.push(e), e;
 	}
 	clear() {
@@ -1693,7 +1733,7 @@ var vn = class extends EventTarget {
 			y: 0
 		}, `${e.name}_drag`);
 		try {
-			n.pixels = e.pixels, n.asCircle(hn).fill({
+			n.pixels = e.pixels, n.asCircle(vn).fill({
 				color: "white",
 				opacity: .8
 			}), this.layers.interactive.add(n.element);
@@ -1701,30 +1741,102 @@ var vn = class extends EventTarget {
 				target: e,
 				...t
 			});
-			return e.setLabelClearance(hn / 2), r;
+			return e.setLabelClearance(vn / 2), r;
 		} catch (e) {
 			throw this.remove(n.name), e;
 		}
 	}
 	dragTo(e, t) {
 		let n = this._drags.get(e);
-		if (n === void 0) throw new _(`The point "${e.name}" cannot be dragged: make it draggable first`);
+		if (n === void 0) throw new f(`The point "${e.name}" cannot be dragged: make it draggable first`);
 		this._dragMove(n.figure, n.options, t);
 	}
-	_dragMove(e, t, n) {
-		let { along: r, bounds: i, callback: a, follow: o = [], grid: s, target: c } = t, l = rt({
+	_dragMove(e, t, n, r) {
+		let { callback: i, target: a } = t, o = {
 			x: Math.max(0, Math.min(n.x, this._config.width)),
 			y: Math.max(0, Math.min(n.y, this._config.height))
-		}, {
+		}, s = this._limited(o, t, a ?? e), c = this._candidates(t, a ?? e, r?.known), l = this._snapped(s, c, t), u = l ?? s, d = l === null ? null : {
+			x: l.x,
+			y: l.y
+		};
+		return r && (r.known = c, this._showSnapRings(r, c, l)), e.pixels.x === u.x && e.pixels.y === u.y ? null : (e.pixels = u, a && (a.pixels = u), i && i(e), {
+			...this.update(a ? [e, a] : [e]),
+			snapped: d
+		});
+	}
+	_limited(e, t, n) {
+		let { along: r, bounds: i, follow: a = [], grid: o } = t, s = ot(e, {
 			...r ? { along: {
 				axis: r,
-				keep: (c ?? e).pixels
+				keep: n.pixels
 			} } : {},
 			...i ? { bounds: i } : {},
-			...s ? { step: this._gridStep() } : {}
+			...o ? { step: this._gridStep() } : {}
 		}, this._config);
-		for (let e of o) l = e instanceof p ? e.follow(l.x, l.y) : e(l.x, l.y);
-		return e.pixels.x === l.x && e.pixels.y === l.y ? null : (e.pixels = l, c && (c.pixels = l), a && a(e), this.update(c ? [e, c] : [e]));
+		for (let e of a) s = e instanceof g ? e.follow(s.x, s.y) : e(s.x, s.y);
+		return s;
+	}
+	_candidates(e, t, n = []) {
+		let { snap: r = [] } = e;
+		return r.flatMap((e) => e.snapPoints()).map((r, i) => {
+			let a = n.at(i);
+			if (a?.x === r.x && a.y === r.y) return a;
+			let o = j(r) ? this._limited(r, e, t) : S();
+			return {
+				x: r.x,
+				y: r.y,
+				reachable: Math.hypot(o.x - r.x, o.y - r.y) <= Sn
+			};
+		});
+	}
+	_snapped(e, t, n) {
+		return at(e, t.filter((e) => e.reachable), n.snapRadius ?? 12).at(0) ?? null;
+	}
+	_showSnapRings(e, t, n) {
+		for (; e.rings.length > t.length;) e.rings.pop()?.element.remove();
+		t.forEach((t, r) => {
+			let i = e.rings[r] ??= this._makeSnapRing(), a = t === n;
+			t.reachable ? (i.shown ||= (i.element.show(), !0), (i.x !== t.x || i.y !== t.y) && (i.element.center(t.x, t.y), i.x = t.x, i.y = t.y), i.active === a && i.drawn || (i.element.radius(a ? bn : yn).stroke({
+				color: xn,
+				width: a ? 2.5 : 1.5,
+				opacity: a ? 1 : .55
+			}), i.active = a, i.drawn = !0)) : i.shown &&= (i.element.hide(), !1);
+		});
+	}
+	_makeSnapRing() {
+		return {
+			element: this._layers.temporary.circle(0).fill("none").attr({ "pointer-events": "none" }),
+			x: NaN,
+			y: NaN,
+			active: !1,
+			shown: !0,
+			drawn: !1
+		};
+	}
+	_startSnap(e, t) {
+		if (!t.snap?.length) return;
+		let n = {
+			figure: e,
+			options: t,
+			rings: [],
+			known: []
+		};
+		this._snapDrags.set(e, n), this._showSnap(n);
+	}
+	_showSnap(e) {
+		let t = e.options.target ?? e.figure, n = this._candidates(e.options, t);
+		e.known = n, this._showSnapRings(e, n, this._snapped(t.pixels, n, e.options));
+	}
+	_endSnap(e) {
+		this._snapDrags.get(e)?.rings.forEach((e) => {
+			e.element.remove();
+		}), this._snapDrags.delete(e);
+	}
+	snap(e, t) {
+		let n = this._drags.get(e);
+		if (n === void 0) throw new f(`The point "${e.name}" cannot snap: make it draggable first`);
+		let { figures: r, radius: i } = t;
+		this._checkSnap(e, /* @__PURE__ */ new Set([n.figure, n.options.target ?? n.figure]), r, i), r !== void 0 && (n.options.snap = [...r]), i !== void 0 && (n.options.snapRadius = i);
 	}
 	draggable(e, t = {}) {
 		this._checkDraggable(e, t);
@@ -1736,7 +1848,7 @@ var vn = class extends EventTarget {
 			figure: e,
 			options: t
 		}), this._held.add(e), this._held.add(n), this._layers.interactive.add(e.element), e.isDraggable = !0, e.shape.draggable().on("dragstart", () => {
-			this._emit("dragstart", {
+			this._startSnap(e, t), this._emit("dragstart", {
 				graph: this,
 				figure: e,
 				target: n
@@ -1746,7 +1858,7 @@ var vn = class extends EventTarget {
 			let { box: i } = r.detail, a = this._dragMove(e, t, {
 				x: i.x + i.width / 2,
 				y: i.y + i.height / 2
-			});
+			}, this._snapDrags.get(e));
 			a !== null && this._emit("dragmove", {
 				graph: this,
 				figure: e,
@@ -1754,7 +1866,7 @@ var vn = class extends EventTarget {
 				...a
 			});
 		}).on("dragend", () => {
-			this._emit("dragend", {
+			this._endSnap(e), this._emit("dragend", {
 				graph: this,
 				figure: e,
 				target: n
@@ -1762,10 +1874,10 @@ var vn = class extends EventTarget {
 		}), e;
 	}
 	toPixels(e, t) {
-		return D(e, this.config, t);
+		return w(e, this.config, t);
 	}
 	toCoordinates(e, t) {
-		return O(e, this.config, t);
+		return T(e, this.config, t);
 	}
 	update(e, t) {
 		let n = 0;
@@ -1775,7 +1887,7 @@ var vn = class extends EventTarget {
 			updated: n,
 			total: this._total
 		};
-		let r = e instanceof p ? [e] : e, i = this._affectedBy(r);
+		let r = e instanceof g ? [e] : e, i = this._affectedBy(r);
 		i.forEach((e) => {
 			n += +!!this._refresh(e, t);
 		});
@@ -1792,8 +1904,8 @@ var vn = class extends EventTarget {
 		};
 	}
 	updateLayout(e, t) {
-		e !== void 0 && pt(e);
-		let n = Object.values(this._figures).filter((e) => e instanceof d && e.isMoved()).map((e) => ({
+		e !== void 0 && gt(e);
+		let n = Object.values(this._figures).filter((e) => e instanceof h && e.isMoved()).map((e) => ({
 			point: e,
 			coordinates: e.coordinates
 		})), r = {
@@ -1806,10 +1918,12 @@ var vn = class extends EventTarget {
 			throw this._config = r.config, this._display = r.display, this._fitSvg(), this._layout = this._makeLayout(), e;
 		}
 		this.update(void 0, !0);
-		let i = n.filter(({ coordinates: e }) => x(e));
+		let i = n.filter(({ coordinates: e }) => j(e));
 		i.forEach(({ point: e, coordinates: t }) => {
 			e.pixels = this.toPixels(t);
-		}), i.length > 0 && this.update(i.map(({ point: e }) => e)), this._controllers.forEach((e) => {
+		}), i.length > 0 && this.update(i.map(({ point: e }) => e)), this._snapDrags.forEach((e) => {
+			this._showSnap(e);
+		}), this._controllers.forEach((e) => {
 			e.onLayoutChanged?.(this._config);
 		});
 	}
@@ -1829,14 +1943,14 @@ var vn = class extends EventTarget {
 			e.set(t.element.node, t);
 		});
 		let t = [];
-		for (let n of Object.values(y)) n !== y.INTERACTIVE && this._layers[n].children().forEach((n) => {
+		for (let n of Object.values(k)) n !== k.INTERACTIVE && n !== k.TEMPORARY && this._layers[n].children().forEach((n) => {
 			let r = e.get(n.node);
 			r && t.push(r.tikz());
 		});
-		return Ue(this._config, t);
+		return ne(this._config, t);
 	}
 	tikzPreamble() {
-		return ne;
+		return qe;
 	}
 	_fitSvg() {
 		let { width: e, height: t } = this._config;
@@ -1853,37 +1967,46 @@ var vn = class extends EventTarget {
 		return this._held.has(e) ? (e.updateLabel(), !0) : (e.static || e.isDraggable) && t !== !0 ? !1 : (e.update(t), !0);
 	}
 	_gridStep() {
-		let e = typeof this._display.grid == "object" ? this._display.grid : {}, { x: t, y: n } = $e(e), r = e.subdivisions ?? 1;
+		let e = typeof this._display.grid == "object" ? this._display.grid : {}, { x: t, y: n } = me(e), r = e.subdivisions ?? 1;
 		return {
 			x: t / r,
 			y: n / r
 		};
 	}
 	_checkDraggable(e, t) {
-		if (!(e instanceof d)) {
-			let t = e instanceof p ? `"${e.name}" is a ${e.constructor.name}` : "it is not a figure";
-			throw new _(`Only a point can be made draggable: ${t}`);
+		if (!(e instanceof h)) {
+			let t = e instanceof g ? `"${e.name}" is a ${e.constructor.name}` : "it is not a figure";
+			throw new f(`Only a point can be made draggable: ${t}`);
 		}
-		if (this._held.has(e) || e.isDraggable) throw new _(`The point "${e.name}" is already draggable`);
-		let { along: n, bounds: r, follow: i, target: a } = t;
-		if (n !== void 0 && n !== "x" && n !== "y") throw new _(`Invalid along ${JSON.stringify(n)} for the point "${e.name}": expected 'x' or 'y'`);
-		if (a !== void 0 && !(a instanceof d)) throw new _(`The target of the point "${e.name}" must be a point`);
-		if (i !== void 0 && (!Array.isArray(i) || i.some((e) => typeof e != "function" && !(e instanceof p)))) throw new _(`The follow of the point "${e.name}" must be a list of functions and figures`);
-		for (let [t, n] of Object.entries(r ?? {})) if (n !== void 0 && !(Number.isFinite(n.min) && Number.isFinite(n.max))) throw new _(`Invalid bounds ${t} ${JSON.stringify(n)} for the point "${e.name}": expected {min, max}, two finite numbers`);
+		if (this._held.has(e) || e.isDraggable) throw new f(`The point "${e.name}" is already draggable`);
+		let { along: n, bounds: r, follow: i, snap: a, snapRadius: o, target: s } = t;
+		if (n !== void 0 && n !== "x" && n !== "y") throw new f(`Invalid along ${JSON.stringify(n)} for the point "${e.name}": expected 'x' or 'y'`);
+		if (s !== void 0 && !(s instanceof h)) throw new f(`The target of the point "${e.name}" must be a point`);
+		if (i !== void 0 && (!Array.isArray(i) || i.some((e) => typeof e != "function" && !(e instanceof g)))) throw new f(`The follow of the point "${e.name}" must be a list of functions and figures`);
+		for (let [t, n] of Object.entries(r ?? {})) if (n !== void 0 && !(Number.isFinite(n.min) && Number.isFinite(n.max))) throw new f(`Invalid bounds ${t} ${JSON.stringify(n)} for the point "${e.name}": expected {min, max}, two finite numbers`);
+		this._checkSnap(e, /* @__PURE__ */ new Set([e, ...s instanceof h ? [s] : []]), a, o);
+	}
+	_checkSnap(e, t, n, r) {
+		if (n !== void 0 && !(Array.isArray(n) && n.every((e) => e instanceof g))) throw new f(`The snap of the point "${e.name}" must be a list of figures`);
+		for (let r of n ?? []) {
+			if (!r.snappable) throw new f(`The point "${e.name}" cannot snap to "${r.name}", a ${r.constructor.name}: only points, circles, segments, arcs and polygons attract`);
+			if (t.has(r)) throw new f(`The point "${e.name}" cannot snap to itself`);
+		}
+		if (r !== void 0 && !(typeof r == "number" && Number.isFinite(r) && r > 0)) throw new f(`Invalid snap radius ${JSON.stringify(r)} for the point "${e.name}": expected a number above 0, in pixels`);
 	}
 	_detach(e) {
-		let t = e instanceof d ? this._drags.get(e) : void 0;
+		let t = e instanceof h ? this._drags.get(e) : void 0;
 		t?.figure === e && t.options.target?.setLabelClearance(0), Object.values(this._figures).forEach((t) => {
 			t.labelReference === e && t.setLabelReference(null);
 		}), e.dispose(), e.element.remove(), delete this._figures[e.name], this._total--, this._held.delete(e), this._drags.forEach((t, n) => {
-			(n === e || t.figure === e) && this._drags.delete(n);
+			(n === e || t.figure === e) && (this._endSnap(t.figure), this._drags.delete(n));
 		}), this._links.delete(e), this._dependents = null;
 	}
 	_dependentsMap() {
 		let e = Object.values(this._figures), t = this._dependents === null;
 		for (let n of e) this._links.get(n)?.config !== n.config && (this._links.set(n, {
 			config: n.config,
-			dependencies: _n(n.config)
+			dependencies: wn(n.config)
 		}), t = !0);
 		if (this._dependents !== null && !t) return this._dependents;
 		let n = /* @__PURE__ */ new Map();
@@ -1895,7 +2018,7 @@ var vn = class extends EventTarget {
 			n.set(e, "visiting");
 			for (let r of t.get(e) ?? []) {
 				let t = n.get(r);
-				if (t === "visiting") throw new _(`The figure "${r.name}" depends on itself, through "${e.name}"`);
+				if (t === "visiting") throw new f(`The figure "${r.name}" depends on itself, through "${e.name}"`);
 				t === void 0 && i(r);
 			}
 			n.set(e, "done"), r.push(e);
@@ -1912,8 +2035,8 @@ var vn = class extends EventTarget {
 	_makeLayout() {
 		this._clearLayout();
 		let e = this._display.grid;
-		this._mainGrid = e ? this._decorate(new we(this, pn, e === !0 ? {} : e), y.GRIDS) : null;
-		let { origin: t, axis: n, width: r, height: i } = this._config, a = fe(this._display.axis), o = gt(t, r, i, n), s = this._makeLayoutAxis(S.X, n.x, a.x, o.x), c = this._makeLayoutAxis(S.Y, n.y, a.y, o.y);
+		this._mainGrid = e ? this._decorate(new tt(this, gn, e === !0 ? {} : e), k.GRIDS) : null;
+		let { origin: t, axis: n, width: r, height: i } = this._config, a = rt(this._display.axis), o = yt(t, r, i, n), s = this._makeLayoutAxis(y.X, n.x, a.x, o.x), c = this._makeLayoutAxis(y.Y, n.y, a.y, o.y);
 		return (/* @__PURE__ */ new Set([
 			s.line,
 			s.drawn,
@@ -1946,12 +2069,12 @@ var vn = class extends EventTarget {
 			drawn: n === !1 ? i : this._makeAxis(`${e}${W}`, t, r.A, n, r.side)
 		};
 	}
-	_makeAxis(e, t, n, r, i, a = !1) {
-		let o = tt({
+	_makeAxis(e, t, n, i, a, o = !1) {
+		let s = r({
 			A: n,
 			d: t
-		}, i, r), s = a ? this._lines.get(e) : void 0;
-		return s ? (s.resetStyle(), s.config = o) : a ? (s = new h(this, e, o), this._layers.axis.add(s.element), this._lines.set(e, s)) : s = this._decorate(new h(this, e, o), y.AXIS), s.static = !0, r === !1 ? s.hide() : s;
+		}, a, i), c = o ? this._lines.get(e) : void 0;
+		return c ? (c.resetStyle(), c.config = s) : o ? (c = new _(this, e, s), this._layers.axis.add(c.element), this._lines.set(e, c)) : c = this._decorate(new _(this, e, s), k.AXIS), c.static = !0, i === !1 ? c.hide() : c;
 	}
 	_decorate(e, t) {
 		return this._layers[t].add(e.element), this._decor.push(e), e;
@@ -1966,35 +2089,35 @@ var vn = class extends EventTarget {
 	}
 	_checkName(e) {
 		let t = e;
-		if (typeof t != "string" || t.trim() === "") throw new _(`Invalid name ${JSON.stringify(t)} for a figure: expected a text`);
-		if (mn.includes(e)) throw new _(`The name "${e}" is the one of a figure of the layout of the graph (the grid and the axes): choose another name`);
-		if (Object.hasOwn(this._figures, e)) throw new _(`There is already a figure named "${e}"`);
+		if (typeof t != "string" || t.trim() === "") throw new f(`Invalid name ${JSON.stringify(t)} for a figure: expected a text`);
+		if (_n.includes(e)) throw new f(`The name "${e}" is the one of a figure of the layout of the graph (the grid and the axes): choose another name`);
+		if (Object.hasOwn(this._figures, e)) throw new f(`There is already a figure named "${e}"`);
 	}
-}, yn = String.raw`(?:\d+\.?\d*|\.\d+)(?:[eE][+-]?\d+)?`, G = `[+-]?${yn}`, bn = RegExp(`^${G}$`), xn = RegExp(`^(${G})/(${G})$`), Sn = RegExp(`^(${G});(${G})(?:;(?<z>${G}))?$`), Cn = RegExp(`^(${G}):(${G})(?::(?<axis>[xyz]))?$`), wn = RegExp(`^(${G}):(${G}):(${yn})$`);
-function Tn(e) {
-	return xn.test(e);
+}, En = String.raw`(?:\d+\.?\d*|\.\d+)(?:[eE][+-]?\d+)?`, G = `[+-]?${En}`, Dn = RegExp(`^${G}$`), On = RegExp(`^(${G})/(${G})$`), kn = RegExp(`^(${G});(${G})(?:;(?<z>${G}))?$`), An = RegExp(`^(${G}):(${G})(?::(?<axis>[xyz]))?$`), jn = RegExp(`^(${G}):(${G}):(${En})$`);
+function Mn(e) {
+	return On.test(e);
 }
 function K(e) {
 	let t = e.trim();
 	if (t.startsWith("[") && t.endsWith("]")) {
 		let n = t.slice(1, -1);
-		return n.includes("[") || n.includes("]") ? e : n.trim() === "" ? [] : n.split(",").map((e) => En(e.trim()));
+		return n.includes("[") || n.includes("]") ? e : n.trim() === "" ? [] : n.split(",").map((e) => Nn(e.trim()));
 	}
-	return En(e);
+	return Nn(e);
 }
-function En(e) {
+function Nn(e) {
 	if (e === "") return !0;
 	let t = e.trim();
-	if (bn.test(t)) {
+	if (Dn.test(t)) {
 		let n = Number(t);
 		return Number.isFinite(n) ? n : e;
 	}
-	let n = xn.exec(t);
+	let n = On.exec(t);
 	if (n) {
 		let t = Number(n[1]) / Number(n[2]);
 		return Number.isFinite(t) ? t : e;
 	}
-	let r = Sn.exec(t);
+	let r = kn.exec(t);
 	if (r) {
 		let t = Number(r[1]), n = Number(r[2]), i = r.groups?.z === void 0 ? void 0 : Number(r.groups.z);
 		return [
@@ -2010,7 +2133,7 @@ function En(e) {
 			z: i
 		} : e;
 	}
-	let i = Cn.exec(t);
+	let i = An.exec(t);
 	if (i) {
 		let t = Number(i[1]), n = Number(i[2]);
 		return [t, n].every(Number.isFinite) ? {
@@ -2019,7 +2142,7 @@ function En(e) {
 			axis: i.groups?.axis ?? "x"
 		} : e;
 	}
-	let a = wn.exec(t);
+	let a = jn.exec(t);
 	if (a) {
 		let t = Number(a[1]), n = Number(a[2]), r = Number(a[3]);
 		return [
@@ -2034,16 +2157,16 @@ function En(e) {
 	}
 	return e;
 }
-var Dn = class extends Error {
+var Pn = class extends Error {
 	name = "PiParserError";
-}, q = class extends Dn {
+}, q = class extends Pn {
 	name = "ParseError";
 	from;
 	to;
 	constructor(e, t) {
 		super(e, t), this.from = t?.from, this.to = t?.to;
 	}
-}, On = class extends Dn {
+}, Fn = class extends Pn {
 	name = "InvalidArgumentError";
 };
 function J(e) {
@@ -2070,7 +2193,7 @@ function X(e, t, n) {
 function Z(e) {
 	return e.text.trim() === "" ? X(e, 0, 0) : X(e, e.text.length - e.text.trimStart().length, e.text.trimEnd().length);
 }
-function kn(e, t) {
+function In(e, t) {
 	let n = "", r = [];
 	return e.forEach((i, a) => {
 		if (a > 0) {
@@ -2085,7 +2208,7 @@ function kn(e, t) {
 	};
 }
 function Q(e, t) {
-	if (t === "") throw new On("The splitter must not be empty");
+	if (t === "") throw new Fn("The splitter must not be empty");
 	let { text: n, at: r } = e, i = "\\" + t, a = [], o = "", s = [], c = 0;
 	for (; c < n.length;) if (n.startsWith(i, c)) {
 		o += t, s.push(r[c]);
@@ -2100,10 +2223,10 @@ function Q(e, t) {
 		at: s
 	}), a;
 }
-function An(e, t) {
+function Ln(e, t) {
 	return Q(J(e), t).map((e) => e.text);
 }
-function jn(e) {
+function Rn(e) {
 	let t = e.indexOf("=");
 	return t === -1 ? {
 		key: e,
@@ -2113,7 +2236,7 @@ function jn(e) {
 		value: e.slice(t + 1)
 	};
 }
-function Mn(e) {
+function zn(e) {
 	let t = e.text.indexOf("=");
 	return t === -1 ? {
 		key: e,
@@ -2123,30 +2246,30 @@ function Mn(e) {
 		value: X(e, t + 1, e.text.length)
 	};
 }
-function Nn(e, t = ",") {
+function Bn(e, t = ",") {
 	let n = e.trim();
 	if (!n.startsWith("<")) throw new q(`expected a set between chevrons like "<3-5,7,9>", found "${n}"`);
 	let r = n.indexOf(">");
 	if (r === -1) throw new q(`the "<" of "${n}" has no closing ">"`);
 	if (r !== n.length - 1) throw new q(`unexpected text "${n.slice(r + 1)}" after the ">" of "${n.slice(0, r + 1)}"`);
-	let i = An(n.slice(1, r), t).map((e) => e.trim()).filter((e) => e !== "").map((e) => Fn(e));
+	let i = Ln(n.slice(1, r), t).map((e) => e.trim()).filter((e) => e !== "").map((e) => Hn(e));
 	if (i.length === 0) throw new q(`the set "${n}" has no element`);
 	return {
 		items: i,
 		raw: n
 	};
 }
-var Pn = /^(\d+)?(?:(\s*-\s*)(\d+)?)?$/;
-function Fn(e) {
-	let t = Pn.exec(e);
+var Vn = /^(\d+)?(?:(\s*-\s*)(\d+)?)?$/;
+function Hn(e) {
+	let t = Vn.exec(e);
 	if (t === null || $(t, 1) === void 0 && $(t, 3) === void 0) throw new q(`invalid element "${e}": expected 3, 3-5, 3- or -5`);
-	let n = $(t, 1), r = $(t, 2), i = $(t, 3), a = n === void 0 ? 1 : In(n, e);
+	let n = $(t, 1), r = $(t, 2), i = $(t, 3), a = n === void 0 ? 1 : Un(n, e);
 	if (r === void 0) return {
 		from: a,
 		to: a
 	};
 	if (i === void 0) return { from: a };
-	let o = In(i, e);
+	let o = Un(i, e);
 	if (o < a) throw new q(`the element "${e}" is reversed: its second number must not be less than the first`);
 	return {
 		from: a,
@@ -2156,13 +2279,13 @@ function Fn(e) {
 function $(e, t) {
 	return e[t];
 }
-function In(e, t) {
+function Un(e, t) {
 	let n = Number(e);
 	if (!Number.isSafeInteger(n)) throw new q(`the number of the element "${t}" is too large`);
 	if (n < 1) throw new q(`the element "${t}" must be at least 1`);
 	return n;
 }
-var Ln = class {
+var Wn = class {
 	#e;
 	#t = "->";
 	#n = ",";
@@ -2189,7 +2312,7 @@ var Ln = class {
 		this.#r = this.#o("parameter", e);
 	}
 	#o(e, t) {
-		if (t === "") throw new On(`The ${e} splitter must not be empty`);
+		if (t === "") throw new Fn(`The ${e} splitter must not be empty`);
 		return t;
 	}
 	get formatter() {
@@ -2215,7 +2338,7 @@ var Ln = class {
 			"auto",
 			"text",
 			"set"
-		].includes(n))) throw new On(`The type of the key "${t}" is not valid: expected 'auto', 'text', 'set' or a function`);
+		].includes(n))) throw new Fn(`The type of the key "${t}" is not valid: expected 'auto', 'text', 'set' or a function`);
 		return { ...e };
 	}
 	#c(e) {
@@ -2228,7 +2351,7 @@ var Ln = class {
 		};
 	}
 	parse(e, t) {
-		let [n, ...r] = Q(J(e), this.#t), i = r.length > 0 ? kn(r, this.#t) : void 0, a = Y(Z(n)), o = (this.#e ? this.#e(n.text) : n.text).trim(), { name: s, key: c, values: l, rawValues: u } = this.#l(o, a), { keys: d, types: f } = this.#c(t);
+		let [n, ...r] = Q(J(e), this.#t), i = r.length > 0 ? In(r, this.#t) : void 0, a = Y(Z(n)), o = (this.#e ? this.#e(n.text) : n.text).trim(), { name: s, key: c, values: l, rawValues: u } = this.#l(o, a), { keys: d, types: f } = this.#c(t);
 		return {
 			name: s,
 			key: c,
@@ -2285,20 +2408,20 @@ var Ln = class {
 			let e = i.at(-1);
 			e !== void 0 && this.#p(e[0].text, t.text, r, n) ? e.push(t) : (i.push([t]), this.#m(t.text, n) && (a = i.at(-1)));
 		}
-		return i.map((e) => e.length === 1 ? e[0] : kn(e, this.#n));
+		return i.map((e) => e.length === 1 ? e[0] : In(e, this.#n));
 	}
 	#f(e, t) {
-		let n = jn(e).key.trim();
+		let n = Rn(e).key.trim();
 		return Object.hasOwn(t, n) ? t[n] : void 0;
 	}
 	#p(e, t, n, r) {
 		if (!e.includes("=")) return !1;
 		let i = this.#f(e, r);
-		return i === "set" ? !1 : i === "text" ? !n.includes(jn(t).key.trim()) : !t.includes("=") && !n.includes(t.trim());
+		return i === "set" ? !1 : i === "text" ? !n.includes(Rn(t).key.trim()) : !t.includes("=") && !n.includes(t.trim());
 	}
 	#m(e, t) {
 		if (this.#f(e, t) !== "set") return !1;
-		let n = (jn(e).value ?? "").trim();
+		let n = (Rn(e).value ?? "").trim();
 		return n.startsWith("<") && !n.includes(">");
 	}
 	#h(e, t, n) {
@@ -2317,13 +2440,13 @@ var Ln = class {
 		return o;
 	}
 	#g(e, t) {
-		let { key: n, value: r } = Mn(e), i = Z(n), a = i.text, o = Y(Z(e)), s = Y(i);
+		let { key: n, value: r } = zn(e), i = Z(n), a = i.text, o = Y(Z(e)), s = Y(i);
 		if (a === "") throw new q(`Cannot parse the parameter "${e.text.trim()}": the key is empty`, o);
 		let c = r === void 0 ? {
 			text: "",
 			at: [s.to]
 		} : Z(r), l = c.text, u = Object.hasOwn(t, a) ? t[a] : void 0, d = u === void 0 || u === "auto";
-		if (d && this.#r === "/" && Tn(l)) return {
+		if (d && this.#r === "/" && Mn(l)) return {
 			key: a,
 			parameter: {
 				value: K(l),
@@ -2353,7 +2476,7 @@ var Ln = class {
 	}
 	#_(e, t, n, r) {
 		try {
-			return t === "set" ? Nn(e, this.#n) : e === "" ? !0 : t === "text" ? e : t(e);
+			return t === "set" ? Bn(e, this.#n) : e === "" ? !0 : t === "text" ? e : t(e);
 		} catch (e) {
 			let t = e instanceof Error ? e.message : String(e);
 			throw new q(`Cannot parse the parameter "${n.trim()}": ${t}`, {
@@ -2362,20 +2485,20 @@ var Ln = class {
 			});
 		}
 	}
-}, Rn = "%", zn = "$", Bn = "@";
-function Vn(e) {
-	return Oe(e) ?? He(e) ?? Re(e) ?? je(e) ?? e;
+}, Gn = "%", Kn = "$", qn = "@";
+function Jn(e) {
+	return je(e) ?? Ge(e) ?? Be(e) ?? Ne(e) ?? e;
 }
-function Hn() {
-	return Object.entries(Se).flatMap(([e, t]) => t.commands === void 0 ? [] : [[e, t.commands]]);
+function Yn() {
+	return Object.entries(we).flatMap(([e, t]) => t.commands === void 0 ? [] : [[e, t.commands]]);
 }
-function Un(e, t, n) {
-	let r = [], i = Hn(), a = new Map(i.map(([e, t]) => [e, t.initial])), o = {};
+function Xn(e, t, n) {
+	let r = [], i = Yn(), a = new Map(i.map(([e, t]) => [e, t.initial])), o = {};
 	return e.split("\n").forEach((e, s) => {
 		let c = s + 1, l = e.trim(), u = e.length - e.trimStart().length;
-		if (!(l === "" || l.startsWith(Rn) || l.startsWith(zn))) try {
-			if (l.startsWith(Bn)) {
-				let [e, t, s] = Wn(l, i);
+		if (!(l === "" || l.startsWith(Gn) || l.startsWith(Kn))) try {
+			if (l.startsWith(qn)) {
+				let [e, t, s] = Zn(l, i);
 				a.set(t, s.fold(a.get(t), e, n)), o = Object.assign({}, ...i.map(([e, t]) => t.defaults(a.get(e)))), r.push({
 					number: c,
 					text: l,
@@ -2397,7 +2520,7 @@ function Un(e, t, n) {
 				number: c,
 				text: l,
 				indent: u,
-				error: Gn(e, l),
+				error: Qn(e, l),
 				controls: o,
 				states: new Map(a)
 			});
@@ -2410,11 +2533,11 @@ function Un(e, t, n) {
 		}), {})
 	};
 }
-function Wn(e, t) {
+function Zn(e, t) {
 	let n = /^@(\w+)\s*(.*)$/.exec(e), r = n === null ? void 0 : t.find(([, e]) => e.names.includes(n[1]));
 	if (n === null || r === void 0) {
 		let n = t.flatMap(([, e]) => e.names);
-		throw new g(`Cannot read the command "${e}": expected ${n.map((e) => `@${e}`).join(" or ")}`);
+		throw new M(`Cannot read the command "${e}": expected ${n.map((e) => `@${e}`).join(" or ")}`);
 	}
 	return [{
 		name: n[1],
@@ -2422,30 +2545,30 @@ function Wn(e, t) {
 		text: e
 	}, ...r];
 }
-function Gn(e, t) {
-	if (e instanceof g) return e;
+function Qn(e, t) {
+	if (e instanceof M) return e;
 	let n = e instanceof Error ? e.message : String(e);
-	return new g(`Cannot read "${t}": ${n}`, { cause: e });
+	return new M(`Cannot read "${t}": ${n}`, { cause: e });
 }
 // src/Draw/Draw.diff.ts
-function Kn(e, t) {
+function $n(e, t) {
 	let n = 0;
 	for (; n < e.length && n < t.length && e[n].text === t[n].text && !e[n].fallback;) n++;
 	return n;
 }
-function qn(e, t, n) {
+function er(e, t, n) {
 	let r = (e) => e.filter((e) => e.number !== n).map((e) => `${e.number}:${e.text}`), i = r(e), a = r(t);
 	if (!(i.length !== a.length || i.some((e, t) => e !== a[t]))) return e.find((e) => e.number === n);
 }
 // src/Draw/Draw.report.ts
-function Jn(e, t) {
-	if (e instanceof v) return e;
+function tr(e, t) {
+	if (e instanceof i) return e;
 	let n = e instanceof Error ? e.message : String(e);
-	return new g(`Cannot read "${t}": ${n}`, { cause: e });
+	return new M(`Cannot read "${t}": ${n}`, { cause: e });
 }
-function Yn(e, t, n = 0) {
+function nr(e, t, n = 0) {
 	let r = e.indexOf("->");
-	if (!(t instanceof ee) || r < 0) return {};
+	if (!(t instanceof pe) || r < 0) return {};
 	let i = r + 2;
 	for (let r of e.slice(i).split(",")) {
 		if (r.split(/[=/]/)[0].trim() === t.option) {
@@ -2459,23 +2582,23 @@ function Yn(e, t, n = 0) {
 	}
 	return {};
 }
-function Xn(e, t, n) {
+function rr(e, t, n) {
 	return {
 		line: e.number,
 		text: e.text,
-		...Yn(e.text, t, e.indent),
+		...nr(e.text, t, e.indent),
 		severity: n,
 		message: t.message,
 		error: t
 	};
 }
 // src/Draw/Draw.ts
-var Zn = Object.values(S), Qn = Te().flatMap((e) => e.handleControls ?? []);
-function $n(e, t, n) {
+var ir = Object.values(y), ar = RegExp(`^(\\w+)\\.(${Me.join("|")})$`), or = De().flatMap((e) => e.handleControls ?? []);
+function sr(e, t, n) {
 	let r = e[n];
 	r !== void 0 && t.setControl(n, r);
 }
-var er = class extends EventTarget {
+var cr = class extends EventTarget {
 	graph;
 	_parser;
 	_settings;
@@ -2492,8 +2615,8 @@ var er = class extends EventTarget {
 		controls: []
 	};
 	constructor(e, t) {
-		super(), this.graph = new vn(e, t?.tex === void 0 ? {} : { tex: t.tex }), this._parser = new Ln({
-			formatter: Vn,
+		super(), this.graph = new Tn(e, t?.tex === void 0 ? {} : { tex: t.tex }), this._parser = new Wn({
+			formatter: Jn,
 			splitter: {
 				main: "->",
 				entry: ",",
@@ -2543,28 +2666,28 @@ var er = class extends EventTarget {
 		return this._layoutError;
 	}
 	static documentation() {
-		return w;
+		return C;
 	}
 	refresh(e, t = {}) {
 		let { editing: n, drag: r = "keep" } = t;
-		if (n !== void 0 && !(Number.isInteger(n) && n >= 1)) throw new _(`Invalid line ${String(n)} to edit: expected a line number, an integer from 1`);
+		if (n !== void 0 && !(Number.isInteger(n) && n >= 1)) throw new f(`Invalid line ${String(n)} to edit: expected a line number, an integer from 1`);
 		return this._build(e, n, r);
 	}
 	refreshLayout(e) {
 		try {
-			let t = Je(e ?? "", this._parser);
+			let t = Qe(e ?? "", this._parser);
 			this.graph.updateLayout({
-				...mt({
+				..._t({
 					...t.window,
 					unit: t.unit
 				}),
-				system: A.CARTESIAN_2D,
+				system: o.CARTESIAN_2D,
 				measure: t.measure
 			}, t.display), this._settings = t.defaults, this._applyLayoutOptions(t.options), (e ?? "") !== this._parameters && (this._lines = []), this._parameters = e ?? "", this._layoutError = null;
 		} catch (t) {
-			if (!(t instanceof v)) throw t;
+			if (!(t instanceof i)) throw t;
 			let n = (e ?? "").trim();
-			this._layoutError = Xn({
+			this._layoutError = rr({
 				number: 1,
 				text: n,
 				indent: 0
@@ -2578,10 +2701,10 @@ var er = class extends EventTarget {
 			[this.graph.drawnAxes.y, e.y],
 			[this.graph.mainGrid, e.grid]
 		];
-		for (let [e, n] of t) e !== null && Object.keys(n).length > 0 && Ke(n, e, this.graph);
+		for (let [e, n] of t) e !== null && Object.keys(n).length > 0 && Xe(n, e, this.graph);
 	}
 	_build(e, t, n = "keep") {
-		let { lines: r, graphControls: i } = Un(e, (e) => this._parser.parse(e, ze()), this._parser), a = this._lines, o = t === void 0 ? void 0 : qn(a, r, t), s = Kn(a, r);
+		let { lines: r, graphControls: i } = Xn(e, (e) => this._parser.parse(e, He()), this._parser), a = this._lines, o = t === void 0 ? void 0 : er(a, r, t), s = $n(a, r);
 		if (n === "reset") {
 			let e = a.findIndex((e) => e.created.some((e) => this._moved.has(e)));
 			s = e < 0 ? s : Math.min(s, e), this._moved.clear();
@@ -2616,7 +2739,7 @@ var er = class extends EventTarget {
 		});
 		else {
 			let e = i.number === t ? "pending" : "error";
-			n.push(Xn(i, i.error, e)), r.push({
+			n.push(rr(i, i.error, e)), r.push({
 				line: i.number,
 				status: e
 			});
@@ -2672,7 +2795,7 @@ var er = class extends EventTarget {
 				created: r()
 			};
 		} catch (n) {
-			let a = Jn(n, e.text);
+			let a = tr(n, e.text);
 			if (t?.valid == null) return {
 				...i,
 				valid: null,
@@ -2709,22 +2832,22 @@ var er = class extends EventTarget {
 		});
 	}
 	_buildItem(e, t, n) {
-		if (Zn.includes(e.name)) throw new g(`Cannot build "${e.name}" (${e.key}): ${e.name} is the name of an axis of the graph, choose another name`);
+		if (ir.includes(e.name)) throw new M(`Cannot build "${e.name}" (${e.key}): ${e.name} is the name of an axis of the graph, choose another name`);
 		let r = e.key;
-		if (r === void 0 || !Object.hasOwn(w, r)) throw new g(`Cannot build "${e.name}": ${r === void 0 ? "expected <name>=<key> <values>" : `"${r}" is not a kind of figure`}`);
-		e.name = this._uniqueName(e.name);
-		let i = w[e.key].build(e, this._namedFigures(), this.graph.config);
-		if (i === null) throw new g(`Cannot build "${e.name}" (${e.key}): nothing to build`);
+		if (r === void 0 || !Object.hasOwn(C, r)) throw new M(`Cannot build "${e.name}": ${r === void 0 ? "expected <name>=<key> <values>" : `"${r}" is not a kind of figure`}`);
+		e.name = this._uniqueName(e.name), this._ensureAnchors(e);
+		let i = C[e.key].build(e, this._namedFigures(), this.graph.config);
+		if (i === null) throw new M(`Cannot build "${e.name}" (${e.key}): nothing to build`);
 		let a = Array.isArray(i) ? i : [i];
 		a.forEach(({ config: r, create: i }, o) => {
 			let s = this.graph.create, c = Object.hasOwn(s, i) ? s[i] : void 0;
-			if (c === void 0) throw new g(`Cannot build "${e.name}" (${e.key}): the graph cannot make a "${i}"`);
+			if (c === void 0) throw new M(`Cannot build "${e.name}" (${e.key}): the graph cannot make a "${i}"`);
 			let l = c.call(s, r, e.name + (a.length > 1 ? `${o + 1}` : ""));
-			Ke(Ne(e.parameters, this._settings, l), l, this.graph, n);
-			for (let n of Object.keys(t)) Object.hasOwn(e.parameters, n) || $n(t, l, n);
+			Xe(Pe(e.parameters, this._settings, l), l, this.graph, n);
+			for (let n of Object.keys(t)) Object.hasOwn(e.parameters, n) || sr(t, l, n);
 			let u = this.graph.figures[`${l.name}_drag`];
-			u !== void 0 && Qn.forEach((e) => {
-				$n(l.controls, u, e);
+			u !== void 0 && or.forEach((e) => {
+				sr(l.controls, u, e);
 			});
 		});
 	}
@@ -2735,12 +2858,26 @@ var er = class extends EventTarget {
 			...this.graph.figures
 		};
 	}
+	_ensureAnchors(e) {
+		for (let t of e.values) {
+			let n = typeof t == "string" ? ar.exec(t) : null;
+			if (typeof t != "string" || n === null || Object.hasOwn(this.graph.figures, t)) continue;
+			let r = Object.hasOwn(this.graph.figures, n[1]) ? this.graph.figures[n[1]] : void 0;
+			if (r instanceof h) {
+				if (r.node === null) throw new M(`Cannot build "${e.name}" (${e.key}): "${r.name}" is not a node, so it has no place "${n[2]}": write ->node on its line`);
+				this.graph.create.point({ anchor: {
+					node: r,
+					position: n[2]
+				} }, t).hide();
+			}
+		}
+	}
 	_uniqueName(e) {
 		let t = e, n = 1;
 		for (; this.graph.figures[t];) t = `${e}_${n}`, n++;
 		return t;
 	}
 };
-export { Ft as Animate, S as Axes, Bt as Buttons, A as CoordinateSystem, i as EASINGS, _ as InvalidArgumentError, y as LayerName, ve as LoopStyle, ue as MathError, f as NotImplementedError, ee as OptionError, g as ParseError, er as PiDraw, v as PiDrawError, vn as PiGraph, zt as Slides, M as UnsupportedOperationError, R as ZOOM_ALLOWS, N as ZOOM_LIMITS, z as ZOOM_STEP, Lt as Zoom, o as isDomain, Qe as isXY, le as setAnimation, Ie as setSlide, s as setToggle };
+export { Rt as Animate, y as Axes, Ut as Buttons, o as CoordinateSystem, ee as EASINGS, f as InvalidArgumentError, k as LayerName, ve as LoopStyle, te as MathError, re as NotImplementedError, pe as OptionError, M as ParseError, cr as PiDraw, i as PiDrawError, Tn as PiGraph, Ht as Slides, b as UnsupportedOperationError, R as ZOOM_ALLOWS, N as ZOOM_LIMITS, z as ZOOM_STEP, Bt as Zoom, ge as isDomain, u as isXY, d as setAnimation, t as setSlide, se as setToggle };
 
 //# sourceMappingURL=pidraw.js.map

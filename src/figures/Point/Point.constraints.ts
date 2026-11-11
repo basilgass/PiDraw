@@ -2,10 +2,10 @@ import type {XY, IGraphConfig} from "../../pidraw.common"
 import {InvalidArgumentError} from "../../errors"
 import {Axis} from "../Axis/Axis"
 import {Line} from "../Line/Line"
-import {distanceAB, mathVector, nowhere, toPixels} from "../../calculus"
+import {distanceAB, mathVector, NODE_SHAPES, type NodeShape, nowhere, toPixels} from "../../calculus"
 import {constraintIn, resolveIn} from "../constraints"
 import {mathLineOf} from "../Line/Line.constraints"
-import type {IPointConfig, PointConstraints, PointCoordinateType} from "./Point.types"
+import type {IPointConfig, IPointOptions, PointConstraints, PointCoordinateType} from "./Point.types"
 
 // Where a point is, according to its constraint: pure functions from the value of the constraint to a position in
 // pixels. Nothing here touches the svg or a `Point`, but for what a constraint refers to (`Line`, `Circle`, `Plot`...).
@@ -20,7 +20,28 @@ const RESOLVERS: { [K in keyof PointConstraints]: (value: PointConstraints[K], c
     intersectionWithCircle: ({A, B, index}) => A.intersectionWithLine(B)?.[index] ?? nowhere(),
     middle: ({A, B}) => ({x: (A.x + B.x) / 2, y: (A.y + B.y) / 2}),
     projection: project,
-    symmetry: reflect
+    symmetry: reflect,
+    anchor: ({node, position}) => node.anchorPoint(position)
+}
+
+/**
+ * The shape of the node of a config, or `null` for a point that is not one.
+ * @throws InvalidArgumentError if the shape is not one of a node, or if the config has also a `shape` or a `size` (a node is not a mark).
+ */
+export function nodeOf(config: Pick<IPointOptions, 'node' | 'shape' | 'size'>, name: string): NodeShape | null {
+    if (config.node === undefined) {
+        return null
+    }
+
+    if (!NODE_SHAPES.includes(config.node)) {
+        throw new InvalidArgumentError(`Invalid node "${config.node}" for the point "${name}": expected ${NODE_SHAPES.map(shape => `'${shape}'`).join(', ')}`)
+    }
+
+    if (config.shape !== undefined || config.size !== undefined) {
+        throw new InvalidArgumentError(`The point "${name}" is a node, and a node has no shape nor size of a mark: remove the ${config.shape === undefined ? 'size' : 'shape'}`)
+    }
+
+    return config.node
 }
 
 /** The only constraint of a point. @throws InvalidArgumentError if the config has none, or several. */

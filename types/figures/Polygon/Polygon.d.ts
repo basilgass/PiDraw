@@ -4,6 +4,7 @@ import { type PolygonShape } from "../../calculus";
 import type { LabelFields } from "../Label/Label.types";
 import type { IPolygonConfig } from "./Polygon.types";
 export declare class Polygon extends AbstractFigure {
+    protected get _className(): string;
     constructor(context: IFigureContext, name: string, values: IPolygonConfig);
     protected static _copy(values: IPolygonConfig): IPolygonConfig;
     protected _config: IPolygonConfig;
@@ -15,6 +16,8 @@ export declare class Polygon extends AbstractFigure {
     labelFields(): LabelFields;
     readonly referenceable = true;
     referenceAnchorPoint(): XY | null;
+    get snappable(): boolean;
+    snapPoints(): XY[];
     computed(): this;
     protected _place(shape: PolygonShape | null): this;
     readonly followable = true;

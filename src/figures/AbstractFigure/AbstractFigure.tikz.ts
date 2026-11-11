@@ -1,7 +1,15 @@
 import {CSS_COLORS, numberCorrection, toCoordinates} from "../../calculus"
 import {InvalidArgumentError, NotImplementedError} from "../../errors"
 import type {IFigureAppearanceConfig, IGraphConfig, XY} from "../../pidraw.common"
-import {alignementDirection, labelAwayGap, labelPush, unitDirection} from "../Label/Label.constraints"
+import {
+    alignementDirection,
+    LABEL_PADDING,
+    LABEL_SIZE_COMMANDS,
+    labelAwayGap,
+    labelPush,
+    labelSizeInPoints,
+    unitDirection
+} from "../Label/Label.constraints"
 import type {ILabelConfig} from "../Label/Label.types"
 
 // How a figure is written in TikZ: pure functions from what the figure keeps (its appearance, its label, the graph it is in) to the text of
@@ -236,17 +244,43 @@ export function tikzLabelText(text: string, isTex: boolean): string {
     return text.includes('$') ? text : `$${text}$`
 }
 
+type TikzLabelConfig = Pick<ILabelConfig, 'alignement' | 'offset' | 'rotate'> & Partial<Pick<ILabelConfig, 'away' | 'push' | 'clearance' | 'color' | 'fill' | 'size'>>
+
 /**
- * The `\node` of a label.
+ * The size of the text of a label in LaTeX: the command of its name (`\small`) or `\fontsize{9pt}{10.8pt}\selectfont`. `null` for the size of
+ * the page.
+ * @throws InvalidArgumentError if the size is not one that a label can have (see `parseLabelSize`).
+ */
+export function tikzLabelFont(size: string): string | null {
+    if (Object.hasOwn(LABEL_SIZE_COMMANDS, size)) {
+        return LABEL_SIZE_COMMANDS[size]
+    }
+
+    const points = labelSizeInPoints(size)
+
+    return points === null ? null : `\\fontsize{${tikzNumber(points)}pt}{${tikzNumber(points * 1.2)}pt}\\selectfont`
+}
+
+/**
+ * The `\definecolor` that the color of the text and the background of a label need, before its `\node` (see {@link tikzLabelNode}).
+ * @throws InvalidArgumentError if a color has no TikZ equivalent.
+ */
+export function tikzLabelDefinitions({color = null, fill = null}: Partial<Pick<ILabelConfig, 'color' | 'fill'>>): string[] {
+    return [color, fill?.color ?? null]
+        .flatMap(value => value === null ? [] : [tikzColor(value)?.definition ?? null])
+        .filter((definition): definition is string => definition !== null)
+        .filter((definition, index, all) => all.indexOf(definition) === index)
+}
+
+/**
+ * The `\node` of a label. The color of the text is `text=`; the background is `fill=` (with `fill opacity=` when it is not opaque), and
+ * the margin of the box is `inner sep=`, the one of the svg.
  * @param at where the figure puts its label, in the units of the coordinate system (`'1,2'`).
  * @param text the text of the node, as it is written (see {@link tikzLabelText}).
+ * @throws InvalidArgumentError if a color has no TikZ equivalent.
  */
-export function tikzLabelNode(
-    config: Pick<ILabelConfig, 'alignement' | 'offset' | 'rotate'> & Partial<Pick<ILabelConfig, 'away' | 'push' | 'clearance'>>,
-    at: string,
-    text: string
-): string {
-    const {alignement, offset, rotate, away = null, push = null, clearance = 0} = config
+export function tikzLabelNode(config: TikzLabelConfig, at: string, text: string): string {
+    const {alignement, offset, rotate, away = null, push = null, clearance = 0, color = null, fill = null, size = 'inherit'} = config
     const direction = away === null ? null : unitDirection(away)
     const vertical = {t: 'above', b: 'below', m: ''}[alignement[0] as 't' | 'b' | 'm']
     const horizontal = {l: 'left', r: 'right', c: ''}[alignement[1] as 'l' | 'r' | 'c']
@@ -268,6 +302,22 @@ export function tikzLabelNode(
     }
     if (rotate) {
         options.push(`rotate=${tikzNumber(-rotate)}`)
+    }
+
+    const textColor = color === null ? null : tikzColor(color)
+    const fillColor = fill === null ? null : tikzColor(fill.color)
+
+    const font = tikzLabelFont(size)
+
+    if (font !== null) {
+        options.push(`font=${font}`)
+    }
+
+    if (textColor !== null) {
+        options.push(`text=${textColor.name}`)
+    }
+    if (fillColor !== null && fill !== null) {
+        options.push(`fill=${fillColor.name}`, ...(fill.opacity < 1 ? [`fill opacity=${tikzNumber(fill.opacity)}`] : []), `inner sep=${tikzNumber(LABEL_PADDING * PX_TO_PT)}pt`)
     }
 
     const style = options.filter(x => x !== '').join(', ')

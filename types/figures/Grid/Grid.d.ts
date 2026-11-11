@@ -3,6 +3,7 @@ import { AbstractFigure } from "../AbstractFigure/AbstractFigure";
 import type { IFigureContext, XY } from "../../pidraw.common";
 import type { IGridConfig } from "./Grid.types";
 export declare class Grid extends AbstractFigure {
+    protected get _className(): string;
     constructor(context: IFigureContext, name: string, values?: IGridConfig);
     protected _config: IGridConfig;
     get config(): IGridConfig;

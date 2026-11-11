@@ -1,5 +1,5 @@
 import {describe, expect, test} from 'vitest'
-import {constrainDrag} from '../../src/calculus'
+import {constrainDrag, snapCandidates} from '../../src/calculus'
 import {graphConfig} from '../helpers/figure'
 
 // 800 x 600 pixels, the origin in the middle (400, 300), 50 pixels per unit, y pointing up.
@@ -76,5 +76,27 @@ describe('constrainDrag', () => {
         const rules = {along: {axis: 'x' as const, keep: {x: 0, y: 281}}, step: {x: 1, y: 1}}
 
         expect(constrainDrag({x: 500, y: 100}, rules, config).y).toBeCloseTo(300, 9)
+    })
+})
+
+describe('snapCandidates', () => {
+    const position = {x: 100, y: 100}
+
+    test('keeps the candidates within the radius, the closest first', () => {
+        const near = snapCandidates(position, [{x: 110, y: 100}, {x: 103, y: 100}, {x: 200, y: 100}], 12)
+
+        expect(near).toEqual([{x: 103, y: 100}, {x: 110, y: 100}])
+    })
+
+    test('keeps a candidate that is exactly at the radius', () => {
+        expect(snapCandidates(position, [{x: 112, y: 100}], 12)).toEqual([{x: 112, y: 100}])
+    })
+
+    test('gives none when every candidate is too far', () => {
+        expect(snapCandidates(position, [{x: 130, y: 100}], 12)).toEqual([])
+    })
+
+    test('leaves out a position that does not exist', () => {
+        expect(snapCandidates(position, [{x: NaN, y: NaN}, {x: 101, y: 100}], 12)).toEqual([{x: 101, y: 100}])
     })
 })

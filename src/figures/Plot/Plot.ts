@@ -29,6 +29,10 @@ const UNDEFINED_FUNCTION = '0/0'
  * everywhere. It is drawn again when it exists again.
  */
 export class Plot extends AbstractFigure {
+    protected override get _className(): string {
+        return 'pidraw-plot'
+    }
+
     /** The label is this far, in pixels, from the end of the curve. */
     protected override readonly _labelGap: number = 6
 

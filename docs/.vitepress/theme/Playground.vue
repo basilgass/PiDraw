@@ -3,15 +3,11 @@ import {computed, onBeforeUnmount, onMounted, ref, shallowRef} from 'vue'
 import AnimationControls from './AnimationControls.vue'
 import ButtonsControls from './ButtonsControls.vue'
 import SlidesControls from './SlidesControls.vue'
-import {basic_examples} from '../../../demo/parsing_examples/basic_examples'
+import ExamplesTable from './ExamplesTable.vue'
+import {basic_examples as examples} from '../../../demo/parsing_examples/basic_examples'
+import {featuresOfExamples, type IExampleFeatures} from '../../../demo/parsing_examples/features'
 
-interface IExample {
-    name: string
-    code: string
-    parameters?: string
-}
-
-const examples: IExample[] = basic_examples
+// The page is narrower than the demo of the library: the unit of x is smaller.
 const DEFAULT_PARAMETERS = 'x=-11:11,y=-11:11,axis,grid,unitX=0.9'
 
 const editorHost = ref<HTMLElement | null>(null)
@@ -22,9 +18,12 @@ const parametersError = ref('')
 const errors = ref<{ line: number, message: string, pending: boolean }[]>([])
 const animated = ref(false)
 const stepped = ref(false)
+const toggled = ref(false)
 const showTikz = ref(false)
 const tikz = ref('')
 const ready = ref(false)
+// What each example does, read by drawing them on a drawing that nobody sees.
+const features = ref<IExampleFeatures[]>([])
 
 const current = computed(() => examples[selected.value])
 
@@ -62,6 +61,7 @@ function run(): void {
     errors.value = report.errors.map(({line, message, severity}) => ({line, message, pending: severity === 'pending'}))
     animated.value = animation.value?.canBeAnimated() ?? false
     stepped.value = (slides.value?.count ?? 1) > 1
+    toggled.value = draw.uses('toggle')
 
     if (showTikz.value) {
         tikz.value = writeTikz()
@@ -90,10 +90,12 @@ function schedule(): void {
     }
 }
 
-function choose(): void {
+function choose(index: number): void {
+    selected.value = index
     parameters.value = current.value.parameters ?? DEFAULT_PARAMETERS
     changeParameters()
     view?.dispatch({changes: {from: 0, to: view.state.doc.length, insert: current.value.code}})
+    editorHost.value?.scrollIntoView({block: 'start', behavior: 'smooth'})
 }
 
 function changeParameters(): void {
@@ -107,6 +109,10 @@ function reset(): void {
     buttons.value?.reset()
     draw?.refresh(view?.state.doc.toString() ?? '', {drag: 'reset'})
     schedule()
+}
+
+function goToExamples(): void {
+    document.getElementById('examples')?.scrollIntoView({block: 'start', behavior: 'smooth'})
 }
 
 function toggleTikz(): void {
@@ -160,6 +166,11 @@ onMounted(async () => {
     buttons.value = new library.Buttons(draw.graph)
 
     parametersError.value = draw.layoutError?.message ?? ''
+
+    const scan = new library.PiDraw(document.createElement('div'), {})
+    features.value = featuresOfExamples(scan)
+    scan.graph.dispose()
+
     ready.value = true
     run()
 })
@@ -177,21 +188,11 @@ onBeforeUnmount(() => {
 
 <template>
     <div class="pd-playground">
-        <div class="pd-bar">
-            <label>
-                Example
-                <select v-model.number="selected" :disabled="!ready" @change="choose">
-                    <option v-for="(example, index) in examples" :key="example.name" :value="index">
-                        {{ example.name }}
-                    </option>
-                </select>
-            </label>
-            <AnimationControls v-if="animated" :animation="animation" />
-            <SlidesControls v-if="stepped" :slides="slides" />
-            <button type="button" :disabled="!ready" @click="reset">Reset</button>
-            <button type="button" :disabled="!ready" @click="toggleTikz">{{ showTikz ? 'Hide TikZ' : 'TikZ' }}</button>
-        </div>
+        <p class="pd-hint">
+            <a href="#examples" @click.prevent="goToExamples">{{ examples.length }} examples</a> below: click one to load it in the editor.
+        </p>
 
+        <h2 id="code" tabindex="-1">Code <a class="header-anchor" href="#code" aria-label="Permalink to Code">&#8203;</a></h2>
         <label class="pd-parameters">
             Parameters
             <input v-model="parameters" type="text" spellcheck="false" :disabled="!ready" @input="changeParameters">
@@ -206,13 +207,29 @@ onBeforeUnmount(() => {
             </li>
         </ul>
 
-        <div ref="figureHost" class="pd-figure"></div>
-
-        <div class="pd-buttons-bar">
-            <ButtonsControls :buttons="buttons" />
+        <h2 id="graph" tabindex="-1">Graph <a class="header-anchor" href="#graph" aria-label="Permalink to Graph">&#8203;</a></h2>
+        <div class="pd-bar">
+            <strong class="pd-name">{{ current.name }}</strong>
+            <button type="button" :disabled="!ready" @click="reset">Reset</button>
+            <button type="button" :disabled="!ready" @click="toggleTikz">{{ showTikz ? 'Hide TikZ' : 'TikZ' }}</button>
         </div>
 
+        <div ref="figureHost" class="pd-figure"></div>
+
+        <section class="pd-controls-box" aria-labelledby="controls">
+            <h2 id="controls" tabindex="-1">Controls</h2>
+            <div class="pd-buttons-bar">
+                <ButtonsControls :buttons="buttons" />
+                <AnimationControls v-if="animated" :animation="animation" />
+                <SlidesControls v-if="stepped" :slides="slides" />
+            </div>
+            <p v-if="!animated && !stepped && !toggled" class="pd-none">Nothing to control in this example.</p>
+        </section>
+
         <pre v-if="showTikz" class="pd-tikz">{{ tikz }}</pre>
+
+        <h2 id="examples" tabindex="-1">Examples <a class="header-anchor" href="#examples" aria-label="Permalink to Examples">&#8203;</a></h2>
+        <ExamplesTable :examples="examples" :features="features" :current="selected" :disabled="!ready" @select="choose" />
     </div>
 </template>
 
@@ -229,7 +246,6 @@ onBeforeUnmount(() => {
     margin-bottom: 8px;
 }
 
-.pd-bar select,
 .pd-bar button,
 .pd-parameters input {
     border: 1px solid var(--vp-c-divider);
@@ -332,8 +348,41 @@ onBeforeUnmount(() => {
 }
 
 /* The figures are drawn for a white page, whatever the theme of the site. */
+.pd-hint {
+    margin: 0 0 8px;
+    color: var(--vp-c-text-2);
+}
+
+.pd-controls-box {
+    margin-top: 12px;
+    padding: 10px 14px 12px;
+    border: 1px solid var(--vp-c-divider);
+    border-radius: 8px;
+}
+
+/* The title of the box is a heading for the links, but it is small: not the one of a section. */
+.pd-controls-box h2 {
+    margin: 0 0 8px;
+    padding: 0;
+    border-top: 0;
+    font-size: 0.85em;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--vp-c-text-2);
+}
+
+.pd-none {
+    margin: 0;
+    color: var(--vp-c-text-3);
+    font-size: 0.9em;
+}
+
 .pd-buttons-bar {
-    margin-top: 8px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
 }
 
 .pd-figure {

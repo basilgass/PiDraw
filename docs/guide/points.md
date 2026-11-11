@@ -61,6 +61,37 @@ B(3,2)
 C(5,2)->o=12
 ```
 
+### A node
+
+The option `node` makes a point a box around its label, as big as the label asks, in place of its mark. The label is in the middle of the box. `node` alone is a rectangle.
+
+| Option | Box |
+|---|---|
+| `node` or `node=rect` | a rectangle |
+| `node=round` | a rectangle with rounded corners |
+| `node=diamond` | a diamond, which holds the text with a margin: twice as wide and as high as a rectangle |
+| `node=circle` | a circle, which holds the text with a margin: as big as the diagonal of a rectangle |
+
+`fill`, `color`, `w`, `dash`, `labelColor` and the other options of the appearance work on the box. A node is a point: it can be dragged and snapped to, and the figures that use it follow it. A node has no `o`, `s` or `*` (they are the shape of a mark) and the shape and the visibility that the graph gives to the points (`default.points`) are not for it.
+
+```pidraw params="x=-1:9,y=-1:5"
+A(1,4)->label=Start,node=round,fill=lightgreen
+B(5,4)->label=Is it done?,node=diamond,fill=lightyellow
+C(8,4)->tex=\frac{1}{2},node=circle,dash
+D(1,1)->label=Rectangle,node,labelColor=white,fill=steelblue
+```
+
+#### The places of a node
+
+A node has nine places, named like the positions of a label: `A.tl` is the top left of the node `A`, `A.tc` the top center, `A.tr` the top right, then `A.ml`, `A.mc`, `A.mr` for the middle and `A.bl`, `A.bc`, `A.br` for the bottom. They are on the border of the box (`mc` is its center), and they are points: any figure that wants a point accepts them. They are not drawn, and they follow the node when it moves or when its label changes. A point that is not a node has no places: `A.tr` is an error. The lines between the nodes are the [edges](./diagrams).
+
+```pidraw params="x=-1:9,y=-1:5"
+A(1,3)->label=Begin,node=round
+B(6,1)->label=End,node=diamond
+d=seg A.mr,B.tc->mark=end
+M=mid A.br,B.tl->label
+```
+
 ### Move a point
 
 The option `drag` makes a point movable with the mouse. The figures made from it follow.
@@ -221,7 +252,7 @@ P=inter c,Ox->red,label
 
 A line that does not suit its key is an error that names the line. The other lines are drawn.
 
-```pidraw params="x=-1:7,y=-1:5" errors="4,5,6,7,8,10"
+```pidraw params="x=-1:7,y=-1:5" errors="4,5,6,7,8,10,11,12,14"
 A(1,1)
 B(4,2)
 d=line A,B
@@ -232,6 +263,10 @@ G=dpt A,d,3,x
 H=inter A,B
 I=dpt A,d,3,*
 J=eval f,2
+K(5,1)->node=hexagon
+L(5,2)->node=rect,s
+M(5,3)->label,node
+n=seg B.tr,M
 ```
 
 | Line | What is wrong |
@@ -242,3 +277,6 @@ J=eval f,2
 | 7 | the last value of `dpt` can only be `*` |
 | 8 | `inter` wants two lines, a circle and a line, or two circles |
 | 10 | `eval` wants a function, and `f` does not exist |
+| 11 | a node is `rect`, `round`, `diamond` or `circle` |
+| 12 | a node has no mark: `s` is the shape of a mark |
+| 14 | `B.tr` is a place of a node, and `B` is not one: write `->node` on its line |

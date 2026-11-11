@@ -29,6 +29,10 @@ const MINIMUM_INTERVALS = 64
  * pixels from the real curve. It is cut where a function is not defined, and where the curve jumps far (an asymptote).
  */
 export class Parametric extends AbstractFigure {
+    protected override get _className(): string {
+        return 'pidraw-parametric'
+    }
+
     /**
      * @throws InvalidArgumentError if a function is not text or uses a variable other than `t`, or an option is not valid.
      * @throws ParseError if a function cannot be read.

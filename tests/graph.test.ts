@@ -14,6 +14,7 @@ import {Arc} from '../src/figures/Arc/Arc'
 import {Axis} from '../src/figures/Axis/Axis'
 import {Bezier} from '../src/figures/Bezier/Bezier'
 import {Circle} from '../src/figures/Circle/Circle'
+import {Edge} from '../src/figures/Edge/Edge'
 import {FillBetween} from '../src/figures/FillBetween/FillBetween'
 import {Follow} from '../src/figures/Follow/Follow'
 import {Grid} from '../src/figures/Grid/Grid'
@@ -26,6 +27,7 @@ import {Polygon} from '../src/figures/Polygon/Polygon'
 import {Riemann} from '../src/figures/Riemann/Riemann'
 import {PX_PER_CM} from '../src/calculus'
 import {createContainer, createGraph, useDocument} from './helpers/graph'
+import {createContext} from './helpers/figure'
 
 beforeAll(useDocument)
 
@@ -40,6 +42,15 @@ describe('Graph construction', () => {
 
         expect(graph.rootSVG).toBeDefined()
         expect(container.children.length).toBe(1)
+    })
+
+    test('has a layer for what is shown for a moment, in front of all the others and empty', () => {
+        const {graph} = createGraph()
+        const names = Object.keys(graph.layers)
+
+        expect(names.at(-1)).toBe(LayerName.TEMPORARY)
+        expect(names).toEqual(Object.values(LayerName))
+        expect(graph.layers.temporary.children()).toHaveLength(0)
     })
 
     test('finds its container by id', () => {
@@ -221,6 +232,7 @@ const FIGURES: [string, LayerName, abstract new (...args: never[]) => AbstractFi
     ['line', LayerName.MAIN, Line, g => g.create.line({through: {A: O, B: {x: 100, y: 50}}}, 'F')],
     ['path', LayerName.MAIN, Path, g => g.create.path({d: 'M 0 0 L 10 10'}, 'F')],
     ['bezier', LayerName.MAIN, Bezier, g => g.create.bezier({through: [O, {x: 100, y: 50}, {x: 200, y: 0}].map(point => ({point}))}, 'F')],
+    ['edge', LayerName.MAIN, Edge, g => g.create.edge({from: g.create.point(O, 'p'), to: g.create.point({x: 100, y: 50}, 'q')}, 'F')],
     ['plot', LayerName.PLOTS, Plot, g => g.create.plot({expression: 'x^2'}, 'F')],
     ['parametric', LayerName.PLOTS, Parametric, g => g.create.parametric({expressions: {x: 'cos(t)', y: 'sin(t)'}}, 'F')],
     ['circle', LayerName.MAIN, Circle, g => g.create.circle({center: O, radius: 1}, 'F')],
@@ -647,7 +659,7 @@ describe('Graph draggable', () => {
         dragTo(handle, {x: 300, y: 200})
 
         // The handle and the target that moved, and the line that is built on the target; the handle, the target, B and the line exist.
-        expect(events).toEqual([{graph, figure: handle, target, updated: 3, total: 4}])
+        expect(events).toEqual([{graph, figure: handle, target, updated: 3, total: 4, snapped: null}])
     })
 
     test('emits the start and the end of a drag with the point, and the point that moves with it', () => {
@@ -1067,6 +1079,15 @@ describe('Graph layout figures that stay', () => {
         expect(H.y).toBeCloseTo(0, 6)
         expect(K.x).toBeCloseTo(0, 6)
         expect(K.y).toBeCloseTo(2, 6)
+    })
+
+    test('takes the classes that were given to Ox away when the layout changes', () => {
+        const draw = new Draw(createContainer(), {code: ''})
+        draw.graph.axes.x.setClasses(['mine'])
+
+        draw.refreshLayout('x=-4:12,y=-2:10')
+
+        expect(draw.graph.axes.x.element.attr('class')).toBe('pidraw-axis')
     })
 
     test('draws an axis at the border when its line goes out of the drawing, and takes it away when it is back', () => {
@@ -1828,5 +1849,403 @@ describe('Graph labels of the points that have a drag handle', () => {
         graph.remove('A_drag')
 
         expect(A.label?.config.clearance).toBe(0)
+    })
+})
+
+describe('Graph snap', () => {
+    /** The position, in pixels, at a distance of a position. */
+    const near = (position: { x: number, y: number }, dx: number, dy: number) => ({x: position.x + dx, y: position.y + dy})
+
+    /** A point under a handle, and three figures it can snap to: the points A (2;1) and B (-2;-1), and a circle centered at (0;3). */
+    function createSnap(options?: IDraggableConfig) {
+        const {graph} = createGraph()
+        const P = graph.create.point({x: 0, y: 0}, 'P')
+        const A = graph.create.point({x: 2, y: 1}, 'A')
+        const B = graph.create.point({x: -2, y: -1}, 'B')
+        const O = graph.create.point({x: 0, y: 3}, 'O')
+        const c = graph.create.circle({center: O, radius: 1}, 'c')
+        const handle = graph.handle(P, {snap: [A, B, c], ...options})
+
+        return {graph, P, A, B, O, c, handle}
+    }
+
+    test('puts the point on a figure that is close enough', () => {
+        const {graph, P, A, handle} = createSnap()
+        const a = {...A.pixels}
+
+        graph.dragTo(handle, near(a, 7, -6))
+
+        expect(P.pixels).toEqual(a)
+        expect(handle.pixels).toEqual(a)
+    })
+
+    test('leaves the point where the mouse is when no figure is close enough', () => {
+        const {graph, P, A, handle} = createSnap()
+
+        graph.dragTo(handle, near(A.pixels, 20, 0))
+
+        expect(P.pixels).toEqual(near(A.pixels, 20, 0))
+    })
+
+    test('snaps to the center of a circle', () => {
+        const {graph, P, O, handle} = createSnap()
+        const center = {...O.pixels}
+
+        graph.dragTo(handle, near(center, 5, 5))
+
+        expect(P.pixels).toEqual(center)
+    })
+
+    test('takes the closest of the figures that are within the radius', () => {
+        const {graph, P, A, handle} = createSnap({snapRadius: 100})
+        const a = {...A.pixels}
+
+        graph.dragTo(handle, near(a, -10, 0))
+
+        expect(P.pixels).toEqual(a)
+    })
+
+    test('a radius sets how close the point has to be', () => {
+        const {graph, P, A, handle} = createSnap({snapRadius: 30})
+        const a = {...A.pixels}
+
+        graph.dragTo(handle, near(a, 25, 0))
+        expect(P.pixels).toEqual(a)
+
+        graph.snap(P, {radius: 3})
+        graph.dragTo(handle, near(a, -5, 0))
+        expect(P.pixels).toEqual(near(a, -5, 0))
+    })
+
+    test('the figures to snap to are replaced, and the radius is kept', () => {
+        const {graph, P, A, B, handle} = createSnap({snapRadius: 30})
+
+        graph.snap(P, {figures: [A]})
+        graph.dragTo(handle, near(B.pixels, 10, 0))
+        expect(P.pixels).toEqual(near(B.pixels, 10, 0))
+
+        graph.dragTo(handle, near(A.pixels, 20, 0))
+        expect(P.pixels).toEqual(A.pixels)
+    })
+
+    test('follows a point that moved', () => {
+        const {graph, P, A, handle} = createSnap()
+
+        A.pixels = {x: 600, y: 100}
+        graph.dragTo(handle, {x: 595, y: 105})
+
+        expect(P.pixels).toEqual({x: 600, y: 100})
+    })
+
+    test('the limits win: a position they would move is not an option', () => {
+        const along = createSnap({along: 'x'})
+        const height = along.P.pixels.y
+        // The point keeps its height, and A is not at it.
+        along.graph.dragTo(along.handle, near(along.A.pixels, 5, 0))
+        expect(along.P.pixels).toEqual({x: along.A.pixels.x + 5, y: height})
+
+        const bounded = createSnap({bounds: {x: {min: -1, max: 1}}})
+        bounded.graph.dragTo(bounded.handle, near(bounded.A.pixels, -5, 0))
+        expect((bounded.graph.toCoordinates(bounded.P.pixels) as { x: number }).x).toBeCloseTo(1, 9)
+        expect(bounded.P.pixels.x).not.toBe(bounded.A.pixels.x)
+    })
+
+    test('snaps to the next figure when the closest is out of the limits', () => {
+        const {graph, P, O, handle} = createSnap({snapRadius: 400, bounds: {x: {min: -1, max: 1}}})
+
+        // The closest one is A (x = 2), which is out of the bounds, and the center of the circle (x = 0) is not.
+        graph.dragTo(handle, near(O.pixels, 100, 0))
+
+        expect(P.pixels).toEqual(O.pixels)
+    })
+
+    test('a position of the grid is kept when the figure is on it', () => {
+        const {graph, P, A, handle} = createSnap({grid: true})
+
+        graph.dragTo(handle, near(A.pixels, 7, -6))
+
+        expect(P.pixels.x).toBeCloseTo(A.pixels.x, 9)
+        expect(P.pixels.y).toBeCloseTo(A.pixels.y, 9)
+    })
+
+    test('a figure that does not exist attracts nothing', () => {
+        const nowhere = new Circle(createContext(), 'x', {center: {x: NaN, y: NaN}, radius: 2})
+        const {graph, P, handle} = createSnap({snap: [nowhere]})
+
+        graph.dragTo(handle, {x: 500, y: 400})
+
+        expect(P.pixels).toEqual({x: 500, y: 400})
+    })
+
+    test('snaps to the middle of a segment', () => {
+        const {graph, P, A, B, handle} = createSnap()
+        const s = graph.create.line({through: {A, B}, shape: 'segment'}, 's')
+        const middle = {x: (A.pixels.x + B.pixels.x) / 2, y: (A.pixels.y + B.pixels.y) / 2}
+
+        graph.snap(P, {figures: [s]})
+        graph.dragTo(handle, near(middle, 6, -5))
+
+        expect(P.pixels.x).toBeCloseTo(middle.x, 9)
+        expect(P.pixels.y).toBeCloseTo(middle.y, 9)
+    })
+
+    test('snaps to the middle of an arc', () => {
+        const {graph, P, handle} = createSnap()
+        const arc = graph.create.arc({points: {start: {x: 600, y: 300}, center: {x: 400, y: 300}, end: {x: 400, y: 100}}}, 'a')
+        const middle = {x: 400 + 200 * Math.SQRT1_2, y: 300 - 200 * Math.SQRT1_2}
+
+        graph.snap(P, {figures: [arc]})
+        graph.dragTo(handle, near(middle, 5, 5))
+
+        expect(P.pixels.x).toBeCloseTo(middle.x, 6)
+        expect(P.pixels.y).toBeCloseTo(middle.y, 6)
+    })
+
+    test.each(['ray', 'vector'] as const)('a %s does not attract', (shape) => {
+        const {graph, P, A, B} = createSnap()
+        const d = graph.create.line({through: {A, B}, shape}, 'd')
+
+        expect(() => { graph.snap(P, {figures: [d]}) }).toThrow(InvalidArgumentError)
+    })
+
+    describe('refuses', () => {
+        test('a point that cannot be dragged', () => {
+            const {graph, A} = createSnap()
+            const free = graph.create.point({x: 3, y: 3}, 'F')
+
+            expect(() => { graph.snap(free, {figures: [A]}) }).toThrow(InvalidArgumentError)
+        })
+
+        test('a figure that does not attract, such as a line', () => {
+            const {graph, P, A, B} = createSnap()
+            const d = graph.create.line({through: {A, B}}, 'd')
+
+            expect(() => { graph.snap(P, {figures: [d]}) }).toThrow(InvalidArgumentError)
+        })
+
+        test('the point itself, and its handle', () => {
+            const {graph, P, handle} = createSnap()
+
+            expect(() => { graph.snap(P, {figures: [P]}) }).toThrow(InvalidArgumentError)
+            expect(() => { graph.snap(P, {figures: [handle]}) }).toThrow(InvalidArgumentError)
+        })
+
+        test.each([0, -3, NaN, Infinity, '12'])('a radius of %s', (radius) => {
+            const {graph, P} = createSnap()
+
+            expect(() => { graph.snap(P, {radius: radius as number}) }).toThrow(InvalidArgumentError)
+        })
+
+        test('options that are not valid when the point is made draggable, which leaves it as it was', () => {
+            const {graph} = createGraph()
+            const P = graph.create.point({x: 0, y: 0}, 'P')
+
+            expect(() => graph.draggable(P, {snap: 'A' as unknown as AbstractFigure[]})).toThrow(InvalidArgumentError)
+            expect(() => graph.draggable(P, {snapRadius: 0})).toThrow(InvalidArgumentError)
+            expect(P.isDraggable).toBe(false)
+        })
+
+        test('leaves the snap as it was after an error', () => {
+            const {graph, P, A, handle} = createSnap()
+
+            expect(() => { graph.snap(P, {figures: [P]}) }).toThrow(InvalidArgumentError)
+            graph.dragTo(handle, near(A.pixels, 7, -6))
+
+            expect(P.pixels).toEqual(A.pixels)
+        })
+    })
+})
+
+describe('Graph snap rings', () => {
+    const near = (position: { x: number, y: number }, dx: number, dy: number) => ({x: position.x + dx, y: position.y + dy})
+
+    /** A point under a handle that snaps to the points A (2;1) and B (-2;-1) and to the center O (0;3) of a circle. */
+    function createSnap(options?: IDraggableConfig) {
+        const {graph} = createGraph()
+        const P = graph.create.point({x: 0, y: 0}, 'P')
+        const A = graph.create.point({x: 2, y: 1}, 'A')
+        const B = graph.create.point({x: -2, y: -1}, 'B')
+        const O = graph.create.point({x: 0, y: 3}, 'O')
+        const c = graph.create.circle({center: O, radius: 1}, 'c')
+        const handle = graph.handle(P, {snap: [A, B, c], ...options})
+
+        return {graph, P, A, B, O, handle}
+    }
+
+    const press = (handle: Point) => { handle.shape.fire('dragstart', {event: {}, handler: {}, box: handle.shape.bbox()}) }
+    const release = (handle: Point) => { handle.shape.fire('dragend', {event: {}, handler: {}, box: handle.shape.bbox()}) }
+
+    /** The rings on the temporary layer that are shown: their center and their radius. */
+    function rings(graph: Graph) {
+        // A list of svg.js has the methods of an element (`find`), and an array does not.
+        return [...graph.layers.temporary.children()]
+            .filter(ring => ring.css('display') !== 'none')
+            .map(ring => ({x: +ring.attr('cx'), y: +ring.attr('cy'), r: +ring.attr('r')}))
+    }
+
+    test('shows nothing before the point is held, nor for a point that does not snap', () => {
+        const {graph} = createSnap()
+        const free = graph.handle(graph.create.point({x: 3, y: 3}, 'F'))
+
+        expect(graph.layers.temporary.children()).toHaveLength(0)
+
+        press(free)
+        expect(graph.layers.temporary.children()).toHaveLength(0)
+    })
+
+    test('shows a ring on each place the point can snap to as soon as it is held', () => {
+        const {graph, A, B, O, handle} = createSnap()
+
+        press(handle)
+
+        const shown = rings(graph)
+
+        expect(shown).toHaveLength(3)
+        for (const place of [A, B, O]) {
+            expect(shown.some(ring => ring.x === place.pixels.x && ring.y === place.pixels.y)).toBe(true)
+        }
+    })
+
+    test('does not show a place that the limits do not let the point reach', () => {
+        const {graph, O, handle} = createSnap({bounds: {x: {min: -1, max: 1}}})
+
+        press(handle)
+
+        expect(rings(graph)).toEqual([{x: O.pixels.x, y: O.pixels.y, r: 5}])
+    })
+
+    test('makes the ring of the place the point is on bigger, and back when it leaves', () => {
+        const {graph, A, handle} = createSnap()
+        const a = {...A.pixels}
+        const radiusAt = () => rings(graph).find(ring => ring.x === a.x && ring.y === a.y)?.r
+
+        press(handle)
+        expect(radiusAt()).toBe(5)
+
+        dragTo(handle, near(a, 5, 0))
+        expect(radiusAt()).toBe(8)
+
+        dragTo(handle, near(a, 60, 0))
+        expect(radiusAt()).toBe(5)
+    })
+
+    test('the held place is the one of the point when it is held on it', () => {
+        const {graph, A, handle} = createSnap()
+
+        graph.dragTo(handle, near(A.pixels, 3, 3))
+        press(handle)
+
+        expect(rings(graph).filter(ring => ring.r === 8)).toHaveLength(1)
+    })
+
+    test('takes the rings off the drawing when the point is let go', () => {
+        const {graph, handle} = createSnap()
+
+        press(handle)
+        release(handle)
+
+        expect(graph.layers.temporary.children()).toHaveLength(0)
+    })
+
+    test('shows nothing for a drag from code', () => {
+        const {graph, A, handle} = createSnap()
+
+        graph.dragTo(handle, near(A.pixels, 5, 0))
+
+        expect(graph.layers.temporary.children()).toHaveLength(0)
+    })
+
+    test('says where the point snapped in the event of the move, and null when it did not', () => {
+        const {graph, A, handle} = createSnap()
+        const a = {...A.pixels}
+        const snapped: unknown[] = []
+        graph.on('dragmove', (e) => { snapped.push(e.detail.snapped) })
+
+        press(handle)
+        dragTo(handle, near(a, 5, 0))
+        dragTo(handle, near(a, 80, 0))
+
+        expect(snapped).toEqual([a, null])
+    })
+
+    test('a place that moves takes its ring with it', () => {
+        const {graph, A, handle} = createSnap()
+        const before = {...A.pixels}
+
+        press(handle)
+        A.pixels = {x: before.x + 40, y: before.y}
+        dragTo(handle, {x: 100, y: 500})
+
+        const shown = rings(graph)
+
+        expect(shown.some(ring => ring.x === before.x + 40 && ring.y === before.y)).toBe(true)
+        expect(shown.some(ring => ring.x === before.x && ring.y === before.y)).toBe(false)
+        expect(shown).toHaveLength(3)
+    })
+
+    test('asks the limits again only for the places that moved', () => {
+        const limit = vi.fn((x: number, y: number) => ({x, y}))
+        const {graph, A, handle} = createSnap({follow: [limit]})
+
+        press(handle)
+        // A ring for each place: the limits were asked once for each, as the point had no place to be asked for.
+        expect(limit).toHaveBeenCalledTimes(3)
+
+        dragTo(handle, {x: 100, y: 500})
+        dragTo(handle, {x: 110, y: 510})
+        // Once for the mouse at each move, and nothing for the places, which did not move.
+        expect(limit).toHaveBeenCalledTimes(5)
+
+        A.pixels = {x: A.pixels.x + 10, y: A.pixels.y}
+        dragTo(handle, {x: 120, y: 520})
+        // The mouse, and the place that moved.
+        expect(limit).toHaveBeenCalledTimes(7)
+        expect(rings(graph)).toHaveLength(3)
+    })
+
+    test('follows a zoom or a move of the drawing while the point is held', () => {
+        const {graph, A, handle} = createSnap()
+
+        press(handle)
+        const before = rings(graph).find(ring => ring.x === A.pixels.x && ring.y === A.pixels.y)
+
+        graph.updateLayout({...graph.config, origin: {x: graph.config.origin.x + 100, y: graph.config.origin.y}})
+
+        expect(before).toBeDefined()
+        expect(A.pixels.x).toBe((before?.x ?? 0) + 100)
+        expect(rings(graph).some(ring => ring.x === A.pixels.x && ring.y === A.pixels.y)).toBe(true)
+        expect(rings(graph)).toHaveLength(3)
+    })
+
+    test('asks the limits again for every place after the layout changed', () => {
+        const limit = vi.fn((x: number, y: number) => ({x, y}))
+        const {graph, handle} = createSnap({follow: [limit]})
+
+        press(handle)
+        limit.mockClear()
+
+        graph.updateLayout({...graph.config, origin: {x: graph.config.origin.x + 50, y: graph.config.origin.y}})
+
+        // The limits (the grid, the bounds, the figures) can be other ones: a place is no more known to be reachable.
+        expect(limit).toHaveBeenCalledTimes(3)
+        expect(rings(graph)).toHaveLength(3)
+    })
+
+    test('takes the rings away when the point that is held is removed', () => {
+        const {graph, handle} = createSnap()
+
+        press(handle)
+        graph.remove(handle.name)
+
+        expect(graph.layers.temporary.children()).toHaveLength(0)
+    })
+
+    test('is not written in TikZ', () => {
+        const {graph, handle} = createSnap()
+        const before = graph.tikz()
+
+        press(handle)
+
+        expect(graph.tikz()).toBe(before)
     })
 })

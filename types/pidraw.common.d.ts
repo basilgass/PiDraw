@@ -52,7 +52,8 @@ export declare enum LayerName {
     PLOTS_FOREGROUND = "plots_FG",
     FOREGROUND = "foreground",
     POINTS = "points",
-    INTERACTIVE = "interactive"
+    INTERACTIVE = "interactive",
+    TEMPORARY = "temporary"
 }
 export declare enum Axes {
     X = "Ox",

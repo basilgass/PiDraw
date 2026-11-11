@@ -1,5 +1,6 @@
 import type {Domain, IGraphConfig, XY} from "../pidraw.common"
 import {toCoordinates, toPixels} from "./coordinates"
+import {isDefinedPosition} from "./geometry"
 
 // Where a point that is dragged is allowed to go. Pure maths: `Graph` reads the events of the mouse, this puts the position where the
 // rules say.
@@ -20,6 +21,18 @@ export interface DragRules {
 /** The number between `min` and `max` that is the closest to `value`. */
 function clamp(value: number, min: number, max: number): number {
     return Math.max(min, Math.min(value, max))
+}
+
+/**
+ * The candidates that are at most `radius` pixels from `position`, the closest first. A candidate that is not a position is left out.
+ */
+export function snapCandidates<T extends XY>(position: XY, candidates: readonly T[], radius: number): T[] {
+    return candidates
+        .filter(isDefinedPosition)
+        .map(candidate => ({candidate, distance: Math.hypot(candidate.x - position.x, candidate.y - position.y)}))
+        .filter(({distance}) => distance <= radius)
+        .sort((a, b) => a.distance - b.distance)
+        .map(({candidate}) => candidate)
 }
 
 /**

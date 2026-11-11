@@ -28,6 +28,7 @@ export declare enum PARSER_TYPE {
     PLOT = "plot",
     PARAMETRIC = "parametric",
     BEZIER = "bezier",
+    EDGE = "edge",
     POLYGON = "poly",
     GRID = "grid",
     AXIS = "axis",

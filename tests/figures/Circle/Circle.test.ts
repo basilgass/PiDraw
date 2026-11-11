@@ -641,3 +641,19 @@ describe('Figures as the reference of a label', () => {
         expect(A.labelReference).toBeNull()
     })
 })
+
+describe('Circle as a figure to snap to', () => {
+    test('is attracted to its center, and not to its outline', () => {
+        const {point, circle} = create()
+        const c = circle('c', {center: point('O', 1, 1), radius: 2})
+
+        expect(c.snappable).toBe(true)
+        expect(c.snapPoints()).toEqual([{x: 450, y: 250}])
+    })
+
+    test('attracts nowhere when it does not exist', () => {
+        const {circle} = create()
+
+        expect(circle('c', {center: {x: NaN, y: NaN}, radius: 2}).snapPoints()).toEqual([])
+    })
+})

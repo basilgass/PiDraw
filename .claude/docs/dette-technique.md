@@ -181,3 +181,31 @@ Points connus, acceptés pour l'instant, à traiter plus tard. Une entrée par s
 
 - **Contexte** : un `TODO: ajouter l'ellipse` était en tête de `parser.config.ts`, retiré du code.
 - **Ce qui manque** : une figure `Ellipse` (suivre « Créer une nouvelle figure » du guideline) : clé de la syntaxe, config, contraintes, `tikz()`, page du guide.
+
+## 2026-11-11 : snap au contour d'un cercle ou d'un polygone
+
+- **Contexte** : `snap=A/B/C` attire un point glissé vers des points d'accroche (`snappable`, `snapPoints()` : position d'un point, centre d'un cercle, extrémités et milieu d'un segment ou d'un arc, sommets et milieux des côtés d'un polygone). L'attraction vers le **contour** d'un cercle ou d'un polygone n'existe pas.
+- **Ce qui manque** : une syntaxe pour le demander (`*` après la figure, `snap=c/*`, a été envisagé, ou un mot : `.edge`) et un second type d'accroche (un point continu, comme `follow` avec un rayon) en plus de la liste de points de `snapPoints()`. Piste : un `snapTo(x, y): XY | null` à côté de `snapPoints()`, essayé dans le même ordre par `Graph._snapped` (les limites de `drag` gagnent déjà).
+- **Décision de l'utilisateur** : pas fait, il n'est pas sûr que ce soit utile. À reprendre seulement si un besoin réel apparaît (`drag=c` suit déjà le contour d'un cercle ou d'un polygone de façon dure).
+- **Voisin non fait** : accroche pour `Bezier` et `Path` (extrémités), voir l'entrée suivante.
+
+## 2026-11-11 : snap aux extrémités de `Bezier` et `Path`
+
+- **Contexte** : `Bezier` et `Path` ne sont pas `snappable` (`snap=` sur eux est une `OptionError`) ; le segment, l'arc et le polygone le sont (extrémités, milieux, sommets).
+- **Ce qui manque** : décider ce qui attire. Pour une `Bezier`, ses points de passage (les points donnés) et ses extrémités ; pour un `Path`, ses sommets (`M`, `L`, `C`, `Z` relus) et ses extrémités, un chemin fermé n'en ayant pas. Il faut aussi dire si le milieu a un sens pour une courbe (non pour un `Path` fait de plusieurs morceaux). Le mécanisme est prêt : surcharger le getter `snappable` et `snapPoints()` (voir « Le snap d'un point tiré » dans `.claude/guideline.md`), puis la ligne du tableau du guide, le test de la figure et celui de `Graph`.
+- **Décision de l'utilisateur** : à traiter plus tard.
+
+## 2026-11-11 : nœud (`node=`) : poignée de `drag`, label repoussé, retour à une marque
+
+- **Contexte** : `node=` fait d'un point une boîte autour de son label (`Point.setNode`). Trois cas limites ne sont pas traités.
+- **Ce qui manque** : (1) un nœud qui a `drag` garde sa poignée ronde de 30 px au centre, qui couvre la boîte et son label ; (2) un label repoussé par une figure (`label=A/>O`) sur un nœud est orienté par `_orientLabel` après `moveLabel()` et sort du centre de la boîte ; (3) `setNode(null)` laisse l'alignement du label à `mc`, au lieu de rendre celui d'avant. Aucun n'est dans le périmètre de `Node`/`Edge` pour Scolcours (flowchart, arbre de probabilités).
+
+## 2026-11-11 : `Graph.update(changed)` met le label du point déplacé après les figures qui en dépendent
+
+- **Contexte** : `update(changed)` redessine d'abord les figures atteintes (`affected`), puis met à jour le label des points déplacés (`updateLabel`). Un nœud (`node=`) se redimensionne dans `moveLabel()`, donc **après** les arêtes et les ancres qui lisent sa boîte.
+- **Ce qui manque** : si la taille d'un nœud change au moment où on le déplace (son texte change en même temps), les arêtes sont dessinées avec l'ancienne boîte jusqu'au prochain `update()`. Glisser un nœud ne change pas sa taille : sans effet aujourd'hui. Piste : mettre à jour le label des points déplacés **avant** de redessiner les dépendants, si `Graph.test.ts` (`update(point)` identique à `update()`) le permet.
+
+## 2026-11-11 : trou d'un label d'arête sur le trait périmé si le label est montré ou caché seul
+
+- **Contexte** : un label d'arête en `mc` fait un trou dans le trait par un `<mask>` (`Edge._updateCut`, appelé par `moveLabel()` et `setLabelStyle`). Le trou est posé quand le label est visible à ce moment.
+- **Ce qui manque** : `Label.hide()` / `show()` ne préviennent pas la figure. Un label caché ou montré seul (sans `updateLabel()` ensuite) laisse le trou comme il était : un trou sans label, ou un label sans trou, jusqu'au prochain `update`. Les contrôleurs (`slide`, `toggle`) cachent le groupe entier, pas le label : sans effet. Piste : un rappel `onVisibilityChanged` du `Label` vers sa figure, ou le trou lu à la volée par le mask (display du label).

@@ -1,18 +1,20 @@
 import type {Graph, IDraggableConfig, IDraggableFollow} from "../Graph"
 import type {PiParseOptions} from "piparser"
 import type {IOptionContext, IParserParameters, IParserSettings, OptionHandler, Options} from "../parser/parser.types"
-import {
-    describeValue,
-    invalidOption,
-    PARSER_COLOR_VALUES
-} from "../parser/parser.common"
+import {describeValue, invalidOption, PARSER_COLOR_VALUES} from "../parser/parser.common"
 import {themeOptionTypes, themeSyntaxes} from "../controls/controls"
 import {Axes, isDomain, type XY} from "../pidraw.common"
-import {AbstractFigure, type IColorValue, type IMarkOptions, type MarkerSide} from "../figures/AbstractFigure/AbstractFigure"
+import {
+    AbstractFigure,
+    type IColorValue,
+    type IMarkOptions,
+    type MarkerSide
+} from "../figures/AbstractFigure/AbstractFigure"
 import {Point} from "../figures/Point/Point"
-import {POINT_OPTIONS} from "../figures/Point/Point.parser"
+import {NODE_OPTIONS, POINT_OPTIONS} from "../figures/Point/Point.parser"
 import {ARC_OPTION_HANDLERS} from "../figures/Arc/Arc.parser"
 import {BEZIER_OPTION_HANDLERS} from "../figures/Bezier/Bezier.parser"
+import {EDGE_OPTION_HANDLERS} from "../figures/Edge/Edge.parser"
 import {AXIS_OPTION_HANDLERS} from "../figures/Axis/Axis.parser"
 import {GRID_OPTION_HANDLERS} from "../figures/Grid/Grid.parser"
 import {parseLabelPosition, parseLabelText} from "../figures/Label/Label.parser"
@@ -146,6 +148,9 @@ function applyLabel(key: 'label' | 'tex'): OptionHandler {
                 typeof rotate === 'number' ? rotate : 0,
                 push
             )
+
+            // The figure puts the label where the position it was given says (an edge makes a hole in its line for a label that is on it).
+            figure.updateLabel()
         }
     }
 }
@@ -201,6 +206,41 @@ const applyDrag: OptionHandler = (figure, {value, options}, {graph}) => {
     graph.handle(figure, dragConfig([value, ...options], graph.figures))
 }
 
+/**
+ * The figures a point snaps to from the values of its option (`snap=A/B/C`).
+ * @throws InvalidArgumentError if a value is not the name of a figure.
+ */
+export function snapFigures(values: unknown[], figures: Record<string, AbstractFigure>): AbstractFigure[] {
+    return values.map(value => {
+        if (typeof value === 'string' && Object.hasOwn(figures, value)) {
+            return figures[value]
+        }
+
+        throw new InvalidArgumentError(`Invalid snap ${describeValue(value)}: expected the name of a point, a circle or a polygon`)
+    })
+}
+
+/** `snap` and `snapRadius` complete a `drag` written before them in the line. */
+function dragged(option: string, figure: AbstractFigure): Point {
+    if (!(figure instanceof Point)) {
+        throw new OptionError(option, `The option "${option}" is for a point, and "${figure.name}" is not one`)
+    }
+
+    return figure
+}
+
+const applySnap: OptionHandler = (figure, {value, options}, {graph}) => {
+    graph.snap(dragged('snap', figure), {figures: snapFigures([value, ...options], graph.figures)})
+}
+
+const applySnapRadius: OptionHandler = (figure, {value}, {graph}) => {
+    if (typeof value !== 'number') {
+        throw invalidOption('snapRadius', figure, value, 'a distance in pixels, a number')
+    }
+
+    graph.snap(dragged('snapRadius', figure), {radius: value})
+}
+
 /** Join the tables of options. @throws Error if two tables give the same option: a name belongs to one handler. */
 function registry(...tables: Record<string, OptionHandler>[]): Record<string, OptionHandler> {
     const joined: Record<string, OptionHandler> = Object.create(null) as Record<string, OptionHandler>
@@ -243,6 +283,15 @@ const OPTIONS = registry(
             }
         },
         dot: (figure) => { figure.dot() },
+        class: (figure, {value, options}) => {
+            const names = [value, ...options]
+
+            if (!names.every((name): name is string => typeof name === 'string')) {
+                throw invalidOption('class', figure, value, 'the names of CSS classes (class=primary or class=a/b)')
+            }
+
+            figure.setClasses(names)
+        },
         mark: (figure, option) => { figure.mark(markOf(figure, option)) }
     },
     Object.fromEntries(Object.entries(STROKE_WIDTHS).map(([key, width]): [string, OptionHandler] => [key, (figure) => { figure.stroke(width) }])),
@@ -266,14 +315,28 @@ const OPTIONS = registry(
     {
         label: applyLabel('label'),
         tex: applyLabel('tex'),
-        drag: applyDrag
+        labelColor: (figure, option) => {
+            const {color, opacity} = colorOf('labelColor', figure, option)
+
+            // The text of a label has no opacity: an opacity here would be ignored.
+            if (opacity !== undefined) {
+                throw invalidOption('labelColor', figure, opacity, 'a color without opacity (labelColor=red), the text has none')
+            }
+
+            figure.setLabelStyle({color})
+        },
+        labelFill: (figure, option) => { figure.setLabelStyle({fill: colorOf('labelFill', figure, option)}) },
+        labelSize: (figure, {value}) => { figure.setLabelStyle({size: value as string | number}) },
+        drag: applyDrag,
+        snap: applySnap,
+        snapRadius: applySnapRadius
     },
 
     // The options of the themes (animation, slides...)
     ...themeSyntaxes().map(theme => theme.options),
 
     // The options of a kind of figure
-    POINT_OPTIONS, ARC_OPTION_HANDLERS, BEZIER_OPTION_HANDLERS, AXIS_OPTION_HANDLERS, GRID_OPTION_HANDLERS
+    POINT_OPTIONS, NODE_OPTIONS, ARC_OPTION_HANDLERS, BEZIER_OPTION_HANDLERS, EDGE_OPTION_HANDLERS, AXIS_OPTION_HANDLERS, GRID_OPTION_HANDLERS
 )
 
 /** The names of the options of a line of code (the names of the colors are options too, see {@link applyOptions}). */
@@ -340,9 +403,11 @@ export function withDefaults(options: Options, settings: IParserSettings, figure
 
     const resolved: Options = {}
     const shape = settings.points
+    // A node is not a mark: the shape and the visibility that the graph gives to the points are not for it.
+    const isNode = Object.hasOwn(options, 'node')
 
     // The shape that the points take when they do not ask for one (`points=s/12`).
-    if (shape && !SHAPE_KEYS.some(key => Object.hasOwn(options, key)) && (shape.shape !== 'o' || shape.size !== undefined)) {
+    if (shape && !isNode && !SHAPE_KEYS.some(key => Object.hasOwn(options, key)) && (shape.shape !== 'o' || shape.size !== undefined)) {
         resolved[shape.shape] = {value: shape.size ?? true, options: []}
     }
 
@@ -358,7 +423,7 @@ export function withDefaults(options: Options, settings: IParserSettings, figure
         resolved.tex = {value: true, options: []}
     }
 
-    if (settings.points === false) {
+    if (settings.points === false && !isNode) {
         resolved['!'] = {value: true, options: []}
     }
 

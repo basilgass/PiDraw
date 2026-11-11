@@ -20,6 +20,12 @@ export interface IGraphDragEvent {
     target: Point
 }
 
+/** What a move of a point that is dragged did: the update, and where the point snapped. */
+export interface IGraphMove extends IGraphUpdate {
+    /** The position, in pixels, that the point snapped to (see `snap`): `null` when it is not on one. */
+    snapped: XY | null
+}
+
 /** What an update of the graph did: how many figures it reached, out of the figures the graph has. */
 export interface IGraphUpdate {
     /** The figures drawn again, and the ones that were moved, whose label was put at its place. */
@@ -29,7 +35,7 @@ export interface IGraphUpdate {
 }
 
 /** A point was moved by the mouse: with how many figures this reached. */
-export interface IGraphDragMoveEvent extends IGraphDragEvent, IGraphUpdate {
+export interface IGraphDragMoveEvent extends IGraphDragEvent, IGraphMove {
 }
 
 /**

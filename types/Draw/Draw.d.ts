@@ -3,7 +3,7 @@ import type { IParserConfig, IParserSettings } from "../parser/parser.types";
 import { type XY } from "../pidraw.common";
 import { type ILayout } from "../parser/buildLayout";
 import { AbstractFigure } from "../figures/AbstractFigure/AbstractFigure";
-import type { Point } from "../figures/Point/Point";
+import { Point } from "../figures/Point/Point";
 import { type PARSER, PiParse } from "piparser";
 import { type IDrawLine } from "./Draw.lines";
 import type { IControlsFigure } from "../controls/controls.types";
@@ -47,6 +47,7 @@ export declare class Draw extends EventTarget {
     protected _removeMade(names: readonly string[]): void;
     protected _buildItem(item: PARSER, controls: Partial<IControlsFigure>, states: ReadonlyMap<string, unknown>): void;
     protected _namedFigures(): Record<string, AbstractFigure>;
+    protected _ensureAnchors(item: PARSER): void;
     protected _uniqueName(name: string): string;
 }
 //# sourceMappingURL=Draw.d.ts.map

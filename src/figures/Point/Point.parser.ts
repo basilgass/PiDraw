@@ -3,6 +3,7 @@ import type {AbstractFigure} from "../AbstractFigure/AbstractFigure"
 import {Circle} from "../Circle/Circle"
 import {Line} from "../Line/Line"
 import {Plot} from "../Plot/Plot"
+import {NODE_SHAPES, type NodeShape} from "../../calculus"
 import {Point} from "./Point"
 import type {IPointConfig, PointCoordinateType} from "./Point.types"
 import type {BuildResult, FigureOptionHandler, IParserValues, PointShapeOption, ParserItems} from "../../parser/parser.types"
@@ -254,6 +255,30 @@ export const POINT_OPTIONS: Record<PointShapeOption, FigureOptionHandler> = {
     's': shapeHandler('s'),
     '*': shapeHandler('*')
 }
+
+/**
+ * `node=rect`, `node=round`, `node=diamond` or `node=circle`: the point is a box around its label, and `node` alone is `rect`.
+ * @throws OptionError if the figure is not a point, or the shape is not one of a node; an InvalidArgumentError of the point (a mark that was asked) becomes one in `Draw`.
+ */
+const nodeHandler: FigureOptionHandler = (figure, {value}) => {
+    if (!(figure instanceof Point)) {
+        throw new OptionError('node', `The option "node" makes a point a node, and "${figure.name}" is not a point`)
+    }
+
+    const shape = value === true ? 'rect' : value
+
+    if (typeof shape !== 'string' || !NODE_SHAPES.includes(shape as NodeShape)) {
+        throw new OptionError(
+            'node',
+            `Invalid value ${describeValue(value)} for the option "node" of "${figure.name}": expected ${NODE_SHAPES.join(', ')}, or nothing for rect`
+        )
+    }
+
+    figure.setNode(shape as NodeShape)
+}
+
+/** The option of a point that makes it a node. */
+export const NODE_OPTIONS: Record<'node', FigureOptionHandler> = {node: nodeHandler}
 
 /** The kinds of points of the syntax, by key. */
 export const POINT_ITEMS: ParserItems = {

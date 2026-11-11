@@ -916,3 +916,11 @@ Fichiers : `src/buttons/` (`Buttons.ts`, `Buttons.types.ts`, `Buttons.syntax.ts`
 - **Nouveau contrôleur** : `Buttons` (`buttons`, `isActive(id)`, `toggle(id)`, `reset()`, événement `change` : `{buttons, toggled}`), `setToggle`, types `IButton`, `IButtonDefinition`, `IButtonDefinitions`, `IButtonsChange`, `IButtonsEventMap`, `IFigureToggle`. Pas d'interface dans la bibliothèque. Sans `Buttons`, le paramètre est ignoré et toute figure est montrée.
 - **Changement de type** : `IControlsFigure` gagne `toggle`, `IControlsGraph` gagne `buttons` ; `IOptionContext` gagne `states` (l'état des commandes de chaque thème avant la ligne) ; `IDrawLine` gagne `states` ; `applyOptions(options, figure, graph, states?)` ; `AbstractFigure.showShape()` (l'inverse de `hideShape()`).
 - **Interne** : la raison de masquage `toggle` (`setHiddenBy`) s'ajoute à `slide` ; `readCode` donne `graphControls` avec `buttons` ; le registre `THEMES` gagne `toggle`.
+
+## 2026-11-11 : classes CSS des figures
+
+Fichiers : `src/figures/AbstractFigure/AbstractFigure.ts`, une classe `pidraw-<sorte>` par figure, `src/Draw/Draw.options.ts` (option `class`).
+
+- **Ajout, pas de rupture de l'API** : le groupe svg de chaque figure porte un attribut `class` (`pidraw-point`, `pidraw-line`…), et l'option `class=a/b` en ajoute. Le balisage svg change : un test ou une feuille de style qui compare le svg complet le voit.
+- `resetStyle()` retire les classes de l'utilisateur (`Ox` et `Oy` sont réutilisés) ; la classe de la sorte reste.
+- Pas dans TikZ.

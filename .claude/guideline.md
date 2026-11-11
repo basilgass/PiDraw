@@ -223,10 +223,29 @@ Spec et intégration dans Scolcours : `.claude/specs/2026-11-04-coloration-codem
   `verbatimModuleSyntax`, ce dernier reste un import d'effet de bord et recrée le cycle (`Class extends value undefined`).
   `dependency-cruiser` ne voit pas ce cas : `tests/modules.test.ts` charge chaque module de `src/` en premier.
 
+## Classes CSS des figures
+
+- Le groupe svg d'une figure porte la classe de sa sorte (`pidraw-point`, `pidraw-line`, `pidraw-axis`…) : chaque figure la déclare par `protected override get _className()` (un **getter** : le constructeur d'`AbstractFigure` la lit avant l'initialisation des champs de la sous-classe), puis les classes de l'option commune `class=a/b` (`setClasses`, `classes`). `resetStyle()` retire celles de l'utilisateur, pas celle de la sorte. TikZ les ignore. Aucun style visuel dans la bibliothèque : une page les habille en CSS.
+
+## Couleur et fond d'un label
+
+- `labelColor=red` (texte, sans opacité) et `labelFill=white/0.8` (fond) valent pour `label` et `tex`, dans n'importe quel ordre : la figure garde le style (`setLabelStyle`, `_labelStyle`), l'applique à chaque nouveau `Label` (`addLabel`) et le vide dans `resetStyle()`. **Le texte ne suit pas le trait** (`color`) de la figure : changer cela casserait les dessins existants, et un nœud a trois couleurs indépendantes (trait, fond de la forme, texte).
+- Le fond est un `<rect>` frère placé avant le texte, de la taille mesurée plus `LABEL_PADDING` (3 px), pour un `<text>` comme pour un label HTML ; il suit le déplacement, la rotation, `hide`/`show` et `remove()` du label (jamais `label.shape.remove()`). `Label.size()` est la mesure, publique : un test la remplace (`vi.spyOn(label, 'size')`), `svgdom` ne mesure rien.
+- **Un label d'arête posé sur le trait (`/mc`) y fait un trou** (`Edge.cutsLine`, `_updateCut`) : un `<mask>` de `defs` appliqué au tracé (blanc partout, un rectangle noir de la taille du label + `LABEL_PADDING`), jamais une couleur de fond (la page derrière est inconnue). Il vaut quand le label est visible, que sa position `mc` est écrite et que **aucun `labelFill` n'est écrit** (`_labelStyle.fill`) ; `labelFill=none` / `transparent` / opacité 0 ne dessine ni boîte ni trou (`Label._drawBackground`). Le masque est hors du groupe : `Edge.dispose()` le retire. TikZ n'a pas de masque : `_tikzLabelConfig` donne un fond blanc. `Label.bounds` donne le centre et la taille du texte. Limite : un label montré ou caché sans `updateLabel()` laisse le trou périmé (`dette-technique.md`). `applyLabel` appelle `figure.updateLabel()` après `position()`, pour que la figure place le label selon la position écrite.
+- **Taille du texte** : `labelSize` (`xs`…`xl` relatifs à la police de la page : 0.7, 0.85, 1, 1.25, 1.5 em ; un nombre = pixels ; une longueur `px|pt|em|rem|%`) est une **grammaire fermée** (`parseLabelSize`, `Label.constraints.ts`) : une chaîne CSS libre n'aurait pas d'équivalent TikZ, et une apparence sans équivalent n'est jamais ignorée. `Label.config.size` garde la chaîne CSS, `_labelStyle.size` suit le même chemin que les couleurs. TikZ : `font=\small` ou `\fontsize{…}{…}\selectfont` (`tikzLabelFont`) ; `em`, `rem` et `%` sont relatifs à 10 pt.
+- TikZ : `text=`, `fill=`, `fill opacity=` et `inner sep=` (la même marge) sur le `\node` ; `tikzLabelDefinitions` donne les `\definecolor`, que `_tikzLabel` écrit avant le nœud.
+
+## Nœuds (`node=` d'un point)
+
+- Un nœud n'est pas une figure : c'est un `Point` qui a `node` (`rect`, `round`, `diamond`, `circle`), une boîte autour de son label **à la place de sa marque** (`o`, `s`, `*`, `size` : exclusifs, `InvalidArgumentError`, `OptionError` côté `Draw`). Les maths (taille, contour, ancres) sont pures, dans `calculus/computeNode.ts` ; `Point.ts` dessine (`_makeShape`, `_drawNode`), mesure par `label.size()` et se redessine dans `moveLabel()` quand la taille change. La boîte est **derrière** le label (`shape.back()`), le label est centré (`mc`). `Point.boundaryPoint(from)` (le contour, le point lui-même sans `node`) et `anchorPoint(place)` servent aux figures qui s'y accrochent (`Edge`).
+- **Les 9 places** `A.tl`…`A.br` sont de vrais `Point` cachés, de contrainte `anchor: {node, position}` : le graphe ne suit une dépendance que par une figure dans la config (`figuresIn`), donc jamais un objet `{x, y}` calculé. `Draw._ensureAnchors` les crée avant le `build*` de la ligne qui les nomme la première fois (la ligne les possède : `Draw.refresh` les défait avec elle) ; un point sans `node` donne une `ParseError`. Un nom de place s'écrit comme une valeur, jamais comme une figure à part.
+- `withDefaults` ne donne ni la forme ni l'invisibilité de `default.points` à un nœud. Cas limites connus : `.claude/docs/dette-technique.md`.
+- **`clear()`, `hideShape()` et `showShape()` passent par `_isLabelPart`** : le label **et son fond** (`<name>-label`, `<name>-label-background`) ne sont pas la forme.
+
 ## Figures qu'un point suit
 
 - Une figure qui redéfinit `follow(x, y)` (le point de la figure le plus proche d'une position en pixels) se déclare aussi
-  `override readonly followable = true` : `Follow` n'accepte que ces figures (aujourd'hui `Line`, `Circle`, `Arc`, `Polygon`, `Bezier`, `Path`, `Plot`, `Parametric`). Une figure qui garde un écouteur hors de son groupe svg le
+  `override readonly followable = true` : `Follow` n'accepte que ces figures (aujourd'hui `Line`, `Circle`, `Arc`, `Polygon`, `Bezier`, `Edge`, `Path`, `Plot`, `Parametric`). Une figure qui garde un écouteur hors de son groupe svg le
   retire dans `dispose()`, que `Graph.clear()` appelle.
 
 ## Contrôleurs du graphe (animation, zoom, diapositives)
@@ -346,7 +365,7 @@ et ses exports de `index.ts`. Le cœur tolère les `import type` des `*.types.ts
 - Le tracé d'une courbe (`y = f(x)`, `(x(t), y(t))`) est dans `calculus/computeCurve.ts` (`sampleCurve`, `curvePath`) : un point par
   intervalle seulement là où la courbe courbe, jamais un point par pixel. Mesures : `.claude/specs/2026-10-29-trace-des-courbes.md`.
 - Tant qu'une figure n'a pas son `tikz()`, elle lève `NotImplementedError` : l'implémenter dans son `file-analyse`, avec test.
-  Fait pour : `Point`, `Line`, `Circle`, `Arc`, `Plot`, `Parametric`, `Polygon`, `Bezier`, `Path`, `Follow`, `Riemann`, `FillBetween`, `Grid`, `Axis`.
+  Fait pour : `Point`, `Line`, `Circle`, `Arc`, `Plot`, `Parametric`, `Polygon`, `Bezier`, `Edge`, `Path`, `Follow`, `Riemann`, `FillBetween`, `Grid`, `Axis`.
 - **`Graph.tikz()` est un `tikzpicture` complet** (`tikzPicture`, `AbstractFigure.tikz.ts`) : l'échelle `x=…, y=…` d'une unité, la taille de la fenêtre (`\path (x0,y0) rectangle (x1,y1)`), puis les figures dans l'ordre du svg (couche par couche ; la couche
   `interactive`, les poignées, n'est pas écrite). Les commandes sont coupées à la fenêtre par un `\clip` **dans un `scope`**, sauf les `axis` de pgfplots, qui se coupent seuls : un `\clip` ou un `\useasboundingbox` actif devant un `fill between` fait échouer pgfplots
   (« Dimension too large »). `Graph.tikzPreamble()` donne les lignes à mettre avant `\begin{document}` (`TIKZ_PREAMBLE`). Axes obliques ou renversés : `NotImplementedError` ; image plus grande que TeX (16 383 pt) : `InvalidArgumentError`.
@@ -393,6 +412,13 @@ exporté par `index.ts`).
   et du code** (noms uniques et ordre des calques compris) : un `build*` ne lit rien d'autre, un état caché de `Draw` ou de `Graph` y met fin. `tests/Draw/Draw.refresh.test.ts` compare, sur les exemples de la démo,
   un code redessiné à un `Draw` neuf. Mesures : `.claude/specs/2026-10-31-mesure-update.md`.
 - Les figures d'une ligne sont celles que le graphe a en plus après elle (`Object.keys(graph.figures)`), ce qui comprend les poignées de `drag`. Les paramètres du graphe qui changent (`refreshLayout`) font tout refaire.
+- **Le snap d'un point tiré** (`->drag,snap=A/B/C,snapRadius=30`) est un aimant, pas une limite : `snap` et `snapRadius` complètent le `drag` écrit avant eux (`Graph.snap`, `OptionError` sinon) et ne remplacent rien. Une figure déclare `snappable` (un **getter**, car `Line` dépend de sa forme) et `snapPoints()` (pixels ; `[]` par défaut) comme elle déclare
+  `followable` et `follow` : un point (sa position), un cercle (son centre), un segment et un arc (extrémités et milieu ; le milieu d'un arc est le point de l'arc à mi-angle, le centre n'attire pas), un polygone (sommets, puis milieu de chaque côté **dessiné**, donc suivant `cycles`). Ne sont pas `snappable` : rayon,
+  vecteur, droite, axes (leurs bouts sont les bords de la fenêtre), courbes, `Bezier`, `Path` (à définir). Après les limites de `drag`, `Graph._snapped` prend le candidat le plus proche dans le rayon (`SNAP_RADIUS`, 12 px, ou `snapRadius`) **que les limites laissent atteignable** (`_limited` le rend inchangé) : les limites gagnent. Les positions sont lues
+  au glisser, sans dépendance de redessin ; un point ne peut pas se snapper à lui-même ni à sa poignée.
+  **Retour visuel** : pendant un glisser à la souris d'un point qui a un `snap` (`dragstart` à `dragend`, jamais pour `dragTo`), un anneau marque chaque position atteignable, plus grand sur celle qui tient le point. Les anneaux sont sur la couche `LayerName.TEMPORARY` (tout élément éphémère y va : vide hors d'un glisser, absente du TikZ).
+  L'état du glisser (`_snapDrags`, par point tenu : anneaux et dernière liste de candidats) ne redessine que ce qui a changé : une position inchangée garde sa réponse « atteignable » et son anneau (comparaison de positions, pas de prédiction par l'arbre de dépendances, qui se tromperait avec une animation ou deux doigts). `updateLayout` relit tout (les limites dépendent du
+  layout) ; retirer le point tenu retire ses anneaux. `dragmove` porte `snapped` (`IGraphMove`).
 - **La position d'un point tiré** est dans le point (`pixels`), pas dans la config : `Draw` écoute `dragmove` (`target`) et la garde en unités avec le texte de la ligne. Une ligne refaite dont le texte est le même
   remet le point par `Graph.dragTo` (qui ré-applique `along`, `grid`, `bounds`, `follow`) ; un texte qui change, `drag: 'reset'` ou une figure qui disparaît l'oublient. Un point que personne n'a tiré n'est jamais remis.
 
@@ -434,3 +460,9 @@ Alignée sur PiMath : site VitePress dans `docs/` (anglais, public = enseignants
 - Pour chaque figure (`src/figures/*`) vérifier : lien avec le parser (`<Figure>.parser.ts`), options exposées et
   documentées dans la page du guide, cohérence avec `AbstractFigure`
 - Pour chaque `*.parser.ts` : toute syntaxe acceptée doit apparaître dans le guide (un exemple `pidraw` qui la construit) et avoir un test
+
+## Démo (`demo/`)
+
+- `demo/parsing_examples/basic_examples.ts` : les exemples (`IDemoExample` : `name`, `code`, `parameters?`, les paramètres par défaut sont `DEFAULT_PARAMETERS`). Il est lu aussi par `docs/.vitepress/theme/Playground.vue` (l'exemple `[0]` est l'exemple de départ), `tests/Graph.test.ts`, `tests/Draw/Draw.refresh.test.ts` et `scripts/docs-check.test.ts`. Un nom est unique ; les paramètres d'un exemple sont appliqués (démo et `docs:check`).
+- Le tableau des exemples (`examplesTable.vue`) montre les **particularités calculées** (`features.ts` : `draw.hasDraggable()`, `draw.uses('animate' | 'slide' | 'toggle')`, et `snap=` lu dans le texte, car `Draw` ne le déclare pas), jamais écrites à la main. Une particularité sans exemple fait échouer `docs:check`.
+- Les boutons de la démo (toggles, animation, étapes) sont dans un seul bloc, sous le graphe.

@@ -19,6 +19,11 @@ export interface ILabelConfig {
     offset: XY;
     rotate: number;
     size: string;
+    color: string | null;
+    fill: {
+        color: string;
+        opacity: number;
+    } | null;
     texConverter?: (value: string) => string;
 }
 export type LabelOptions = Partial<ILabelConfig> & {

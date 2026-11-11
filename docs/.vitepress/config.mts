@@ -100,6 +100,7 @@ export default defineConfig({
                     {text: 'Circles and arcs', link: '/guide/circles'},
                     {text: 'Functions and curves', link: '/guide/curves'},
                     {text: 'Polygons and paths', link: '/guide/polygons'},
+                    {text: 'Nodes and edges', link: '/guide/diagrams'},
                     {text: 'Grids and graduated lines', link: '/guide/grids-axes'}
                 ]
             },

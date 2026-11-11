@@ -421,3 +421,35 @@ describe('Polygon as the reference of a label', () => {
         expect(p.referenceAnchorPoint()?.y).toBeCloseTo(300 - 200 / 3, 6)
     })
 })
+
+describe('Polygon as a figure to snap to', () => {
+    test('is attracted to its vertices, then to the middle of each side', () => {
+        const {polygon} = create()
+        const p = polygon('p', {vertices: [at(0, 0), at(4, 0), at(0, 4)]})
+
+        expect(p.snappable).toBe(true)
+        expect(p.snapPoints()).toEqual([
+            at(0, 0), at(4, 0), at(0, 4),
+            at(2, 0), at(2, 2), at(0, 2)
+        ])
+    })
+
+    test('the middles of a star are the ones of the sides that are drawn', () => {
+        const {polygon} = create()
+        const p = polygon('p', {regular: {center: at(0, 0), radius: 2, sides: 5, star: 2}})
+        const vertices = p.vertices
+        const middles = p.snapPoints().slice(5)
+
+        expect(middles).toHaveLength(5)
+        // The pentagram joins the vertices 2 by 2.
+        for (const [i, [from, to]] of [[0, 2], [2, 4], [4, 1], [1, 3], [3, 0]].entries()) {
+            expectPoint(middles[i], {x: (vertices[from].x + vertices[to].x) / 2, y: (vertices[from].y + vertices[to].y) / 2})
+        }
+    })
+
+    test('attracts nowhere when it does not exist', () => {
+        const {polygon} = create()
+
+        expect(polygon('p', {vertices: [at(0, 0), at(1, 0), at(NaN, NaN)]}).snapPoints()).toEqual([])
+    })
+})

@@ -2,19 +2,26 @@
 
 import {onMounted, ref} from "vue"
 import katex from "katex"
-import {Animate, Buttons, type IButton, type IGraphDragEvent, type IGraphDragMoveEvent, PiDraw} from "../../src"
-import {basic_examples} from "../parsing_examples/basic_examples"
+import {Animate, Buttons, type IButton, type IGraphDragEvent, type IGraphDragMoveEvent, PiDraw, Slides} from "../../src"
+import {basic_examples, DEFAULT_PARAMETERS} from "../parsing_examples/basic_examples"
+import {featuresOfExamples, type IExampleFeatures} from "../parsing_examples/features"
+import ExamplesTable from "./examplesTable.vue"
 
-const id = basic_examples.length - 1
-const parameter = ref<string>(`x=-11:11,y=-11:11,axis,grid,unitX=1.3`)
+// The example that is drawn first: the first one, the simplest.
+const current = ref<number>(0)
+const parameter = ref<string>(basic_examples[0].parameters ?? DEFAULT_PARAMETERS)
 // How many figures the last move of a point reached, out of how many there are.
 const touched = ref<string>('')
 // The message of the parameters that cannot be read.
 const parameterError = ref<string>('')
 // const code = ref<string>('a=line y=1/2x+3->w=10')
-const code = ref<string>(basic_examples[id].code ?? '')
+const code = ref<string>(basic_examples[0].code)
+// What each example does (drag, animation...), computed by drawing them on a drawing that is not shown.
+const features = ref<IExampleFeatures[]>([])
 
 const showAnimation = ref<boolean>(false)
+// The step of the presentation, when the code has more than one.
+const slidesState = ref({current: 1, count: 1, title: null as string | null})
 // The buttons that the code declares (@button=id->title=Text) and the ones that are pressed.
 const buttons = ref<IButton[]>([])
 // What is wrong with the lines of the code: the report of the last drawing.
@@ -23,21 +30,26 @@ const lineErrors = ref<string[]>([])
 let draw: PiDraw
 let player: Animate
 let pushers: Buttons
+let slides: Slides
 
-function update(newCode: unknown) {
-  if (typeof newCode === "string") {
-    code.value = newCode
-    // scroll to top
-    document.getElementsByTagName('BODY')[0].scrollIntoView({
-      block: "start",
-      behavior: "smooth",
-      inline: "start"
-    })
-  }
-
+function update() {
   const report = draw.refresh(code.value)
   lineErrors.value = report.errors.map(error => `Line ${error.line}: ${error.message}`)
   showAnimation.value = player.canBeAnimated()
+  slidesState.value = slides.state
+}
+
+// An example of the table: its code and its parameters are drawn, and the page goes back to the editor.
+function select(index: number) {
+  current.value = index
+  parameter.value = basic_examples[index].parameters ?? DEFAULT_PARAMETERS
+  code.value = basic_examples[index].code
+  updateLayout()
+  document.getElementsByTagName('BODY')[0].scrollIntoView({
+    block: "start",
+    behavior: "smooth",
+    inline: "start"
+  })
 }
 
 function updateLayout() {
@@ -45,7 +57,7 @@ function updateLayout() {
   parameterError.value = draw.refreshLayout(parameter.value)?.message ?? ''
 
   // The lines are built with the layout: they are drawn again.
-  update(undefined)
+  update()
 }
 
 function animation(value: string) {
@@ -73,6 +85,11 @@ onMounted(() => {
   )
 
   player = new Animate(draw.graph)
+  slides = new Slides(draw.graph)
+  slides.on('change', event => {
+    slidesState.value = event.detail
+  })
+  slidesState.value = slides.state
   pushers = new Buttons(draw.graph)
   buttons.value = pushers.buttons
   pushers.on('change', event => {
@@ -81,6 +98,11 @@ onMounted(() => {
   parameterError.value = draw.layoutError?.message ?? ''
   lineErrors.value = draw.errors.map(error => `Line ${error.line}: ${error.message}`)
   showAnimation.value = player.canBeAnimated()
+
+  // A drawing that nobody sees reads what each example does.
+  const scan = new PiDraw('scan', {})
+  features.value = featuresOfExamples(scan)
+  scan.graph.dispose()
 
   draw.graph.on('dragstart', (e: CustomEvent<IGraphDragEvent>)=>{
     console.log('MOVE', e.detail.figure.name)
@@ -101,6 +123,10 @@ function logTikz(){
 
 <template>
 	<main class="max-w-7xl mx-auto">
+		<div
+			id="scan"
+			class="hidden"
+		/>
 		<h1 class="text-center text-2xl font-semibold my-10">
 			Graph builder
 		</h1>
@@ -154,7 +180,7 @@ function logTikz(){
 				</p>
 
 				<div
-					v-if="buttons.length > 0"
+					v-if="buttons.length > 0 || showAnimation || slidesState.count > 1"
 					class="flex flex-wrap gap-3 mt-3"
 				>
 					<button
@@ -166,37 +192,69 @@ function logTikz(){
 					>
 						{{ button.title }}
 					</button>
-				</div>
-
-				<div
-					v-show="showAnimation"
-					class="flex gap-3 mt-3"
-				>
 					<button
+						v-if="showAnimation"
 						class="bg-white hover:bg-gray-200 transition-colors border rounded px-4 py-2"
 						@click="animation('start')"
 					>
 						start
 					</button>
 					<button
+						v-if="showAnimation"
 						class="bg-white hover:bg-gray-200 transition-colors border rounded px-4 py-2"
 						@click="animation('pause')"
 					>
 						pause
 					</button>
 					<button
+						v-if="showAnimation"
 						class="bg-white hover:bg-gray-200 transition-colors border rounded px-4 py-2"
 						@click="animation('continue')"
 					>
 						continue
 					</button>
 					<button
+						v-if="showAnimation"
 						class="bg-white hover:bg-gray-200 transition-colors border rounded px-4 py-2"
 						@click="animation('stop')"
 					>
 						stop
 					</button>
+					<button
+						v-if="slidesState.count > 1"
+						class="bg-white hover:bg-gray-200 transition-colors border rounded px-4 py-2"
+						@click="slides.previous()"
+					>
+						Previous
+					</button>
+					<button
+						v-if="slidesState.count > 1"
+						class="bg-white hover:bg-gray-200 transition-colors border rounded px-4 py-2"
+						@click="slides.next()"
+					>
+						Next
+					</button>
+					<span
+						v-if="slidesState.count > 1"
+						class="self-center text-sm text-gray-600"
+					>
+						{{ slidesState.current }} / {{ slidesState.count }} {{ slidesState.title ?? '' }}
+					</span>
 				</div>
+			</div>
+		</div>
+
+		<div>
+			<h3 class="my-10 font-semibold uppercase text-lg">
+				Examples
+			</h3>
+			<div class="border rounded bg-white overflow-x-auto">
+				<examples-table
+					:examples="basic_examples"
+					:features="features"
+					:current="current"
+					@select="select"
+				/>
 			</div>
 		</div>
 
@@ -225,31 +283,6 @@ function logTikz(){
 							{{ doc.description }}
 						</p>
 						<pre class="px-3 pb-3">{{ doc.forms.join('\n') }}</pre>
-					</div>
-				</div>
-			</details>
-
-			<details
-				class="border rounded p-3 bg-white mt-3"
-				open
-			>
-				<summary class="my-5 text-xl">
-					Code examples
-				</summary>
-				<div
-					ref="examples"
-					class="w-full grid grid-cols-1 md:grid-cols-2 gap-3"
-				>
-					<div
-						v-for="(example, index) in basic_examples"
-						:key="`example-${index}`"
-						class="border rounded flex flex-col gap-2"
-						@click="update(example.code)"
-					>
-						<h2 class="font-semibold text-lg bg-gray-200 p-3">
-							{{ example.name }}
-						</h2>
-						<pre class="text-sm text-gray-500 px-3 py-1">{{ example.code }}</pre>
 					</div>
 				</div>
 			</details>

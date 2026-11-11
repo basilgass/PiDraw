@@ -4,6 +4,7 @@ import type { LABEL_POSITION } from "../Label/Label.types";
 import { type BezierSegment } from "../../calculus";
 import type { IBezierConfig } from "./Bezier.types";
 export declare class Bezier extends AbstractFigure {
+    protected get _className(): string;
     constructor(context: IFigureContext, name: string, values: IBezierConfig);
     protected static _copy(values: IBezierConfig): IBezierConfig;
     protected _config: IBezierConfig;

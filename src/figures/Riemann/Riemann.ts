@@ -15,6 +15,10 @@ import type {IRiemannConfig} from "./Riemann.types"
  * rectangle; a sum without any rectangle (the plot does not exist) is not drawn.
  */
 export class Riemann extends AbstractFigure {
+    protected override get _className(): string {
+        return 'pidraw-riemann'
+    }
+
     /** The label is this far, in pixels, above the highest rectangle. */
     protected override readonly _labelGap: number = 6
 

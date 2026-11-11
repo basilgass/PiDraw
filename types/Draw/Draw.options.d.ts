@@ -4,6 +4,7 @@ import type { IOptionContext, IParserSettings, OptionHandler, Options } from "..
 import { AbstractFigure } from "../figures/AbstractFigure/AbstractFigure";
 export type { IOptionContext, OptionHandler, Options };
 export declare function dragConfig(values: unknown[], figures: Record<string, AbstractFigure>): IDraggableConfig;
+export declare function snapFigures(values: unknown[], figures: Record<string, AbstractFigure>): AbstractFigure[];
 export declare function optionNames(): string[];
 export declare function lineParseOptions(): PiParseOptions;
 export declare function applyOptions(options: Options, figure: AbstractFigure, graph: Graph, states?: ReadonlyMap<string, unknown>): void;

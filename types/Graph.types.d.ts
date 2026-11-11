@@ -13,11 +13,14 @@ export interface IGraphDragEvent {
     figure: AbstractFigure;
     target: Point;
 }
+export interface IGraphMove extends IGraphUpdate {
+    snapped: XY | null;
+}
 export interface IGraphUpdate {
     updated: number;
     total: number;
 }
-export interface IGraphDragMoveEvent extends IGraphDragEvent, IGraphUpdate {
+export interface IGraphDragMoveEvent extends IGraphDragEvent, IGraphMove {
 }
 export interface IGraphController {
     dispose(): void;

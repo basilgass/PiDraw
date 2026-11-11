@@ -6,6 +6,7 @@ import type { LabelFields } from "../Label/Label.types";
 import type { ICircleConfig } from "./Circle.types";
 import type { Line } from "../Line/Line";
 export declare class Circle extends AbstractFigure {
+    protected get _className(): string;
     readonly followable = true;
     constructor(context: IFigureContext, name: string, values: ICircleConfig);
     protected _config: ICircleConfig;
@@ -25,6 +26,8 @@ export declare class Circle extends AbstractFigure {
     labelFields(): LabelFields;
     readonly referenceable = true;
     referenceAnchorPoint(): XY | null;
+    get snappable(): boolean;
+    snapPoints(): XY[];
     protected _labelPoint(): XY;
     protected _makeShape(): Shape;
 }

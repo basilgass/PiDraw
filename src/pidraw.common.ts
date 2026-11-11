@@ -101,6 +101,8 @@ export enum LayerName {
     FOREGROUND = 'foreground',
     POINTS = 'points',
     INTERACTIVE = 'interactive',
+    /** What is shown for a moment, such as the places a dragged point can snap to: empty when nothing is happening, and never written as TikZ. */
+    TEMPORARY = 'temporary',
 }
 
 /** The names of the two axes of the graph, which no figure can take. */

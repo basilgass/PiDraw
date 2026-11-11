@@ -18,6 +18,11 @@ export interface IColorValue {
 export declare abstract class AbstractFigure {
     protected _context: IFigureContext;
     constructor(context: IFigureContext, name: string);
+    protected get _className(): string;
+    protected _classes: string[];
+    get classes(): string[];
+    setClasses(names: string[]): this;
+    protected _writeClasses(): void;
     protected _rootSVG: Svg;
     get rootSVG(): Svg;
     protected _name: string;
@@ -50,6 +55,8 @@ export declare abstract class AbstractFigure {
     readonly followable: boolean;
     readonly referenceable: boolean;
     referenceAnchorPoint(): XY | null;
+    get snappable(): boolean;
+    snapPoints(): XY[];
     get graphConfig(): import("../..").IGraphConfig;
     abstract computed(): this;
     abstract get config(): object;
@@ -57,6 +64,9 @@ export declare abstract class AbstractFigure {
     isHiddenBy(reason: string): boolean;
     hide(): this;
     show(): this;
+    protected _isLabelPart(child: {
+        attr(name: string): unknown;
+    }): boolean;
     hideShape(): this;
     showShape(): this;
     resetStyle(): this;
@@ -76,6 +86,12 @@ export declare abstract class AbstractFigure {
     clear(): this;
     update(forceUpdate?: boolean): this;
     addLabel(content?: LabelContent, options?: ILabelOptions): Label;
+    protected _labelStyle: Partial<Pick<ILabelConfig, 'color' | 'fill' | 'size'>>;
+    setLabelStyle(style: {
+        color?: string | null;
+        fill?: string | IColorValue | null;
+        size?: string | number | null;
+    }): this;
     protected _setDefined(defined: boolean): void;
     protected _applyVisibility(): void;
     protected _tikzCoordinates(pixels: XY): string;
@@ -110,6 +126,7 @@ export declare abstract class AbstractFigure {
     };
     protected _tikzDraw(path: string): string;
     protected _tikzLabel(at: string): string;
+    protected _tikzLabelConfig(config: ILabelConfig): ILabelConfig;
     protected _tikzLabelText(): string;
     protected readonly _labelGap: number;
     updateLabel(): this;

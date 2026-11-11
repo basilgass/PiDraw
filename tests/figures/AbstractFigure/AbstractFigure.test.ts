@@ -1231,3 +1231,157 @@ describe('AbstractFigure hidden for a reason', () => {
         expect(A.shown().shape).toBe(true)
     })
 })
+
+describe('AbstractFigure classes', () => {
+    test('the group has the class of the kind of figure', () => {
+        const figure = new TestFigure(createContext(), 'A')
+
+        expect(figure.element.attr('class')).toBe('pidraw-figure')
+        expect(figure.classes).toEqual([])
+    })
+
+    test('a figure of a kind has its own class', () => {
+        const figure = new Circle(createContext(), 'c', {center: {x: 0, y: 0}, radius: 1})
+
+        expect(figure.element.attr('class')).toBe('pidraw-circle')
+    })
+
+    test('setClasses writes the classes after the one of the kind, and replaces the ones given before', () => {
+        const figure = new TestFigure(createContext(), 'A')
+
+        figure.setClasses(['primary', 'big'])
+        expect(figure.element.attr('class')).toBe('pidraw-figure primary big')
+
+        figure.setClasses(['small'])
+        expect(figure.element.attr('class')).toBe('pidraw-figure small')
+        expect(figure.classes).toEqual(['small'])
+    })
+
+    test('a class that is given twice is written once', () => {
+        const figure = new TestFigure(createContext(), 'A')
+
+        figure.setClasses(['a', 'a'])
+
+        expect(figure.element.attr('class')).toBe('pidraw-figure a')
+    })
+
+    test.each([[''], ['1a'], ['a b'], ['a.b'], ['a,b']])('the class "%s" is an InvalidArgumentError, and the figure is left as it was', (name) => {
+        const figure = new TestFigure(createContext(), 'A')
+        figure.setClasses(['kept'])
+
+        expect(() => figure.setClasses(['ok', name])).toThrow(InvalidArgumentError)
+        expect(figure.element.attr('class')).toBe('pidraw-figure kept')
+    })
+
+    test('resetStyle takes the classes that were given away and keeps the one of the kind', () => {
+        const figure = new TestFigure(createContext(), 'A')
+        figure.setClasses(['primary'])
+
+        figure.resetStyle()
+
+        expect(figure.element.attr('class')).toBe('pidraw-figure')
+        expect(figure.classes).toEqual([])
+    })
+})
+
+describe('AbstractFigure label style', () => {
+    test('gives the label the color of its text and its background', () => {
+        const figure = createFigure()
+        const label = figure.addLabel('A')
+
+        figure.setLabelStyle({color: 'red', fill: {color: 'white', opacity: 0.5}})
+
+        expect(label.config.color).toBe('red')
+        expect(label.config.fill).toEqual({color: 'white', opacity: 0.5})
+    })
+
+    test('keeps the style for the label that is made after it, whatever the order', () => {
+        const figure = createFigure()
+
+        figure.setLabelStyle({color: 'red', fill: 'white'})
+        const label = figure.addLabel('A')
+
+        expect(label.config.color).toBe('red')
+        expect(label.config.fill).toEqual({color: 'white', opacity: 1})
+    })
+
+    test('keeps the style when the label is replaced, and what is not given stays', () => {
+        const figure = createFigure()
+        figure.setLabelStyle({color: 'red'})
+        figure.setLabelStyle({fill: 'white'})
+
+        const label = figure.addLabel('B')
+
+        expect(label.config.color).toBe('red')
+        expect(label.config.fill).toEqual({color: 'white', opacity: 1})
+    })
+
+    test('null takes the color or the background away', () => {
+        const figure = createFigure()
+        const label = figure.addLabel('A')
+        figure.setLabelStyle({color: 'red', fill: 'white'})
+
+        figure.setLabelStyle({fill: null})
+
+        expect(label.config.color).toBe('red')
+        expect(label.config.fill).toBeNull()
+    })
+
+    test('resetStyle takes the style away, and the label with it', () => {
+        const figure = createFigure()
+        figure.setLabelStyle({color: 'red'})
+
+        figure.resetStyle()
+
+        expect(figure.addLabel('A').config.color).toBeNull()
+    })
+
+    test.each([[{color: ''}], [{fill: {color: 'white', opacity: 2}}], [{fill: 'white/0.5'}]])('%j is an InvalidArgumentError, and the style is left as it was', (style) => {
+        const figure = createFigure()
+        figure.setLabelStyle({color: 'red'})
+
+        expect(() => figure.setLabelStyle(style)).toThrow(InvalidArgumentError)
+        expect(figure.addLabel('A').config.color).toBe('red')
+    })
+
+    test('writes the colors of the label in TikZ, with their definitions before the node', () => {
+        const figure = createFigure()
+        figure.addLabel('A')
+        figure.setLabelStyle({color: 'red', fill: {color: 'white', opacity: 0.5}})
+
+        const tikz = figure.tikz()
+
+        expect(tikz).toContain('\\definecolor{pidraw-red}{HTML}{FF0000}')
+        expect(tikz).toContain('text=pidraw-red, fill=white, fill opacity=0.5')
+        expect(tikz.indexOf('\\definecolor{pidraw-red}')).toBeLessThan(tikz.indexOf('\\node'))
+    })
+})
+
+describe('AbstractFigure shape and the background of a label', () => {
+    function withBackground() {
+        const figure = createFigure()
+        const label = figure.addLabel('A')
+        figure.setLabelStyle({fill: 'white'})
+        label.move(10, 10)
+
+        return {figure, label}
+    }
+
+    test('clear keeps the background of the label', () => {
+        const {figure} = withBackground()
+
+        figure.clear()
+
+        expect(figure.element.children().map(child => child.node.id)).toEqual(['A-label-background', 'A-label'])
+    })
+
+    test('hideShape and showShape leave the label and its background alone', () => {
+        const {figure} = withBackground()
+
+        figure.hideShape()
+        expect(figure.element.findOne('#A-label-background')?.css('display')).not.toBe('none')
+
+        figure.showShape()
+        expect(figure.element.findOne('#A-label-background')?.css('display')).not.toBe('none')
+    })
+})

@@ -49,7 +49,7 @@ describe('Label', () => {
 
         expect(label.displayName).toBe('B')
         expect(label.config).toEqual({
-            asHtml: false, alignement: 'br', away: null, push: null, clearance: 0, offset: {x: 0, y: 0}, rotate: 0, size: 'inherit'
+            asHtml: false, alignement: 'br', away: null, push: null, clearance: 0, offset: {x: 0, y: 0}, rotate: 0, size: 'inherit', color: null, fill: null
         })
     })
 
@@ -367,5 +367,109 @@ describe('Label that is pushed', () => {
         label.position('mr', {x: 5, y: -5}, undefined, 10)
 
         expect(center).toHaveBeenLastCalledWith(45, 5)
+    })
+})
+
+describe('Label color and background', () => {
+    const white = {color: 'white', opacity: 0.8}
+
+    test('size is the size of the text that is measured', () => {
+        const {label} = create({}, {width: 33, height: 11})
+
+        expect(label.size()).toEqual({width: 33, height: 11})
+    })
+
+    test('has the color of its text on a <text>, and none by default', () => {
+        expect(create({color: 'red'}).label.shape.attr('fill')).toBe('red')
+        expect(create().label.shape.node.hasAttribute('fill')).toBe(false)
+    })
+
+    test('has the color of its text in the div of an HTML label', () => {
+        expect(create({asHtml: true, color: 'red'}).label.shape.node.innerHTML).toContain('color: red')
+        expect(create({asHtml: true}).label.shape.node.innerHTML).not.toContain('color:')
+    })
+
+    test('has no background by default', () => {
+        const {group, label} = create()
+
+        label.move(100, 50)
+
+        expect(group.find('rect')).toHaveLength(0)
+    })
+
+    test('has a background behind its text, a margin bigger than the text on each side', () => {
+        const {group, label} = create({fill: white, alignement: 'mc'})
+
+        label.move(100, 50)
+
+        const [background] = group.find('rect')
+        expect(background.attr('fill')).toBe('white')
+        expect(background.attr('fill-opacity')).toBe(0.8)
+        expect(background.width()).toBe(46)
+        expect(background.height()).toBe(26)
+        expect(background.cx()).toBeCloseTo(100)
+        expect(background.cy()).toBeCloseTo(50)
+        expect(group.children().indexOf(background)).toBeLessThan(group.children().indexOf(label.shape))
+    })
+
+    test('measures an HTML label for its background as well', () => {
+        const {group, label} = create({asHtml: true, fill: white, alignement: 'mc'})
+        vi.spyOn(label, 'size').mockReturnValue({width: 10, height: 6})
+
+        label.move(0, 0)
+
+        expect(group.find('rect')[0].width()).toBe(16)
+    })
+
+    test('the background follows the label when it moves and when it is turned', () => {
+        const {group, label} = create({fill: white, alignement: 'mc'})
+
+        label.move(10, 20)
+        label.move(60, 80)
+        label.position(undefined, undefined, 30)
+
+        const [background] = group.find('rect')
+        expect(background.cx()).toBeCloseTo(60)
+        expect(background.cy()).toBeCloseTo(80)
+        expect(String(background.attr('transform'))).toContain('matrix')
+    })
+
+    test('setStyle gives the background and the color after the label is drawn, and takes the background away with null', () => {
+        const {group, label} = create({alignement: 'mc'})
+        label.move(10, 10)
+
+        label.setStyle({fill: white, color: 'blue'})
+        expect(group.find('rect')).toHaveLength(1)
+        expect(label.shape.attr('fill')).toBe('blue')
+
+        label.setStyle({fill: null, color: null})
+        expect(group.find('rect')).toHaveLength(0)
+        expect(label.shape.node.hasAttribute('fill')).toBe(false)
+    })
+
+    test('hide, show and remove act on the background too', () => {
+        const {group, label} = create({fill: white})
+        label.move(10, 10)
+        const [background] = group.find('rect')
+
+        label.hide()
+        expect(background.css('display')).toBe('none')
+
+        label.show()
+        expect(background.css('display')).not.toBe('none')
+
+        label.remove()
+        expect(group.find('rect')).toHaveLength(0)
+        expect(group.has(label.shape)).toBe(false)
+    })
+
+    test('a background that is given to a hidden label is hidden', () => {
+        const {group, label} = create({})
+        label.hide()
+        label.move(10, 10)
+
+        label.setStyle({fill: white})
+
+        expect(group.find('rect')[0].css('display')).toBe('none')
     })
 })

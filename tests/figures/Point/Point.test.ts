@@ -893,3 +893,20 @@ describe('Point moved', () => {
         expect(A.isMoved()).toBe(false)
     })
 })
+
+describe('Point as a figure to snap to', () => {
+    test('is attracted to its position', () => {
+        const {point} = createDrawing()
+        const A = point('A', 1, 2)
+
+        expect(A.snappable).toBe(true)
+        expect(A.snapPoints()).toEqual([{x: 450, y: 200}])
+    })
+
+    test('attracts nowhere without a position', () => {
+        const {from} = createDrawing()
+        const fx = new Plot(createContext(), 'f', {expression: 'sqrt(x)'})
+
+        expect(from('Q', {evaluation: {fx, x: -1}}).snapPoints()).toEqual([])
+    })
+})

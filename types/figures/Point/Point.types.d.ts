@@ -1,4 +1,5 @@
 import type { Exclusive, XY } from "../../pidraw.common";
+import type { NodeAnchor, NodeShape } from "../../calculus";
 import type { Circle } from "../Circle/Circle";
 import type { Line } from "../Line/Line";
 import type { Plot } from "../Plot/Plot";
@@ -56,12 +57,17 @@ export interface PointConstraints {
         A: XY;
         B: XY | Line;
     };
+    anchor: {
+        node: Point;
+        position: NodeAnchor;
+    };
 }
 export type PointConstraint = Exclusive<PointConstraints>;
 export interface IPointOptions {
     shape?: PointShape;
     size?: number;
+    node?: NodeShape;
 }
 export type IPointConfig = PointConstraint & IPointOptions;
-export type IPointResolvedConfig = IPointConfig & Required<IPointOptions>;
+export type IPointResolvedConfig = IPointConfig & Required<Pick<IPointOptions, 'shape' | 'size'>>;
 //# sourceMappingURL=Point.types.d.ts.map

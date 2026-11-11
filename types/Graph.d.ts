@@ -1,7 +1,7 @@
-import { type Svg } from "@svgdotjs/svg.js";
+import { type Circle as svgCircle, type Svg } from "@svgdotjs/svg.js";
 import '@svgdotjs/svg.draggable.js';
 import { type Domain, type IFigureContext, type IGraphConfig, LayerName, type XY } from "./pidraw.common";
-import type { IAxisDisplay, IGraphConstructorConfig, IGraphController, IGraphDisplay, IGraphEventMap, IGraphUpdate, Layers, TeXConverterType } from "./Graph.types";
+import type { IAxisDisplay, IGraphConstructorConfig, IGraphController, IGraphDisplay, IGraphEventMap, IGraphMove, IGraphUpdate, Layers, TeXConverterType } from "./Graph.types";
 import { Point } from "./figures/Point/Point";
 import type { IPointConfig } from "./figures/Point/Point.types";
 import { Line } from "./figures/Line/Line";
@@ -20,6 +20,7 @@ import { FillBetween } from "./figures/FillBetween/FillBetween";
 import { Riemann } from "./figures/Riemann/Riemann";
 import { Path } from "./figures/Path/Path";
 import { Bezier } from "./figures/Bezier/Bezier";
+import { Edge } from "./figures/Edge/Edge";
 export type IDraggableFollow = ((x: number, y: number) => XY) | AbstractFigure;
 export interface IDraggableConfig {
     along?: 'x' | 'y';
@@ -29,8 +30,28 @@ export interface IDraggableConfig {
     };
     callback?: (point: Point) => void;
     follow?: IDraggableFollow[];
+    snap?: AbstractFigure[];
+    snapRadius?: number;
     grid?: boolean;
     target?: Point;
+}
+export declare const SNAP_RADIUS = 12;
+interface ISnapCandidate extends XY {
+    reachable: boolean;
+}
+interface ISnapRing {
+    element: svgCircle;
+    x: number;
+    y: number;
+    active: boolean;
+    shown: boolean;
+    drawn: boolean;
+}
+interface ISnapDrag {
+    figure: Point;
+    options: IDraggableConfig;
+    rings: ISnapRing[];
+    known: ISnapCandidate[];
 }
 interface ILayoutFigures {
     axes: {
@@ -55,6 +76,7 @@ export declare class Graph extends EventTarget {
         figure: Point;
         options: IDraggableConfig;
     }>;
+    protected _snapDrags: Map<Point, ISnapDrag>;
     protected _total: number;
     protected _links: Map<AbstractFigure, {
         config: object;
@@ -82,6 +104,7 @@ export declare class Graph extends EventTarget {
         line: (config: import(".").ILineConfig, name: string) => Line;
         path: (config: import(".").IPathConfig, name: string) => Path;
         bezier: (config: import(".").IBezierConfig, name: string) => Bezier;
+        edge: (config: import(".").IEdgeConfig, name: string) => Edge;
         plot: (config: import(".").IPlotConfig, name: string) => Plot;
         parametric: (config: import(".").IParametricConfig, name: string) => Parametric;
         circle: (config: import(".").ICircleConfig, name: string) => Circle;
@@ -113,7 +136,19 @@ export declare class Graph extends EventTarget {
     dispose(): void;
     handle(target: Point, options?: IDraggableConfig): Point;
     dragTo(point: Point, pixels: XY): void;
-    protected _dragMove(figure: Point, options: IDraggableConfig, mouse: XY): IGraphUpdate | null;
+    protected _dragMove(figure: Point, options: IDraggableConfig, mouse: XY, drag?: ISnapDrag): IGraphMove | null;
+    protected _limited(position: XY, options: IDraggableConfig, held: Point): XY;
+    protected _candidates(options: IDraggableConfig, held: Point, known?: readonly ISnapCandidate[]): ISnapCandidate[];
+    protected _snapped(position: XY, candidates: readonly ISnapCandidate[], options: IDraggableConfig): ISnapCandidate | null;
+    protected _showSnapRings(drag: ISnapDrag, candidates: readonly ISnapCandidate[], chosen: ISnapCandidate | null): void;
+    protected _makeSnapRing(): ISnapRing;
+    protected _startSnap(figure: Point, options: IDraggableConfig): void;
+    protected _showSnap(drag: ISnapDrag): void;
+    protected _endSnap(figure: Point): void;
+    snap(point: Point, snap: {
+        figures?: AbstractFigure[];
+        radius?: number;
+    }): void;
     draggable(figure: Point, options?: IDraggableConfig): Point;
     toPixels(value: number, axis?: 'x' | 'y'): number;
     toPixels(value: Domain, axis?: 'x' | 'y'): Domain;
@@ -135,6 +170,7 @@ export declare class Graph extends EventTarget {
         y: number;
     };
     protected _checkDraggable(figure: unknown, options: IDraggableConfig): void;
+    protected _checkSnap(point: Point, held: ReadonlySet<AbstractFigure>, figures: unknown, radius: unknown): void;
     protected _detach(figure: AbstractFigure): void;
     protected _dependentsMap(): Map<AbstractFigure, AbstractFigure[]>;
     protected _affectedBy(sources: readonly AbstractFigure[]): AbstractFigure[];

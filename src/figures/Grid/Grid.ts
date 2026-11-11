@@ -29,6 +29,10 @@ function segmentsPath(lines: [XY, XY][]): string {
  * The subdivisions have the color, the width and the dashes of the grid, with half of its opacity.
  */
 export class Grid extends AbstractFigure {
+    protected override get _className(): string {
+        return 'pidraw-grid'
+    }
+
     /**
      * @throws InvalidArgumentError if the step is not made of two finite numbers greater than 0, or the subdivisions are not an integer
      * from 2 to 20. Nothing is left in the svg.

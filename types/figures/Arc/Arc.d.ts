@@ -4,6 +4,7 @@ import type { LABEL_POSITION, LabelFieldName, LabelFields } from "../Label/Label
 import type { ArcDefinition } from "./Arc.constraints";
 import type { IArcConfig } from "./Arc.types";
 export declare class Arc extends AbstractFigure {
+    protected get _className(): string;
     constructor(context: IFigureContext, name: string, values: IArcConfig);
     protected _config: IArcConfig;
     get config(): IArcConfig;
@@ -28,6 +29,8 @@ export declare class Arc extends AbstractFigure {
     protected _place({ center, start, end, radius }: ArcDefinition): this;
     readonly followable = true;
     follow(x: number, y: number): XY;
+    get snappable(): boolean;
+    snapPoints(): XY[];
     protected _drawnAsSquare(): boolean;
     protected _directionAt(fraction: number): number;
     protected _pointAt(degrees: number, distance: number): XY;

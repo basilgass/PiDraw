@@ -4,6 +4,7 @@ import type { LabelFieldName, LabelFields } from "../Label/Label.types";
 import { type RiemannRectangle } from "../../calculus";
 import type { IRiemannConfig } from "./Riemann.types";
 export declare class Riemann extends AbstractFigure {
+    protected get _className(): string;
     protected readonly _labelGap: number;
     constructor(context: IFigureContext, name: string, values: IRiemannConfig);
     protected static _copy(values: IRiemannConfig): IRiemannConfig;

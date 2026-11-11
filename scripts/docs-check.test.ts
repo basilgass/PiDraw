@@ -21,7 +21,8 @@ import {optionNames} from '../src/Draw/Draw.options'
 import {LAYOUT_KEYS} from '../src/parser/buildLayout'
 import {PARSER_COLOR_VALUES} from '../src/parser/parser.common'
 import {PARSER_CONFIG} from '../src/parser/parser.config'
-import {basic_examples} from '../demo/parsing_examples/basic_examples'
+import {basic_examples, DEFAULT_PARAMETERS} from '../demo/parsing_examples/basic_examples'
+import {FEATURE_COLUMNS, featuresOfExamples} from '../demo/parsing_examples/features'
 import {controlsDemos} from '../docs/.vitepress/theme/controlsDemos'
 import {PiParse} from 'piparser'
 import {standardForm} from '../src/Draw/Draw.lines'
@@ -341,11 +342,29 @@ describe('syntax of the registry', () => {
 })
 
 describe('examples of the demo', () => {
-    test.each(basic_examples.map(example => [example.name, example.code]))('%s', (_, code) => {
-        const draw = new Draw(createContainer(), {code})
+    test.each(basic_examples.map(example => [example.name, example] as const))('%s', (_, example) => {
+        const draw = new Draw(createContainer(), {code: example.code, parameters: example.parameters ?? DEFAULT_PARAMETERS})
 
+        expect(draw.layoutError?.message).toBeUndefined()
         expect(draw.errors.map(error => `${error.line}: ${error.message}`)).toEqual([])
         draw.graph.dispose()
+    })
+
+    test('each example has its own name', () => {
+        const names = basic_examples.map(example => example.name)
+
+        expect(new Set(names).size).toBe(names.length)
+    })
+
+    test('each feature of the table is shown by at least one example', () => {
+        const draw = new Draw(createContainer(), {})
+        const features = featuresOfExamples(draw)
+
+        draw.graph.dispose()
+        expect(features).toHaveLength(basic_examples.length)
+        FEATURE_COLUMNS.forEach(({key}) => {
+            expect(features.some(example => example[key]), key).toBe(true)
+        })
     })
 })
 

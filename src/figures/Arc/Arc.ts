@@ -34,6 +34,10 @@ const RIGHT_ANGLE_EPSILON = 1e-6
  * its `center` is `NaN` and its `angle` too, and it is drawn again when it exists again.
  */
 export class Arc extends AbstractFigure {
+    protected override get _className(): string {
+        return 'pidraw-arc'
+    }
+
     /**
      * @throws InvalidArgumentError if `values` does not hold exactly one construction, or has a value that is not valid: a
      * radius that is a number but not finite and greater than 0, an angle that is not finite, a position that is not `{x, y}`.
@@ -204,6 +208,23 @@ export class Arc extends AbstractFigure {
      */
     override follow(x: number, y: number): XY {
         return nearestOnArc(this._center, this._radius, this._from, this._sweep, this._config.alternative === true, {x, y})
+    }
+
+    override get snappable(): boolean {
+        return true
+    }
+
+    /** The two ends of the arc and its middle, the point of the arc in the middle direction. Empty when the arc does not exist. */
+    override snapPoints(): XY[] {
+        if (Number.isNaN(this._sweep)) {
+            return []
+        }
+
+        return [
+            {x: this._start.x, y: this._start.y},
+            this._pointAt(this._directionAt(0.5), this._radius),
+            {x: this._end.x, y: this._end.y}
+        ]
     }
 
     /** Whether the arc is drawn as a square corner. */

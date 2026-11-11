@@ -4,6 +4,7 @@ import type { LabelFieldName, LabelFields } from "../Label/Label.types";
 import { type FillBetweenRun } from "../../calculus";
 import type { IFillBetweenConfig } from "./FillBetween.types";
 export declare class FillBetween extends AbstractFigure {
+    protected get _className(): string;
     constructor(context: IFigureContext, name: string, values: IFillBetweenConfig);
     protected static _copy(values: IFillBetweenConfig): IFillBetweenConfig;
     protected _config: IFillBetweenConfig;

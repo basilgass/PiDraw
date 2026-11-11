@@ -195,6 +195,77 @@ export function labelPush(direction: XY | null, distance: number): XY {
 /** Where a label can be put in relation to its anchor: top, middle or bottom, then left, center or right. */
 export const LABEL_POSITIONS: readonly LABEL_POSITION[] = ['tl', 'tc', 'tr', 'ml', 'mc', 'mr', 'bl', 'bc', 'br']
 
+/** The margin of the background of a label around its text, in pixels: the same for a text and for an HTML label, and in TikZ (`inner sep`). */
+export const LABEL_PADDING = 3
+
+/** The sizes of the text of a label by name, as CSS font sizes relative to the font of the page (`md` is the one of the page). */
+export const LABEL_SIZES: Readonly<Record<'xs' | 'sm' | 'md' | 'lg' | 'xl', string>> = {
+    xs: '0.7em',
+    sm: '0.85em',
+    md: '1em',
+    lg: '1.25em',
+    xl: '1.5em'
+}
+
+/** The units of a size that is written with one: `14px`, `12pt`, `1.2em`, `1.2rem`, `120%`. */
+const SIZE_LENGTH = /^(\d+(?:\.\d+)?|\.\d+)(px|pt|em|rem|%)$/
+
+const SIZES_EXPECTED = `a size (${Object.keys(LABEL_SIZES).join(', ')}), a number of pixels (14), or a length (14px, 12pt, 1.2em, 1.2rem, 120%)`
+
+/**
+ * The CSS font size of a size of a label: `xs`, `sm`, `md`, `lg` or `xl` (relative to the font of the page), a number (pixels), or a length with
+ * its unit (`px`, `pt`, `em`, `rem`, `%`). The text of the label is never in a unit that CSS and TikZ would read differently.
+ * @throws InvalidArgumentError for anything else: a CSS keyword (`large`), a size of 0, or a negative one.
+ */
+export function parseLabelSize(value: unknown): string {
+    if (typeof value === 'number' && Number.isFinite(value) && value > 0) {
+        return `${value}px`
+    }
+
+    if (typeof value === 'string') {
+        const size = value.trim()
+
+        if (Object.hasOwn(LABEL_SIZES, size)) {
+            return LABEL_SIZES[size as keyof typeof LABEL_SIZES]
+        }
+
+        const found = SIZE_LENGTH.exec(size)
+
+        if (found !== null && Number(found[1]) > 0) {
+            return size
+        }
+    }
+
+    throw new InvalidArgumentError(`Invalid size ${JSON.stringify(value)} for a label: expected ${SIZES_EXPECTED}`)
+}
+
+/** The size of the text of a label in points, in TikZ, from its CSS font size. `null` for the size of the page. */
+export function labelSizeInPoints(css: string): number | null {
+    if (css === 'inherit') {
+        return null
+    }
+
+    const found = SIZE_LENGTH.exec(css)
+
+    if (found === null) {
+        throw new InvalidArgumentError(`Invalid size "${css}" for a label: expected ${SIZES_EXPECTED}`)
+    }
+
+    const value = Number(found[1])
+
+    // A pixel is 0.75 pt; the text of a document is 10 pt, which `em`, `rem` and `%` are relative to.
+    return {px: value * 0.75, pt: value, em: value * 10, rem: value * 10, '%': value / 10}[found[2] as 'px' | 'pt' | 'em' | 'rem' | '%']
+}
+
+/** The names of the sizes of a label in LaTeX, by the CSS size they stand for. */
+export const LABEL_SIZE_COMMANDS: Readonly<Record<string, string>> = {
+    [LABEL_SIZES.xs]: '\\scriptsize',
+    [LABEL_SIZES.sm]: '\\small',
+    [LABEL_SIZES.md]: '\\normalsize',
+    [LABEL_SIZES.lg]: '\\large',
+    [LABEL_SIZES.xl]: '\\Large'
+}
+
 /** The alignment of a label that was not given one: below the anchor and to its right. */
 export const DEFAULT_LABEL_POSITION: LABEL_POSITION = 'br'
 

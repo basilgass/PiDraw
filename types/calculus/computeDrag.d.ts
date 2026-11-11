@@ -13,5 +13,6 @@ export interface DragRules {
         y: number;
     };
 }
+export declare function snapCandidates<T extends XY>(position: XY, candidates: readonly T[], radius: number): T[];
 export declare function constrainDrag(position: XY, rules: DragRules, config: IGraphConfig): XY;
 //# sourceMappingURL=computeDrag.d.ts.map

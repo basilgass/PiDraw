@@ -2,7 +2,7 @@ import {describe, expect, test, vi} from 'vitest'
 import {Graph} from '../../src/Graph'
 import {Point} from '../../src/figures/Point/Point'
 import {Line} from '../../src/figures/Line/Line'
-import {OptionError} from '../../src/errors'
+import {InvalidArgumentError, OptionError} from '../../src/errors'
 import type {AbstractFigure} from '../../src/figures/AbstractFigure/AbstractFigure'
 import type {IParserParameters} from '../../src/parser/parser.types'
 import {applyOptions, dragConfig, type Options, withDefaults} from '../../src/Draw/Draw.options'
@@ -305,6 +305,32 @@ describe('Draw option label', () => {
 
         expect(() => {
             applyOptions({label: value}, d, graph)
+        }).toThrow(OptionError)
+    })
+})
+
+describe('Draw option class', () => {
+    test('class=a/b gives the group of the figure the classes a and b after the one of its kind', () => {
+        const {graph, point} = createPoint()
+
+        applyOptions({class: option('a', 'b')}, point, graph)
+
+        expect(point.element.attr('class')).toBe('pidraw-point a b')
+    })
+
+    test('class=primary gives one class', () => {
+        const {graph, point} = createPoint()
+
+        applyOptions({class: option('primary')}, point, graph)
+
+        expect(point.classes).toEqual(['primary'])
+    })
+
+    test.each([[true], [3], ['1a'], ['a b']])('class=%s is an OptionError: the names are CSS identifiers', (value) => {
+        const {graph, point} = createPoint()
+
+        expect(() => {
+            applyOptions({class: option(value)}, point, graph)
         }).toThrow(OptionError)
     })
 })
@@ -637,5 +663,95 @@ describe('Draw option label pushed away from a figure', () => {
         applyOptions({label: option('A', 'tl')}, A, graph)
 
         expect(A.labelReference).toBeNull()
+    })
+})
+
+describe('Draw options snap and snapRadius', () => {
+    test('the figures named are given to the graph, with the radius', () => {
+        const context = createContext()
+        const B = new Point(context, 'B', {coordinates: {x: 3, y: 3}})
+        const C = new Point(context, 'C', {coordinates: {x: 4, y: 4}})
+        const {graph, point} = createPoint({B, C})
+        const snap = vi.fn()
+        Object.defineProperty(graph, 'snap', {value: snap})
+
+        applyOptions({snap: option('B', 'C'), snapRadius: option(30)}, point, graph)
+
+        expect(snap).toHaveBeenNthCalledWith(1, point, {figures: [B, C]})
+        expect(snap).toHaveBeenNthCalledWith(2, point, {radius: 30})
+    })
+
+    test.each([['snap', 'Z'], ['snap', 3], ['snapRadius', 'a'], ['snapRadius', true]])('%s=%s is an OptionError', (key, value) => {
+        const {graph, point} = createPoint()
+        const snap = vi.fn()
+        Object.defineProperty(graph, 'snap', {value: snap})
+
+        expect(() => { applyOptions({[key]: option(value)}, point, graph) }).toThrow(OptionError)
+        expect(snap).not.toHaveBeenCalled()
+    })
+
+    test.each(['snap', 'snapRadius'])('%s on a figure that is not a point is an OptionError', (key) => {
+        const {graph, context} = createGraph()
+        const line = new Line(context, 'd', {through: {A: new Point(context, 'A', {coordinates: {x: 0, y: 0}}), B: new Point(context, 'B', {coordinates: {x: 1, y: 1}})}})
+
+        expect(() => { applyOptions({[key]: option(10)}, line, graph) }).toThrow(OptionError)
+    })
+
+    test('an error of the graph becomes an OptionError', () => {
+        const {graph, point} = createPoint({})
+        Object.defineProperty(graph, 'snap', {value: () => { throw new InvalidArgumentError('no') }})
+
+        expect(() => { applyOptions({snapRadius: option(10)}, point, graph) }).toThrow(OptionError)
+    })
+})
+
+describe('Draw options labelColor and labelFill', () => {
+    test('labelColor is the color of the text of the label', () => {
+        const {graph, point} = createPoint()
+
+        applyOptions({label: option('A'), labelColor: option('red')}, point, graph)
+
+        expect(point.label?.config.color).toBe('red')
+    })
+
+    test('labelFill is the background of the label, with an opacity or not', () => {
+        const {graph, point} = createPoint()
+        applyOptions({label: option('A'), labelFill: option('white', 0.8)}, point, graph)
+        expect(point.label?.config.fill).toEqual({color: 'white', opacity: 0.8})
+
+        const other = createPoint()
+        applyOptions({label: option('A'), labelFill: option('white')}, other.point, other.graph)
+        expect(other.point.label?.config.fill).toEqual({color: 'white', opacity: 1})
+    })
+
+    test('work before the label, and with tex', () => {
+        const {graph, point} = createPoint()
+
+        applyOptions({labelColor: option('red'), labelFill: option('white'), tex: option('x')}, point, graph)
+
+        expect(point.label?.config.color).toBe('red')
+        expect(point.label?.config.fill).toEqual({color: 'white', opacity: 1})
+        expect(point.label?.asHtml).toBe(true)
+    })
+
+    test('are kept without a label, and draw nothing', () => {
+        const {graph, point} = createPoint()
+
+        applyOptions({labelColor: option('red')}, point, graph)
+
+        expect(point.label).toBeNull()
+    })
+
+    test.each([
+        ['labelColor', option('red', 0.5)],
+        ['labelColor', option(true)],
+        ['labelFill', option(true)],
+        ['labelFill', option('white', 2)]
+    ])('%s with an invalid value is an OptionError', (key, parameters) => {
+        const {graph, point} = createPoint()
+
+        expect(() => {
+            applyOptions({label: option('A'), [key]: parameters}, point, graph)
+        }).toThrow(OptionError)
     })
 })

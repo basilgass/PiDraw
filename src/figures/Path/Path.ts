@@ -29,6 +29,10 @@ const polylineLength = (points: XY[]) =>
  * longest one, and a point follows the nearest piece.
  */
 export class Path extends AbstractFigure {
+    protected override get _className(): string {
+        return 'pidraw-path'
+    }
+
     /**
      * @throws InvalidArgumentError if `d` is not a text, or `units` is not a boolean.
      * @throws ParseError if `d` is not the data of an SVG path. Nothing is left in the svg.

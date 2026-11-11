@@ -69,9 +69,84 @@ H=proj P,Ox->label
 s=seg P,H->dash
 ```
 
-### What the rules do
+### Snap to a point
 
-The limits are the rules of the drag. From code, [`graph.dragTo`](./code#drag-from-code) puts a point where the mouse would have put it, under the same rules. This is how the page checks them:
+`snap` is not a limit: it is a magnet. A point that is dragged, and that gets close to a figure named by `snap`, is put on it. It is written after `drag`, separated from it by a comma, and the names of the figures go together, separated by slashes.
+
+```
+P(3,4)->drag,snap=A/B/C
+P(3,4)->drag=grid,snap=A/B/C
+P(3,4)->drag,snap=A/B/C,snapRadius=30
+```
+
+| Figure | The point snaps to |
+|---|---|
+| a point | the point |
+| a circle | its center |
+| a segment | its two ends and its middle |
+| an arc | its two ends and its middle (the point of the arc halfway between them) |
+| a polygon | its vertices and the middle of each side, as the side is drawn: the sides of a star, not the vertices that are neighbours by number |
+
+A ray, a vector, a line and the axes do not attract, and neither do curves.
+
+As soon as the point is held, a small ring shows each place it can reach, so there is no need to look for the center of a circle by trial. The ring of the place that holds the point is bigger. The rings go when the point is let go. A place that the limits of the drag do not let the point reach has no ring. The rings follow the places if they move, and a zoom or a move of the drawing.
+
+Elsewhere the point is dragged as usual. The magnet is 12 pixels wide, whatever the zoom, and `snapRadius=30` sets another distance, in pixels. The figures are read when the point is dragged, so a point that moves attracts at its place of the moment.
+
+The limits of the drag win: a figure that the limits would not let the point reach, because it is out of a domain, off the grid or away from the figure that the point follows, does not attract. The point snaps to the next figure that it can reach.
+
+```pidraw params="x=-1:9,y=-1:7,axis,grid"
+A(1,1)->label
+B(7,1)->label
+C(4,5)->label
+t=poly A,B,C->fill=lightblue/0.4
+O(7,5)->label
+c=circ O,1->blue
+P(4,3)->drag,snap=t/c,red,label
+```
+
+The point is attracted to the three vertices of `t` and to the center of `c`.
+
+```pidraw params="x=-1:9,y=-1:7,axis,grid"
+A(2,2)->label
+B(7,2)->label
+P(4,4)->drag=2:5,snap=A/B,snapRadius=60,red,label
+```
+
+In the second drawing the point is held between 2 and 5, and `B` is out of that part: it never attracts.
+
+A segment, an arc and the sides of a polygon attract at their middle too:
+
+```pidraw params="x=-1:9,y=-1:7,axis,grid"
+A(1,1)
+B(6,1)
+s=seg A,B->blue
+O(2,3)
+C(5,3)
+D(2,6)
+a=arc C,O,D->blue
+P(4,5)->drag,snap=s/a,red,label
+```
+
+From code, `graph.dragTo` follows the magnet too:
+
+```js
+const draw = new PiDraw(container, {
+    parameters: 'x=-5:5,y=-5:5',
+    code: 'A(2,2)\nP(0,0)->drag,snap=A,snapRadius=20\nQ(0,0)->drag,snap=A,snapRadius=20'
+})
+const {graph} = draw
+const {A, P, Q} = graph.figures
+const a = A.pixels
+
+graph.dragTo(P, {x: a.x + 10, y: a.y - 8})
+P.pixels.x === a.x && P.pixels.y === a.y // true
+
+graph.dragTo(Q, {x: a.x + 40, y: a.y})
+Q.pixels.x === a.x + 40 // true
+```
+
+ From code, [`graph.dragTo`](./code#drag-from-code) puts a point where the mouse would have put it, under the same rules. This is how the page checks them:
 
 ```js
 const draw = new PiDraw(container, {
@@ -106,6 +181,19 @@ B(2,1)->drag=x
 ```
 
 The second line is an error: only a point can be dragged. So is a limit that means nothing (`drag=x`, line 3): it is none of `grid`, `Ox`, `Oy`, an interval or the name of a figure.
+
+```pidraw params="x=-1:6,y=-1:4" errors="4,5,6,7,8"
+A(1,1)
+B(3,1)
+d=line A,B
+P(2,2)->snap=A
+Q(2,3)->drag,snap=d
+R(3,3)->drag,snap=Z
+S(4,3)->drag,snap=A,snapRadius=0
+T(4,2)->drag,snap=T
+```
+
+`snap` and `snapRadius` need a `drag` written before them (line 4). The names must be figures that attract: a point, a circle, a segment, an arc or a polygon, and a line does not (line 5). A name that is no figure is an error (line 6), and so is a radius that is not a number above 0 (line 7). A point cannot snap to itself (line 8).
 
 ## Animate a point
 

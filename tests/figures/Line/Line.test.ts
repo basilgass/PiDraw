@@ -896,3 +896,35 @@ describe('Line label slope in a text', () => {
         expect(slopeOf([0, 3], true)).toBe('\\infty')
     })
 })
+
+describe('Line as a figure to snap to', () => {
+    test('a segment is attracted to its ends and to its middle', () => {
+        const {point, line} = create()
+        const s = line('s', {through: {A: point('A', 1, 1), B: point('B', 3, 2)}, shape: 'segment'})
+
+        expect(s.snappable).toBe(true)
+        expect(s.snapPoints()).toEqual([{x: 450, y: 250}, {x: 500, y: 225}, {x: 550, y: 200}])
+    })
+
+    test.each<ILineType>(['ray', 'vector', 'line'])('a %s attracts nothing', (shape) => {
+        const {point, line} = create()
+        const d = line('d', {through: {A: point('A', 1, 1), B: point('B', 3, 2)}, shape})
+
+        expect(d.snappable).toBe(false)
+        expect(d.snapPoints()).toEqual([])
+    })
+
+    test('the axes attract nothing', () => {
+        const {axes} = create()
+
+        expect(axes.Ox.snappable).toBe(false)
+        expect(axes.Oy.snapPoints()).toEqual([])
+    })
+
+    test('a segment that does not exist attracts nothing', () => {
+        const {point, line} = create()
+        const s = line('s', {through: {A: point('A', 1, 1), B: point('B', 1, 1)}, shape: 'segment'})
+
+        expect(s.snapPoints()).toEqual([])
+    })
+})

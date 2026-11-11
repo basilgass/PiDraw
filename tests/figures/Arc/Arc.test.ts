@@ -628,3 +628,38 @@ describe('Arc label on the side of its middle direction', () => {
         expect(a.referenceAnchorPoint()).toEqual({x: 400, y: 300})
     })
 })
+
+describe('Arc as a figure to snap to', () => {
+    function expectSnap(arc: Arc, expected: XY[]) {
+        const found = arc.snapPoints()
+
+        expect(found).toHaveLength(expected.length)
+        found.forEach((position, i) => {
+            expect(position.x).toBeCloseTo(expected[i].x, 6)
+            expect(position.y).toBeCloseTo(expected[i].y, 6)
+        })
+    }
+
+    test('is attracted to its ends and to the point of the arc in the middle', () => {
+        const {arc} = create()
+        const a = arc('a', {points: {start: at(2, 0), center: at(0, 0), end: at(0, 2)}})
+        const middle = at(Math.SQRT2, Math.SQRT2)
+
+        expect(a.snappable).toBe(true)
+        expectSnap(a, [at(2, 0), middle, at(0, 2)])
+    })
+
+    test('the alternative arc, drawn clockwise, has its own middle', () => {
+        const {arc} = create()
+        const a = arc('a', {points: {start: at(2, 0), center: at(0, 0), end: at(0, 2)}, alternative: true})
+
+        expectSnap(a, [at(2, 0), at(-Math.SQRT2, -Math.SQRT2), at(0, 2)])
+    })
+
+    test('an arc that does not exist attracts nothing', () => {
+        const {arc} = create()
+        const a = arc('a', {points: {start: at(2, 0), center: at(0, 0), end: at(4, 0)}})
+
+        expect(a.snapPoints()).toEqual([])
+    })
+})

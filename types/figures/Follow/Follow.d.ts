@@ -8,6 +8,7 @@ interface FollowState {
     direction: XY | null;
 }
 export declare class Follow extends AbstractFigure {
+    protected get _className(): string;
     protected readonly _labelGap: number;
     constructor(context: IFigureContext, name: string, values: IFollowConfig);
     protected _config: IFollowConfig;

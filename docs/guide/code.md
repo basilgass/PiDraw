@@ -51,7 +51,7 @@ const d = graph.create.line({through: {A, B}}, 'd')
 
 Object.keys(graph.figures) // [ 'A', 'B', 'd' ]
 A.coordinates.x.toFixed(2) // 1.00
-Object.keys(graph.create).join(' ') // point line path bezier plot parametric circle polygon arc follow fillbetween grid axis riemann
+Object.keys(graph.create).join(' ') // point line path bezier edge plot parametric circle polygon arc follow fillbetween grid axis riemann
 ```
 
 `width` and `height` are in pixels (800 by 600 by default), `origin` is where the origin of the plane is, and `axis` the vectors of the two axes: `PiDraw` sets all of them from its parameters, and a `PiGraph` alone is for those who want to set them. `tex` is the function of the labels in TeX. `measure: {unit: 'mm', scale: 10}` sets the unit and the scale of the lengths that the labels write (the parameters `unit` and `scale`, see [the unit of the lengths](./graph#the-unit-of-the-lengths)); `graph.updateLayout({...graph.config, measure})` changes them.
@@ -104,7 +104,7 @@ Object.keys(graph.figures) // [ 'A', 'A_drag', 'B', 's' ]
 
 `graph.toPixels` and `graph.toCoordinates` change a position, a length or an interval from units of the graph to pixels, and back.
 
-Drag events are listened to with `graph.on`, and `graph.off` stops it. The event has the graph, the figure that is held (`figure`), the point that moves with it (`target`: the same point, or the point behind a handle), and for `dragmove` how many figures the move reached.
+Drag events are listened to with `graph.on`, and `graph.off` stops it. The event has the graph, the figure that is held (`figure`), the point that moves with it (`target`: the same point, or the point behind a handle), and for `dragmove` how many figures the move reached (`updated` out of `total`) and where the point snapped (`snapped`, a position in pixels, or `null`).
 
 ```ts
 draw.graph.on('dragmove', (event) => {

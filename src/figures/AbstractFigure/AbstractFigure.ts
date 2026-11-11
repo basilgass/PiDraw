@@ -2,7 +2,7 @@ import type {G, Path, Shape, Svg} from "@svgdotjs/svg.js"
 import type {IFigureAppearanceConfig, IFigureContext, XY} from "../../pidraw.common"
 import type {IControlsFigure} from "../../controls/controls.types"
 import {Label} from "../Label/Label"
-import {checkLabelContent, renderLabelContent} from "../Label/Label.constraints"
+import {checkLabelContent, parseLabelSize, renderLabelContent} from "../Label/Label.constraints"
 import type {ILabelConfig, LabelContent, LabelFieldName, LabelFields} from "../Label/Label.types"
 import {createMarker, MARKER_SHAPES} from "../../svg/marker"
 import {InvalidArgumentError} from "../../errors"
@@ -11,6 +11,7 @@ import {isDefinedPosition} from "../../calculus"
 import {
     tikzAxis,
     tikzCoordinates,
+    tikzLabelDefinitions,
     tikzLabelNode,
     tikzLabelText,
     tikzLength,
@@ -114,10 +115,49 @@ export abstract class AbstractFigure {
         this._label = null
         this._labelContent = name
         this._element = this._rootSVG.group().attr('id', this._name)
+        this._writeClasses()
 
         this._appearance = defaultAppearance()
 
         this._shape = this._element.path()
+    }
+
+    /**
+     * The CSS class of the kind of figure (`pidraw-point`), on its group. A getter, not a field: the constructor of this class reads it
+     * before the fields of the figure are set.
+     */
+    // eslint-disable-next-line @typescript-eslint/class-literal-property-style -- a field would not be set yet when the constructor reads it
+    protected get _className(): string {
+        return 'pidraw-figure'
+    }
+
+    protected _classes: string[] = []
+
+    /** The CSS classes that were asked for (`class=a/b`), without the one of the kind of figure. */
+    get classes(): string[] {
+        return [...this._classes]
+    }
+
+    /**
+     * Give the group of the figure CSS classes, after the one of its kind. They replace the ones that were given before.
+     * @throws InvalidArgumentError if a name is not a CSS identifier (letters, digits, `_` and `-`, not starting with a digit). The figure is then left unchanged.
+     */
+    setClasses(names: string[]): this {
+        for (const name of names) {
+            if (!/^[A-Za-z_][\w-]*$/.test(name)) {
+                throw new InvalidArgumentError(`Invalid class "${name}" for "${this._name}": expected letters, digits, _ and -, not starting with a digit`)
+            }
+        }
+
+        this._classes = [...new Set(names)]
+        this._writeClasses()
+
+        return this
+    }
+
+    /** Write the class of the kind of figure and the ones that were asked for in the `class` of the group. */
+    protected _writeClasses(): void {
+        this._element.attr('class', [this._className, ...this._classes].join(' '))
     }
 
     protected _rootSVG: Svg
@@ -258,6 +298,24 @@ export abstract class AbstractFigure {
         return null
     }
 
+    /**
+     * Whether a point that is dragged can snap to the figure (`snap`): whether {@link snapPoints} gives positions. A figure that overrides
+     * that overrides this too. A getter, because it can depend on the config (only a segment, among the lines).
+     */
+    // eslint-disable-next-line @typescript-eslint/class-literal-property-style -- an accessor, so that `Line` can override it
+    get snappable(): boolean {
+        return false
+    }
+
+    /**
+     * The positions a point that is dragged is attracted to, in pixels: the position of a point, the center of a circle, the ends and the
+     * middle of a segment or an arc, the vertices and the middles of the sides of a polygon.
+     * @returns an empty list for a figure that is not {@link snappable}, or that has no position now.
+     */
+    snapPoints(): XY[] {
+        return []
+    }
+
     get graphConfig() {
         return this._context.config
     }
@@ -306,10 +364,17 @@ export abstract class AbstractFigure {
         return this
     }
 
+    /** Whether an element of the group is the label of the figure, or its background: the parts of the label are not the shape. */
+    protected _isLabelPart(child: { attr(name: string): unknown }): boolean {
+        const id = child.attr('id')
+
+        return id === `${this._name}-label` || id === `${this._name}-label-background`
+    }
+
     /** Hide the figure but its label (`hide()` hides both). */
     hideShape(): this {
         this._element.children().forEach((child) => {
-            if (child.attr('id') !== `${this._name}-label`) {
+            if (!this._isLabelPart(child)) {
                 child.hide()
             }
         })
@@ -320,7 +385,7 @@ export abstract class AbstractFigure {
     /** Show what {@link hideShape} hid (the label is not touched: `?` hides it for good). */
     showShape(): this {
         this._element.children().forEach((child) => {
-            if (child.attr('id') !== `${this._name}-label`) {
+            if (!this._isLabelPart(child)) {
                 child.show()
             }
         })
@@ -336,15 +401,18 @@ export abstract class AbstractFigure {
      */
     resetStyle(): this {
         this._appearance = defaultAppearance()
+        this._classes = []
+        this._writeClasses()
         this._dasharray = null
         this._markerStart = null
         this._markerEnd = null
         this._shape.attr('transform', null)
 
-        this._label?.shape.remove()
+        this._label?.remove()
         this._label = null
         this._labelContent = this._name
         this._labelReference = null
+        this._labelStyle = {}
 
         this._isDraggable = false
 
@@ -502,7 +570,7 @@ export abstract class AbstractFigure {
      */
     clear(): this {
         this._element.children().forEach((child) => {
-            if (child.attr('id') !== `${this._name}-label`) {
+            if (!this._isLabelPart(child)) {
                 child.remove()
             }
         })
@@ -545,7 +613,7 @@ export abstract class AbstractFigure {
         const labelContent = content ?? this._name
         checkLabelContent(labelContent, this.labelFields(), this._name)
 
-        this._label?.shape.remove()
+        this._label?.remove()
         this._labelContent = labelContent
 
         this._label = new Label(
@@ -554,11 +622,39 @@ export abstract class AbstractFigure {
             {
                 text: renderLabelContent(labelContent, this.labelFields(), {tex: asHtml ?? false}),
                 asHtml: asHtml ?? false,
+                ...this._labelStyle,
                 ...(texConverter === undefined ? {} : {texConverter})
             })
 
         this.updateLabel()
         return this._label
+    }
+
+    /** The color of the text and the background of the label that were asked for: kept by the figure, so that they do not depend on when the label is made. */
+    protected _labelStyle: Partial<Pick<ILabelConfig, 'color' | 'fill' | 'size'>> = {}
+
+    /**
+     * Give the label of the figure a color for its text, a background, a size, or all of them. What is not given stays; `null` takes the color or
+     * the background away, and `null` for the size is the one of the page. It is kept for the label that the figure is given later (`addLabel`),
+     * and applied to the one that it has.
+     * @param style `color` is the color of the text; `fill` is the background (a box a little bigger than the text), with an opacity or not;
+     * `size` is `xs`, `sm`, `md`, `lg` or `xl` (relative to the font of the page), a number of pixels, or a length (`14px`, `12pt`, `1.2em`, `1.2rem`, `120%`).
+     * @throws InvalidArgumentError if a color or the size is invalid (see {@link fill}). The figure is then left unchanged.
+     */
+    setLabelStyle(style: { color?: string | null, fill?: string | IColorValue | null, size?: string | number | null }): this {
+        const color = style.color === undefined || style.color === null ? style.color : readColor(style.color).color
+        const fill = style.fill === undefined || style.fill === null ? style.fill : readColor(style.fill)
+        const size = style.size === undefined ? undefined : style.size === null ? 'inherit' : parseLabelSize(style.size)
+
+        this._labelStyle = {
+            ...this._labelStyle,
+            ...(color === undefined ? {} : {color}),
+            ...(fill === undefined ? {} : {fill}),
+            ...(size === undefined ? {} : {size})
+        }
+        this._label?.setStyle({color, fill, ...(size === undefined ? {} : {size})})
+
+        return this
     }
 
     /**
@@ -702,7 +798,17 @@ export abstract class AbstractFigure {
             return ''
         }
 
-        return tikzLabelNode(this._label.config, at, this._tikzLabelText())
+        const config = this._tikzLabelConfig(this._label.config)
+
+        return [...tikzLabelDefinitions(config), tikzLabelNode(config, at, this._tikzLabelText())].join('\n')
+    }
+
+    /**
+     * How the label is written in TikZ: its config by default. A figure that gives its label something that the svg draws in another way (the
+     * hole that an edge makes in its line) says so here, for TikZ has no equivalent of it.
+     */
+    protected _tikzLabelConfig(config: ILabelConfig): ILabelConfig {
+        return config
     }
 
     /**

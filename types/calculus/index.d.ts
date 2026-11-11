@@ -4,6 +4,8 @@ export * from "./coordinates";
 export * from "./computeCircle";
 export * from "./computeDrag";
 export * from "./computeLine";
+export * from "./computeEdge";
+export * from "./computeNode";
 export * from "./intersections";
 export * from "./linearEquation";
 export * from "./computeQuadratic";

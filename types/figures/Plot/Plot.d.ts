@@ -3,6 +3,7 @@ import type { IFigureContext, XY } from "../../pidraw.common";
 import { NumExp } from "../../calculus";
 import type { IPlotConfig } from "./Plot.types";
 export declare class Plot extends AbstractFigure {
+    protected get _className(): string;
     protected readonly _labelGap: number;
     constructor(context: IFigureContext, name: string, values: IPlotConfig);
     protected _fx: string;

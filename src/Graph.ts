@@ -1,4 +1,4 @@
-import {type Box, SVG, type Svg} from "@svgdotjs/svg.js"
+import {type Box, type Circle as svgCircle, SVG, type Svg} from "@svgdotjs/svg.js"
 import '@svgdotjs/svg.draggable.js'
 
 import {Axes, type Domain, type IFigureContext, type IGraphConfig, isXY, LayerName, type XY} from "./pidraw.common"
@@ -8,6 +8,7 @@ import type {
     IGraphController,
     IGraphDisplay,
     IGraphEventMap,
+    IGraphMove,
     IGraphUpdate,
     Layers,
     TeXConverterType
@@ -21,7 +22,9 @@ import {
     axisPlacement,
     checkGraphConfig,
     isDefinedPosition,
+    nowhere,
     constrainDrag,
+    snapCandidates,
     resolveGraphConfig,
     toCoordinates as pixelsToCoordinates,
     toPixels as coordToPixels
@@ -43,6 +46,7 @@ import {FillBetween} from "./figures/FillBetween/FillBetween"
 import {Riemann} from "./figures/Riemann/Riemann"
 import {Path} from "./figures/Path/Path"
 import {Bezier} from "./figures/Bezier/Bezier"
+import {Edge} from "./figures/Edge/Edge"
 
 /** The names of the figures of the layout (the grid and the axes, with the ones at the border): a figure of the graph cannot have one. */
 const MAIN_GRID = 'MAINGRID'
@@ -52,7 +56,7 @@ const LAYOUT_NAMES: string[] = [MAIN_GRID, Axes.X, Axes.Y, `${Axes.X}${EDGE}`, `
 /** A way to limit where a point that is dragged goes: a function from the position in pixels to the one it takes, or a figure to stay on. */
 export type IDraggableFollow = ((x: number, y: number) => XY) | AbstractFigure
 
-/** How a point is dragged. The rules apply in this order: `along`, `grid`, `bounds`, then each of `follow`. */
+/** How a point is dragged. The rules apply in this order: `along`, `grid`, `bounds`, then each of `follow`; `snap` comes last. */
 export interface IDraggableConfig {
     /** Move on the screen along an axis only: the point keeps its other coordinate (`'x'` keeps its height). */
     along?: 'x' | 'y',
@@ -65,6 +69,13 @@ export interface IDraggableConfig {
     callback?: (point: Point) => void
     /** Limits that are applied in turn, after the rules above: a function, or a figure the point stays on. */
     follow?: IDraggableFollow[],
+    /**
+     * The figures the point is attracted to (see {@link AbstractFigure.snapPoints}): near one of their positions, closer than `snapRadius`, the point
+     * is put on it. A position that the limits above do not allow is left out.
+     */
+    snap?: AbstractFigure[],
+    /** How close the point has to be to snap, in pixels. {@link SNAP_RADIUS} when absent. */
+    snapRadius?: number,
     /** Put the point on the lines of the grid of the graph, subdivisions included: its step if it shows one, a unit otherwise, from the origin. */
     grid?: boolean
     /** A point that moves with the one that is dragged, and is the one other figures are built on (the dragged one is a handle). */
@@ -73,6 +84,42 @@ export interface IDraggableConfig {
 
 /** The diameter of the disc that a drag handle is, in pixels. */
 const HANDLE_SIZE = 30
+
+/** How close, in pixels, a point that is dragged has to be to a figure it snaps to (`snap`) to be put on it, unless `snapRadius` says another. */
+export const SNAP_RADIUS = 12
+
+/** The rings that show where a dragged point can snap: the radius of a place it can reach, and of the one it holds, in pixels. */
+const SNAP_RING_RADIUS = 5
+const SNAP_ACTIVE_RADIUS = 8
+const SNAP_COLOR = '#e8590c'
+
+/** A position a point can snap to, with whether the limits of its drag let the point reach it. */
+interface ISnapCandidate extends XY {
+    reachable: boolean
+}
+
+/** The ring that shows a candidate on the temporary layer, with what is written on it, so that a move writes only what changed. */
+interface ISnapRing {
+    element: svgCircle
+    x: number
+    y: number
+    active: boolean
+    shown: boolean
+    drawn: boolean
+}
+
+/** What a drag that snaps shows while it lasts. */
+interface ISnapDrag {
+    /** The point that is held, and the rules of its drag. */
+    figure: Point
+    options: IDraggableConfig
+    rings: ISnapRing[]
+    /** The candidates of the last move, to know which ones did not move: the limits need not be asked again. */
+    known: ISnapCandidate[]
+}
+
+/** How far a snapped position may be from the one the limits of the drag give for it, in pixels: what the rounding of the maths allows. */
+const SNAP_TOLERANCE = 1e-6
 
 /** How deep `figuresIn` goes into a configuration: the figures are in objects and lists nested a few levels (`{through: [{point}]}`). */
 const CONFIG_DEPTH = 5
@@ -162,6 +209,9 @@ export class Graph extends EventTarget {
 
     /** How each point that can be dragged is: by the point that is held, and by its target. */
     protected _drags = new Map<Point, { figure: Point, options: IDraggableConfig }>()
+
+    /** The places that a mouse drag shows, by the point that is held: only while the point is held, and only for a point that snaps. */
+    protected _snapDrags = new Map<Point, ISnapDrag>()
 
     /** How many figures the graph has. */
     protected _total = 0
@@ -301,6 +351,7 @@ export class Graph extends EventTarget {
             line: this._maker(Line, LayerName.MAIN),
             path: this._maker(Path, LayerName.MAIN),
             bezier: this._maker(Bezier, LayerName.MAIN),
+            edge: this._maker(Edge, LayerName.MAIN),
             plot: this._maker(Plot, LayerName.PLOTS),
             parametric: this._maker(Parametric, LayerName.PLOTS),
             circle: this._maker(Circle, LayerName.MAIN),
@@ -497,22 +548,23 @@ export class Graph extends EventTarget {
      * @param mouse the position of the mouse in pixels, which is put inside the drawing.
      * @returns what the update did, `null` if the point did not move.
      */
-    protected _dragMove(figure: Point, options: IDraggableConfig, mouse: XY): IGraphUpdate | null {
-        const {along, bounds, callback, follow = [], grid, target} = options
+    protected _dragMove(figure: Point, options: IDraggableConfig, mouse: XY, drag?: ISnapDrag): IGraphMove | null {
+        const {callback, target} = options
 
         const inside = {
             x: Math.max(0, Math.min(mouse.x, this._config.width)),
             y: Math.max(0, Math.min(mouse.y, this._config.height))
         }
 
-        let position = constrainDrag(inside, {
-            ...(along ? {along: {axis: along, keep: (target ?? figure).pixels}} : {}),
-            ...(bounds ? {bounds} : {}),
-            ...(grid ? {step: this._gridStep()} : {})
-        }, this._config)
+        const limited = this._limited(inside, options, target ?? figure)
+        const candidates = this._candidates(options, target ?? figure, drag?.known)
+        const chosen = this._snapped(limited, candidates, options)
+        const position = chosen ?? limited
+        const snapped = chosen === null ? null : {x: chosen.x, y: chosen.y}
 
-        for (const limit of follow) {
-            position = limit instanceof AbstractFigure ? limit.follow(position.x, position.y) : limit(position.x, position.y)
+        if (drag) {
+            drag.known = candidates
+            this._showSnapRings(drag, candidates, chosen)
         }
 
         if (figure.pixels.x === position.x && figure.pixels.y === position.y) {
@@ -529,7 +581,166 @@ export class Graph extends EventTarget {
             callback(figure)
         }
 
-        return this.update(target ? [figure, target] : [figure])
+        return {...this.update(target ? [figure, target] : [figure]), snapped}
+    }
+
+    /** Put a position where the limits of a drag allow it (`along`, `grid`, `bounds`, then `follow`). `held` is the point that is dragged. */
+    protected _limited(position: XY, options: IDraggableConfig, held: Point): XY {
+        const {along, bounds, follow = [], grid} = options
+
+        let limited = constrainDrag(position, {
+            ...(along ? {along: {axis: along, keep: held.pixels}} : {}),
+            ...(bounds ? {bounds} : {}),
+            ...(grid ? {step: this._gridStep()} : {})
+        }, this._config)
+
+        for (const limit of follow) {
+            limited = limit instanceof AbstractFigure ? limit.follow(limited.x, limited.y) : limit(limited.x, limited.y)
+        }
+
+        return limited
+    }
+
+    /**
+     * The positions the point can snap to, with whether its limits let it reach each one. Whether a position is reachable depends on it and
+     * on the limits only, not on the mouse: a candidate that is where it was in `known` (the last move) keeps its answer, so a figure that does
+     * not move costs a comparison.
+     */
+    protected _candidates(options: IDraggableConfig, held: Point, known: readonly ISnapCandidate[] = []): ISnapCandidate[] {
+        const {snap = []} = options
+
+        return snap.flatMap(figure => figure.snapPoints()).map((position, i) => {
+            const before = known.at(i)
+
+            if (before?.x === position.x && before.y === position.y) {
+                return before
+            }
+
+            const allowed = isDefinedPosition(position) ? this._limited(position, options, held) : nowhere()
+
+            return {x: position.x, y: position.y, reachable: Math.hypot(allowed.x - position.x, allowed.y - position.y) <= SNAP_TOLERANCE}
+        })
+    }
+
+    /**
+     * The candidate that is the closest to `position`, if one is close enough and the limits of the drag allow it (the limits win: a
+     * position they would move is not an option). `null` otherwise.
+     */
+    protected _snapped(position: XY, candidates: readonly ISnapCandidate[], options: IDraggableConfig): ISnapCandidate | null {
+        const reachable = candidates.filter(candidate => candidate.reachable)
+
+        return snapCandidates(position, reachable, options.snapRadius ?? SNAP_RADIUS).at(0) ?? null
+    }
+
+    /**
+     * Draw a ring on each candidate that the point can reach, bigger on the one it holds, on the temporary layer. A ring that is as it was is
+     * not written again.
+     */
+    protected _showSnapRings(drag: ISnapDrag, candidates: readonly ISnapCandidate[], chosen: ISnapCandidate | null): void {
+        while (drag.rings.length > candidates.length) {
+            drag.rings.pop()?.element.remove()
+        }
+
+        candidates.forEach((candidate, i) => {
+            const ring = drag.rings[i] ??= this._makeSnapRing()
+            const active = candidate === chosen
+
+            if (!candidate.reachable) {
+                if (ring.shown) {
+                    ring.element.hide()
+                    ring.shown = false
+                }
+
+                return
+            }
+
+            if (!ring.shown) {
+                ring.element.show()
+                ring.shown = true
+            }
+
+            if (ring.x !== candidate.x || ring.y !== candidate.y) {
+                ring.element.center(candidate.x, candidate.y)
+                ring.x = candidate.x
+                ring.y = candidate.y
+            }
+
+            if (ring.active !== active || !ring.drawn) {
+                ring.element.radius(active ? SNAP_ACTIVE_RADIUS : SNAP_RING_RADIUS).stroke({
+                    color: SNAP_COLOR,
+                    width: active ? 2.5 : 1.5,
+                    opacity: active ? 1 : 0.55
+                })
+                ring.active = active
+                ring.drawn = true
+            }
+        })
+    }
+
+    /** A ring on the temporary layer, which the mouse goes through. */
+    protected _makeSnapRing(): ISnapRing {
+        const element = this._layers.temporary.circle(0).fill('none').attr({'pointer-events': 'none'})
+
+        return {element, x: NaN, y: NaN, active: false, shown: true, drawn: false}
+    }
+
+    /** Show the places a point that is held can snap to, if it snaps. */
+    protected _startSnap(figure: Point, options: IDraggableConfig): void {
+        if (!options.snap?.length) {
+            return
+        }
+
+        const drag: ISnapDrag = {figure, options, rings: [], known: []}
+
+        this._snapDrags.set(figure, drag)
+        this._showSnap(drag)
+    }
+
+    /** Draw the rings of a drag as the figures and the limits are now: the candidates are read again, and the one under the point is the held one. */
+    protected _showSnap(drag: ISnapDrag): void {
+        const held = drag.options.target ?? drag.figure
+        const candidates = this._candidates(drag.options, held)
+
+        drag.known = candidates
+        this._showSnapRings(drag, candidates, this._snapped(held.pixels, candidates, drag.options))
+    }
+
+    /** Take the places a point that is held showed off the drawing. */
+    protected _endSnap(figure: Point): void {
+        this._snapDrags.get(figure)?.rings.forEach((ring) => {
+            ring.element.remove()
+        })
+        this._snapDrags.delete(figure)
+    }
+
+    /**
+     * Make a point attracted to figures while it is dragged, and set how close it has to be to snap. What is not given is left as it is.
+     *
+     * @param point the point that is held (the handle), or its `target`.
+     * @param snap.figures the figures to snap to, which replace the ones from before.
+     * @param snap.radius the distance in pixels from which the point snaps.
+     * @throws InvalidArgumentError if the point cannot be dragged; a figure is not {@link AbstractFigure.snappable}, or is the point itself;
+     * or the radius is not a finite number above 0. Nothing is changed in case of an error.
+     */
+    snap(point: Point, snap: { figures?: AbstractFigure[], radius?: number }): void {
+        const drag = this._drags.get(point)
+
+        if (drag === undefined) {
+            throw new InvalidArgumentError(`The point "${point.name}" cannot snap: make it draggable first`)
+        }
+
+        const {figures, radius} = snap
+
+        this._checkSnap(point, new Set<AbstractFigure>([drag.figure, drag.options.target ?? drag.figure]), figures, radius)
+
+        // The point and its handle share their options.
+        if (figures !== undefined) {
+            drag.options.snap = [...figures]
+        }
+
+        if (radius !== undefined) {
+            drag.options.snapRadius = radius
+        }
     }
 
     /**
@@ -537,7 +748,8 @@ export class Graph extends EventTarget {
      * the events `dragstart`, `dragmove` (with how many figures that reached) and `dragend` are emitted. It stays in the drawing.
      *
      * @throws InvalidArgumentError if `figure` is not a point, or is already draggable; if `options.along` is neither `'x'` nor `'y'`;
-     * `options.target` is not a point; a `follow` is neither a function nor a figure; or a bound is not a finite number.
+     * `options.target` is not a point; a `follow` is neither a function nor a figure; a bound is not a finite number; or `snap` and
+     * `snapRadius` are invalid (see {@link snap}).
      * Nothing is changed in case of an error.
      */
     draggable(figure: Point, options: IDraggableConfig = {}): Point {
@@ -551,7 +763,7 @@ export class Graph extends EventTarget {
 
             // The box is the one of the shape, and the point is at its center.
             const {box} = e.detail
-            const report = this._dragMove(figure, options, {x: box.x + box.width / 2, y: box.y + box.height / 2})
+            const report = this._dragMove(figure, options, {x: box.x + box.width / 2, y: box.y + box.height / 2}, this._snapDrags.get(figure))
 
             // Nothing moved (the rules put the point where it was): nothing to draw again.
             if (report !== null) {
@@ -574,9 +786,15 @@ export class Graph extends EventTarget {
         figure.isDraggable = true
         figure.shape
             .draggable()
-            .on('dragstart', () => { this._emit('dragstart', {graph: this, figure, target}) })
+            .on('dragstart', () => {
+                this._startSnap(figure, options)
+                this._emit('dragstart', {graph: this, figure, target})
+            })
             .on('dragmove', dragmove as EventListener)
-            .on('dragend', () => { this._emit('dragend', {graph: this, figure, target}) })
+            .on('dragend', () => {
+                this._endSnap(figure)
+                this._emit('dragend', {graph: this, figure, target})
+            })
 
         return figure
     }
@@ -716,6 +934,11 @@ export class Graph extends EventTarget {
             this.update(placed.map(({point}) => point))
         }
 
+        // A point that is held now: its limits and the places it snaps to are the ones of the new layout.
+        this._snapDrags.forEach((drag) => {
+            this._showSnap(drag)
+        })
+
         this._controllers.forEach((controller) => {
             controller.onLayoutChanged?.(this._config)
         })
@@ -765,7 +988,7 @@ export class Graph extends EventTarget {
         const fragments: string[] = []
 
         for (const layer of Object.values(LayerName)) {
-            if (layer === LayerName.INTERACTIVE) {
+            if (layer === LayerName.INTERACTIVE || layer === LayerName.TEMPORARY) {
                 continue
             }
 
@@ -852,7 +1075,7 @@ export class Graph extends EventTarget {
             throw new InvalidArgumentError(`The point "${figure.name}" is already draggable`)
         }
 
-        const { along, bounds, follow, target } = options as Record<string, unknown>
+        const { along, bounds, follow, snap, snapRadius, target } = options as Record<string, unknown>
 
         if (along !== undefined && along !== 'x' && along !== 'y') {
             throw new InvalidArgumentError(`Invalid along ${JSON.stringify(along)} for the point "${figure.name}": expected 'x' or 'y'`)
@@ -871,6 +1094,33 @@ export class Graph extends EventTarget {
             if (domain !== undefined && !(Number.isFinite(domain.min) && Number.isFinite(domain.max))) {
                 throw new InvalidArgumentError(`Invalid bounds ${axis} ${JSON.stringify(domain)} for the point "${figure.name}": expected {min, max}, two finite numbers`)
             }
+        }
+
+        this._checkSnap(figure, new Set<AbstractFigure>([figure, ...(target instanceof Point ? [target] : [])]), snap, snapRadius)
+    }
+
+    /**
+     * Check the figures a point snaps to, and its radius.
+     * @param held the point that is dragged and its handle, which cannot attract it.
+     * @throws InvalidArgumentError see {@link snap}.
+     */
+    protected _checkSnap(point: Point, held: ReadonlySet<AbstractFigure>, figures: unknown, radius: unknown): void {
+        if (figures !== undefined && !(Array.isArray(figures) && figures.every(figure => figure instanceof AbstractFigure))) {
+            throw new InvalidArgumentError(`The snap of the point "${point.name}" must be a list of figures`)
+        }
+
+        for (const figure of figures ?? []) {
+            if (!figure.snappable) {
+                throw new InvalidArgumentError(`The point "${point.name}" cannot snap to "${figure.name}", a ${figure.constructor.name}: only points, circles, segments, arcs and polygons attract`)
+            }
+
+            if (held.has(figure)) {
+                throw new InvalidArgumentError(`The point "${point.name}" cannot snap to itself`)
+            }
+        }
+
+        if (radius !== undefined && !(typeof radius === 'number' && Number.isFinite(radius) && radius > 0)) {
+            throw new InvalidArgumentError(`Invalid snap radius ${JSON.stringify(radius)} for the point "${point.name}": expected a number above 0, in pixels`)
         }
     }
 
@@ -897,6 +1147,7 @@ export class Graph extends EventTarget {
         this._held.delete(figure)
         this._drags.forEach((drag, key) => {
             if (key === figure || drag.figure === figure) {
+                this._endSnap(drag.figure)
                 this._drags.delete(key)
             }
         })

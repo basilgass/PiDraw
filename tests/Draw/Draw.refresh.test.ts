@@ -462,3 +462,67 @@ describe('Draw dragged point on the grid', () => {
         }
     })
 })
+
+describe('Draw snap', () => {
+    const code = 'A(2,2)\nB(5,2)\nP(0,0)->drag=Ox,snap=A/B,snapRadius=20'
+
+    test('the limits win: along Ox the point keeps its height, and a point at another height does not attract', () => {
+        const d = draw(code, 'x=-1:9,y=-1:6')
+        const A = point(d, 'A').pixels
+        const P = point(d, 'P')
+        const height = P.pixels.y
+
+        mouseTo(point(d, 'P_drag'), {x: A.x + 15, y: A.y})
+
+        expect(P.pixels.y).toBeCloseTo(height, 6)
+        expect(P.pixels.x).toBeCloseTo(A.x + 15, 6)
+    })
+
+    test('a point that is dragged snaps to a point it can reach, within the radius of the line', () => {
+        const d = draw('A(2,2)\nB(5,2)\nP(0,2)->drag=Ox,snap=A/B,snapRadius=20', 'x=-1:9,y=-1:6')
+        const B = point(d, 'B').pixels
+
+        mouseTo(point(d, 'P_drag'), {x: B.x - 15, y: B.y + 40})
+
+        expectPixels(point(d, 'P').pixels, B)
+    })
+
+    test('a point snaps to the middle of a segment and of a side of a polygon', () => {
+        const d = draw('A(1,1)\nB(5,1)\ns=seg A,B\nC(3,5)\nt=poly A,B,C\nP(0,0)->drag,snap=s\nQ(0,0)->drag,snap=t', 'x=-1:9,y=-1:6')
+        const A = point(d, 'A').pixels
+        const B = point(d, 'B').pixels
+        const C = point(d, 'C').pixels
+
+        mouseTo(point(d, 'P_drag'), {x: (A.x + B.x) / 2 + 4, y: A.y - 4})
+        expectPixels(point(d, 'P').pixels, {x: (A.x + B.x) / 2, y: A.y})
+
+        mouseTo(point(d, 'Q_drag'), {x: (B.x + C.x) / 2 + 4, y: (B.y + C.y) / 2 - 3})
+        expectPixels(point(d, 'Q').pixels, {x: (B.x + C.x) / 2, y: (B.y + C.y) / 2})
+    })
+
+    test('the snap is kept when the code is drawn again', () => {
+        const source = 'A(2,2)\nB(5,2)\nP(0,2)->drag,snap=A/B'
+        const d = draw(source, 'x=-1:9,y=-1:6')
+        const A = point(d, 'A').pixels
+
+        mouseTo(point(d, 'P_drag'), {x: A.x + 5, y: A.y})
+        d.refresh(`${source}\nC(7,7)`)
+
+        expectPixels(point(d, 'P').pixels, A)
+    })
+
+    test.each([
+        ['snap without drag', 'A(1,1)\nP(2,2)->snap=A'],
+        ['a figure that does not attract', 'A(1,1)\nB(2,2)\nd=line A,B\nP(2,3)->drag,snap=d'],
+        ['a ray', 'A(1,1)\nB(2,2)\nr=ray A,B\nP(2,3)->drag,snap=r'],
+        ['a vector', 'A(1,1)\nB(2,2)\nv=vec A,B\nP(2,3)->drag,snap=v'],
+        ['a name that is no figure', 'P(2,2)->drag,snap=Z'],
+        ['a radius of 0', 'A(1,1)\nP(2,2)->drag,snap=A,snapRadius=0'],
+        ['the point itself', 'P(2,2)->drag,snap=P']
+    ])('%s is an error of its line', (_, source) => {
+        const d = draw(source)
+
+        expect(d.errors.length).toBeGreaterThan(0)
+        expect(d.errors.at(-1)?.line).toBe(source.split('\n').length)
+    })
+})

@@ -32,6 +32,10 @@ const ASYMPTOTE_THRESHOLD = 10
  * is nowhere (the plots do not exist, or have no abscissa in common) is not drawn.
  */
 export class FillBetween extends AbstractFigure {
+    protected override get _className(): string {
+        return 'pidraw-fillbetween'
+    }
+
     /**
      * @throws InvalidArgumentError if a plot is not a `Plot`, the domain is not valid or the plots have no abscissa in common
      * (see `checkFillBetween`). Nothing is left in the svg.

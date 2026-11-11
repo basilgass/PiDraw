@@ -1,6 +1,7 @@
 import {ARC_ITEMS} from "../figures/Arc/Arc.parser"
 import {AXIS_ITEMS} from "../figures/Axis/Axis.parser"
 import {BEZIER_ITEMS} from "../figures/Bezier/Bezier.parser"
+import {EDGE_ITEMS} from "../figures/Edge/Edge.parser"
 import {CIRCLE_ITEMS} from "../figures/Circle/Circle.parser"
 import {FILL_BETWEEN_ITEMS} from "../figures/FillBetween/FillBetween.parser"
 import {FOLLOW_ITEMS} from "../figures/Follow/Follow.parser"
@@ -38,5 +39,5 @@ function registry(...tables: ParserItems[]): Record<string, ParserItem> {
  */
 export const PARSER_CONFIG: Record<string, ParserItem> = registry(
     POINT_ITEMS, LINE_ITEMS, CIRCLE_ITEMS, ARC_ITEMS, PLOT_ITEMS, PARAMETRIC_ITEMS, BEZIER_ITEMS, POLYGON_ITEMS,
-    FOLLOW_ITEMS, FILL_BETWEEN_ITEMS, PATH_ITEMS, GRID_ITEMS, AXIS_ITEMS, RIEMANN_ITEMS
+    FOLLOW_ITEMS, FILL_BETWEEN_ITEMS, PATH_ITEMS, GRID_ITEMS, AXIS_ITEMS, RIEMANN_ITEMS, EDGE_ITEMS
 )

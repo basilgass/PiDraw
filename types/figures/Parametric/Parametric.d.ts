@@ -4,6 +4,7 @@ import type { LABEL_POSITION } from "../Label/Label.types";
 import { type ParametricFunctions } from "./Parametric.constraints";
 import type { IParametricConfig } from "./Parametric.types";
 export declare class Parametric extends AbstractFigure {
+    protected get _className(): string;
     constructor(context: IFigureContext, name: string, values: IParametricConfig);
     protected _numExp: ParametricFunctions;
     protected _config: IParametricConfig;

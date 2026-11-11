@@ -30,7 +30,11 @@ export declare function tikzStyle(appearance: IFigureAppearanceConfig, dasharray
     end: string | null;
 }): TikzStyle;
 export declare function tikzLabelText(text: string, isTex: boolean): string;
-export declare function tikzLabelNode(config: Pick<ILabelConfig, 'alignement' | 'offset' | 'rotate'> & Partial<Pick<ILabelConfig, 'away' | 'push' | 'clearance'>>, at: string, text: string): string;
+type TikzLabelConfig = Pick<ILabelConfig, 'alignement' | 'offset' | 'rotate'> & Partial<Pick<ILabelConfig, 'away' | 'push' | 'clearance' | 'color' | 'fill' | 'size'>>;
+export declare function tikzLabelFont(size: string): string | null;
+export declare function tikzLabelDefinitions({ color, fill }: Partial<Pick<ILabelConfig, 'color' | 'fill'>>): string[];
+export declare function tikzLabelNode(config: TikzLabelConfig, at: string, text: string): string;
 export declare const TIKZ_PREAMBLE: string;
 export declare function tikzPicture(graph: IGraphConfig, fragments: string[]): string;
+export {};
 //# sourceMappingURL=AbstractFigure.tikz.d.ts.map

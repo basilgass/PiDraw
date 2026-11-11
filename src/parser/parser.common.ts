@@ -35,6 +35,7 @@ export enum PARSER_TYPE {
     PARAMETRIC = 'parametric',  // parametric <function>,<function>[,@<number>,<domain>]
     // CURVES
     BEZIER = 'bezier',          // bezier <point>/<direction>/<ratio>,... | bezier <point>,<point>,<point>[,<point>],*
+    EDGE = 'edge',              // edge <point>,<point>
     // POLYGONS
     POLYGON = 'poly',           // poly <point>,<point>,<point>,... | poly <point>,<radius>,<sides>[,<step>] | poly <point>,<point>,<sides>[,<step>]
 

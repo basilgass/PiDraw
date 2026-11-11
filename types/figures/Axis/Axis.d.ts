@@ -22,6 +22,7 @@ export interface DrawnName {
     alignement: LABEL_POSITION;
 }
 export declare class Axis extends Line {
+    protected get _className(): string;
     protected _config: IAxisResolvedConfig;
     protected _marks?: Path;
     protected _texts?: G;

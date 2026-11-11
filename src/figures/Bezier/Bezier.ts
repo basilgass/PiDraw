@@ -14,6 +14,10 @@ import type {IBezierConfig} from "./Bezier.types"
  * A curve that does not exist (a position that does not exist) is not drawn: it is drawn again when it exists again.
  */
 export class Bezier extends AbstractFigure {
+    protected override get _className(): string {
+        return 'pidraw-bezier'
+    }
+
     /**
      * @throws InvalidArgumentError if `values` does not hold exactly one construction, or has a value that is not valid: too few
      * points, a position that is not `{x, y}`, a direction or a ratio that is not valid, `closed` with control points. Nothing is

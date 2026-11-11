@@ -5,6 +5,7 @@ import type { IFigureContext, XY } from "../../pidraw.common";
 import { AbstractFigure } from "../AbstractFigure/AbstractFigure";
 import type { IPathConfig } from "./Path.types";
 export declare class Path extends AbstractFigure {
+    protected get _className(): string;
     constructor(context: IFigureContext, name: string, values: IPathConfig);
     protected _config: IPathConfig;
     get config(): IPathConfig;

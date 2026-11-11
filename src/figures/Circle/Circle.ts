@@ -25,6 +25,10 @@ import type {Line} from "../Line/Line"
  * position) is not drawn: its `center` and its `radius` are `NaN`, and it is drawn again when it exists again.
  */
 export class Circle extends AbstractFigure {
+    protected override get _className(): string {
+        return 'pidraw-circle'
+    }
+
     /**
      * Where a point dragged to (`x`, `y`) lands on the circle: the nearest point of the circle. The center goes to the right
      * of the circle. A circle that does not exist does not constrain the point.
@@ -202,6 +206,17 @@ export class Circle extends AbstractFigure {
     /** The center of the circle. `null` when the circle does not exist. */
     override referenceAnchorPoint(): XY | null {
         return Number.isFinite(this._radius) ? {x: this._center.x, y: this._center.y} : null
+    }
+
+    override get snappable(): boolean {
+        return true
+    }
+
+    /** The center of the circle. Empty when the circle does not exist. */
+    override snapPoints(): XY[] {
+        const center = this.referenceAnchorPoint()
+
+        return center === null ? [] : [center]
     }
 
     /** Where the label is, in pixels: exactly at the center. */

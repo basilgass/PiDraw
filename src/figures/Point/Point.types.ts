@@ -1,4 +1,5 @@
 import type {Exclusive, XY} from "../../pidraw.common"
+import type {NodeAnchor, NodeShape} from "../../calculus"
 import type {Circle} from "../Circle/Circle"
 import type {Line} from "../Line/Line"
 import type {Plot} from "../Plot/Plot"
@@ -42,6 +43,8 @@ export interface PointConstraints {
     projection: { axis: Line, point: XY },
     /** The symmetric of `A` about a point, a line or an axis. */
     symmetry: { A: XY, B: XY | Line },
+    /** A named place of the node of a point (`A.tr`): on its border, or its center. No position while the node has none. */
+    anchor: { node: Point, position: NodeAnchor },
 }
 
 /** Exactly one of the {@link PointConstraints}. */
@@ -55,9 +58,14 @@ export interface IPointOptions {
      * the width of the cross. By default 5 for a circle, 10 for the others.
      */
     size?: number,
+    /**
+     * The point is a node: a box (`'rect'`, `'round'`, `'diamond'` or `'circle'`) around its label, as big as the label asks, instead of
+     * a mark. Not with a `shape` or a `size`.
+     */
+    node?: NodeShape,
 }
 
 export type IPointConfig = PointConstraint & IPointOptions
 
 /** The config of a point as it keeps it: the shape and the size are always there, by default or as asked. */
-export type IPointResolvedConfig = IPointConfig & Required<IPointOptions>
+export type IPointResolvedConfig = IPointConfig & Required<Pick<IPointOptions, 'shape' | 'size'>>

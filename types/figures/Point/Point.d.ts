@@ -1,13 +1,22 @@
 import type { Shape } from "@svgdotjs/svg.js";
 import type { XY, IFigureContext } from "../../pidraw.common";
 import { AbstractFigure } from "../AbstractFigure/AbstractFigure";
+import { type INodeSize, type NodeAnchor, type NodeShape } from "../../calculus";
 import type { LabelFieldName, LabelFields } from "../Label/Label.types";
 import type { IPointConfig, IPointResolvedConfig, PointShape } from "./Point.types";
 export declare class Point extends AbstractFigure {
+    protected get _className(): string;
+    protected _node: NodeShape | null;
+    protected _markAsked: boolean;
+    protected _box: INodeSize;
     constructor(context: IFigureContext, name: string, values: IPointConfig);
     protected _config: IPointResolvedConfig;
     get config(): IPointResolvedConfig;
     set config(value: IPointConfig);
+    get node(): NodeShape | null;
+    setNode(shape: NodeShape | null): this;
+    boundaryPoint(from: XY): XY;
+    anchorPoint(position: NodeAnchor): XY;
     get givenByNumbers(): boolean;
     protected _pixels: Readonly<XY>;
     get pixels(): Readonly<XY>;
@@ -15,6 +24,7 @@ export declare class Point extends AbstractFigure {
     get coordinates(): XY;
     get size(): number;
     set size(value: number);
+    protected _checkMark(): void;
     get x(): number;
     set x(value: number);
     get y(): number;
@@ -27,11 +37,16 @@ export declare class Point extends AbstractFigure {
     defaultLabelField(): LabelFieldName;
     readonly referenceable = true;
     referenceAnchorPoint(): XY | null;
+    get snappable(): boolean;
+    snapPoints(): XY[];
     isMoved(): boolean;
     computed(): this;
     tikz(): string;
+    protected _tikzNode(node: NodeShape): string;
     moveLabel(): this;
+    protected _measureNode(): INodeSize | null;
     protected _makeShape(): Shape;
+    protected _drawNode(node: NodeShape, size: INodeSize): Shape;
     protected _centerShape<T extends Shape>(shape: T): T;
 }
 //# sourceMappingURL=Point.d.ts.map

@@ -7,8 +7,9 @@ An option that does not exist (`->colr=red`), that is not made for the figure (`
 | Group | Options |
 |---|---|
 | [Stroke and fill](#stroke-and-fill) | `w`, `ultrathin`, `thin`, `thick`, `ultrathick`, `color`, a color name, `fill`, `dash`, `dot`, `mark` |
+| [Classes](#classes) | `class` |
 | [Visibility](#visibility) | `hide`, `!`, `?`, `_`, `static` |
-| [Labels](#labels) | `label`, `tex` |
+| [Labels](#labels) | `label`, `tex`, `labelColor`, `labelFill`, `labelSize` |
 | [Move and scale](#move-and-scale) | `move`, `scale` |
 | [Interaction](./interaction) | `drag`, `animate`, `from`, `to`, `duration`, `delay`, `easing`, `loop` |
 | [Slides](./slides) | `slide` |
@@ -118,6 +119,30 @@ F(6,4)
 a=seg A,B->mark=end,red
 b=seg C,D->mark=both/x/12,blue
 c=seg E,F->mark=start/20,thick,green
+```
+
+## Classes
+
+Every figure is a group of the svg with a CSS class that says what it is: `pidraw-point`, `pidraw-line`, `pidraw-axis`, `pidraw-circle`, `pidraw-arc`, `pidraw-bezier`, `pidraw-path`, `pidraw-plot`, `pidraw-parametric`, `pidraw-polygon`, `pidraw-follow`, `pidraw-riemann`, `pidraw-fillbetween` or `pidraw-grid`. A page can style all the figures of a kind with it, and `class` adds the classes that a line asks for.
+
+| Option | Description |
+|---|---|
+| `class=primary` | a class, written after the one of the figure |
+| `class=a/b` | several classes, separated by `/` |
+
+A name is made of letters, digits, `_` and `-`, and does not start with a digit. The classes are not written in the TikZ export, which has no CSS.
+
+```pidraw params="x=-1:6,y=-1:4"
+A(1,1)->class=start
+B(4,2)->class=end/big
+c=seg A,B->class=link
+```
+
+The page then styles them as it wants:
+
+```css
+.pidraw-point.big circle { r: 8px; }
+.link { stroke-dasharray: 4 2; }
 ```
 
 ## Visibility
@@ -290,6 +315,43 @@ D(6,4)
 d=line C,D->label=d/tc/0;0/
 ```
 
+### Color and background
+
+| Option | Description |
+|---|---|
+| `labelColor=red` | the color of the text. It has no opacity |
+| `labelFill=white` | a background behind the text |
+| `labelFill=white/0.8` | the background with an opacity, from 0 to 1 |
+
+They work with `label` and with `tex`, and in any order: `labelColor=red,label=A` and `label=A,labelColor=red` are the same. Without them, the text keeps the color that the page gives it: it does **not** follow `color` (the stroke) of the figure. The background is a box a little bigger than the text (3 pixels on each side), drawn behind it: it hides what is under the label, a line for instance.
+
+```pidraw params="x=-1:7,y=-1:5"
+A(1,1)
+B(6,3)
+d=seg A,B->blue,w=3
+M=mid A,B->label=middle,labelFill=white
+C(1,4)->red,label=red text,labelColor=red
+D(4,4)->tex=\frac{1}{2},labelFill=yellow/0.5
+```
+
+### Size of the text
+
+| Option | Description |
+|---|---|
+| `labelSize=lg` | a size by its name: `xs`, `sm`, `md`, `lg` or `xl` (0.7, 0.85, 1, 1.25 and 1.5 times the font of the page; `md` is the font of the page) |
+| `labelSize=14` | a number is a size in pixels |
+| `labelSize=1.2em` | a length with its unit: `px`, `pt`, `em`, `rem` or `%` (`14px`, `12pt`, `1.2em`, `1.2rem`, `120%`) |
+
+It works with `label` and with `tex`, and in any order, like the color. Without it, the text has the size that the page gives it. Another value is an error that lists these forms: a CSS keyword (`large`) or `calc(…)` has no equivalent in the TikZ export, which writes the size of a label (`\small`, or `\fontsize{12pt}{14.4pt}\selectfont`; `em`, `rem` and `%` are relative to the 10 pt of a document). The size of a [node](./points#a-node) follows the size of its label.
+
+```pidraw params="x=-1:7,y=-1:5"
+A(1,1)->label=small,labelSize=sm
+B(3,1)->label=page size
+C(5,1)->label=large,labelSize=xl
+D(1,3)->label=20 pixels,labelSize=20
+E(4,3)->tex=\frac{a}{b},labelSize=1.5em,node=circle
+```
+
 ### Values in a label
 
 In the text, `@` is a value that the figure computes. It is kept up to date when the figure moves (dragging, animation). `@` alone is the most classical value of the figure; `@name` is another one. When there is a doubt, `@` alone is not valid: the name is needed.
@@ -401,7 +463,7 @@ draw.graph.figures.A.pixels.x === plain.graph.figures.A.pixels.x // true
 
 ## Mistakes
 
-```pidraw params="x=-1:6,y=-1:4" errors="2,3,4,5,6,7,8,9,10,11,12"
+```pidraw params="x=-1:6,y=-1:4" errors="2,3,4,5,6,7,8,9,10,11,12,13,14"
 A(1,1)
 B(2,1)->w=red
 C(3,1)->color=red/2
@@ -414,6 +476,8 @@ I(1,3)->scale=a
 J(2,3)->colr=red
 k=circ A,1->mark
 l=circ A,1->sector
+M(2,2)->class=1a
+N(3,2)->label,labelColor=red/0.5
 ```
 
 | Line | What is wrong |
@@ -428,3 +492,5 @@ l=circ A,1->sector
 | 10 | `colr` is not an option |
 | 11 | a circle cannot carry a marker |
 | 12 | `sector` is the option of an arc |
+| 13 | a class does not start with a digit |
+| 14 | the text of a label has no opacity: `labelColor=red` |

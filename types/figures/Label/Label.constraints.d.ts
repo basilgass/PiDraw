@@ -18,6 +18,11 @@ export declare function labelAwayGap(direction: XY): XY;
 export declare function labelCenterToward(anchor: XY, direction: XY, width: number, height: number): XY;
 export declare function labelPush(direction: XY | null, distance: number): XY;
 export declare const LABEL_POSITIONS: readonly LABEL_POSITION[];
+export declare const LABEL_PADDING = 3;
+export declare const LABEL_SIZES: Readonly<Record<'xs' | 'sm' | 'md' | 'lg' | 'xl', string>>;
+export declare function parseLabelSize(value: unknown): string;
+export declare function labelSizeInPoints(css: string): number | null;
+export declare const LABEL_SIZE_COMMANDS: Readonly<Record<string, string>>;
 export declare const DEFAULT_LABEL_POSITION: LABEL_POSITION;
 export declare function labelCenter(alignement: LABEL_POSITION, anchor: XY, width: number, height: number): XY;
 //# sourceMappingURL=Label.constraints.d.ts.map

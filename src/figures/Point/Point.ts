@@ -2,8 +2,20 @@ import type {G, Shape} from "@svgdotjs/svg.js"
 import type {XY, IFigureContext} from "../../pidraw.common"
 import {InvalidArgumentError} from "../../errors"
 import {AbstractFigure} from "../AbstractFigure/AbstractFigure"
-import {isDefinedPosition, toCoordinates} from "../../calculus"
-import {constraintOf, resolveConstraint} from "./Point.constraints"
+import {
+    diamondVertices,
+    type INodeSize,
+    isDefinedPosition,
+    type NodeAnchor,
+    nodeAnchor,
+    nodeBoundary,
+    nodeCornerRadius,
+    type NodeShape,
+    nodeSize,
+    nowhere,
+    toCoordinates
+} from "../../calculus"
+import {constraintOf, nodeOf, resolveConstraint} from "./Point.constraints"
 import {fieldNumber} from "../Label/Label.constraints"
 import type {LabelFieldName, LabelFields} from "../Label/Label.types"
 import type {IPointConfig, IPointOptions, IPointResolvedConfig, PointShape} from "./Point.types"
@@ -51,7 +63,7 @@ function checkSize(size: number, name: string): number {
  * The shape and the size of a point, by default or as asked.
  * @throws InvalidArgumentError if the shape does not exist, or the size is not a finite number greater than 0.
  */
-function optionsOf({shape = 'circle', size}: IPointOptions, name: string): Required<IPointOptions> {
+function optionsOf({shape = 'circle', size}: IPointOptions, name: string): Required<Pick<IPointOptions, 'shape' | 'size'>> {
     if (!Object.hasOwn(SHAPES, shape)) {
         const expected = Object.keys(SHAPES).map(key => `'${key}'`).join(', ')
         throw new InvalidArgumentError(`Invalid shape "${shape}" for the point "${name}": expected ${expected}`)
@@ -63,6 +75,12 @@ function optionsOf({shape = 'circle', size}: IPointOptions, name: string): Requi
 /** How far a point may be from the place of its constraint, in pixels, and not be moved: the rounding of a calculation. */
 const MOVED_TOLERANCE = 1e-6
 
+/** The margin between the text of a node and its border, in pixels. */
+const NODE_PADDING = 8
+
+/** The smallest node, in pixels: a node whose label is short or empty is still a box. */
+const NODE_MIN_SIZE: INodeSize = {width: 30, height: 22}
+
 /**
  * A point of the drawing: a position found from exactly one constraint (its coordinates, the middle of two points, an
  * intersection...), shown by a circle, a square or a crosshair.
@@ -73,17 +91,36 @@ const MOVED_TOLERANCE = 1e-6
  * its coordinates (see {@link labelFields}).
  */
 export class Point extends AbstractFigure {
+    protected override get _className(): string {
+        // Read by the constructor of the base class, before the fields of the point are set.
+        return this._node ? 'pidraw-point pidraw-node' : 'pidraw-point'
+    }
+
+    /** The shape of the node that the point is, or `null` for a point that is a mark. */
+    protected _node: NodeShape | null = null
+
+    /** Whether a shape or a size of a mark was asked: a node has none. */
+    protected _markAsked = false
+
+    /** The size of the node as it was drawn, in pixels (the one of the label and what it asks of the box). */
+    protected _box: INodeSize = {width: 0, height: 0}
+
     /**
      * @throws InvalidArgumentError if `values` does not hold exactly one constraint, has a shape that does not exist or a
-     * size that is not a finite number greater than 0, or has a coordinate that is not valid. Nothing is left in the svg.
+     * size that is not a finite number greater than 0, or has a coordinate that is not valid, or is a node with a shape or a size of
+     * a mark. Nothing is left in the svg.
      */
     constructor(context: IFigureContext, name: string, values: IPointConfig) {
         // Before the figure draws anything in the svg.
         constraintOf(values, name)
+        const node = nodeOf(values, name)
         const options = optionsOf(values, name)
 
         super(context, name)
 
+        this._node = node
+        this._markAsked = values.shape !== undefined || values.size !== undefined
+        this._writeClasses()
         this._pixels = Object.freeze({x: NaN, y: NaN})
         this._config = {...values, ...options}
 
@@ -111,6 +148,7 @@ export class Point extends AbstractFigure {
      */
     set config(value: IPointConfig) {
         constraintOf(value, this.name)
+        const node = nodeOf(value, this.name)
         const previous = this._config
         this._config = {...value, ...optionsOf(value, this.name)}
 
@@ -121,8 +159,74 @@ export class Point extends AbstractFigure {
             throw error
         }
 
+        this._node = node
+        this._markAsked = value.shape !== undefined || value.size !== undefined
+        this._writeClasses()
         this._makeShape()
         this.updateLabel()
+    }
+
+    /** The shape of the node that the point is (a box around its label), or `null` for a point that is a mark. */
+    get node(): NodeShape | null {
+        return this._node
+    }
+
+    /**
+     * Make the point a node: a box of a shape around its label, as big as the label asks, in place of its mark. `null` makes it a mark
+     * again. The label is centered in the box.
+     * @throws InvalidArgumentError if the shape is not one of a node, or if a shape or a size of a mark was asked. The point is then left as it was.
+     */
+    setNode(shape: NodeShape | null): this {
+        if (shape !== null) {
+            nodeOf({node: shape}, this.name)
+
+            if (this._markAsked) {
+                throw new InvalidArgumentError(`The point "${this.name}" has a shape or a size of a mark, and a node has none`)
+            }
+        }
+
+        this._node = shape
+
+        if (shape === null) {
+            delete this._config.node
+        } else {
+            this._config.node = shape
+        }
+
+        this._writeClasses()
+        this._makeShape()
+        this.updateLabel()
+
+        return this
+    }
+
+    /**
+     * Where a half line from the center of the point toward `from` meets the border of the node, in pixels: the center itself for a point that is
+     * not a node. `NaN` when the point has no position.
+     */
+    boundaryPoint(from: XY): XY {
+        if (!isDefinedPosition(this._pixels)) {
+            return nowhere()
+        }
+
+        if (this._node === null) {
+            return {x: this._pixels.x, y: this._pixels.y}
+        }
+
+        const offset = nodeBoundary(this._node, this._box, {x: from.x - this._pixels.x, y: from.y - this._pixels.y})
+
+        return {x: this._pixels.x + offset.x, y: this._pixels.y + offset.y}
+    }
+
+    /** A named place of the node, in pixels: on its border, or its center for `mc`. The center for a point that is not a node. `NaN` when the point has no position. */
+    anchorPoint(position: NodeAnchor): XY {
+        if (!isDefinedPosition(this._pixels)) {
+            return nowhere()
+        }
+
+        const offset = this._node === null ? {x: 0, y: 0} : nodeAnchor(this._node, this._box, position)
+
+        return {x: this._pixels.x + offset.x, y: this._pixels.y + offset.y}
     }
 
     /**
@@ -162,10 +266,19 @@ export class Point extends AbstractFigure {
         return this._config.size
     }
 
-    /** @throws InvalidArgumentError if `value` is not a finite number greater than 0. The point is then left as it was. */
+    /** @throws InvalidArgumentError if `value` is not a finite number greater than 0, or if the point is a node (its size is the one of its label). The point is then left as it was. */
     set size(value: number) {
+        this._checkMark()
         this._config.size = checkSize(value, this.name)
+        this._markAsked = true
         this._makeShape()
+    }
+
+    /** @throws InvalidArgumentError if the point is a node: it has no mark to give a shape or a size to. */
+    protected _checkMark(): void {
+        if (this._node !== null) {
+            throw new InvalidArgumentError(`The point "${this.name}" is a node, and a node has no shape nor size of a mark`)
+        }
     }
 
     /** Abscissa of the point in pixels (not in units of the coordinate system: see {@link coordinates}). */
@@ -202,7 +315,9 @@ export class Point extends AbstractFigure {
     }
 
     protected _as(shape: PointShape, size?: number): this {
+        this._checkMark()
         Object.assign(this._config, optionsOf({shape, size}, this.name))
+        this._markAsked = true
         this._makeShape()
 
         return this
@@ -228,6 +343,17 @@ export class Point extends AbstractFigure {
     /** The position of the point. `null` when it has none. */
     override referenceAnchorPoint(): XY | null {
         return isDefinedPosition(this._pixels) ? {x: this._pixels.x, y: this._pixels.y} : null
+    }
+
+    override get snappable(): boolean {
+        return true
+    }
+
+    /** The position of the point. Empty when it has none. */
+    override snapPoints(): XY[] {
+        const position = this.referenceAnchorPoint()
+
+        return position === null ? [] : [position]
     }
 
     /**
@@ -270,19 +396,61 @@ export class Point extends AbstractFigure {
 
         const at = this._tikzCoordinates(this._pixels)
         const half = this._tikzLength(this.size / 2)
+        const path = this._node === null ? SHAPES[this._config.shape].tikz(at, half) : this._tikzNode(this._node)
 
         return [
-            shown.shape ? this._tikzDraw(SHAPES[this._config.shape].tikz(at, half)) : '',
+            shown.shape ? this._tikzDraw(path) : '',
             shown.label ? this._tikzLabel(at) : ''
         ].filter(part => part !== '').join('\n')
     }
 
+    /** The path of a node in TikZ: the same box as in the svg, from its size as it was drawn. */
+    protected _tikzNode(node: NodeShape): string {
+        const {x, y} = this._pixels
+        const [a, b] = [this._box.width / 2, this._box.height / 2]
+        const at = (dx: number, dy: number) => `(${this._tikzCoordinates({x: x + dx, y: y + dy})})`
+
+        if (node === 'circle') {
+            return `${at(0, 0)} circle[radius=${this._tikzLength(a)}]`
+        }
+
+        if (node === 'diamond') {
+            return `${diamondVertices(this._box).map(({x: dx, y: dy}) => at(dx, dy)).join(' -- ')} -- cycle`
+        }
+
+        const corners = node === 'round' ? `[rounded corners=${this._tikzLength(nodeCornerRadius(node, this._box))}] ` : ''
+
+        return `${corners}${at(-a, -b)} rectangle ${at(a, b)}`
+    }
+
+    /** Put the label on the point, or in the middle of the box of a node, whose size follows the label. */
     moveLabel(): this {
-        if (this.label) {
-            this.label.move(this.x, this.y)
+        if (!this.label) {
+            return this
+        }
+
+        if (this._node !== null) {
+            this.label.config.alignement = 'mc'
+        }
+
+        this.label.move(this.x, this.y)
+
+        if (this._node !== null && this._measureNode() !== null) {
+            this._makeShape()
         }
 
         return this
+    }
+
+    /** The size that the node asks for its label as it is now, or `null` if it is the one that is drawn. */
+    protected _measureNode(): INodeSize | null {
+        if (this._node === null) {
+            return null
+        }
+
+        const size = nodeSize(this._node, this.label?.size() ?? {width: 0, height: 0}, NODE_PADDING, NODE_MIN_SIZE)
+
+        return size.width === this._box.width && size.height === this._box.height ? null : size
     }
 
     /** Draw the shape again, with its appearance, centered on the point. The label stays. */
@@ -290,12 +458,33 @@ export class Point extends AbstractFigure {
         this.clear()
 
         const {shape, size} = this._config
-        this.shape = this._centerShape(SHAPES[shape].draw(this.element, size))
+
+        if (this._node === null) {
+            this.shape = this._centerShape(SHAPES[shape].draw(this.element, size))
+        } else {
+            this._box = this._measureNode() ?? this._box
+            this.shape = this._centerShape(this._drawNode(this._node, this._box))
+            // The box is behind the label.
+            this.shape.back()
+        }
 
         // Apply the stroke and fill.
         this.fill().stroke()
 
         return this.shape
+    }
+
+    /** The box of a node of a size, in the svg, not yet placed. */
+    protected _drawNode(node: NodeShape, size: INodeSize): Shape {
+        if (node === 'circle') {
+            return this.element.circle(size.width)
+        }
+
+        if (node === 'diamond') {
+            return this.element.polygon(diamondVertices(size).map(({x, y}): [number, number] => [x, y]))
+        }
+
+        return this.element.rect(size.width, size.height).radius(nodeCornerRadius(node, size))
     }
 
     /** Center the shape on the point. A point without a position leaves it where it is: svg refuses a `NaN` attribute. */

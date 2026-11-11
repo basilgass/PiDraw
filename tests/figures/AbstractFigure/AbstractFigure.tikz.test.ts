@@ -4,6 +4,7 @@ import {
     tikzAxis,
     tikzColor,
     tikzCoordinates,
+    tikzLabelDefinitions,
     tikzLabelNode,
     tikzLabelText,
     tikzLength,
@@ -298,5 +299,43 @@ describe('TIKZ_PREAMBLE', () => {
             '\\usetikzlibrary{arrows.meta}',
             '\\usepgfplotslibrary{fillbetween}'
         ])
+    })
+})
+
+describe('tikzLabelNode color and background', () => {
+    const config = {alignement: 'br', offset: {x: 0, y: 0}, rotate: 0} as const
+
+    test('writes the color of the text', () => {
+        expect(tikzLabelNode({...config, color: 'red'}, '1,2', 'A')).toBe('\\node[below right, text=pidraw-red] at (1,2) {A};')
+    })
+
+    test('writes the background, with the margin of the svg', () => {
+        expect(tikzLabelNode({...config, fill: {color: 'white', opacity: 1}}, '1,2', 'A'))
+            .toBe('\\node[below right, fill=white, inner sep=2.25pt] at (1,2) {A};')
+    })
+
+    test('writes the opacity of a background that is not opaque', () => {
+        expect(tikzLabelNode({...config, fill: {color: '#ff0000', opacity: 0.8}}, '1,2', 'A'))
+            .toBe('\\node[below right, fill=pidraw-ff0000, fill opacity=0.8, inner sep=2.25pt] at (1,2) {A};')
+    })
+
+    test('writes nothing more for a label without color nor background', () => {
+        expect(tikzLabelNode({...config, color: null, fill: null}, '1,2', 'A')).toBe('\\node[below right] at (1,2) {A};')
+    })
+
+    test('has a color that LaTeX does not know for an InvalidArgumentError', () => {
+        expect(() => tikzLabelNode({...config, color: 'notacolor'}, '1,2', 'A')).toThrow(InvalidArgumentError)
+    })
+})
+
+describe('tikzLabelDefinitions', () => {
+    test('defines the colors that the text and the background need, once each', () => {
+        expect(tikzLabelDefinitions({color: 'red', fill: {color: 'red', opacity: 1}})).toEqual(['\\definecolor{pidraw-red}{HTML}{FF0000}'])
+        expect(tikzLabelDefinitions({color: 'black', fill: {color: '#00ff00', opacity: 1}})).toEqual(['\\definecolor{pidraw-00ff00}{HTML}{00FF00}'])
+    })
+
+    test('defines nothing without color', () => {
+        expect(tikzLabelDefinitions({color: null, fill: null})).toEqual([])
+        expect(tikzLabelDefinitions({})).toEqual([])
     })
 })

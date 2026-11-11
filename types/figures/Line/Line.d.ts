@@ -6,6 +6,7 @@ import { mathLine } from "../../calculus";
 import { type LineFound } from "./Line.constraints";
 import type { ILineConfig, ILineResolvedConfig } from "./Line.types";
 export declare class Line extends AbstractFigure {
+    protected get _className(): string;
     constructor(context: IFigureContext, name: string, values: ILineConfig);
     protected _config: ILineResolvedConfig;
     get config(): ILineResolvedConfig;
@@ -25,6 +26,8 @@ export declare class Line extends AbstractFigure {
     protected _slopeIsExact(): boolean;
     computed(): this;
     protected _place({ start, direction, end }: LineFound): this;
+    get snappable(): boolean;
+    snapPoints(): XY[];
     readonly followable = true;
     follow(x: number, y: number): XY;
     tikz(): string;

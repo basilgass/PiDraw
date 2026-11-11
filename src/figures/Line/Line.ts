@@ -46,6 +46,10 @@ function resolvedConfig(values: ILineConfig, name: string): ILineResolvedConfig 
  * drawn, `start` and `end` are `NaN`, and it is drawn again when its position comes back.
  */
 export class Line extends AbstractFigure {
+    protected override get _className(): string {
+        return 'pidraw-line'
+    }
+
     /**
      * @throws InvalidArgumentError if `values` does not hold exactly one constraint, has a shape that does not exist, or
      * gives a segment or a vector by anything but two points or a vector, or has a slope that is not finite.
@@ -240,6 +244,24 @@ export class Line extends AbstractFigure {
         ;(this.shape as svgLine).plot(from.x, from.y, to.x, to.y)
 
         return this
+    }
+
+    /** Only a segment attracts: the ends of a ray or a vector, and the borders of a line, are not what the user means. */
+    override get snappable(): boolean {
+        return this._config.shape === 'segment'
+    }
+
+    /** The two ends of a segment and its middle. Empty for the other lines, and for a segment that does not exist. */
+    override snapPoints(): XY[] {
+        if (!this.snappable || !isDefinedPosition(this._start) || !isDefinedPosition(this._end)) {
+            return []
+        }
+
+        return [
+            {x: this._start.x, y: this._start.y},
+            {x: (this._start.x + this._end.x) / 2, y: (this._start.y + this._end.y) / 2},
+            {x: this._end.x, y: this._end.y}
+        ]
     }
 
     /**

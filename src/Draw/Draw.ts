@@ -1,11 +1,11 @@
 import {Graph} from "../Graph"
 import type {IParserConfig, IParserSettings} from "../parser/parser.types"
 import {Axes, CoordinateSystem, type XY} from "../pidraw.common"
-import {layoutGeometry} from "../calculus"
+import {layoutGeometry, NODE_ANCHORS, type NodeAnchor} from "../calculus"
 import {PARSER_CONFIG} from "../parser/parser.config"
 import {buildLayout, type ILayout} from "../parser/buildLayout"
 import {AbstractFigure} from "../figures/AbstractFigure/AbstractFigure"
-import type {Point} from "../figures/Point/Point"
+import {Point} from "../figures/Point/Point"
 import {type PARSER, PiParse} from "piparser"
 import {InvalidArgumentError, ParseError, PiDrawError} from "../errors"
 import {type IDrawLine, readCode, standardForm} from "./Draw.lines"
@@ -26,6 +26,9 @@ import {
 
 /** The names of the axes of the graph, which no figure can have. */
 const AXIS_NAMES: string[] = Object.values(Axes)
+
+/** A place of a node in a value of a line of code: the name of the node, a dot and one of its places (`A.tr`). */
+const ANCHOR_NAME = new RegExp(`^(\\w+)\\.(${NODE_ANCHORS.join('|')})$`)
 
 /** The entries of the controls of a point that its drag handle takes too, as the themes ask. */
 const HANDLE_CONTROLS: readonly (keyof IControlsFigure)[] = themeSyntaxes().flatMap(theme => theme.handleControls ?? [])
@@ -474,6 +477,8 @@ export class Draw extends EventTarget {
         // Determine the id of the figure.
         item.name = this._uniqueName(item.name)
 
+        this._ensureAnchors(item)
+
         const buildResult = PARSER_CONFIG[item.key].build(item, this._namedFigures(), this.graph.config)
 
         if (buildResult === null) {
@@ -516,6 +521,34 @@ export class Draw extends EventTarget {
      */
     protected _namedFigures(): Record<string, AbstractFigure> {
         return {Ox: this.graph.axes.x, Oy: this.graph.axes.y, ...this.graph.figures}
+    }
+
+    /**
+     * Make the places of a node that a line names (`A.tr`, a value of the line) that do not exist yet: a point that is not drawn, named like the
+     * place, which follows the node. It belongs to the line that names it first, so a line is still built only from the figures of the lines
+     * before it and from the code.
+     * @throws ParseError if the figure before the dot is a point that is not a node: it has no places.
+     */
+    protected _ensureAnchors(item: PARSER): void {
+        for (const value of item.values) {
+            const found = typeof value === 'string' ? ANCHOR_NAME.exec(value) : null
+
+            if (typeof value !== 'string' || found === null || Object.hasOwn(this.graph.figures, value)) {
+                continue
+            }
+
+            const node = Object.hasOwn(this.graph.figures, found[1]) ? this.graph.figures[found[1]] : undefined
+
+            if (!(node instanceof Point)) {
+                continue
+            }
+
+            if (node.node === null) {
+                throw new ParseError(`Cannot build "${item.name}" (${item.key}): "${node.name}" is not a node, so it has no place "${found[2]}": write ->node on its line`)
+            }
+
+            this.graph.create.point({anchor: {node, position: found[2] as NodeAnchor}}, value).hide()
+        }
     }
 
     protected _uniqueName(name: string): string {
